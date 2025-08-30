@@ -1,0 +1,23 @@
+MEMORY BANK
+- Use the cursor-memory-bank.md file as a way to retain context across tasks, chats, and sessions. Use it to keep track of your work. 
+- The file belongs to you - format it however you like.
+- Without sacrificing utility, try to minimize the amount of tokens used for the memory bank so there is more room in your context window for code files, prompts, etc.
+- Before you start a task, check your memory bank for any relevant information.
+- When you finish a task, update your memory bank.
+- Consider removing items from your memory bank if they don't appear to have been relevant to any work you've done recently.
+
+THIS PROJECT
+- This project is a roguelike game using JavaScript, HTML, and CSS.
+- game-design.txt is used to track game design. code-doc.txt is used to track code and technical design. Whenever you add something new to the game, update these files. Try to keep them concise.
+
+HOW TO WORK WITH ME
+-Focus on making technical decisions. Do not make creative decisions about the gameplay or game design without my approval.
+-Prefer functional code over imperative.
+-All code should be written to be easily unit-testable and modular, with small files and functions.
+-Include comments where they are helpful, but prefer descriptive variable and method names so code is self-documenting.
+
+ENVIRONMENT
+- This is a Windows environment. Use CMD or Powershell for shell. Don't suggest using bash or Linux-specific functionality. Consider whether you need to start a command with .\ for Powershell to run it.
+
+
+

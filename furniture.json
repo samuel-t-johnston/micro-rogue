@@ -1,0 +1,34 @@
+{
+  "boulder": {
+    "name": "Boulder",
+    "symbol": "O",
+    "impassible": true
+  },
+  "door": {
+    "name": "Door",
+    "symbol": "+",
+    "impassible": false,
+    "stateful": true,
+    "states": ["closed", "open"],
+    "defaultState": "closed",
+    "impassibleWhen": ["closed"],
+    "usable": {
+      "action": "toggle_state"
+    }
+  },
+  "heavy_chest": {
+    "name": "Heavy Chest",
+    "symbol": "=",
+    "impassible": false,
+    "stateful": true,
+    "states": ["closed", "open"],
+    "defaultState": "closed",
+    "impassibleWhen": ["closed"],
+    "usable": {
+      "action": "toggle_state"
+    },
+    "container": {
+      "capacity": 5
+    }
+  }
+}

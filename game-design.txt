@@ -1,0 +1,237 @@
+ROGµE - GAME DESIGN DOCUMENT
+============================
+
+This document is for game design. 
+More technical and code-centric documentation should go in code-doc.txt.
+
+PROJECT OVERVIEW
+----------------
+A traditional roguelike game built with vanilla JavaScript, HTML, and CSS that runs directly in a web browser.
+
+WORLD SYMBOLS
+-------------
+- Wall: '#' (impassable)
+- Floor: '.'
+- Item: '$'
+- Player character: '@'
+- Boulder: 'O' (impassable)
+- Door: '+' (stateful, impassable when closed)
+- Heavy Chest: '=' (stateful, container, impassable when closed)
+- Empty space outside room boundaries: no symbol
+
+CONTROLS
+--------
+ - WASD / Arrows - Move player character
+ - 'p' - Pick up item at current player character location
+ - 'u' - Use something nearby (enters directional choice mode)
+
+USER INTERFACE DESIGN
+--------------------
+
+Layout Structure:
+- Header: Title, main stats (Level, HP, Score, Turns)
+- Character attributes section
+- Main area: Game display
+- Sidebar: Controls help, collapsible inventory, and message log
+- Footer: Reset button
+
+Visual Design:
+- Retro terminal aesthetic with modern web styling
+- Background: Dark gradient (#1a1a2e to #16213e)
+- Text: Light gray (#e8e8e8) for readability
+- Accent: Bright green (#00ff00) for highlights
+- Borders: Dark green (#006400) for structure
+
+Responsive Design:
+- Desktop: Side-by-side layout with game area and sidebar
+- Tablet: Stacked layout with horizontal sidebar
+- Mobile: Compact layout with smaller fonts and spacing
+
+INVENTORY UI DESIGN
+-------------------
+
+Equipment Display:
+- Equipment grid: 3-column layout for weapon and armor slots
+- Weapon slots: Positioned at top for easy access
+- Ring slots: Circular indicators (○ empty, ● filled)
+- Slot labels: Clear identification of equipment types
+- Visual feedback: Empty slots show "-", filled slots show item names
+
+Inventory Display:
+- Numbered list: Shows inventory items as "1. Item Name", "2. Item Name", etc.
+- Counters: Display current/maximum capacity
+- Item names: Actual item names from JSON data, not generic labels
+- Responsive: Adapts to different screen sizes
+- Future-ready: Numbering prepares for item selection functionality
+
+CHARACTER SYSTEM
+----------------
+
+Attributes:
+- Four core attributes (all default to 1):
+  * Body: Strength and toughness
+  * Mind: Intelligence, wisdom, and perception  
+  * Agility: Speed and dexterity
+  * Control: Willfulness and fortitude
+
+Health System:
+- Max HP = (Body × 2) + HpBonus
+- [TEMPORARY] HpBonus placeholder for future equipment/effects
+
+Player Character:
+- [TEMPORARY] Starting position: Center of room (5,5)
+
+INVENTORY AND EQUIPMENT SYSTEM
+------------------------------
+
+Inventory System:
+- [TEMPORARY] 5-item inventory limit per character
+
+Equipment Slots:
+- Weapon slots: Weapon 1, Weapon 2 (for dual-wielding or weapon/shield)
+- Armor slots: Head, Body, Hands, Legs, Feet
+- Jewelry slots: Neck (1 slot), Rings (10 slots)
+
+ITEM SYSTEM
+-----------
+
+Item Data:
+- JSON-based item definitions in items.json for easy JavaScript integration
+- "Properties" define item behavior (equipment, usable, etc.)
+- "Sub-properties" provide specific details for each property
+- Extensible design allows easy addition of new properties and effects
+- Item definitions stored separately from game logic for maintainability
+
+Item Placement:
+- [TEMPORARY] Place 3 randomized items at top left of room at game start
+
+Item Interaction:
+- Player can pick up items at the player character's location
+- Item detection: Automatic message when player moves onto item location
+- Inventory integration: Picked up items are added to player's inventory
+- World removal: Items disappear from dungeon when picked up
+
+ITEM PROPERTIES/SUB-PROPERTIES LIST
+-----------------------------------
+ - name: User-facing item name
+ - equipment: Allows the item to be equipped
+ -- slot: Equipment slot used
+ -- effect: The ongoing effect when the item is equipped
+ - usable: Allows the item to be used as an action
+ -- use-effect: The immediate effect when the item is used
+
+EQUIPMENT EFFECTS LIST
+----------------------
+ [TODO] These don't do anything yet.
+ - armor+X
+
+ITEM USE-EFFECTS LIST
+---------------------
+[TODO] These don't do anything yet.
+ - currentHp+X
+
+FURNITURE SYSTEM
+----------------
+
+Furniture Data:
+- JSON-based furniture definitions in furniture.json for easy JavaScript integration
+- "Properties" define furniture behavior (impassible, stateful, usable, container, etc.)
+- "Sub-properties" provide specific details for each property
+- Extensible design allows easy addition of new properties and effects
+- Furniture definitions stored separately from game logic for maintainability
+
+Furniture Placement:
+- [TEMPORARY] Place 2 randomized furniture pieces at bottom right of room at game start
+
+Furniture Interaction:
+- Collision detection: Furniture can block player movement based on properties
+- State management: Stateful furniture can have multiple states (e.g., open/closed)
+- Automatic detection: Messages when player moves onto furniture location
+- Choice mode interaction: Use 'U' key to enter directional choice mode for furniture interaction
+
+FURNITURE PROPERTIES/SUB-PROPERTIES LIST
+----------------------------------------
+ - name: User-facing furniture name
+ - symbol: Character used to represent furniture on map
+ - impassible: Boolean - Whether furniture blocks movement
+ - stateful: Boolean - Whether furniture has multiple states
+ - states: Array - List of possible states for stateful furniture
+ - defaultState: String - Initial state for stateful furniture
+ - impassibleWhen: Array - States when furniture blocks movement
+ - usable: Allows the furniture to be interacted with
+ -- action: The type of interaction (e.g., "toggle_state")
+ - container: Allows the furniture to hold items
+ -- capacity: Maximum number of items the container can hold
+
+CHOICE MODE SYSTEM
+------------------
+
+Choice Mode Overview:
+- Multi-step input system for complex interactions
+- Normal gameplay operates in "default" mode
+- Special interactions enter "choice modes" with limited input options
+- Visual feedback shows current mode and available actions
+
+Directional Choice Mode:
+- Triggered by 'U' key for furniture interaction
+- Full 8-direction support: WASD (cardinal), QEZC (diagonal), arrow keys
+- ESC key cancels action and returns to default mode
+- Successful actions automatically return to default mode
+- Failed actions stay in choice mode to allow retry
+
+User Experience:
+- Controls area updates to show current mode and instructions
+- Yellow highlighting for choice mode display
+- Clear feedback about available actions and how to cancel
+- Seamless transition between normal gameplay and choice modes
+
+MOVEMENT SYSTEM
+---------------
+
+Movement Logic:
+- Collision detection with walls ('#' characters)
+- Collision detection with furniture (based on furniture properties)
+- Boundary checking within room limits
+- Turn counter increment on successful movement
+- Position feedback in message log
+
+Turn System:
+- Turn-based gameplay with counter
+- Turns increment on player movement (Future: Will increment for other player actions)
+- Display: Real-time counter in UI stats
+
+MESSAGE SYSTEM
+--------------
+
+Message Log:
+- DECISION: Sidebar message display with scrollable history
+- Maximum 10 messages to prevent UI clutter
+- Automatic overflow: oldest messages removed
+- Real-time updates with game events
+
+Message Types:
+- Welcome messages
+- Game state information
+- Character statistics
+- Movement feedback and collision warnings
+- Item interaction messages (item detection, pickup success/failure)
+- Furniture interaction messages (furniture detection, collision warnings)
+
+Message Display:
+- New messages appear at top with auto-scroll to ensure latest messages are visible
+- Turn tracking: Each message shows turn number [turn] message
+- Format: [0] Welcome to ROGµE!
+
+VERSION HISTORY
+---------------
+v0.1.0 - Initial setup with text rendering
+v0.2.0 - Character system with 4 attributes
+v0.3.0 - UI improvements and retro styling
+v0.4.0 - Health system and attribute display
+v0.5.0 - Game world with 11×11 room and player movement
+v0.6.0 - Inventory and equipment system with collapsible UI
+v0.7.0 - Added weapon slots for dual-wielding and weapon/shield combinations
+v0.8.0 - Item system with JSON-based data format and initial items
+v0.9.0 - Item loading and random placement system with '$' symbol representation
+v0.10.0 - Item pickup functionality with 'P' key, numbered inventory display, and streamlined UI controls
+v0.11.0 - Furniture system with stateful objects, collision detection, and choice mode interaction

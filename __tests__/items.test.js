@@ -1,0 +1,229 @@
+import itemsData from '../items.json';
+
+// Item validation rules and configurations
+const ITEM_RULES = {
+  // Required properties for all items
+  required: ['name'],
+  
+  // Property-specific rules
+  properties: {
+    equipment: {
+      required: ['slot', 'effect'],
+      slot: {
+        validValues: ['weapon', 'head', 'body', 'hands', 'legs', 'feet', 'neck', 'ring']
+      },
+      effect: {
+        pattern: /^armor\+(\d+)$/,
+        description: 'armor+X where X is an integer'
+      }
+    },
+    usable: {
+      required: ['use_effect'],
+      use_effect: {
+        pattern: /^currentHp\+(\d+)$/,
+        description: 'currentHp+X where X is an integer'
+      }
+    }
+  }
+};
+
+// Helper functions for validation
+function validateRequiredProperties(item, itemId) {
+  const errors = [];
+  
+  for (const requiredProp of ITEM_RULES.required) {
+    if (!item.hasOwnProperty(requiredProp)) {
+      errors.push(`Item "${itemId}" is missing required property "${requiredProp}"`);
+    }
+  }
+  
+  return errors;
+}
+
+function validatePropertyRules(item, itemId) {
+  const errors = [];
+  
+  for (const [propertyName, propertyRules] of Object.entries(ITEM_RULES.properties)) {
+    if (item.hasOwnProperty(propertyName)) {
+      // Check required sub-properties
+      for (const requiredSubProp of propertyRules.required) {
+        if (!item[propertyName].hasOwnProperty(requiredSubProp)) {
+          errors.push(`Item "${itemId}" with "${propertyName}" property is missing required sub-property "${requiredSubProp}"`);
+        }
+      }
+      
+      // Validate sub-property values
+      for (const [subPropName, subPropRules] of Object.entries(propertyRules)) {
+        if (subPropName !== 'required' && item[propertyName].hasOwnProperty(subPropName)) {
+          const value = item[propertyName][subPropName];
+          
+          if (subPropRules.validValues && !subPropRules.validValues.includes(value)) {
+            errors.push(`Item "${itemId}" has invalid "${subPropName}" value "${value}" for "${propertyName}" property. Valid values: [${subPropRules.validValues.join(', ')}]`);
+          }
+          
+          if (subPropRules.pattern && !subPropRules.pattern.test(value)) {
+            errors.push(`Item "${itemId}" has invalid "${subPropName}" value "${value}" for "${propertyName}" property. Expected format: ${subPropRules.description}`);
+          }
+        }
+      }
+    }
+  }
+  
+  return errors;
+}
+
+describe('Item Data Validation', () => {
+  describe('Basic Structure', () => {
+    test('should load items.json successfully', () => {
+      expect(itemsData).toBeDefined();
+      expect(typeof itemsData).toBe('object');
+      expect(Object.keys(itemsData).length).toBeGreaterThan(0);
+    });
+
+    test('should have valid JSON structure', () => {
+      const itemIds = Object.keys(itemsData);
+      expect(itemIds.length).toBeGreaterThan(0);
+      
+      itemIds.forEach(itemId => {
+        expect(typeof itemId).toBe('string');
+        expect(itemId.length).toBeGreaterThan(0);
+        expect(typeof itemsData[itemId]).toBe('object');
+      });
+    });
+  });
+
+  describe('Required Properties', () => {
+    test('all items should have required properties', () => {
+      const errors = [];
+      
+      Object.entries(itemsData).forEach(([itemId, item]) => {
+        errors.push(...validateRequiredProperties(item, itemId));
+      });
+      
+      if (errors.length > 0) {
+        throw new Error(`Validation errors found:\n${errors.join('\n')}`);
+      }
+    });
+
+    test('all items should have a name property', () => {
+      Object.entries(itemsData).forEach(([itemId, item]) => {
+        expect(item).toHaveProperty('name');
+        expect(typeof item.name).toBe('string');
+        expect(item.name.length).toBeGreaterThan(0);
+      });
+    });
+  });
+
+  describe('Equipment Property Validation', () => {
+    test('equipment items should have required sub-properties', () => {
+      const errors = [];
+      
+      Object.entries(itemsData).forEach(([itemId, item]) => {
+        if (item.hasOwnProperty('equipment')) {
+          errors.push(...validatePropertyRules(item, itemId));
+        }
+      });
+      
+      if (errors.length > 0) {
+        throw new Error(`Equipment validation errors found:\n${errors.join('\n')}`);
+      }
+    });
+
+    test('equipment items should have valid slot values', () => {
+      const validSlots = ITEM_RULES.properties.equipment.slot.validValues;
+      
+      Object.entries(itemsData).forEach(([itemId, item]) => {
+        if (item.hasOwnProperty('equipment')) {
+          expect(item.equipment).toHaveProperty('slot');
+          expect(validSlots).toContain(item.equipment.slot);
+        }
+      });
+    });
+
+    test('equipment items should have valid effect values', () => {
+      const effectPattern = ITEM_RULES.properties.equipment.effect.pattern;
+      
+      Object.entries(itemsData).forEach(([itemId, item]) => {
+        if (item.hasOwnProperty('equipment')) {
+          expect(item.equipment).toHaveProperty('effect');
+          expect(effectPattern.test(item.equipment.effect)).toBe(true);
+        }
+      });
+    });
+
+    test('equipment effect values should have positive integers', () => {
+      Object.entries(itemsData).forEach(([itemId, item]) => {
+        if (item.hasOwnProperty('equipment')) {
+          const effect = item.equipment.effect;
+          const match = effect.match(/^armor\+(\d+)$/);
+          expect(match).toBeTruthy();
+          
+          const armorValue = parseInt(match[1], 10);
+          expect(armorValue).toBeGreaterThan(0);
+        }
+      });
+    });
+  });
+
+  describe('Usable Property Validation', () => {
+    test('usable items should have required sub-properties', () => {
+      const errors = [];
+      
+      Object.entries(itemsData).forEach(([itemId, item]) => {
+        if (item.hasOwnProperty('usable')) {
+          errors.push(...validatePropertyRules(item, itemId));
+        }
+      });
+      
+      if (errors.length > 0) {
+        throw new Error(`Usable validation errors found:\n${errors.join('\n')}`);
+      }
+    });
+
+    test('usable items should have valid use_effect values', () => {
+      const useEffectPattern = ITEM_RULES.properties.usable.use_effect.pattern;
+      
+      Object.entries(itemsData).forEach(([itemId, item]) => {
+        if (item.hasOwnProperty('usable')) {
+          expect(item.usable).toHaveProperty('use_effect');
+          expect(useEffectPattern.test(item.usable.use_effect)).toBe(true);
+        }
+      });
+    });
+
+    test('usable use_effect values should have positive integers', () => {
+      Object.entries(itemsData).forEach(([itemId, item]) => {
+        if (item.hasOwnProperty('usable')) {
+          const useEffect = item.usable.use_effect;
+          const match = useEffect.match(/^currentHp\+(\d+)$/);
+          expect(match).toBeTruthy();
+          
+          const hpValue = parseInt(match[1], 10);
+          expect(hpValue).toBeGreaterThan(0);
+        }
+      });
+    });
+  });
+
+
+
+  describe('Comprehensive Validation', () => {
+    test('all items should pass comprehensive validation', () => {
+      const errors = [];
+      
+      Object.entries(itemsData).forEach(([itemId, item]) => {
+        // Check required properties
+        errors.push(...validateRequiredProperties(item, itemId));
+        
+        // Check property-specific rules
+        errors.push(...validatePropertyRules(item, itemId));
+      });
+      
+      if (errors.length > 0) {
+        throw new Error(`Comprehensive validation errors found:\n${errors.join('\n')}`);
+      }
+    });
+
+
+  });
+});

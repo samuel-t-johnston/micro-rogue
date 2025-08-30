@@ -1,0 +1,326 @@
+ROGµE - CODE DOCUMENTATION
+==========================
+
+This document is for code documentation. 
+Game design and game functionality documentation should go in game-design.txt.
+
+CONVENIENCE SCRIPTS
+-------------------
+ - quick-lint.bat - use this to run the linter
+ - run-tests.bat - use this to run unit tests
+ - dev-workflow.bat - lint, prettify, and run tests
+ - start-server.bat - start the game
+
+TECH
+----
+ - Node - Standalone install at .\node-v22.18.0-win-x64
+ - Jest, Babel - Unit tests
+ - Prettier - Code formatting
+
+GENERAL PRINCIPLES
+------------------
+Code Style:
+- ES6+ features (classes, arrow functions, template literals)
+- Clear function and variable naming
+- Modular design with reusable components
+- Small files, classes, functions
+- High unit test coverage
+
+Design:
+- Simple and accessible
+- Ensure code reusability
+- Prioritize user experience
+- Document all major decisions
+
+CODE ORGANIZATION
+-----------------
+
+File Structure:
+- __tests__: Unit tests directory
+- index.html: Main UI structure
+- style.css: All styling and responsive design
+- game.js: Main game orchestration
+- inputHandler.js: User input event handling
+- choiceModeManager.js: Choice mode system for multi-step input handling
+- config.js: Game configuration and settings
+- character.js: Character class and related functionality
+- world.js: World generation and management functions
+- renderer.js: Game rendering system
+- ui.js: User interface management functions
+- gameLogic.js: Core game logic and state management
+- coordinates.js: Coordinate utility functions for 2D positions
+- furniture.js: Furniture class and related functionality
+- items.json: Item definitions and properties
+- furniture.json: Furniture definitions and properties
+- levelLoader.js: Level loading and parsing functionality
+- levels/: Directory containing level definition files
+
+Module Responsibilities:
+- config.js: Centralized game configuration and settings
+- character.js: Character class with attributes, health, inventory, and equipment systems
+- world.js: World map generation, item placement, furniture placement, position validation, and item detection functions
+- renderer.js: Game display rendering with player-centered viewport
+- ui.js: User interface updates, message system, and inventory display management
+- gameLogic.js: Core game logic, movement, initialization, item pickup, and state management
+- inputHandler.js: User input event handling and keyboard controls
+- choiceModeManager.js: Choice mode system for handling multi-step input interactions
+- coordinates.js: Coordinate utility functions for 2D position operations
+- furniture.js: Furniture class with state management, collision detection, and container functionality
+- levelLoader.js: Level loading, parsing, and validation with support for fixed layout levels
+- game.js: Main game orchestration and initialization
+
+Important classes:
+ - Character (character.js) - Represents both player and NPCs
+ - Furniture (furniture.js) - Represents furniture objects with state and behavior
+ - ChoiceModeManager (choiceModeManager.js) - Manages different input modes for multi-step interactions
+ - LevelLoader (levelLoader.js) - Handles loading and parsing of level data from JSON files
+ - DungeonLevel (gameState.js) - Game state for the current level
+ - GameState (gameState.js) - Level-independent game state
+
+ITEM DEFINITIONS
+----------------
+
+- Properties define item behavior (equipment, usable, etc.)
+- Sub-properties provide specific details for each property
+- Extensible design allows easy addition of new properties and effects
+- Item definitions stored separately from game logic for maintainability
+- Comprehensive validation rules enforced through unit tests
+
+Item Data Format (items.json):
+````
+"leather_helm": {
+    "name": "Leather Helm",
+    "equipment": {
+      "slot": "head",
+      "effect": "armor+1"
+    }
+  }
+````
+ - "equipment" is an example of a property
+ - "slot" and "effect" are sub-properties, each with a value
+ - particular properties may have required sub-properties
+
+Item Validation Rules:
+- All items must have a "name" property
+- Equipment items must have "slot" and "effect" sub-properties
+- Equipment slots must be one of: weapon, head, body, hands, legs, feet, neck, ring
+- Equipment effects must follow pattern: "armor+X" where X is a positive integer
+- Usable items must have "use_effect" sub-property
+- Usable effects must follow pattern: "currentHp+X" where X is a positive integer
+
+FURNITURE DEFINITIONS
+---------------------
+
+- Properties define furniture behavior (impassible, stateful, usable, container, etc.)
+- Sub-properties provide specific details for each property
+- Extensible design allows easy addition of new properties and effects
+- Furniture definitions stored separately from game logic for maintainability
+
+Furniture Data Format (furniture.json):
+````
+"door": {
+    "name": "Door",
+    "symbol": "+",
+    "impassible": false,
+    "stateful": true,
+    "states": ["closed", "open"],
+    "defaultState": "closed",
+    "impassibleWhen": ["closed"],
+    "usable": {
+      "action": "toggle_state"
+    }
+  }
+````
+ - "stateful", "usable", "container" are examples of properties
+ - "states", "defaultState", "impassibleWhen" are sub-properties
+ - Furniture can be impassible, stateful (with multiple states), usable, and/or containers
+
+Furniture Properties:
+- "impassible": Boolean - Whether furniture blocks movement
+- "stateful": Boolean - Whether furniture has multiple states
+- "states": Array - List of possible states for stateful furniture
+- "defaultState": String - Initial state for stateful furniture
+- "impassibleWhen": Array - States when furniture blocks movement
+- "usable": Object - Defines interaction behavior
+- "container": Object - Defines container behavior with capacity
+
+LEVEL LOADING SYSTEM
+--------------------
+
+Level Data Format:
+- JSON-based level definitions stored in levels/ directory
+- Support for fixed layout levels with predefined maps
+- Extensible system for future level types (procedural, etc.)
+
+Level Structure (levels/*.json):
+````
+{
+  "name": "Level Name",
+  "type": "fixed_layout",
+  "level_data": {
+    "width": 27,
+    "height": 11,
+    "player_start": [6, 6],
+    "tiles": {
+      "floor": ".",
+      "wall": "#",
+      "solid_rock": " "
+    },
+    "grid": ["###########     ###########", ...],
+    "items": [
+      {
+        "location": [1, 1],
+        "items": ["?"]
+      }
+    ]
+  }
+}
+````
+
+Level Components:
+- "name": String identifier for the level
+- "type": Level generation type (currently "fixed_layout")
+- "level_data": Core level information
+  - "width"/"height": Grid dimensions
+  - "player_start": [x, y] starting coordinates
+  - "tiles": Symbol definitions for different terrain types
+  - "grid": Array of strings representing the level map
+  - "items": Array of item placements with coordinates and item IDs
+
+Level Loading Process:
+- LevelLoader class handles async loading from JSON files
+- Validates level structure and data integrity
+- Parses grid strings into 2D map arrays
+- Extracts item placements and furniture from grid symbols
+- Returns structured level data for game initialization
+
+Grid Symbol Processing:
+- Automatic furniture detection from grid symbols
+- Support for doors (+), boulders (O), and heavy chests (=)
+- Item placement parsing from separate items array
+- Terrain type mapping from tile definitions
+
+COORDINATE SYSTEM
+-----------------
+
+Coordinate Representation:
+- Uses plain objects {x, y} for simplicity and compatibility
+- Functional utility functions in coordinates.js for coordinate operations
+- Immutable operations that return new coordinate objects
+- Consistent coordinate format across all modules
+
+Coordinate Utilities:
+- create(x, y): Create new coordinate object
+- add(coord1, coord2): Add two coordinates together
+- addDelta(coord, dx, dy): Add delta to coordinate
+- equals(coord1, coord2): Check coordinate equality
+- isWithinBounds(coord, minX, maxX, minY, maxY): Check bounds
+- manhattanDistance(coord1, coord2): Calculate Manhattan distance
+- euclideanDistance(coord1, coord2): Calculate Euclidean distance
+- toString(coord): String representation
+
+CHOICE MODE SYSTEM
+------------------
+
+Choice Mode Management:
+- ChoiceModeManager class handles different input states for multi-step interactions
+- Treats normal gameplay as "default" mode
+- Supports "directional" mode for selecting directions with full 8-direction support
+- Easily extensible for future choice modes with different input requirements
+
+Choice Mode Features:
+- Mode switching with context preservation
+- UI updates when modes change
+- Input validation for each mode
+- Success/failure handling with appropriate mode transitions
+- ESC key support for canceling actions
+
+Directional Choice Mode:
+- Full 8-direction support: WASD (cardinal), QEZC (diagonal), arrow keys
+- Context-aware actions (e.g., furniture interaction)
+- Visual feedback with highlighted controls
+- Automatic mode exit on successful actions
+- Mode persistence on failed actions for retry
+
+GAME STATE MANAGEMENT
+--------------------
+
+Game Configuration:
+- Centralized GAME_CONFIG object for easy modification
+- Player starting position configurable via playerStartX and playerStartY
+
+Dungeon Level:
+- Tracks state for the current level of the dungeon
+- Separate from other state for future development: multiple dungeon levels
+- World map for current level
+- World items (array of placed items with coordinates and item IDs)
+- World furniture (array of placed furniture with coordinates, furniture IDs, states, and container items)
+
+Game State:
+- Dungeon Level tracking
+- Score system
+- Turn counter
+- Message log (last 10 messages)
+- Player character instance
+- Player position (coordinate object)
+- Items data (loaded from items.json)
+- Furniture data (loaded from furniture.json)
+
+USER INTERFACE IMPLEMENTATION
+----------------------------
+
+Layout Structure:
+- Header: Title, main stats (Level, HP, Score, Turns)
+- Character attributes section: Body, Mind, Agility, Control
+- Main area: Game display (51×13 character grid)
+- Sidebar: Controls help, inventory, and message log
+- Footer: New Game button
+
+Visual Design:
+- Retro terminal aesthetic with modern web styling
+- Monospace courier font
+- Background: Dark gradient (#1a1a2e to #16213e)
+- Text: Light gray (#e8e8e8) for readability
+- Accent: Bright green (#00ff00) for highlights
+- Borders: Dark green (#006400) for structure
+
+Responsive Design:
+- Desktop: Side-by-side layout with game area and sidebar
+- Tablet: Stacked layout with horizontal sidebar
+- Mobile: Compact layout with smaller fonts and spacing
+
+CONTROLS AND INTERACTION IMPLEMENTATION
+---------------------------------------
+
+Event Handling:
+- Centralized event listeners
+- Movement validation and collision detection (including furniture)
+- Turn counter management
+- Inventory toggle functionality
+- Button click handlers for game reset
+
+VERSION HISTORY
+---------------
+v0.1.0 - Initial setup with text rendering
+v0.2.0 - Character system with 4 attributes
+v0.3.0 - UI improvements and retro styling
+v0.4.0 - Health system and attribute display
+v0.5.0 - Game world with 11×11 room and player movement
+v0.6.0 - Inventory and equipment system with collapsible UI
+v0.7.0 - Added weapon slots for dual-wielding and weapon/shield combinations
+v0.8.0 - Item system with JSON-based data format and initial items
+v0.9.0 - Item loading and random placement system with '$' symbol representation
+v0.10.0 - Item pickup functionality with 'P' key, numbered inventory display, and streamlined UI controls
+v0.11.0 - Code refactoring: Extracted config.js and character.js modules
+v0.12.0 - Code refactoring: Extracted world.js module (Step 2a)
+v0.13.0 - Code refactoring: Extracted renderer.js module (Step 2b)
+v0.14.0 - Code refactoring: Extracted ui.js module (Phase 3)
+v0.15.0 - Code refactoring: Extracted gameLogic.js module (Phase 4)
+v0.16.0 - Code refactoring: Separated input handling into dedicated InputHandler class (Step 5)
+v0.17.0 - Code refactoring: Encapsulated X,Y coordinates in coordinate utility functions
+v0.18.0 - Code refactoring: Moved player starting position to configuration
+v0.19.0 - Added comprehensive item validation tests with extensible rule system
+v0.20.0 - Furniture system with JSON-based data format, stateful furniture, and collision detection
+v0.21.0 - Code refactoring: Extracted Furniture class to encapsulate furniture behavior and state
+v0.22.0 - Choice mode system with directional input for furniture interaction (U key)
+v0.23.0 - Level loading system with JSON-based level definitions and LevelLoader class

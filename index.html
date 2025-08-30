@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ROGµE</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="game-container">
+      <header class="game-header">
+        <div class="header-left">
+          <div class="menu-container">
+            <span class="hamburger-menu" id="hamburger-menu">☰</span>
+            <!-- Menu Overlay -->
+            <div id="menu-overlay" class="menu-overlay">
+              <div class="menu-items">
+                <div class="menu-item" id="new-game-menu-item">
+                  <span class="menu-text">New Game</span>
+                </div>
+                <!-- Future menu items can be added here -->
+              </div>
+            </div>
+          </div>
+          <h1>ROGµE</h1>
+        </div>
+        <div class="header-right">
+          <div class="game-stats">
+            <span class="stat-item">DLVL: <span id="level" class="stat-value">1</span></span>
+            <span class="stat-separator">  |  </span>
+            <span class="stat-item">🕑: <span id="turns" class="stat-value">0</span></span>
+            <span class="stat-separator">  |  </span>
+            <span class="stat-item">🏆: <span id="score" class="stat-value">0</span></span>
+          </div>
+          <div class="character-attributes">
+            <span class="attr-item">Character Name</span>
+            <span class="attr-separator">  |  </span>
+            <span class="attr-item">CLVL: <span id="char-level" class="attr-value">1</span></span>
+            <span class="attr-separator">  |  </span>
+            <span class="attr-item">HP: <span id="hp" class="attr-value">100</span></span>
+            <span class="attr-separator">  |  </span>
+            <span class="attr-item">Body: <span id="body" class="attr-value">1</span></span>
+            <span class="attr-separator">  |  </span>
+            <span class="attr-item">Mind: <span id="mind" class="attr-value">1</span></span>
+            <span class="attr-separator">  |  </span>
+            <span class="attr-item">Agility: <span id="agility" class="attr-value">1</span></span>
+            <span class="attr-separator">  |  </span>
+            <span class="attr-item">Control: <span id="control" class="attr-value">1</span></span>
+          </div>
+        </div>
+      </header>
+
+      <main class="game-main">
+        <!-- Top row: game-display and message-log -->
+        <div class="game-top-row">
+          <div class="game-area">
+            <pre id="gameDisplay" class="game-display"></pre>
+          </div>
+
+          <div class="message-log">
+            <h3>Messages</h3>
+            <div id="messages" class="messages"></div>
+          </div>
+        </div>
+
+        <!-- Bottom row: inventory-section and controls -->
+        <div class="game-bottom-row">
+          <div class="inventory-section">
+            <h3>Inventory & Equipment</h3>
+            <div class="inventory-content">
+              <div class="equipment-grid">
+                <div class="equipment-slot" data-slot="weapon1">
+                  <span class="slot-label">Weapon 1</span>
+                  <div class="slot-item" id="weapon1-slot">-</div>
+                </div>
+                <div class="equipment-slot" data-slot="weapon2">
+                  <span class="slot-label">Weapon 2</span>
+                  <div class="slot-item" id="weapon2-slot">-</div>
+                </div>
+                <div class="equipment-slot" data-slot="head">
+                  <span class="slot-label">Head</span>
+                  <div class="slot-item" id="head-slot">-</div>
+                </div>
+                <div class="equipment-slot" data-slot="body">
+                  <span class="slot-label">Body</span>
+                  <div class="slot-item" id="body-slot">-</div>
+                </div>
+                <div class="equipment-slot" data-slot="hands">
+                  <span class="slot-label">Hands</span>
+                  <div class="slot-item" id="hands-slot">-</div>
+                </div>
+                <div class="equipment-slot" data-slot="legs">
+                  <span class="slot-label">Legs</span>
+                  <div class="slot-item" id="legs-slot">-</div>
+                </div>
+                <div class="equipment-slot" data-slot="feet">
+                  <span class="slot-label">Feet</span>
+                  <div class="slot-item" id="feet-slot">-</div>
+                </div>
+                <div class="equipment-slot" data-slot="neck">
+                  <span class="slot-label">Neck</span>
+                  <div class="slot-item" id="neck-slot">-</div>
+                </div>
+              </div>
+              <div class="rings-section">
+                <h4>Rings (0/10)</h4>
+                <div class="rings-grid" id="rings-grid">
+                  <!-- Ring slots will be generated by JavaScript -->
+                </div>
+              </div>
+              <div class="inventory-list">
+                <h4>Inventory (0/5)</h4>
+                <div class="inventory-items" id="inventory-items">
+                  <!-- Inventory items will be generated by JavaScript -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls" id="controls">
+            <h3>Controls</h3>
+            <p>WASD or Arrow Keys: Move</p>
+            <p>P: Pick up item</p>
+          </div>
+        </div>
+      </main>
+
+    </div>
+
+    <script type="module" src="game.js"></script>
+  </body>
+</html>
