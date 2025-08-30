@@ -88,7 +88,7 @@ const CHOICE_MODES = {
         case 'arrowright':
           gameActions.movePlayer(1, 0);
           break;
-        case 'p':
+        case 'p': {
           // Check if there are multiple items to pick up
           const availableItems = gameActions.getAvailableItems();
           if (availableItems.length > 1) {
@@ -102,6 +102,7 @@ const CHOICE_MODES = {
             gameActions.pickUpItem();
           }
           break;
+        }
         case 'u':
           // Enter directional choice mode for use action
           modeManager.setMode('directional', { action: 'use' });

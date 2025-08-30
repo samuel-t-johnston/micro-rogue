@@ -1,4 +1,4 @@
-Rogµe (or Micro-Rogue) is a traditional [roguelike game](https://en.wikipedia.org/wiki/Roguelike) in early development. It is written in Javascript and HTML5. 
+**Rogµe** (or Micro-Rogue) is a traditional [roguelike game](https://en.wikipedia.org/wiki/Roguelike) in early development. It is written in Javascript and HTML5. 
 
 Rogµe was started primarily as a playground to experiment with agentic AI tools. I'm currently using Cursor. Apologies for any rough code. It has been many years since I wrote Javascript regularly, and the language has changed. I'll be relying on the AI quite a bit at first, and refactoring as I go.
 
@@ -23,7 +23,7 @@ The dev side of the project includes:
  - Code Formatting (Prettier)
  - Documentation File (code-doc.txt) - mostly by AI
  - Game Design File (game-design.txt) - mostly by AI
- - .cursorrules - to keep the AI in line
+ - .cursorrules and .cursor-memory-bank - to keep the AI in line
 
 ## Roadmap
 

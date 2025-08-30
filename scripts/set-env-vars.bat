@@ -4,15 +4,18 @@ echo ROGµE - Environment Variables
 echo ========================================
 echo.
 echo Update the variables in this script before running.
+echo Run with admin privileges to ensure the variables are set correctly.
 echo.
-set nodepath=
-set npmpath=
+set nodepath=C:\path\to\node-v22.18.0-win-x64
+set npmpath=C:\path\to\node-v22.18.0-win-x64\npm.cmd
 
 echo Setting node path...
-setx NODE_PATH "%nodepath%"
+echo %nodepath%
+setx NODE_PATH "%nodepath%" /M
 
 echo Setting npm path...
-setx NPM_PATH "%npmpath%"
+echo %npmpath%
+setx NPM_PATH "%npmpath%" /M
 
 echo Finished!
 pause 

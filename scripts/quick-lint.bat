@@ -5,7 +5,7 @@ echo ========================================
 echo.
 
 echo Running ESLint...
-C:\Users\samue\Desktop\coding-experiments\js-rogue\node-v22.18.0-win-x64\npm.cmd run lint
+%NPM_PATH% run lint
 
 if %errorlevel% equ 0 (
     echo.

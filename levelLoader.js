@@ -1,6 +1,3 @@
-import { create } from './coordinates.js';
-import { Furniture } from './furniture.js';
-
 // Level loading and parsing functions
 export class LevelLoader {
   constructor() {
@@ -92,6 +89,7 @@ export class LevelLoader {
   }
 
   // Parse furniture from grid symbols
+  //TODO: Convert to use the Furniture class - import { Furniture } from './furniture.js';
   parseFurniture(gridArray, width, height) {
     const furniture = [];
     
