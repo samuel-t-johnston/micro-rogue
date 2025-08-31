@@ -1,7 +1,7 @@
-import { Character } from './character.js';
-import { create } from './coordinates.js';
-import { GAME_CONFIG } from './config.js';
-import { Furniture } from './furniture.js';
+import { Character } from '../entities/character.js';
+import { create } from '../utils/coordinates.js';
+import { GAME_CONFIG } from '../utils/config.js';
+import { Furniture } from '../entities/furniture.js';
 
 // Level-specific state
 export class DungeonLevel {

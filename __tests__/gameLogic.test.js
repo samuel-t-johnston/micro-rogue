@@ -1,26 +1,26 @@
-import { pickUpItem, movePlayer, useFurniture } from '../gameLogic.js';
-import { GameState } from '../gameState.js';
-import { Furniture } from '../furniture.js';
+import { pickUpItem, movePlayer, useFurniture } from '../src/js/core/gameLogic.js';
+import { GameState } from '../src/js/core/gameState.js';
+import { Furniture } from '../src/js/entities/furniture.js';
 
 // Mock dependencies
-jest.mock('../renderer.js', () => ({
+jest.mock('../src/js/systems/renderer.js', () => ({
   render: jest.fn(),
 }));
 
-jest.mock('../ui.js', () => ({
+jest.mock('../src/js/ui/ui.js', () => ({
   addMessage: jest.fn(),
   updateUI: jest.fn(),
 }));
 
-jest.mock('../world.js', () => ({
+jest.mock('../src/js/core/world.js', () => ({
   initializeWorldAsync: jest.fn(),
   placeRandomItems: jest.fn(),
   placeRandomFurniture: jest.fn(),
 }));
 
 // Import mocked modules
-const { addMessage, updateUI } = require('../ui.js');
-const { render } = require('../renderer.js');
+const { addMessage, updateUI } = require('../src/js/ui/ui.js');
+const { render } = require('../src/js/systems/renderer.js');
 
 describe('gameLogic', () => {
   let gameState;

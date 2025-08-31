@@ -7,7 +7,7 @@ import {
   manhattanDistance,
   euclideanDistance,
   toString
-} from '../coordinates.js';
+} from '../src/js/utils/coordinates.js';
 
 describe('Coordinate Utilities', () => {
   describe('create', () => {

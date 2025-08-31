@@ -1,5 +1,5 @@
-import { GAME_CONFIG } from './config.js';
-import { equals } from './coordinates.js';
+import { GAME_CONFIG } from '../utils/config.js';
+import { equals } from '../utils/coordinates.js';
 
 // Game rendering function
 export function render(gameState, gameDisplay) {

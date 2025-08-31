@@ -3,15 +3,15 @@ import {
   placeRandomItems,
   placeRandomFurniture,
 } from './world.js';
-import { render } from './renderer.js';
-import { addMessage, updateUI } from './ui.js';
+import { render } from '../systems/renderer.js';
+import { addMessage, updateUI } from '../ui/ui.js';
 import { GameState } from './gameState.js';
-import { addDelta, toString } from './coordinates.js';
+import { addDelta, toString } from '../utils/coordinates.js';
 
 // Load items from JSON file
 export async function loadItems() {
   try {
-    const response = await fetch('items.json');
+    const response = await fetch('src/data/items/items.json');
     const itemsData = await response.json();
     console.log('Items loaded:', itemsData);
     return itemsData;
@@ -24,7 +24,7 @@ export async function loadItems() {
 // Load furniture from JSON file
 export async function loadFurniture() {
   try {
-    const response = await fetch('furniture.json');
+    const response = await fetch('src/data/furniture/furniture.json');
     const furnitureData = await response.json();
     console.log('Furniture loaded:', furnitureData);
     return furnitureData;

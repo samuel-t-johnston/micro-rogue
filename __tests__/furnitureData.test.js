@@ -1,5 +1,5 @@
-import furnitureData from '../furniture.json';
-import itemsData from '../items.json';
+import furnitureData from '../src/data/furniture/furniture.json';
+import itemsData from '../src/data/items/items.json';
 
 // Furniture validation rules and configurations
 const FURNITURE_RULES = {

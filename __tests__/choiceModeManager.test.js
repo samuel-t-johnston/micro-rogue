@@ -1,4 +1,4 @@
-import { ChoiceModeManager } from '../choiceModeManager.js';
+import { ChoiceModeManager } from '../src/js/systems/choiceModeManager.js';
 
 describe('ChoiceModeManager', () => {
   let choiceModeManager;

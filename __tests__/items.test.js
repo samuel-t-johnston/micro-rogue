@@ -1,4 +1,4 @@
-import itemsData from '../items.json';
+import itemsData from '../src/data/items/items.json';
 
 // Item validation rules and configurations
 const ITEM_RULES = {

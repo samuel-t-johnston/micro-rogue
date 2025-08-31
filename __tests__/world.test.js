@@ -1,9 +1,9 @@
-import { initializeWorldAsync, placeRandomItems } from '../world.js';
-import { DungeonLevel } from '../gameState.js';
-import { GAME_CONFIG } from '../config.js';
+import { initializeWorldAsync, placeRandomItems } from '../src/js/core/world.js';
+import { DungeonLevel } from '../src/js/core/gameState.js';
+import { GAME_CONFIG } from '../src/js/utils/config.js';
 
 // Mock the config for testing
-jest.mock('../config.js', () => ({
+jest.mock('../src/js/utils/config.js', () => ({
   GAME_CONFIG: {
     width: 51,
     height: 13,
@@ -14,7 +14,7 @@ jest.mock('../config.js', () => ({
 }));
 
 // Mock the LevelLoader
-jest.mock('../levelLoader.js', () => ({
+jest.mock('../src/js/systems/levelLoader.js', () => ({
   LevelLoader: jest.fn().mockImplementation(() => ({
     loadLevel: jest.fn().mockResolvedValue({
       width: 11,

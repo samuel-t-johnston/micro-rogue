@@ -1,4 +1,4 @@
-import { updateInventoryUI, updateUI, addMessage } from '../ui.js';
+import { updateInventoryUI, updateUI, addMessage } from '../src/js/ui/ui.js';
 
 // Mock DOM elements
 const mockGameDisplay = {

@@ -36,9 +36,21 @@ CODE ORGANIZATION
 -----------------
 
 File Structure:
-- __tests__: Unit tests directory
-- index.html: Main UI structure
-- style.css: All styling and responsive design
+__tests__          ← Unit tests directory
+src/               ← Web app root
+├── index.html
+├── style.css
+├── js/            ← JavaScript source code
+│   ├── core/
+│   ├── entities/
+│   ├── systems/
+│   ├── utils/
+│   └── ui/
+└── data/          ← JSON data files
+    ├── furniture/
+    ├── items/
+    └── levels/
+
 - game.js: Main game orchestration
 - inputHandler.js: User input event handling
 - choiceModeManager.js: Choice mode system for multi-step input handling

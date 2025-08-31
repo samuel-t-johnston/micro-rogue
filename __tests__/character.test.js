@@ -1,4 +1,4 @@
-import { Character } from '../character.js';
+import { Character } from '../src/js/entities/character.js';
 
 describe('Character', () => {
   let character;

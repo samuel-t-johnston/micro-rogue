@@ -1,6 +1,6 @@
-import { GAME_CONFIG } from './config.js';
-import { create, equals } from './coordinates.js';
-import { LevelLoader } from './levelLoader.js';
+import { GAME_CONFIG } from '../utils/config.js';
+import { create, equals } from '../utils/coordinates.js';
+import { LevelLoader } from '../systems/levelLoader.js';
 
 // Async version for v2 loading
 export async function initializeWorldAsync() {
@@ -12,7 +12,7 @@ async function initializeWorldV2() {
   try {
     const levelLoader = new LevelLoader();
     const levelData = await levelLoader.loadLevel(
-      './levels/1-test-dungeon.json'
+      './src/data/levels/1-test-dungeon.json'
     );
 
     // Update GAME_CONFIG to match the loaded level dimensions

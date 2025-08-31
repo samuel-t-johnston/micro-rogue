@@ -1,4 +1,4 @@
-import { InputHandler } from '../inputHandler.js';
+import { InputHandler } from '../src/js/systems/inputHandler.js';
 
 describe('InputHandler', () => {
   let inputHandler;

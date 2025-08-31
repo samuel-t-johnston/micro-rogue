@@ -7,11 +7,11 @@ import {
   getAvailableItems,
   pickUpItemByIndex,
 } from './gameLogic.js';
-import { updateUI, initUI } from './ui.js';
-import { render } from './renderer.js';
+import { updateUI, initUI } from '../ui/ui.js';
+import { render } from '../systems/renderer.js';
 import { GameState } from './gameState.js';
-import { InputHandler } from './inputHandler.js';
-import { ChoiceModeManager } from './choiceModeManager.js';
+import { InputHandler } from '../systems/inputHandler.js';
+import { ChoiceModeManager } from '../systems/choiceModeManager.js';
 
 // Game state
 let gameState = new GameState();

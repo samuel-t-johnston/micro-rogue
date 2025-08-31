@@ -1,4 +1,4 @@
-import { Furniture } from '../furniture.js';
+import { Furniture } from '../src/js/entities/furniture.js';
 
 describe('Furniture', () => {
   let boulderData, doorData, chestData;
