@@ -1,5 +1,12 @@
 // Import modules
-import { movePlayer, initGame, pickUpItem, useFurniture, getAvailableItems, pickUpItemByIndex } from './gameLogic.js';
+import {
+  movePlayer,
+  initGame,
+  pickUpItem,
+  useFurniture,
+  getAvailableItems,
+  pickUpItemByIndex,
+} from './gameLogic.js';
 import { updateUI, initUI } from './ui.js';
 import { render } from './renderer.js';
 import { GameState } from './gameState.js';
@@ -27,35 +34,40 @@ const gameActions = {
   movePlayer: (dx, dy) => {
     movePlayer(dx, dy, gameState, gameDisplay, choiceModeManager);
   },
-  
+
   pickUpItem: () => {
     pickUpItem(gameState, gameDisplay, choiceModeManager);
   },
-  
+
   getAvailableItems: () => {
     return getAvailableItems(gameState);
   },
-  
-  pickUpItemByIndex: (index) => {
+
+  pickUpItemByIndex: index => {
     return pickUpItemByIndex(index, gameState, gameDisplay, choiceModeManager);
   },
-  
+
   useFurniture: (dx, dy) => {
     return useFurniture(dx, dy, gameState, gameDisplay, updateGameUI);
   },
-  
+
   startNewGame: async () => {
     await startNewGame();
-  }
+  },
 };
 
 // Input handler
-const inputHandler = new InputHandler(gameState, gameDisplay, gameActions, choiceModeManager);
+const inputHandler = new InputHandler(
+  gameState,
+  gameDisplay,
+  gameActions,
+  choiceModeManager
+);
 
 // Start new game function
 async function startNewGame() {
   gameState = await initGame();
-  
+
   // Update input handler with new game state
   inputHandler.updateGameState(gameState);
 
@@ -68,10 +80,10 @@ async function startNewGame() {
 window.addEventListener('load', () => {
   // Initialize input handler
   inputHandler.init();
-  
+
   // Initialize UI
   initUI();
-  
+
   // Start the game
   startNewGame().catch(console.error);
 });

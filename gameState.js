@@ -12,7 +12,10 @@ export class DungeonLevel {
     this.map = []; // 2D array of tiles
     this.items = []; // Array of {x, y, itemId} objects
     this.furniture = []; // Array of Furniture instances
-    this.playerPosition = create(GAME_CONFIG.playerStartX, GAME_CONFIG.playerStartY); // Level-relative position
+    this.playerPosition = create(
+      GAME_CONFIG.playerStartX,
+      GAME_CONFIG.playerStartY
+    ); // Level-relative position
   }
 
   // Get item at specific position
@@ -22,13 +25,15 @@ export class DungeonLevel {
 
   // Get furniture at specific position
   getFurnitureAt(x, y) {
-    return this.furniture.find(furniture => furniture.x === x && furniture.y === y);
+    return this.furniture.find(
+      furniture => furniture.x === x && furniture.y === y
+    );
   }
 
   // Remove item from level
   removeItem(item) {
-    const index = this.items.findIndex(i => 
-      i.x === item.x && i.y === item.y && i.itemId === item.itemId
+    const index = this.items.findIndex(
+      i => i.x === item.x && i.y === item.y && i.itemId === item.itemId
     );
     if (index !== -1) {
       this.items.splice(index, 1);
@@ -51,8 +56,11 @@ export class DungeonLevel {
 
   // Remove furniture from level
   removeFurniture(furniture) {
-    const index = this.furniture.findIndex(f => 
-      f.x === furniture.x && f.y === furniture.y && f.furnitureId === furniture.furnitureId
+    const index = this.furniture.findIndex(
+      f =>
+        f.x === furniture.x &&
+        f.y === furniture.y &&
+        f.furnitureId === furniture.furnitureId
     );
     if (index !== -1) {
       this.furniture.splice(index, 1);
@@ -88,12 +96,12 @@ export class GameState {
     this.itemsData = {}; // Item definitions loaded from items.json
     this.furnitureData = {}; // Furniture definitions loaded from furniture.json
   }
-  
+
   // Convenience methods
   getPlayerPosition() {
     return this.currentLevel?.playerPosition || create(0, 0);
   }
-  
+
   setPlayerPosition(x, y) {
     if (this.currentLevel) {
       this.currentLevel.playerPosition = create(x, y);
@@ -113,4 +121,4 @@ export class GameState {
     this.messages = [];
     this.initializeLevel(1, 11, 11); // Default room size
   }
-} 
+}

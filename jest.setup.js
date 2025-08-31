@@ -1,6 +1,6 @@
 // Mock DOM elements that our game uses
 global.document = {
-  getElementById: jest.fn((id) => {
+  getElementById: jest.fn(id => {
     const mockElement = {
       innerHTML: '',
       textContent: '',
@@ -17,7 +17,7 @@ global.document = {
       querySelector: jest.fn(),
       querySelectorAll: jest.fn(() => []),
     };
-    
+
     // Return different mock elements based on ID
     switch (id) {
       case 'gameDisplay':
@@ -48,12 +48,12 @@ global.document = {
         // For any other ID, return a mock element
         break;
     }
-    
+
     return mockElement;
   }),
   addEventListener: jest.fn(),
   removeEventListener: jest.fn(),
-  createElement: jest.fn((tag) => ({
+  createElement: jest.fn(tag => ({
     tagName: tag.toUpperCase(),
     innerHTML: '',
     textContent: '',
@@ -68,7 +68,7 @@ global.document = {
     appendChild: jest.fn(),
     removeChild: jest.fn(),
   })),
-  querySelector: jest.fn((selector) => {
+  querySelector: jest.fn(selector => {
     if (selector === '.toggle-icon') {
       return {
         textContent: '▼',
@@ -122,4 +122,4 @@ beforeEach(() => {
 
 afterEach(() => {
   Math.random = originalRandom;
-}); 
+});

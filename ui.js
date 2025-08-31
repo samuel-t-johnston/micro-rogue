@@ -51,11 +51,11 @@ export function updateInventoryUI(player) {
 
 export function updateControlsUI(choiceModeManager) {
   const controlsElement = document.getElementById('controls');
-  
+
   if (choiceModeManager.isInSpecialMode()) {
     const currentMode = choiceModeManager.getCurrentMode();
     const context = choiceModeManager.getActionContext();
-    
+
     if (currentMode === 'directional') {
       controlsElement.innerHTML = `
         <h3>Controls</h3>
@@ -69,7 +69,11 @@ export function updateControlsUI(choiceModeManager) {
           </div>
         </div>
       `;
-    } else if (currentMode === 'numeric' && context && context.action === 'pickup') {
+    } else if (
+      currentMode === 'numeric' &&
+      context &&
+      context.action === 'pickup'
+    ) {
       // Build the item list for numeric mode
       let itemList = '';
       if (context.items && context.items.length > 0) {
@@ -81,7 +85,7 @@ export function updateControlsUI(choiceModeManager) {
           }
         });
       }
-      
+
       controlsElement.innerHTML = `
         <h3>Controls</h3>
         <div class="control-mode">
@@ -165,20 +169,23 @@ export function initUI() {
   const hamburgerMenu = document.getElementById('hamburger-menu');
   const menuOverlay = document.getElementById('menu-overlay');
   const newGameMenuItem = document.getElementById('new-game-menu-item');
-  
+
   if (hamburgerMenu && menuOverlay) {
     // Toggle menu
     hamburgerMenu.addEventListener('click', () => {
       menuOverlay.classList.toggle('active');
     });
-    
+
     // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!hamburgerMenu.contains(e.target) && !menuOverlay.contains(e.target)) {
+    document.addEventListener('click', e => {
+      if (
+        !hamburgerMenu.contains(e.target) &&
+        !menuOverlay.contains(e.target)
+      ) {
         menuOverlay.classList.remove('active');
       }
     });
-    
+
     // New Game menu item
     if (newGameMenuItem) {
       newGameMenuItem.addEventListener('click', () => {
@@ -190,5 +197,3 @@ export function initUI() {
     }
   }
 }
-
-

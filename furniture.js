@@ -119,10 +119,10 @@ export class Furniture {
     if (!this.isContainer()) {
       return null;
     }
-    
+
     const itemCount = this.containerItems ? this.containerItems.length : 0;
     const capacity = this.getContainerCapacity();
-    
+
     if (this.state === 'closed') {
       return `(${itemCount}/${capacity} items)`;
     } else {

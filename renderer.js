@@ -7,7 +7,7 @@ export function render(gameState, gameDisplay) {
   const worldMap = gameState.currentLevel.map;
   const worldItems = gameState.currentLevel.items;
   const worldFurniture = gameState.currentLevel.furniture;
-  
+
   let displayText = '';
 
   // Calculate the top-left corner of the visible area

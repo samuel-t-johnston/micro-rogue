@@ -53,7 +53,14 @@ export class ChoiceModeManager {
     }
 
     // Handle the input
-    return mode.handleInput(key, this.actionContext, gameState, gameDisplay, gameActions, this);
+    return mode.handleInput(
+      key,
+      this.actionContext,
+      gameState,
+      gameDisplay,
+      gameActions,
+      this
+    );
   }
 
   // Get display text for current mode
@@ -69,8 +76,27 @@ export class ChoiceModeManager {
 // Choice mode definitions
 const CHOICE_MODES = {
   default: {
-    validKeys: ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'p', 'u', 'escape'],
-    handleInput: (key, context, gameState, gameDisplay, gameActions, modeManager) => {
+    validKeys: [
+      'w',
+      'a',
+      's',
+      'd',
+      'arrowup',
+      'arrowdown',
+      'arrowleft',
+      'arrowright',
+      'p',
+      'u',
+      'escape',
+    ],
+    handleInput: (
+      key,
+      context,
+      gameState,
+      gameDisplay,
+      gameActions,
+      modeManager
+    ) => {
       switch (key.toLowerCase()) {
         case 'w':
         case 'arrowup':
@@ -93,7 +119,10 @@ const CHOICE_MODES = {
           const availableItems = gameActions.getAvailableItems();
           if (availableItems.length > 1) {
             // Enter numeric choice mode for multi-item pickup
-            modeManager.setMode('numeric', { action: 'pickup', items: availableItems });
+            modeManager.setMode('numeric', {
+              action: 'pickup',
+              items: availableItems,
+            });
           } else if (availableItems.length === 1) {
             // Single item - pick up immediately
             gameActions.pickUpItem();
@@ -112,25 +141,46 @@ const CHOICE_MODES = {
           break;
       }
       return true;
-    }
+    },
   },
 
   directional: {
-    validKeys: ['w', 'a', 's', 'd', 'q', 'e', 'z', 'c', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'escape'],
-    handleInput: (key, context, gameState, gameDisplay, gameActions, modeManager) => {
+    validKeys: [
+      'w',
+      'a',
+      's',
+      'd',
+      'q',
+      'e',
+      'z',
+      'c',
+      'arrowup',
+      'arrowdown',
+      'arrowleft',
+      'arrowright',
+      'escape',
+    ],
+    handleInput: (
+      key,
+      context,
+      gameState,
+      gameDisplay,
+      gameActions,
+      modeManager
+    ) => {
       const directionMap = {
-        'w': { dx: 0, dy: -1 },
-        'arrowup': { dx: 0, dy: -1 },
-        's': { dx: 0, dy: 1 },
-        'arrowdown': { dx: 0, dy: 1 },
-        'a': { dx: -1, dy: 0 },
-        'arrowleft': { dx: -1, dy: 0 },
-        'd': { dx: 1, dy: 0 },
-        'arrowright': { dx: 1, dy: 0 },
-        'q': { dx: -1, dy: -1 },
-        'e': { dx: 1, dy: -1 },
-        'z': { dx: -1, dy: 1 },
-        'c': { dx: 1, dy: 1 }
+        w: { dx: 0, dy: -1 },
+        arrowup: { dx: 0, dy: -1 },
+        s: { dx: 0, dy: 1 },
+        arrowdown: { dx: 0, dy: 1 },
+        a: { dx: -1, dy: 0 },
+        arrowleft: { dx: -1, dy: 0 },
+        d: { dx: 1, dy: 0 },
+        arrowright: { dx: 1, dy: 0 },
+        q: { dx: -1, dy: -1 },
+        e: { dx: 1, dy: -1 },
+        z: { dx: -1, dy: 1 },
+        c: { dx: 1, dy: 1 },
       };
 
       if (key.toLowerCase() === 'escape') {
@@ -155,17 +205,24 @@ const CHOICE_MODES = {
 
       return true;
     },
-    displayText: (context) => {
+    displayText: context => {
       if (context && context.action === 'use') {
         return 'Use - choose direction (WASD/QEZC/arrows) or ESC to cancel';
       }
       return 'Choose direction (WASD/QEZC/arrows) or ESC to cancel';
-    }
+    },
   },
 
   numeric: {
     validKeys: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'escape'],
-    handleInput: (key, context, gameState, gameDisplay, gameActions, modeManager) => {
+    handleInput: (
+      key,
+      context,
+      gameState,
+      gameDisplay,
+      gameActions,
+      modeManager
+    ) => {
       if (key.toLowerCase() === 'escape') {
         modeManager.resetToDefault();
         return true;
@@ -187,11 +244,11 @@ const CHOICE_MODES = {
 
       return true;
     },
-    displayText: (context) => {
+    displayText: context => {
       if (context && context.action === 'pickup') {
         return 'Pick up - choose item (0-9) or ESC to cancel';
       }
       return 'Choose item (0-9) or ESC to cancel';
-    }
-  }
+    },
+  },
 };

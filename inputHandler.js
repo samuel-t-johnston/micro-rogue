@@ -15,12 +15,12 @@ export class InputHandler {
     }
 
     document.addEventListener('keydown', this.handleKeyDown);
-    
+
     // New game menu listener
     document.addEventListener('newGameRequested', () => {
       this.gameActions.startNewGame();
     });
-    
+
     this.isInitialized = true;
   }
 
@@ -35,18 +35,25 @@ export class InputHandler {
 
   handleKeyDown(event) {
     const key = event.key.toLowerCase();
-    
+
     // Handle input through choice mode manager
-    const handled = this.choiceModeManager.handleInput(key, this.gameState, this.gameDisplay, this.gameActions);
-    
+    const handled = this.choiceModeManager.handleInput(
+      key,
+      this.gameState,
+      this.gameDisplay,
+      this.gameActions
+    );
+
     if (handled) {
       // Only prevent default behavior for keys that the game actually handled
       event.preventDefault();
     }
-    
+
     if (!handled) {
       // Invalid input for current mode - could add feedback here if needed
-      console.log(`Invalid input '${key}' for current mode: ${this.choiceModeManager.getCurrentMode()}`);
+      console.log(
+        `Invalid input '${key}' for current mode: ${this.choiceModeManager.getCurrentMode()}`
+      );
     }
   }
 }
