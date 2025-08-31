@@ -1,11 +1,11 @@
 @echo off
 echo ========================================
-echo ROGµE - JSDocs
+echo ROGµE - Prettify Code
 echo ========================================
 echo.
 
-echo Generating JSDoc... This currently seems to be broken.
-npm run docs
+echo Running Prettier...
+npm run format
 
 echo Finished!
 pause 

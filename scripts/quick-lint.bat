@@ -5,7 +5,7 @@ echo ========================================
 echo.
 
 echo Running ESLint...
-%NPM_PATH% run lint
+npm run lint
 
 if %errorlevel% equ 0 (
     echo.

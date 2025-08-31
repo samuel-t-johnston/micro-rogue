@@ -17,14 +17,6 @@ The game is very early, but already includes a number of important features:
  - Dungeon "Furniture" like boulders, doors, and chests
    - Doors and chests can be opened. Chests can be looted
 
-The dev side of the project includes:
- - Unit tests (Jest/Babel) - mostly by AI
- - Linting (ESLint)
- - Code Formatting (Prettier)
- - Documentation File (code-doc.txt) - mostly by AI
- - Game Design File (game-design.txt) - mostly by AI
- - .cursorrules and .cursor-memory-bank - to keep the AI in line
-
 ## Roadmap
 
 0.0.x versions are laying basic groundwork for the game, with 0.1.0 being the first minor "release".
@@ -67,11 +59,30 @@ The dev side of the project includes:
    - Game state for tile
    - Debug log
  - Package to executable (Electron?)
+ - Configuration?
 
 ### 0.1.1 - CRB - cleanup, refactoring, and bugfixes.
+- Test Coverage
 
 ### 0.2.0 - Bling and Bad Guys
  - Rings
  - Packs
  - More enemies
  - AI - aggro (pathfinding?)
+
+# Developer Setup
+
+**Dependencies:**
+ - Python - Currently used to easily serve files locally
+ - npm - Package management for everything JS.
+   - Jest/Babel - unit tests
+   - ESLint - linting
+   - Prettier - code formatting
+ - Cursor (optional)
+   - .cursorrules - hints to make the AI more effective
+   - cursor-memory-bank.md - Simple AI memory bank
+
+**Developer Setup:**
+ - `npm install` to download dependencies.
+ - `start-server.bat` to run the game on localhost:8000
+ - The `scripts` directory includes additional scripts to easily lint, unit test, and prettify.
