@@ -1,4 +1,4 @@
-import { initializeWorld, placeRandomItems } from '../src/js/core/world.js';
+import { initializeWorld, placeItems } from '../src/js/core/world.js';
 import { DungeonLevel } from '../src/js/core/gameState.js';
 import { CONFIG_SETTINGS } from '../src/js/utils/config.js';
 
@@ -86,7 +86,7 @@ describe('World Generation', () => {
     });
   });
 
-  describe('placeRandomItems', () => {
+  describe('placeItems', () => {
     it('should place items in dungeon level', async () => {
       const itemsData = {
         'sword': { name: 'Sword', type: 'weapon' },
@@ -96,10 +96,10 @@ describe('World Generation', () => {
       const dungeonLevel = new DungeonLevel(1, 11, 11);
       dungeonLevel.playerPosition = { x: 5, y: 5 }; // Player not in item placement area
       
-      // Initialize world first to set up loadedLevelData
-      await initializeWorld();
+      // Get level data
+      const levelData = await initializeWorld();
       
-      placeRandomItems(itemsData, dungeonLevel);
+      placeItems(itemsData, dungeonLevel, levelData);
       
       expect(dungeonLevel.items.length).toBeGreaterThan(0);
       expect(dungeonLevel.items.length).toBeLessThanOrEqual(3);
@@ -108,11 +108,11 @@ describe('World Generation', () => {
     it('should not place items if no items data', async () => {
       const dungeonLevel = new DungeonLevel(1, 11, 11);
       
-      // Initialize world first to set up loadedLevelData
-      await initializeWorld();
+      // Get level data
+      const levelData = await initializeWorld();
       
       // Test with empty items data - should still place items from level data
-      placeRandomItems({}, dungeonLevel);
+      placeItems({}, dungeonLevel, levelData);
       
       // Since the mock level has items defined, they should be placed
       // This tests that the function works with the new file-based system
@@ -127,10 +127,10 @@ describe('World Generation', () => {
       const dungeonLevel = new DungeonLevel(1, 11, 11);
       dungeonLevel.playerPosition = { x: 1, y: 1 }; // Player in item placement area
       
-      // Initialize world first to set up loadedLevelData
-      await initializeWorld();
+      // Get level data
+      const levelData = await initializeWorld();
       
-      placeRandomItems(itemsData, dungeonLevel);
+      placeItems(itemsData, dungeonLevel, levelData);
       
       // Should place fewer items since player position is skipped
       expect(dungeonLevel.items.length).toBeLessThanOrEqual(2);

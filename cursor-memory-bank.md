@@ -63,6 +63,24 @@
 - **Fixed tests**: Updated to work with new immutable approach
 - **All 200 tests passing**: Confirmed refactoring maintains functionality
 
+### 8. Items Placement Refactoring ✅
+- **Eliminated wrapper functions**: Removed `placeRandomItems` and `placeLoadedItems`
+- **Single responsibility**: Created `placeItems` function that takes level data directly
+- **Removed global dependencies**: No more reliance on `window.loadedLevelData`
+- **Direct parameter passing**: Level data passed explicitly from `gameLogic.js`
+- **Updated tests**: All tests now use new `placeItems` function with direct level data
+- **Cleaner API**: More explicit and testable function signature
+- **All 200 tests passing**: Confirmed items refactoring maintains functionality
+
+### 9. Furniture Placement Refactoring ✅
+- **Eliminated wrapper functions**: Removed `placeRandomFurniture` and `placeLoadedFurniture`
+- **Single responsibility**: Created `placeFurniture` function that takes level data directly
+- **Removed global dependencies**: No more reliance on `window.loadedLevelData`
+- **Direct parameter passing**: Level data passed explicitly from `gameLogic.js`
+- **Updated tests**: Updated mocks in `gameLogic.test.js` to use new function names
+- **Cleaner API**: More explicit and testable function signature
+- **All 200 tests passing**: Confirmed furniture refactoring maintains functionality
+
 ## CURRENT ARCHITECTURE:
 ```
 game.js (orchestrator)
@@ -82,6 +100,12 @@ ChoiceModeManager (input mode switching)
 ```
 
 ## NEXT REFACTORING TARGETS:
+- **Choice Mode Manager Refactoring** (Next Priority)
+  - Problem: `CHOICE_MODES` object is 180+ lines and will balloon out of control
+  - Solution: Hybrid class-based approach with separate mode files
+  - Create `src/js/systems/choiceModes/` directory structure
+  - Split into: `BaseMode.js`, `DefaultMode.js`, `DirectionalMode.js`, `NumericMode.js`, `ModeRegistry.js`
+  - Benefits: Separation of concerns, easy testing, easy extension, better maintainability
 - Review remaining JavaScript files for refactoring opportunities
 - Look for similar patterns that could benefit from the same architectural improvements
 - Focus on: `gameLogic.js`, `gameState.js`, `ui.js`, `renderer.js`

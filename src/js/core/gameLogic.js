@@ -1,7 +1,7 @@
 import {
   initializeWorld,
-  placeRandomItems,
-  placeRandomFurniture,
+  placeItems,
+  placeFurniture,
 } from './world.js';
 import { render } from '../systems/renderer.js';
 import { addMessage, updateUI } from '../ui/ui.js';
@@ -124,11 +124,12 @@ export async function initGame() {
   // Set the map data
   gameState.currentLevel.map = levelData.map;
   
-  placeRandomItems(gameState.itemsData, gameState.currentLevel);
-  placeRandomFurniture(
+  placeItems(gameState.itemsData, gameState.currentLevel, levelData);
+  placeFurniture(
     gameState.furnitureData,
     gameState.currentLevel,
-    gameState.itemsData
+    gameState.itemsData,
+    levelData
   );
 
   addMessage('Welcome to ROGµE!', gameState, gameState.player);

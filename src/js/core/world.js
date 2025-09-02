@@ -19,17 +19,12 @@ export async function initializeWorld() {
   }
 }
 
-// TEMPORARY: This function will be replaced with proper item placement logic later
-export function placeRandomItems(itemsData, dungeonLevel) {
-  // Check if we have loaded level data (v2 world generation)
-  if (window.loadedLevelData && window.loadedLevelData.items) {
-    placeLoadedItems(itemsData, dungeonLevel, window.loadedLevelData);
+// Place items from level data
+export function placeItems(itemsData, dungeonLevel, levelData) {
+  if (!levelData.items) {
     return;
   }
-}
 
-// Place items from loaded level data
-function placeLoadedItems(itemsData, dungeonLevel, levelData) {
   for (const [coordKey, itemList] of levelData.items) {
     const [x, y] = coordKey.split(',').map(Number);
 
@@ -55,27 +50,12 @@ function placeLoadedItems(itemsData, dungeonLevel, levelData) {
   }
 }
 
-// Place random furniture in the dungeon level
-export function placeRandomFurniture(furnitureData, dungeonLevel, itemsData) {
-  // Check if we have loaded level data (v2 world generation)
-  if (window.loadedLevelData && window.loadedLevelData.furniture) {
-    placeLoadedFurniture(
-      furnitureData,
-      dungeonLevel,
-      itemsData,
-      window.loadedLevelData
-    );
+// Place furniture from level data
+export function placeFurniture(furnitureData, dungeonLevel, itemsData, levelData) {
+  if (!levelData.furniture) {
     return;
   }
-}
 
-// Place furniture from loaded level data
-function placeLoadedFurniture(
-  furnitureData,
-  dungeonLevel,
-  itemsData,
-  levelData
-) {
   for (const furnitureInfo of levelData.furniture) {
     const { type, x, y } = furnitureInfo;
 
@@ -115,8 +95,6 @@ function populateContainerWithItems(furniture, itemsData, numItems = 1) {
 
   const containerDef = furniture.data.container;
   const maxItems = containerDef.capacity;
-
-  // Add exactly 1 random item to the container for easier testing
   const numItemsToAdd = Math.min(numItems, maxItems);
 
   for (let i = 0; i < numItemsToAdd; i++) {

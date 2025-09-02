@@ -13,9 +13,9 @@ jest.mock('../src/js/ui/ui.js', () => ({
 }));
 
 jest.mock('../src/js/core/world.js', () => ({
-  initializeWorldAsync: jest.fn(),
-  placeRandomItems: jest.fn(),
-  placeRandomFurniture: jest.fn(),
+  initializeWorld: jest.fn(),
+  placeItems: jest.fn(),
+  placeFurniture: jest.fn(),
 }));
 
 // Import mocked modules
