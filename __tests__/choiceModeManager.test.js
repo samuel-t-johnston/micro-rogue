@@ -252,6 +252,95 @@ describe('ChoiceModeManager', () => {
     });
   });
 
+  describe('handleInput - numeric mode', () => {
+    beforeEach(() => {
+      choiceModeManager.setMode('numeric', { action: 'pickup' });
+      mockGameActions.pickUpItemByIndex = jest.fn();
+    });
+
+    test('should handle numeric keys', () => {
+      mockGameActions.pickUpItemByIndex.mockReturnValue(true);
+      
+      choiceModeManager.handleInput('3', mockGameState, mockGameDisplay, mockGameActions);
+      
+      expect(mockGameActions.pickUpItemByIndex).toHaveBeenCalledWith(3);
+      expect(choiceModeManager.getCurrentMode()).toBe('default');
+    });
+
+    test('should exit mode on escape', () => {
+      choiceModeManager.handleInput('escape', mockGameState, mockGameDisplay, mockGameActions);
+      
+      expect(choiceModeManager.getCurrentMode()).toBe('default');
+      expect(choiceModeManager.getActionContext()).toBeNull();
+    });
+
+    test('should return false for invalid keys', () => {
+      const result = choiceModeManager.handleInput('x', mockGameState, mockGameDisplay, mockGameActions);
+      expect(result).toBe(false);
+    });
+
+    test('should provide display text for pickup action', () => {
+      const displayText = choiceModeManager.getModeDisplayText();
+      expect(displayText).toBe('Pick up - choose item (0-9) or ESC to cancel');
+    });
+  });
+
+  describe('pickup scenarios', () => {
+    test('should enter numeric mode for multiple items', () => {
+      mockGameActions.getAvailableItems.mockReturnValue([
+        { name: 'Sword', source: 'ground' },
+        { name: 'Potion', source: 'ground' }
+      ]);
+      
+      choiceModeManager.handleInput('p', mockGameState, mockGameDisplay, mockGameActions);
+      
+      expect(choiceModeManager.getCurrentMode()).toBe('numeric');
+      expect(choiceModeManager.getActionContext()).toEqual({
+        action: 'pickup',
+        items: [
+          { name: 'Sword', source: 'ground' },
+          { name: 'Potion', source: 'ground' }
+        ]
+      });
+    });
+
+    test('should handle pickup with no items', () => {
+      mockGameActions.getAvailableItems.mockReturnValue([]);
+      
+      choiceModeManager.handleInput('p', mockGameState, mockGameDisplay, mockGameActions);
+      
+      expect(mockGameActions.pickUpItem).toHaveBeenCalled();
+      expect(choiceModeManager.getCurrentMode()).toBe('default');
+    });
+  });
+
+  describe('error handling', () => {
+    test('should handle unknown mode gracefully', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      // Try to get display text for unknown mode
+      choiceModeManager.setMode('unknown');
+      const result = choiceModeManager.getModeDisplayText();
+      
+      expect(result).toBeNull();
+      expect(consoleSpy).toHaveBeenCalledWith('Unknown choice mode: unknown', expect.any(Error));
+      
+      consoleSpy.mockRestore();
+    });
+
+    test('should handle unknown mode in handleInput', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      
+      choiceModeManager.setMode('unknown');
+      const result = choiceModeManager.handleInput('w', mockGameState, mockGameDisplay, mockGameActions);
+      
+      expect(result).toBe(false);
+      expect(consoleSpy).toHaveBeenCalledWith('Unknown choice mode: unknown', expect.any(Error));
+      
+      consoleSpy.mockRestore();
+    });
+  });
+
   describe('case insensitivity', () => {
     test('should handle uppercase keys in default mode', () => {
       choiceModeManager.handleInput('W', mockGameState, mockGameDisplay, mockGameActions);
@@ -264,6 +353,14 @@ describe('ChoiceModeManager', () => {
       
       choiceModeManager.handleInput('W', mockGameState, mockGameDisplay, mockGameActions);
       expect(mockGameActions.useFurniture).toHaveBeenCalledWith(0, -1);
+    });
+
+    test('should handle uppercase keys in numeric mode', () => {
+      choiceModeManager.setMode('numeric', { action: 'pickup' });
+      mockGameActions.pickUpItemByIndex = jest.fn().mockReturnValue(true);
+      
+      choiceModeManager.handleInput('3', mockGameState, mockGameDisplay, mockGameActions);
+      expect(mockGameActions.pickUpItemByIndex).toHaveBeenCalledWith(3);
     });
   });
 });

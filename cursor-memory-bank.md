@@ -99,23 +99,32 @@ ChoiceModeManager (input mode switching)
 └── Handles different input modes
 ```
 
+### 10. Choice Mode Manager Refactoring ✅
+- **Problem solved**: `CHOICE_MODES` object was 180+ lines and would balloon out of control
+- **Solution implemented**: Hybrid class-based approach with separate mode files
+- **New architecture**: 
+  - `src/js/systems/choiceModes/` directory with individual mode classes
+  - `BaseMode.js`: Abstract base class with common interface
+  - `DefaultMode.js`, `DirectionalMode.js`, `NumericMode.js`: Individual mode implementations
+  - `ModeRegistry.js`: Clean registration system for mode management
+  - `index.js`: Barrel export with pre-configured default registry
+- **Benefits achieved**: Separation of concerns, easy testing, easy extension, better maintainability
+- **Public API maintained**: `ChoiceModeManager` works exactly the same from the outside
+- **All 221 tests passing**: Confirmed refactoring maintains full functionality
+- **New test coverage**: 21 additional tests for the new mode classes
+
 ## NEXT REFACTORING TARGETS:
-- **Choice Mode Manager Refactoring** (Next Priority)
-  - Problem: `CHOICE_MODES` object is 180+ lines and will balloon out of control
-  - Solution: Hybrid class-based approach with separate mode files
-  - Create `src/js/systems/choiceModes/` directory structure
-  - Split into: `BaseMode.js`, `DefaultMode.js`, `DirectionalMode.js`, `NumericMode.js`, `ModeRegistry.js`
-  - Benefits: Separation of concerns, easy testing, easy extension, better maintainability
 - Review remaining JavaScript files for refactoring opportunities
 - Look for similar patterns that could benefit from the same architectural improvements
 - Focus on: `gameLogic.js`, `gameState.js`, `ui.js`, `renderer.js`
 
 ## TECHNICAL NOTES:
-- All tests passing (200/200)
+- All tests passing (221/221) - increased from 200 to 221 with new mode class tests
 - Clean separation between game orchestration and input handling
 - Menu actions separated from keyboard input actions
 - Constructor-based dependency injection instead of setter methods
 - Modular architecture with clear responsibilities
+- Class-based choice mode system with registry pattern
 
 ## PROJECT CONTEXT:
 - JavaScript roguelike game with comprehensive test suite
