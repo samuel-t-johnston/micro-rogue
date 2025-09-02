@@ -1,6 +1,7 @@
 {
   "leather_helm": {
     "name": "Leather Helm",
+    "symbol": "$",
     "equipment": {
       "slot": "head",
       "effect": "armor+1"
@@ -8,6 +9,7 @@
   },
   "leather_armor": {
     "name": "Leather Armor",
+    "symbol": "$",
     "equipment": {
       "slot": "body",
       "effect": "armor+1"
@@ -15,6 +17,7 @@
   },
   "leather_gloves": {
     "name": "Leather Gloves",
+    "symbol": "$",
     "equipment": {
       "slot": "hands",
       "effect": "armor+1"
@@ -22,6 +25,7 @@
   },
   "leather_tassets": {
     "name": "Leather Tassets",
+    "symbol": "$",
     "equipment": {
       "slot": "legs",
       "effect": "armor+1"
@@ -29,6 +33,7 @@
   },
   "leather_shoes": {
     "name": "Leather Shoes",
+    "symbol": "$",
     "equipment": {
       "slot": "feet",
       "effect": "armor+1"
@@ -36,6 +41,7 @@
   },
   "potion_vial": {
     "name": "Potion Vial",
+    "symbol": "$",
     "usable": {
       "use_effect": "currentHp+1"
     }

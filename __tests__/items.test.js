@@ -3,10 +3,16 @@ import itemsData from '../src/data/items/items.json';
 // Item validation rules and configurations
 const ITEM_RULES = {
   // Required properties for all items
-  required: ['name'],
+  required: ['name', 'symbol'],
   
   // Property-specific rules
   properties: {
+    symbol: {
+      type: 'string',
+      minLength: 1,
+      maxLength: 1,
+      description: 'Single character symbol for rendering'
+    },
     equipment: {
       required: ['slot', 'effect'],
       slot: {
@@ -40,10 +46,35 @@ function validateRequiredProperties(item, itemId) {
   return errors;
 }
 
+function validateBasicProperties(item, itemId) {
+  const errors = [];
+  
+  // Validate symbol property
+  if (item.hasOwnProperty('symbol')) {
+    const symbol = item.symbol;
+    const symbolRules = ITEM_RULES.properties.symbol;
+    
+    if (typeof symbol !== 'string') {
+      errors.push(`Item "${itemId}" has invalid symbol type. Expected string, got ${typeof symbol}`);
+    } else if (symbol.length < symbolRules.minLength) {
+      errors.push(`Item "${itemId}" has symbol that is too short. Expected at least ${symbolRules.minLength} character, got ${symbol.length}`);
+    } else if (symbol.length > symbolRules.maxLength) {
+      errors.push(`Item "${itemId}" has symbol that is too long. Expected at most ${symbolRules.maxLength} character, got ${symbol.length}`);
+    }
+  }
+  
+  return errors;
+}
+
 function validatePropertyRules(item, itemId) {
   const errors = [];
   
   for (const [propertyName, propertyRules] of Object.entries(ITEM_RULES.properties)) {
+    // Skip basic properties that are handled separately
+    if (propertyName === 'symbol') {
+      continue;
+    }
+    
     if (item.hasOwnProperty(propertyName)) {
       // Check required sub-properties
       for (const requiredSubProp of propertyRules.required) {
@@ -110,6 +141,14 @@ describe('Item Data Validation', () => {
         expect(item).toHaveProperty('name');
         expect(typeof item.name).toBe('string');
         expect(item.name.length).toBeGreaterThan(0);
+      });
+    });
+
+    test('all items should have a symbol property', () => {
+      Object.entries(itemsData).forEach(([itemId, item]) => {
+        expect(item).toHaveProperty('symbol');
+        expect(typeof item.symbol).toBe('string');
+        expect(item.symbol.length).toBe(1);
       });
     });
   });
@@ -214,6 +253,9 @@ describe('Item Data Validation', () => {
       Object.entries(itemsData).forEach(([itemId, item]) => {
         // Check required properties
         errors.push(...validateRequiredProperties(item, itemId));
+        
+        // Check basic properties
+        errors.push(...validateBasicProperties(item, itemId));
         
         // Check property-specific rules
         errors.push(...validatePropertyRules(item, itemId));

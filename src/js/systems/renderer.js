@@ -1,13 +1,51 @@
 import { CONFIG_SETTINGS } from '../utils/config.js';
 import { equals } from '../utils/coordinates.js';
+import { RENDER_SYMBOLS } from '../utils/symbols.js';
+
+// Helper function to find furniture at a specific position
+function findFurnitureAt(worldX, worldY, gameState) {
+  return gameState.currentLevel.furniture.find(
+    furniture => furniture.x === worldX && furniture.y === worldY
+  );
+}
+
+// Helper function to find item at a specific position
+function findItemAt(worldX, worldY, gameState) {
+  return gameState.currentLevel.items.find(
+    item => item.x === worldX && item.y === worldY
+  );
+}
+
+// Get the symbol to display for a specific tile
+function getTileSymbol(worldX, worldY, gameState) {
+  const playerPos = gameState.getPlayerPosition();
+  
+  // Check if this is the player position (highest priority)
+  if (equals({ x: worldX, y: worldY }, playerPos)) {
+    return RENDER_SYMBOLS.PLAYER;
+  }
+  
+  // Check if there's furniture at this position
+  const furniture = findFurnitureAt(worldX, worldY, gameState);
+  if (furniture) {
+    return furniture.getSymbol();
+  }
+  
+  // Check if there's an item at this position
+  const item = findItemAt(worldX, worldY, gameState);
+  if (item) {
+    // Get the item's symbol from the items data
+    const itemData = gameState.itemsData[item.itemId];
+    return itemData ? itemData.symbol : RENDER_SYMBOLS.ITEM;
+  }
+  
+  // Return the world tile symbol
+  return gameState.currentLevel.map[worldY][worldX];
+}
 
 // Game rendering function
 export function render(gameState, gameDisplay, viewportWidth = CONFIG_SETTINGS.viewportWidth, viewportHeight = CONFIG_SETTINGS.viewportHeight) {
   const playerPos = gameState.getPlayerPosition();
-  const worldMap = gameState.currentLevel.map;
-  const worldItems = gameState.currentLevel.items;
-  const worldFurniture = gameState.currentLevel.furniture;
-
   let displayText = '';
 
   // Calculate the top-left corner of the visible area
@@ -27,30 +65,9 @@ export function render(gameState, gameDisplay, viewportWidth = CONFIG_SETTINGS.v
         worldY >= 0 &&
         worldY < gameState.currentLevel.height
       ) {
-        // Check if this is the player position
-        if (equals({ x: worldX, y: worldY }, playerPos)) {
-          displayText += '@'; // Player character
-        } else {
-          // Check if there's furniture at this position
-          const furnitureAtPosition = worldFurniture.find(
-            furniture => furniture.x === worldX && furniture.y === worldY
-          );
-          if (furnitureAtPosition) {
-            displayText += furnitureAtPosition.getSymbol(); // Furniture symbol
-          } else {
-            // Check if there's an item at this position
-            const itemAtPosition = worldItems.find(
-              item => item.x === worldX && item.y === worldY
-            );
-            if (itemAtPosition) {
-              displayText += '$'; // Item symbol
-            } else {
-              displayText += worldMap[worldY][worldX]; // World tile
-            }
-          }
-        }
+        displayText += getTileSymbol(worldX, worldY, gameState);
       } else {
-        displayText += ' '; // Empty space outside world bounds
+        displayText += RENDER_SYMBOLS.EMPTY; // Empty space outside world bounds
       }
     }
     displayText += '\n'; // Add newline at end of each row
