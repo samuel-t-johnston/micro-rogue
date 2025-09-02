@@ -1,15 +1,12 @@
-import { initializeWorldAsync, placeRandomItems } from '../src/js/core/world.js';
+import { initializeWorld, placeRandomItems } from '../src/js/core/world.js';
 import { DungeonLevel } from '../src/js/core/gameState.js';
-import { GAME_CONFIG } from '../src/js/utils/config.js';
+import { CONFIG_SETTINGS } from '../src/js/utils/config.js';
 
 // Mock the config for testing
 jest.mock('../src/js/utils/config.js', () => ({
-  GAME_CONFIG: {
-    width: 51,
-    height: 13,
-    roomSize: 11,
-    playerStartX: 5,
-    playerStartY: 5,
+  CONFIG_SETTINGS: {
+    viewportWidth: 51,
+    viewportHeight: 13,
   },
 }));
 
@@ -46,15 +43,16 @@ jest.mock('../src/js/systems/levelLoader.js', () => ({
 }));
 
 describe('World Generation', () => {
-  describe('initializeWorldAsync', () => {
+  describe('initializeWorld', () => {
     it('should create world map with correct dimensions', async () => {
-      const worldMap = await initializeWorldAsync();
-      expect(worldMap).toHaveLength(11);
-      expect(worldMap[0]).toHaveLength(11);
+      const levelData = await initializeWorld();
+      expect(levelData.map).toHaveLength(11);
+      expect(levelData.map[0]).toHaveLength(11);
     });
 
     it('should create room with walls around perimeter', async () => {
-      const worldMap = await initializeWorldAsync();
+      const levelData = await initializeWorld();
+      const worldMap = levelData.map;
       
       // Check top and bottom walls
       for (let x = 0; x < 11; x++) {
@@ -70,7 +68,8 @@ describe('World Generation', () => {
     });
 
     it('should create floor tiles inside room', async () => {
-      const worldMap = await initializeWorldAsync();
+      const levelData = await initializeWorld();
+      const worldMap = levelData.map;
       
       // Check interior tiles are floor
       for (let y = 1; y < 10; y++) {
@@ -81,9 +80,9 @@ describe('World Generation', () => {
     });
 
     it('should only create room-sized map', async () => {
-      const worldMap = await initializeWorldAsync();
-      expect(worldMap).toHaveLength(11);
-      expect(worldMap[0]).toHaveLength(11);
+      const levelData = await initializeWorld();
+      expect(levelData.map).toHaveLength(11);
+      expect(levelData.map[0]).toHaveLength(11);
     });
   });
 
@@ -95,10 +94,10 @@ describe('World Generation', () => {
       };
       
       const dungeonLevel = new DungeonLevel(1, 11, 11);
-      dungeonLevel.playerPosition = { x: GAME_CONFIG.playerStartX, y: GAME_CONFIG.playerStartY }; // Player not in item placement area
+      dungeonLevel.playerPosition = { x: 5, y: 5 }; // Player not in item placement area
       
       // Initialize world first to set up loadedLevelData
-      await initializeWorldAsync();
+      await initializeWorld();
       
       placeRandomItems(itemsData, dungeonLevel);
       
@@ -110,7 +109,7 @@ describe('World Generation', () => {
       const dungeonLevel = new DungeonLevel(1, 11, 11);
       
       // Initialize world first to set up loadedLevelData
-      await initializeWorldAsync();
+      await initializeWorld();
       
       // Test with empty items data - should still place items from level data
       placeRandomItems({}, dungeonLevel);
@@ -129,7 +128,7 @@ describe('World Generation', () => {
       dungeonLevel.playerPosition = { x: 1, y: 1 }; // Player in item placement area
       
       // Initialize world first to set up loadedLevelData
-      await initializeWorldAsync();
+      await initializeWorld();
       
       placeRandomItems(itemsData, dungeonLevel);
       

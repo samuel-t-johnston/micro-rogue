@@ -1,21 +1,18 @@
 import { Character } from '../entities/character.js';
 import { create } from '../utils/coordinates.js';
-import { GAME_CONFIG } from '../utils/config.js';
+import { CONFIG_SETTINGS } from '../utils/config.js';
 import { Furniture } from '../entities/furniture.js';
 
 // Level-specific state
 export class DungeonLevel {
-  constructor(levelNumber, width, height) {
+  constructor(levelNumber, width, height, playerStartX = 5, playerStartY = 5) {
     this.levelNumber = levelNumber;
     this.width = width;
     this.height = height;
     this.map = []; // 2D array of tiles
     this.items = []; // Array of {x, y, itemId} objects
     this.furniture = []; // Array of Furniture instances
-    this.playerPosition = create(
-      GAME_CONFIG.playerStartX,
-      GAME_CONFIG.playerStartY
-    ); // Level-relative position
+    this.playerPosition = create(playerStartX, playerStartY); // Level-relative position
   }
 
   // Get item at specific position

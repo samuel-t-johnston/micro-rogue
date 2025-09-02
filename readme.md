@@ -22,11 +22,11 @@ The game is very early, but already includes a number of important features:
 0.0.x versions are laying basic groundwork for the game, with 0.1.0 being the first minor "release".
 
 ### 0.0.1 - Groundwork
- - Create GitHub repository
- - Add license
- - Add readme
- - Refactoring early work
- - Improved project structure
+ - Create GitHub repository ✓
+ - Add license ✓
+ - Add readme ✓
+ - Improved project structure ✓
+ - Refactor
 
 ### 0.0.2 - Persistence
  - Saving & loading

@@ -8,11 +8,11 @@
     "lint": "eslint src --ignore-pattern jest.setup.js",
     "lint:fix": "eslint src --fix --ignore-pattern jest.setup.js",
     "format": "prettier --write src/**/*.js src/**/*.html src/**/*.css",
-    "start": "python -m http.server 8000",
+    "start": "python -m http.server 8000 --directory ../src",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "docs": "npx jsdoc \"src\" -d docs"
+    "docs": "npx jsdoc -r src -d docs/jsdoc"
   },
   "keywords": [
     "roguelike",

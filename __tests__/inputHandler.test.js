@@ -14,28 +14,24 @@ describe('InputHandler', () => {
     
     mockGameDisplay = {};
     
-    mockGameActions = {
-      movePlayer: jest.fn(),
-      pickUpItem: jest.fn(),
-      useFurniture: jest.fn(),
-      startNewGame: jest.fn()
-    };
-
     mockChoiceModeManager = {
       handleInput: jest.fn(),
       getCurrentMode: jest.fn().mockReturnValue('default')
     };
 
-    inputHandler = new InputHandler(mockGameState, mockGameDisplay, mockGameActions, mockChoiceModeManager);
+    const mockUpdateGameUICallback = jest.fn();
+    inputHandler = new InputHandler(mockGameState, mockGameDisplay, mockChoiceModeManager, mockUpdateGameUICallback);
   });
 
   describe('Constructor', () => {
     test('should create InputHandler with correct properties', () => {
       expect(inputHandler.gameState).toBe(mockGameState);
       expect(inputHandler.gameDisplay).toBe(mockGameDisplay);
-      expect(inputHandler.gameActions).toBe(mockGameActions);
       expect(inputHandler.choiceModeManager).toBe(mockChoiceModeManager);
       expect(inputHandler.isInitialized).toBe(false);
+      expect(inputHandler.gameActions).toBeDefined();
+      expect(typeof inputHandler.gameActions.movePlayer).toBe('function');
+      expect(typeof inputHandler.gameActions.pickUpItem).toBe('function');
     });
   });
 
@@ -64,7 +60,7 @@ describe('InputHandler', () => {
       inputHandler.init();
       inputHandler.init();
 
-      expect(addEventListenerSpy).toHaveBeenCalledTimes(2);
+      expect(addEventListenerSpy).toHaveBeenCalledTimes(1); // Only keydown event listener
 
       addEventListenerSpy.mockRestore();
       getElementByIdSpy.mockRestore();
@@ -87,7 +83,7 @@ describe('InputHandler', () => {
         'w',
         mockGameState,
         mockGameDisplay,
-        mockGameActions
+        inputHandler.gameActions
       );
     });
 
@@ -108,7 +104,7 @@ describe('InputHandler', () => {
         'x',
         mockGameState,
         mockGameDisplay,
-        mockGameActions
+        inputHandler.gameActions
       );
 
       consoleSpy.mockRestore();
@@ -122,6 +118,8 @@ describe('InputHandler', () => {
       expect(inputHandler.gameState).toBe(newGameState);
     });
   });
+
+
 
   describe('destroy', () => {
     test('should mark as not initialized', () => {

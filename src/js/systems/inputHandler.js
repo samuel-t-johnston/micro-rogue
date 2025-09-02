@@ -1,12 +1,41 @@
 // Input handler class for managing user input
+import { movePlayer, pickUpItem, getAvailableItems, pickUpItemByIndex, useFurniture } from '../core/gameLogic.js';
+
 export class InputHandler {
-  constructor(gameState, gameDisplay, gameActions, choiceModeManager) {
+  constructor(gameState, gameDisplay, choiceModeManager, updateGameUICallback) {
     this.gameState = gameState;
     this.gameDisplay = gameDisplay;
-    this.gameActions = gameActions;
     this.choiceModeManager = choiceModeManager;
+    this.updateGameUICallback = updateGameUICallback;
     this.isInitialized = false;
     this.handleKeyDown = this.handleKeyDown.bind(this);
+    
+    // Create game actions here instead of receiving them
+    this.gameActions = this.createGameActions();
+  }
+
+  createGameActions() {
+    return {
+      movePlayer: (dx, dy) => {
+        movePlayer(dx, dy, this.gameState, this.gameDisplay, this.choiceModeManager);
+      },
+
+      pickUpItem: () => {
+        pickUpItem(this.gameState, this.gameDisplay, this.choiceModeManager);
+      },
+
+      getAvailableItems: () => {
+        return getAvailableItems(this.gameState);
+      },
+
+      pickUpItemByIndex: index => {
+        return pickUpItemByIndex(index, this.gameState, this.gameDisplay, this.choiceModeManager);
+      },
+
+      useFurniture: (dx, dy) => {
+        return useFurniture(dx, dy, this.gameState, this.gameDisplay, this.updateGameUICallback);
+      },
+    };
   }
 
   init() {
@@ -15,11 +44,6 @@ export class InputHandler {
     }
 
     document.addEventListener('keydown', this.handleKeyDown);
-
-    // New game menu listener
-    document.addEventListener('newGameRequested', () => {
-      this.gameActions.startNewGame();
-    });
 
     this.isInitialized = true;
   }

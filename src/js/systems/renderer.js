@@ -1,8 +1,8 @@
-import { GAME_CONFIG } from '../utils/config.js';
+import { CONFIG_SETTINGS } from '../utils/config.js';
 import { equals } from '../utils/coordinates.js';
 
 // Game rendering function
-export function render(gameState, gameDisplay) {
+export function render(gameState, gameDisplay, viewportWidth = CONFIG_SETTINGS.viewportWidth, viewportHeight = CONFIG_SETTINGS.viewportHeight) {
   const playerPos = gameState.getPlayerPosition();
   const worldMap = gameState.currentLevel.map;
   const worldItems = gameState.currentLevel.items;
@@ -11,21 +11,21 @@ export function render(gameState, gameDisplay) {
   let displayText = '';
 
   // Calculate the top-left corner of the visible area
-  const viewX = playerPos.x - Math.floor(GAME_CONFIG.width / 2);
-  const viewY = playerPos.y - Math.floor(GAME_CONFIG.height / 2);
+  const viewX = playerPos.x - Math.floor(viewportWidth / 2);
+  const viewY = playerPos.y - Math.floor(viewportHeight / 2);
 
   // Render the visible area
-  for (let y = 0; y < GAME_CONFIG.height; y++) {
-    for (let x = 0; x < GAME_CONFIG.width; x++) {
+  for (let y = 0; y < viewportHeight; y++) {
+    for (let x = 0; x < viewportWidth; x++) {
       const worldX = viewX + x;
       const worldY = viewY + y;
 
       // Check if this position is within the world bounds
       if (
         worldX >= 0 &&
-        worldX < GAME_CONFIG.width &&
+        worldX < gameState.currentLevel.width &&
         worldY >= 0 &&
-        worldY < GAME_CONFIG.height
+        worldY < gameState.currentLevel.height
       ) {
         // Check if this is the player position
         if (equals({ x: worldX, y: worldY }, playerPos)) {

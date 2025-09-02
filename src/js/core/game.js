@@ -13,55 +13,23 @@ import { GameState } from './gameState.js';
 import { InputHandler } from '../systems/inputHandler.js';
 import { ChoiceModeManager } from '../systems/choiceModeManager.js';
 
-// Game state
 let gameState = new GameState();
-
-// Game display element
 const gameDisplay = document.getElementById('gameDisplay');
 
-// UI update function
 function updateGameUI() {
   if (gameState && gameState.player) {
     updateUI(gameState, gameState.player, choiceModeManager);
   }
 }
 
-// Choice mode manager
 const choiceModeManager = new ChoiceModeManager(updateGameUI);
-
-// Game actions object to pass to InputHandler
-const gameActions = {
-  movePlayer: (dx, dy) => {
-    movePlayer(dx, dy, gameState, gameDisplay, choiceModeManager);
-  },
-
-  pickUpItem: () => {
-    pickUpItem(gameState, gameDisplay, choiceModeManager);
-  },
-
-  getAvailableItems: () => {
-    return getAvailableItems(gameState);
-  },
-
-  pickUpItemByIndex: index => {
-    return pickUpItemByIndex(index, gameState, gameDisplay, choiceModeManager);
-  },
-
-  useFurniture: (dx, dy) => {
-    return useFurniture(dx, dy, gameState, gameDisplay, updateGameUI);
-  },
-
-  startNewGame: async () => {
-    await startNewGame();
-  },
-};
 
 // Input handler
 const inputHandler = new InputHandler(
   gameState,
   gameDisplay,
-  gameActions,
-  choiceModeManager
+  choiceModeManager,
+  updateGameUI
 );
 
 // Start new game function
@@ -76,6 +44,16 @@ async function startNewGame() {
   updateUI(gameState, gameState.player, choiceModeManager);
 }
 
+// Add menu event listeners
+function addMenuEventListeners() {
+  // Handle new game requests from the menu
+  document.addEventListener('newGameRequested', () => {
+    startNewGame().catch(console.error);
+  });
+  
+  // Future menu actions can go here
+}
+
 // Start the game when page loads
 window.addEventListener('load', () => {
   // Initialize input handler
@@ -83,6 +61,9 @@ window.addEventListener('load', () => {
 
   // Initialize UI
   initUI();
+
+  // Add menu event listeners
+  addMenuEventListeners();
 
   // Start the game
   startNewGame().catch(console.error);

@@ -1,17 +1,17 @@
 import {
-  initializeWorldAsync,
+  initializeWorld,
   placeRandomItems,
   placeRandomFurniture,
 } from './world.js';
 import { render } from '../systems/renderer.js';
 import { addMessage, updateUI } from '../ui/ui.js';
-import { GameState } from './gameState.js';
+import { GameState, DungeonLevel } from './gameState.js';
 import { addDelta, toString } from '../utils/coordinates.js';
 
 // Load items from JSON file
 export async function loadItems() {
   try {
-    const response = await fetch('src/data/items/items.json');
+    const response = await fetch('/data/items/items.json');
     const itemsData = await response.json();
     console.log('Items loaded:', itemsData);
     return itemsData;
@@ -24,7 +24,7 @@ export async function loadItems() {
 // Load furniture from JSON file
 export async function loadFurniture() {
   try {
-    const response = await fetch('src/data/furniture/furniture.json');
+    const response = await fetch('/data/furniture/furniture.json');
     const furnitureData = await response.json();
     console.log('Furniture loaded:', furnitureData);
     return furnitureData;
@@ -110,7 +110,20 @@ export async function initGame() {
   // Load items, furniture and initialize world
   gameState.itemsData = await loadItems();
   gameState.furnitureData = await loadFurniture();
-  gameState.currentLevel.map = await initializeWorldAsync();
+  const levelData = await initializeWorld();
+  
+  // Create new level with proper dimensions and player start position
+  gameState.currentLevel = new DungeonLevel(
+    1, 
+    levelData.width, 
+    levelData.height, 
+    levelData.playerStart[0], 
+    levelData.playerStart[1]
+  );
+  
+  // Set the map data
+  gameState.currentLevel.map = levelData.map;
+  
   placeRandomItems(gameState.itemsData, gameState.currentLevel);
   placeRandomFurniture(
     gameState.furnitureData,

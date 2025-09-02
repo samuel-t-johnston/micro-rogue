@@ -1,33 +1,19 @@
-import { GAME_CONFIG } from '../utils/config.js';
+import { CONFIG_SETTINGS } from '../utils/config.js';
 import { create, equals } from '../utils/coordinates.js';
 import { LevelLoader } from '../systems/levelLoader.js';
 
-// Async version for v2 loading
-export async function initializeWorldAsync() {
-  return await initializeWorldV2();
-}
-
-// Version 2: File-based world loading
-async function initializeWorldV2() {
+// File-based world loading
+export async function initializeWorld() {
   try {
     const levelLoader = new LevelLoader();
     const levelData = await levelLoader.loadLevel(
-      './src/data/levels/1-test-dungeon.json'
+      '/data/levels/1-test-dungeon.json'
     );
-
-    // Update GAME_CONFIG to match the loaded level dimensions
-    GAME_CONFIG.width = levelData.width;
-    GAME_CONFIG.height = levelData.height;
-    GAME_CONFIG.roomSize = Math.max(levelData.width, levelData.height);
-
-    // Update player starting position from level data
-    GAME_CONFIG.playerStartX = levelData.playerStart[0];
-    GAME_CONFIG.playerStartY = levelData.playerStart[1];
 
     // Store the loaded level data for later use
     window.loadedLevelData = levelData;
 
-    return levelData.map;
+    return levelData;
   } catch (error) {
     console.error('Failed to load level file:', error);
   }
