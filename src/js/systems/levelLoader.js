@@ -2,11 +2,49 @@
 export class LevelLoader {
   constructor() {
     this.supportedTypes = ['fixed_layout'];
+    this.furnitureData = null;
+    this.symbolToFurnitureType = null;
+  }
+
+  // Load furniture data and create symbol lookup
+  async loadFurnitureData() {
+    if (this.furnitureData) {
+      return; // Already loaded
+    }
+
+    try {
+      const response = await fetch('/data/furniture/furniture.json');
+      if (!response.ok) {
+        throw new Error(
+          `Failed to load furniture data: ${response.status} ${response.statusText}`
+        );
+      }
+
+      this.furnitureData = await response.json();
+      this.createSymbolLookup();
+    } catch (error) {
+      console.error('Error loading furniture data:', error);
+      throw error;
+    }
+  }
+
+  // Create a lookup map from symbols to furniture types
+  createSymbolLookup() {
+    this.symbolToFurnitureType = new Map();
+    
+    for (const [furnitureType, furnitureDef] of Object.entries(this.furnitureData)) {
+      if (furnitureDef.symbol) {
+        this.symbolToFurnitureType.set(furnitureDef.symbol, furnitureType);
+      }
+    }
   }
 
   // Load a level from a JSON file
   async loadLevel(levelPath) {
     try {
+      // Ensure furniture data is loaded first
+      await this.loadFurnitureData();
+
       const response = await fetch(levelPath);
       if (!response.ok) {
         throw new Error(
@@ -102,8 +140,7 @@ export class LevelLoader {
     return items;
   }
 
-  // Parse furniture from grid symbols
-  //TODO: Convert to use the Furniture class - import { Furniture } from './furniture.js';
+  // Parse furniture from grid symbols using furniture data
   parseFurniture(gridArray, width, height) {
     const furniture = [];
 
@@ -112,30 +149,14 @@ export class LevelLoader {
       for (let x = 0; x < width; x++) {
         const symbol = gridArray[y][x];
 
-        // Check if this symbol corresponds to furniture
-        if (symbol === 'O') {
-          // Boulder
+        // Check if this symbol corresponds to furniture using our lookup
+        const furnitureType = this.symbolToFurnitureType.get(symbol);
+        if (furnitureType) {
           furniture.push({
-            type: 'boulder',
+            type: furnitureType,
             x,
             y,
-            symbol: 'O',
-          });
-        } else if (symbol === '+') {
-          // Door
-          furniture.push({
-            type: 'door',
-            x,
-            y,
-            symbol: '+',
-          });
-        } else if (symbol === '=') {
-          // Heavy Chest
-          furniture.push({
-            type: 'heavy_chest',
-            x,
-            y,
-            symbol: '=',
+            symbol: symbol,
           });
         }
       }
