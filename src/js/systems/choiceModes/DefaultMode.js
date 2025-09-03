@@ -19,7 +19,7 @@ export class DefaultMode extends BaseMode {
     ];
   }
 
-  handleInput(key, context, gameState, gameDisplay, gameActions, modeManager) {
+  handleInput(key, _context, _gameState, _gameDisplay, gameActions, modeManager) {
     switch (key.toLowerCase()) {
       case 'w':
       case 'arrowup':
@@ -66,11 +66,11 @@ export class DefaultMode extends BaseMode {
     return true;
   }
 
-  getDisplayText(context) {
+  getDisplayText(_context) {
     return 'What would you like to do?';
   }
 
-  getControlInstructions(context) {
+  getControlInstructions(_context) {
     return [
       { label: 'Movement:', keys: 'WASD or Arrow Keys' },
       { label: 'P:', keys: 'Pick up' },

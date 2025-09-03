@@ -13,7 +13,8 @@ module.exports = {
     sourceType: 'module'
   },
   rules: {
-    'no-unused-vars': 'warn',
+    //'no-unused-vars': 'warn',
+    'no-unused-vars': ['warn', { 'argsIgnorePattern': '^_' }],
     'no-console': 'off', // Allow console.log for debugging
     'prefer-const': 'error',
     'no-var': 'error',

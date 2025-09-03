@@ -7,7 +7,7 @@ export class NumericMode extends BaseMode {
     this.validKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'escape'];
   }
 
-  handleInput(key, context, gameState, gameDisplay, gameActions, modeManager) {
+  handleInput(key, context, _gameState, _gameDisplay, gameActions, modeManager) {
     if (key.toLowerCase() === 'escape') {
       modeManager.resetToDefault();
       return true;
@@ -37,7 +37,7 @@ export class NumericMode extends BaseMode {
     return 'Choose item';
   }
 
-  getControlInstructions(context) {
+  getControlInstructions(_context) {
     return [
       { label: 'Choose item:', keys: '0-9' },
       { label: 'ESC:', keys: 'Cancel' }

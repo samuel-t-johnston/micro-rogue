@@ -21,7 +21,7 @@ export class DirectionalMode extends BaseMode {
     ];
   }
 
-  handleInput(key, context, gameState, gameDisplay, gameActions, modeManager) {
+  handleInput(key, context, _gameState, _gameDisplay, gameActions, modeManager) {
     const directionMap = {
       w: { dx: 0, dy: -1 },
       arrowup: { dx: 0, dy: -1 },
@@ -67,7 +67,7 @@ export class DirectionalMode extends BaseMode {
     return 'Choose direction';
   }
 
-  getControlInstructions(context) {
+  getControlInstructions(_context) {
     return [
       { label: 'Choose direction:', keys: 'WASD, QEZC, or Arrow Keys' },
       { label: 'ESC:', keys: 'Cancel' }

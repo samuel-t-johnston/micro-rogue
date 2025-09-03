@@ -1,12 +1,5 @@
 // Import modules
-import {
-  movePlayer,
-  initGame,
-  pickUpItem,
-  useFurniture,
-  getAvailableItems,
-  pickUpItemByIndex,
-} from './gameLogic.js';
+import { initGame } from './gameLogic.js';
 import { updateUI, initUI } from '../ui/ui.js';
 import { render } from '../systems/renderer.js';
 import { GameState } from './gameState.js';
