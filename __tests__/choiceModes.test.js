@@ -29,6 +29,11 @@ describe('Choice Modes', () => {
       const baseMode = new BaseMode();
       expect(baseMode.getDisplayText(null)).toBeNull();
     });
+
+    test('should return empty array for getControlInstructions by default', () => {
+      const baseMode = new BaseMode();
+      expect(baseMode.getControlInstructions(null)).toEqual([]);
+    });
   });
 
   describe('DefaultMode', () => {
@@ -96,6 +101,20 @@ describe('Choice Modes', () => {
       
       expect(mockModeManager.setMode).toHaveBeenCalledWith('directional', { action: 'use' });
     });
+
+    test('should provide display text', () => {
+      const displayText = defaultMode.getDisplayText();
+      expect(displayText).toBe('Game Controls');
+    });
+
+    test('should provide control instructions', () => {
+      const instructions = defaultMode.getControlInstructions();
+      expect(instructions).toEqual([
+        { label: 'Movement:', keys: 'WASD or Arrow Keys' },
+        { label: 'P:', keys: 'Pick up' },
+        { label: 'U:', keys: 'Use something nearby' }
+      ]);
+    });
   });
 
   describe('DirectionalMode', () => {
@@ -137,7 +156,7 @@ describe('Choice Modes', () => {
 
     test('should provide display text for use action', () => {
       const displayText = directionalMode.getDisplayText({ action: 'use' });
-      expect(displayText).toBe('Use - choose direction (WASD/QEZC/arrows) or ESC to cancel');
+      expect(displayText).toBe('Use - What would you like to use?');
     });
   });
 
@@ -179,7 +198,7 @@ describe('Choice Modes', () => {
 
     test('should provide display text for pickup action', () => {
       const displayText = numericMode.getDisplayText({ action: 'pickup' });
-      expect(displayText).toBe('Pick up - choose item (0-9) or ESC to cancel');
+      expect(displayText).toBe('Pick up - What would you like to pick up?');
     });
   });
 

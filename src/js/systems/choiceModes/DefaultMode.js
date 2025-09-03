@@ -65,4 +65,16 @@ export class DefaultMode extends BaseMode {
     }
     return true;
   }
+
+  getDisplayText(context) {
+    return 'What would you like to do?';
+  }
+
+  getControlInstructions(context) {
+    return [
+      { label: 'Movement:', keys: 'WASD or Arrow Keys' },
+      { label: 'P:', keys: 'Pick up' },
+      { label: 'U:', keys: 'Use something nearby' }
+    ];
+  }
 }

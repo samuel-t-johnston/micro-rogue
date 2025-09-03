@@ -1,3 +1,7 @@
+import { CONFIG_SETTINGS } from '../utils/config.js';
+
+const MAX_MESSAGES = CONFIG_SETTINGS.maxMessages;
+
 // UI management functions
 export function updateInventoryUI(player) {
   // Update equipment slots
@@ -53,67 +57,69 @@ export function updateControlsUI(choiceModeManager) {
   const controlsElement = document.getElementById('controls');
 
   if (choiceModeManager.isInSpecialMode()) {
-    const currentMode = choiceModeManager.getCurrentMode();
+    // Get display text and control instructions from the current mode
+    const displayText = choiceModeManager.getModeDisplayText();
+    const controlInstructions = choiceModeManager.getModeControlInstructions();
     const context = choiceModeManager.getActionContext();
-
-    if (currentMode === 'directional') {
-      controlsElement.innerHTML = `
+    
+    if (displayText) {
+      // Build the controls HTML using the mode's display text and instructions
+      let controlsHTML = `
         <h3>Controls</h3>
         <div class="control-mode">
-          <strong>Use - What would you like to use?</strong>
-          <div class="control-group">
-            <strong>Choose direction:</strong> WASD, QEZC, or Arrow Keys
-          </div>
-          <div class="control-group">
-            <strong>ESC:</strong> Cancel
-          </div>
-        </div>
+          <strong>${displayText}</strong>
       `;
-    } else if (
-      currentMode === 'numeric' &&
-      context &&
-      context.action === 'pickup'
-    ) {
-      // Build the item list for numeric mode
-      let itemList = '';
-      if (context.items && context.items.length > 0) {
+      
+      // Add control instructions from the mode
+      controlInstructions.forEach(instruction => {
+        controlsHTML += `
+          <div class="control-group">
+            <strong>${instruction.label}</strong> ${instruction.keys}
+          </div>
+        `;
+      });
+      
+      // Add context-specific information if available
+      //TODO: Find a better way to handle injecting context-specific information into the controls HTML.
+      if (context && context.action === 'pickup' && context.items) {
+        controlsHTML += '<div class="control-group"><strong>Available items:</strong></div>';
         context.items.forEach((item, index) => {
           if (item.source === 'ground') {
-            itemList += `<div class="control-group">${index}. ${item.name}</div>`;
+            controlsHTML += `<div class="control-group">${index}. ${item.name}</div>`;
           } else if (item.source === 'container') {
-            itemList += `<div class="control-group">${index}. ${item.name} (${item.containerName})</div>`;
+            controlsHTML += `<div class="control-group">${index}. ${item.name} (${item.containerName})</div>`;
           }
         });
       }
-
-      controlsElement.innerHTML = `
-        <h3>Controls</h3>
-        <div class="control-mode">
-          <strong>Pick up - What would you like to pick up?</strong>
-          ${itemList}
-          <div class="control-group">
-            <strong>Choose item:</strong> 0-9
-          </div>
-          <div class="control-group">
-            <strong>ESC:</strong> Cancel
-          </div>
-        </div>
-      `;
+      
+      controlsHTML += '</div>';
+      controlsElement.innerHTML = controlsHTML;
     }
   } else {
-    // Default controls
-    controlsElement.innerHTML = `
-      <h3>Controls</h3>
-      <div class="control-group">
-        <strong>Movement:</strong> WASD or Arrow Keys
-      </div>
-      <div class="control-group">
-        <strong>P:</strong> Pick up
-      </div>
-      <div class="control-group">
-        <strong>U:</strong> Use something nearby
-      </div>
-    `;
+    // Get display text and control instructions from default mode
+    const displayText = choiceModeManager.getModeDisplayText();
+    const controlInstructions = choiceModeManager.getModeControlInstructions();
+    
+    if (displayText) {
+      // Build the controls HTML using the default mode's display text and instructions
+      let controlsHTML = `
+        <h3>Controls</h3>
+        <div class="control-mode">
+          <strong>${displayText}</strong>
+      `;
+      
+      // Add control instructions from the default mode
+      controlInstructions.forEach(instruction => {
+        controlsHTML += `
+          <div class="control-group">
+            <strong>${instruction.label}</strong> ${instruction.keys}
+          </div>
+        `;
+      });
+      
+      controlsHTML += '</div>';
+      controlsElement.innerHTML = controlsHTML;
+    }
   }
 }
 
@@ -157,7 +163,7 @@ export function addMessage(message, gameState, player) {
   const turnNumber = gameState.turns;
   const messageWithTurn = `[${turnNumber}] ${message}`;
   gameState.messages.unshift(messageWithTurn); // Add to beginning instead of end
-  if (gameState.messages.length > 10) {
+  if (gameState.messages.length > MAX_MESSAGES) {
     gameState.messages.pop(); // Remove from end instead of beginning
   }
   updateUI(gameState, player);

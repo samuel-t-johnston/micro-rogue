@@ -28,6 +28,15 @@ export class BaseMode {
   }
 
   /**
+   * Get control instructions for this mode
+   * @param {Object} context - The action context
+   * @returns {Array} - Array of {label, keys} objects
+   */
+  getControlInstructions(context) {
+    return [];
+  }
+
+  /**
    * Check if a key is valid for this mode
    * @param {string} key - The key to check
    * @returns {boolean} - Whether the key is valid

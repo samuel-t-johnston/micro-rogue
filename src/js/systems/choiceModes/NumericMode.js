@@ -32,8 +32,15 @@ export class NumericMode extends BaseMode {
 
   getDisplayText(context) {
     if (context && context.action === 'pickup') {
-      return 'Pick up - choose item (0-9) or ESC to cancel';
+      return 'Pick up - What would you like to pick up?';
     }
-    return 'Choose item (0-9) or ESC to cancel';
+    return 'Choose item';
+  }
+
+  getControlInstructions(context) {
+    return [
+      { label: 'Choose item:', keys: '0-9' },
+      { label: 'ESC:', keys: 'Cancel' }
+    ];
   }
 }

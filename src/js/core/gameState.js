@@ -1,6 +1,5 @@
 import { Character } from '../entities/character.js';
 import { create } from '../utils/coordinates.js';
-import { CONFIG_SETTINGS } from '../utils/config.js';
 import { Furniture } from '../entities/furniture.js';
 
 // Level-specific state

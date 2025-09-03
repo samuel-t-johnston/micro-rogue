@@ -220,15 +220,19 @@ describe('UI Functions', () => {
       expect(mockGameState.turns).toBe(initialTurns); // Turns are not incremented by addMessage
     });
 
-    test('should keep only last 10 messages', () => {
-      // Add 15 messages
-      for (let i = 0; i < 15; i++) {
+    test('should keep only last 30 messages', () => {
+      // Reset turn count to ensure consistent test results
+      mockGameState.turns = 25;
+      mockGameState.messages = [];
+      
+      // Add 35 messages (more than the max of 30)
+      for (let i = 0; i < 35; i++) {
         addMessage(`Message ${i}`, mockGameState, mockPlayer);
       }
 
-      expect(mockGameState.messages).toHaveLength(10);
-      expect(mockGameState.messages[0]).toBe('[25] Message 14'); // First message should be the last one added
-      expect(mockGameState.messages[9]).toBe('[25] Message 5'); // Last message should be the 6th one added
+      expect(mockGameState.messages).toHaveLength(30);
+      expect(mockGameState.messages[0]).toBe('[25] Message 34'); // First message should be the last one added
+      expect(mockGameState.messages[29]).toBe('[25] Message 5'); // Last message should be the 6th one added
     });
 
     test('should update UI after adding message', () => {

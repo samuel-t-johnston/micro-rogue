@@ -87,4 +87,19 @@ export class ChoiceModeManager {
 
     return this.currentModeInstance.getDisplayText(this.actionContext);
   }
+
+  // Get control instructions for current mode
+  getModeControlInstructions() {
+    // Get or create the current mode instance
+    if (!this.currentModeInstance) {
+      try {
+        this.currentModeInstance = this.modeRegistry.getMode(this.currentMode);
+      } catch (error) {
+        console.error(`Unknown choice mode: ${this.currentMode}`, error);
+        return [];
+      }
+    }
+
+    return this.currentModeInstance.getControlInstructions(this.actionContext);
+  }
 }

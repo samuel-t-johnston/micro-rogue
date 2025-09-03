@@ -69,18 +69,18 @@ describe('ChoiceModeManager', () => {
   });
 
   describe('getModeDisplayText', () => {
-    test('should return null for default mode', () => {
-      expect(choiceModeManager.getModeDisplayText()).toBeNull();
+    test('should return display text for default mode', () => {
+      expect(choiceModeManager.getModeDisplayText()).toBe('Game Controls');
     });
 
     test('should return display text for directional mode with use context', () => {
       choiceModeManager.setMode('directional', { action: 'use' });
-      expect(choiceModeManager.getModeDisplayText()).toBe('Use - choose direction (WASD/QEZC/arrows) or ESC to cancel');
+      expect(choiceModeManager.getModeDisplayText()).toBe('Use - What would you like to use?');
     });
 
     test('should return display text for directional mode without context', () => {
       choiceModeManager.setMode('directional');
-      expect(choiceModeManager.getModeDisplayText()).toBe('Choose direction (WASD/QEZC/arrows) or ESC to cancel');
+      expect(choiceModeManager.getModeDisplayText()).toBe('Choose direction');
     });
   });
 
@@ -281,7 +281,7 @@ describe('ChoiceModeManager', () => {
 
     test('should provide display text for pickup action', () => {
       const displayText = choiceModeManager.getModeDisplayText();
-      expect(displayText).toBe('Pick up - choose item (0-9) or ESC to cancel');
+      expect(displayText).toBe('Pick up - What would you like to pick up?');
     });
   });
 

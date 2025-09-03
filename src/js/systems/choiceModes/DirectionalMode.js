@@ -62,8 +62,15 @@ export class DirectionalMode extends BaseMode {
 
   getDisplayText(context) {
     if (context && context.action === 'use') {
-      return 'Use - choose direction (WASD/QEZC/arrows) or ESC to cancel';
+      return 'Use - What would you like to use?';
     }
-    return 'Choose direction (WASD/QEZC/arrows) or ESC to cancel';
+    return 'Choose direction';
+  }
+
+  getControlInstructions(context) {
+    return [
+      { label: 'Choose direction:', keys: 'WASD, QEZC, or Arrow Keys' },
+      { label: 'ESC:', keys: 'Cancel' }
+    ];
   }
 }

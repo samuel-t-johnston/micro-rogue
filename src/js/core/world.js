@@ -1,4 +1,3 @@
-import { CONFIG_SETTINGS } from '../utils/config.js';
 import { create, equals } from '../utils/coordinates.js';
 import { LevelLoader } from '../systems/levelLoader.js';
 
