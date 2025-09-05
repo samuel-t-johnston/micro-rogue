@@ -104,7 +104,7 @@ describe('Choice Modes', () => {
 
     test('should provide display text', () => {
       const displayText = defaultMode.getDisplayText();
-      expect(displayText).toBe('Game Controls');
+      expect(displayText).toBe('What would you like to do?');
     });
 
     test('should provide control instructions', () => {

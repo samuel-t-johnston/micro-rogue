@@ -70,7 +70,7 @@ describe('ChoiceModeManager', () => {
 
   describe('getModeDisplayText', () => {
     test('should return display text for default mode', () => {
-      expect(choiceModeManager.getModeDisplayText()).toBe('Game Controls');
+      expect(choiceModeManager.getModeDisplayText()).toBe('What would you like to do?');
     });
 
     test('should return display text for directional mode with use context', () => {

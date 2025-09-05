@@ -188,10 +188,53 @@ body {
 }
 
 .controls h3,
-.inventory-content h3 {
+.inventory-section h3 {
   color: #00ff00;
   margin-bottom: 10px;
   font-size: 1.1em;
+}
+
+/* Tab styling */
+.tab-container {
+  display: flex;
+  border-bottom: 2px solid #006400;
+  margin-bottom: 15px;
+}
+
+.tab-button {
+  background: transparent;
+  border: none;
+  color: #e8e8e8;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  flex: 1;
+}
+
+.tab-button:hover {
+  background: rgba(0, 255, 0, 0.1);
+  color: #00ff00;
+}
+
+.tab-button.active {
+  color: #00ff00;
+  border-bottom-color: #00ff00;
+  background: rgba(0, 255, 0, 0.05);
+}
+
+.tab-content {
+  position: relative;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
 }
 
 .control-mode {
