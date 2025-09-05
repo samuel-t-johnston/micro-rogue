@@ -7,6 +7,8 @@ import { render } from '../systems/renderer.js';
 import { addMessage, updateUI } from '../ui/ui.js';
 import { GameState, DungeonLevel } from './gameState.js';
 import { addDelta, toString } from '../utils/coordinates.js';
+import { saveSystem } from '../systems/saveSystem.js';
+import { CONFIG_SETTINGS } from '../utils/config.js';
 
 // Load items from JSON file
 export async function loadItems() {
@@ -63,6 +65,9 @@ export function movePlayer(
   gameState.setPlayerPosition(newPos.x, newPos.y);
   gameState.turns++;
   addMessage(`Moved to ${toString(newPos)}`, gameState, gameState.player);
+
+  // Check for auto-save
+  checkAutoSave(gameState);
 
   // Check if there's an item at the new position
   const itemAtPosition = gameState.currentLevel.getItemAt(newPos.x, newPos.y);
@@ -446,4 +451,43 @@ export function useFurniture(
   );
   if (onUIUpdate) onUIUpdate();
   return false;
+}
+
+// Save game state to localStorage
+export function saveGame(gameState) {
+  const success = saveSystem.saveGame(gameState);
+  if (success) {
+    addMessage('Game saved!', gameState, gameState.player);
+  } else {
+    addMessage('Failed to save game!', gameState, gameState.player);
+  }
+  return success;
+}
+
+// Load game state from localStorage
+export function loadGame() {
+  const loadedState = saveSystem.loadGame();
+  if (loadedState) {
+    // Load items and furniture data
+    return loadedState;
+  }
+  return null;
+}
+
+// Check if save data exists
+export function hasSaveData() {
+  return saveSystem.hasSaveData();
+}
+
+// Delete save data
+export function deleteSave() {
+  saveSystem.deleteSave();
+}
+
+// Auto-save check (call this after each turn)
+export function checkAutoSave(gameState) {
+  if (gameState.turns > 0 && gameState.turns % CONFIG_SETTINGS.saveFrequency === 0) {
+    saveSystem.saveGame(gameState);
+    addMessage('Game auto-saved!', gameState, gameState.player);
+  }
 }

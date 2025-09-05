@@ -4,7 +4,7 @@ describe('Character', () => {
   let character;
 
   beforeEach(() => {
-    character = new Character(3, 2, 4, 1, 5);
+    character = new Character(3, 2, 4, 1, 5, '@', 5, 5, false);
   });
 
   describe('Constructor', () => {
@@ -14,6 +14,10 @@ describe('Character', () => {
       expect(character.agility).toBe(4);
       expect(character.control).toBe(1);
       expect(character.hpBonus).toBe(5);
+      expect(character.symbol).toBe('@');
+      expect(character.x).toBe(5);
+      expect(character.y).toBe(5);
+      expect(character.isPlayer).toBe(false);
     });
 
     test('should calculate max HP correctly', () => {
@@ -29,6 +33,10 @@ describe('Character', () => {
       expect(defaultCharacter.agility).toBe(1);
       expect(defaultCharacter.control).toBe(1);
       expect(defaultCharacter.hpBonus).toBe(0);
+      expect(defaultCharacter.symbol).toBe('@');
+      expect(defaultCharacter.x).toBe(0);
+      expect(defaultCharacter.y).toBe(0);
+      expect(defaultCharacter.isPlayer).toBe(false);
       expect(defaultCharacter.maxHp).toBe(2); // (1 * 2) + 0
     });
 
@@ -81,6 +89,22 @@ describe('Character', () => {
 
       character.currentHp = 1;
       expect(character.isAlive()).toBe(true);
+    });
+
+    test('should move character to new position', () => {
+      expect(character.x).toBe(5);
+      expect(character.y).toBe(5);
+      
+      character.moveTo(10, 15);
+      
+      expect(character.x).toBe(10);
+      expect(character.y).toBe(15);
+    });
+
+    test('should create player character with isPlayer = true', () => {
+      const playerCharacter = new Character(1, 1, 1, 1, 0, '@', 0, 0, true);
+      expect(playerCharacter.isPlayer).toBe(true);
+      expect(playerCharacter.symbol).toBe('@');
     });
   });
 

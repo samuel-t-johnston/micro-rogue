@@ -28,7 +28,7 @@ export function placeItems(itemsData, dungeonLevel, levelData) {
     const [x, y] = coordKey.split(',').map(Number);
 
     // Skip if this position is occupied by the player
-    if (equals(create(x, y), dungeonLevel.playerPosition)) {
+    if (dungeonLevel.getCharacterAt(x, y)) {
       continue;
     }
 
@@ -59,7 +59,7 @@ export function placeFurniture(furnitureData, dungeonLevel, itemsData, levelData
     const { type, x, y } = furnitureInfo;
 
     // Skip if this position is occupied by the player
-    if (equals(create(x, y), dungeonLevel.playerPosition)) {
+    if (dungeonLevel.getCharacterAt(x, y)) {
       continue;
     }
 

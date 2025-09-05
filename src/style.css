@@ -465,6 +465,22 @@ body {
   font-weight: bold;
 }
 
+/* Delete save data button - dangerous action styling */
+#delete-save-menu-item {
+  background: rgba(139, 0, 0, 0.2);
+  border-color: #8b0000;
+}
+
+#delete-save-menu-item:hover {
+  background: rgba(139, 0, 0, 0.3);
+  border-color: #ff4444;
+  transform: translateX(5px);
+}
+
+#delete-save-menu-item .menu-text {
+  color: #ff6666;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .game-container {

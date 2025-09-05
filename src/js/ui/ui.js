@@ -201,10 +201,71 @@ export function initUI() {
         menuOverlay.classList.remove('active');
       });
     }
+
+    // Save Game menu item
+    const saveGameMenuItem = document.getElementById('save-game-menu-item');
+    if (saveGameMenuItem) {
+      saveGameMenuItem.addEventListener('click', () => {
+        // Trigger save game action
+        const event = new CustomEvent('saveGameRequested');
+        document.dispatchEvent(event);
+        menuOverlay.classList.remove('active');
+      });
+    }
+
+    // Load Game menu item
+    const loadGameMenuItem = document.getElementById('load-game-menu-item');
+    if (loadGameMenuItem) {
+      loadGameMenuItem.addEventListener('click', () => {
+        // Trigger load game action
+        const event = new CustomEvent('loadGameRequested');
+        document.dispatchEvent(event);
+        menuOverlay.classList.remove('active');
+      });
+    }
+
+    // Delete Save Data menu item
+    const deleteSaveMenuItem = document.getElementById('delete-save-menu-item');
+    if (deleteSaveMenuItem) {
+      deleteSaveMenuItem.addEventListener('click', () => {
+        // Trigger delete save action
+        const event = new CustomEvent('deleteSaveRequested');
+        document.dispatchEvent(event);
+        menuOverlay.classList.remove('active');
+      });
+    }
   }
 
   // Initialize tab switching
   initTabs();
+}
+
+// Update menu state based on save data availability
+export function updateMenuState(hasSaveData) {
+  const loadGameMenuItem = document.getElementById('load-game-menu-item');
+  const deleteSaveMenuItem = document.getElementById('delete-save-menu-item');
+  
+  if (loadGameMenuItem) {
+    if (hasSaveData) {
+      loadGameMenuItem.style.display = 'block';
+      loadGameMenuItem.style.opacity = '1';
+      loadGameMenuItem.style.pointerEvents = 'auto';
+    } else {
+      loadGameMenuItem.style.display = 'block';
+      loadGameMenuItem.style.opacity = '0.5';
+      loadGameMenuItem.style.pointerEvents = 'none';
+    }
+  }
+  
+  if (deleteSaveMenuItem) {
+    if (hasSaveData) {
+      deleteSaveMenuItem.style.display = 'block';
+      deleteSaveMenuItem.style.opacity = '1';
+      deleteSaveMenuItem.style.pointerEvents = 'auto';
+    } else {
+      deleteSaveMenuItem.style.display = 'none';
+    }
+  }
 }
 
 // Initialize tab switching functionality

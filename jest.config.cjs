@@ -10,11 +10,6 @@ module.exports = {
     '^.+\\.js$': 'babel-jest',
   },
   
-  // Module name mapping for ES6 imports
-  moduleNameMapping: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-  },
-  
   // Test file patterns
   testMatch: [
     '**/__tests__/**/*.js',

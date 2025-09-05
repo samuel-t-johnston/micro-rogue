@@ -1,12 +1,15 @@
 // Character class for reusable character logic
 export class Character {
-  constructor(body = 1, mind = 1, agility = 1, control = 1, hpBonus = 0, symbol = '@') {
+  constructor(body = 1, mind = 1, agility = 1, control = 1, hpBonus = 0, symbol = '@', x = 0, y = 0, isPlayer = false) {
     this.body = body;
     this.mind = mind;
     this.agility = agility;
     this.control = control;
     this.hpBonus = hpBonus;
     this.symbol = symbol;
+    this.x = x;
+    this.y = y;
+    this.isPlayer = isPlayer;
     this.maxHp = this.body * 2 + this.hpBonus;
     this.currentHp = this.maxHp;
 
@@ -47,6 +50,12 @@ export class Character {
   // Check if character is alive
   isAlive() {
     return this.currentHp > 0;
+  }
+
+  // Move character to new position
+  moveTo(x, y) {
+    this.x = x;
+    this.y = y;
   }
 
   // Add item to inventory

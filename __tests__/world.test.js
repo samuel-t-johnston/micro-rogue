@@ -1,5 +1,6 @@
 import { initializeWorld, placeItems } from '../src/js/core/world.js';
 import { DungeonLevel } from '../src/js/core/gameState.js';
+import { Character } from '../src/js/entities/character.js';
 import { CONFIG_SETTINGS } from '../src/js/utils/config.js';
 
 // Mock the config for testing
@@ -94,7 +95,9 @@ describe('World Generation', () => {
       };
       
       const dungeonLevel = new DungeonLevel(1, 11, 11);
-      dungeonLevel.playerPosition = { x: 5, y: 5 }; // Player not in item placement area
+      // Add a character at position 5,5 to simulate player not in item placement area
+      const playerChar = new Character(1, 1, 1, 1, 0, '@', 5, 5, true);
+      dungeonLevel.addCharacter(playerChar, 5, 5);
       
       // Get level data
       const levelData = await initializeWorld();
@@ -125,7 +128,9 @@ describe('World Generation', () => {
       };
       
       const dungeonLevel = new DungeonLevel(1, 11, 11);
-      dungeonLevel.playerPosition = { x: 1, y: 1 }; // Player in item placement area
+      // Add a character at position 1,1 to simulate player in item placement area
+      const playerChar = new Character(1, 1, 1, 1, 0, '@', 1, 1, true);
+      dungeonLevel.addCharacter(playerChar, 1, 1);
       
       // Get level data
       const levelData = await initializeWorld();
