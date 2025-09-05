@@ -1,10 +1,10 @@
 **Rogµe** (or Micro-Rogue) is a traditional [roguelike game](https://en.wikipedia.org/wiki/Roguelike) in early development. It is written in Javascript and HTML5. 
 
-Rogµe was started primarily as a playground to experiment with agentic AI tools. I'm currently using Cursor. Apologies for any rough code. It has been many years since I wrote Javascript regularly, and the language has changed. I'll be relying on the AI quite a bit at first, and refactoring as I go.
+I created Rogµe as a playground to experiment with agentic AI tools. I'm currently using Cursor. Apologies for any rough code. It has been many years since I wrote Javascript regularly, and the language has changed. I'll be relying on the AI quite a bit at first, and refactoring as I go.
 
 # State of the Game
 
- - Latest Version: 0.0.1 "Path to Playability"
+ - Latest Version: 0.0.1 "Groundwork"
  - Latest Stable Version: N/A
 
 The game is very early, but already includes a number of important features:
@@ -19,14 +19,7 @@ The game is very early, but already includes a number of important features:
 
 ## Roadmap
 
-0.0.x versions are laying basic groundwork for the game, with 0.1.0 being the first minor "release".
-
-### 0.0.1 - Groundwork
- - Create GitHub repository ✓
- - Add license ✓
- - Add readme ✓
- - Improved project structure ✓
- - Refactor
+(0.0.x versions are laying basic groundwork for the game, with 0.1.0 being the first minor "release".)
 
 ### 0.0.2 - Persistence
  - Saving & loading
@@ -73,6 +66,9 @@ The game is very early, but already includes a number of important features:
 # Developer Setup
 
 **Dependencies:**
+
+Rogµe is pure client-side Javascript, HTML, and CSS. However, there are some external dependencies I use for serving the files, testing, and cleanup in development.
+
  - Python - Currently used to easily serve files locally
  - npm - Package management for everything JS.
    - Jest/Babel - unit tests
