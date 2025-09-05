@@ -113,7 +113,7 @@ export async function initGame() {
   const levelData = await initializeWorld();
   
   // Create new level with proper dimensions and player start position
-  gameState.currentLevel = new DungeonLevel(
+  gameState.initializeLevel(
     1, 
     levelData.width, 
     levelData.height, 

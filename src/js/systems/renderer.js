@@ -16,13 +16,17 @@ function findItemAt(worldX, worldY, gameState) {
   );
 }
 
+// Helper function to find character at a specific position
+function findCharacterAt(worldX, worldY, gameState) {
+  return gameState.currentLevel.getCharacterAt(worldX, worldY);
+}
+
 // Get the symbol to display for a specific tile
 function getTileSymbol(worldX, worldY, gameState) {
-  const playerPos = gameState.getPlayerPosition();
-  
-  // Check if this is the player position (highest priority)
-  if (equals({ x: worldX, y: worldY }, playerPos)) {
-    return RENDER_SYMBOLS.PLAYER;
+  // Check if there's a character at this position (highest priority)
+  const character = findCharacterAt(worldX, worldY, gameState);
+  if (character) {
+    return character.symbol;
   }
   
   // Check if there's furniture at this position

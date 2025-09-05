@@ -1,11 +1,12 @@
 // Character class for reusable character logic
 export class Character {
-  constructor(body = 1, mind = 1, agility = 1, control = 1, hpBonus = 0) {
+  constructor(body = 1, mind = 1, agility = 1, control = 1, hpBonus = 0, symbol = '@') {
     this.body = body;
     this.mind = mind;
     this.agility = agility;
     this.control = control;
     this.hpBonus = hpBonus;
+    this.symbol = symbol;
     this.maxHp = this.body * 2 + this.hpBonus;
     this.currentHp = this.maxHp;
 

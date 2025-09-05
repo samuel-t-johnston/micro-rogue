@@ -11,7 +11,9 @@ export class DungeonLevel {
     this.map = []; // 2D array of tiles
     this.items = []; // Array of {x, y, itemId} objects
     this.furniture = []; // Array of Furniture instances
-    this.playerPosition = create(playerStartX, playerStartY); // Level-relative position
+    this.characters = []; // Array of Character instances
+    this.characterPositions = new Map(); // Map of "x,y" -> Character instance
+    this.playerPosition = create(playerStartX, playerStartY); // Level-relative position (legacy, will be removed)
   }
 
   // Get item at specific position
@@ -24,6 +26,73 @@ export class DungeonLevel {
     return this.furniture.find(
       furniture => furniture.x === x && furniture.y === y
     );
+  }
+
+  // Get character at specific position
+  getCharacterAt(x, y) {
+    const key = `${x},${y}`;
+    return this.characterPositions.get(key) || null;
+  }
+
+  // Add character to level at specific position
+  addCharacter(character, x, y) {
+    // Check if position is already occupied
+    if (this.getCharacterAt(x, y)) {
+      return false; // Position occupied
+    }
+    
+    this.characters.push(character);
+    const key = `${x},${y}`;
+    this.characterPositions.set(key, character);
+    return true;
+  }
+
+  // Remove character from level
+  removeCharacter(character) {
+    const index = this.characters.indexOf(character);
+    if (index === -1) {
+      return false; // Character not found
+    }
+    
+    this.characters.splice(index, 1);
+    
+    // Remove from position map
+    for (const [key, char] of this.characterPositions.entries()) {
+      if (char === character) {
+        this.characterPositions.delete(key);
+        break;
+      }
+    }
+    
+    return true;
+  }
+
+  // Move character to new position
+  moveCharacter(character, newX, newY) {
+    // Check if new position is occupied by another character
+    const existingCharacter = this.getCharacterAt(newX, newY);
+    if (existingCharacter && existingCharacter !== character) {
+      return false; // Position occupied by another character
+    }
+    
+    // Remove from old position
+    for (const [key, char] of this.characterPositions.entries()) {
+      if (char === character) {
+        this.characterPositions.delete(key);
+        break;
+      }
+    }
+    
+    // Add to new position
+    const key = `${newX},${newY}`;
+    this.characterPositions.set(key, character);
+    return true;
+  }
+
+  // Get all characters at a specific position (for future multi-character support)
+  getCharactersAt(x, y) {
+    const character = this.getCharacterAt(x, y);
+    return character ? [character] : [];
   }
 
   // Remove item from level
@@ -65,11 +134,16 @@ export class DungeonLevel {
     return false;
   }
 
-  // Check if position is passible (considering furniture)
+  // Check if position is passible (considering furniture and characters)
   isPassible(x, y) {
     const tile = this.map[y][x];
     if (tile === '#' || tile === ' ') {
       return false; // Wall or solid rock
+    }
+
+    // Check if there's a character at this position
+    if (this.getCharacterAt(x, y)) {
+      return false; // Character present, not passible
     }
 
     const furniture = this.getFurnitureAt(x, y);
@@ -84,7 +158,7 @@ export class DungeonLevel {
 // Persistent game state
 export class GameState {
   constructor() {
-    this.player = new Character(1, 1, 1, 1, 0);
+    this.player = new Character(1, 1, 1, 1, 0, '@'); // Direct reference to player character
     this.score = 0;
     this.turns = 0;
     this.messages = [];
@@ -95,23 +169,41 @@ export class GameState {
 
   // Convenience methods
   getPlayerPosition() {
-    return this.currentLevel?.playerPosition || create(0, 0);
+    if (!this.currentLevel) {
+      return create(0, 0);
+    }
+    
+    // Find player character position in the level
+    for (const [key, character] of this.currentLevel.characterPositions.entries()) {
+      if (character === this.player) {
+        const [x, y] = key.split(',').map(Number);
+        return create(x, y);
+      }
+    }
+    
+    // Fallback to legacy playerPosition if player not found in character system
+    return this.currentLevel.playerPosition || create(0, 0);
   }
 
   setPlayerPosition(x, y) {
     if (this.currentLevel) {
+      // Move player character to new position
+      this.currentLevel.moveCharacter(this.player, x, y);
+      // Keep legacy playerPosition in sync for now
       this.currentLevel.playerPosition = create(x, y);
     }
   }
 
   // Initialize a new level
-  initializeLevel(levelNumber, width, height) {
-    this.currentLevel = new DungeonLevel(levelNumber, width, height);
+  initializeLevel(levelNumber, width, height, playerStartX = 5, playerStartY = 5) {
+    this.currentLevel = new DungeonLevel(levelNumber, width, height, playerStartX, playerStartY);
+    // Add player character to the level
+    this.currentLevel.addCharacter(this.player, playerStartX, playerStartY);
   }
 
   // Reset game state for new game
   reset() {
-    this.player = new Character(1, 1, 1, 1, 0);
+    this.player = new Character(1, 1, 1, 1, 0, '@');
     this.score = 0;
     this.turns = 0;
     this.messages = [];

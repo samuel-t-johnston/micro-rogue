@@ -82,12 +82,12 @@ Module Responsibilities:
 - game.js: Main game orchestration and initialization
 
 Important classes:
- - Character (character.js) - Represents both player and NPCs
+ - Character (character.js) - Represents both player and NPCs with symbol field for rendering
  - Furniture (furniture.js) - Represents furniture objects with state and behavior
  - ChoiceModeManager (choiceModeManager.js) - Manages different input modes for multi-step interactions
  - LevelLoader (levelLoader.js) - Handles loading and parsing of level data from JSON files
- - DungeonLevel (gameState.js) - Game state for the current level
- - GameState (gameState.js) - Level-independent game state
+ - DungeonLevel (gameState.js) - Game state for the current level with character position mapping
+ - GameState (gameState.js) - Level-independent game state with direct player character reference
 
 ITEM DEFINITIONS
 ----------------
@@ -267,16 +267,41 @@ Dungeon Level:
 - World map for current level
 - World items (array of placed items with coordinates and item IDs)
 - World furniture (array of placed furniture with coordinates, furniture IDs, states, and container items)
+- Character management (array of Character instances with position mapping)
+- Character position lookup using Map for efficient O(1) access
 
 Game State:
 - Dungeon Level tracking
 - Score system
 - Turn counter
 - Message log (last 10 messages)
-- Player character instance
-- Player position (coordinate object)
+- Player character instance (direct reference for efficiency)
+- Player position (coordinate object, derived from character position in level)
 - Items data (loaded from items.json)
 - Furniture data (loaded from furniture.json)
+
+CHARACTER SYSTEM
+----------------
+
+Character Management:
+- Character class supports both player and NPCs with symbol field for rendering
+- DungeonLevel tracks all characters with position mapping using Map data structure
+- GameState maintains direct reference to player character for efficient access
+- Character positions stored as "x,y" keys in Map for O(1) lookup performance
+- Characters cannot occupy the same position (collision detection)
+
+Character Operations:
+- addCharacter(character, x, y): Add character to level at specific position
+- removeCharacter(character): Remove character from level
+- moveCharacter(character, newX, newY): Move character to new position
+- getCharacterAt(x, y): Get character at specific position
+- getCharactersAt(x, y): Get all characters at position (for future multi-character support)
+
+Rendering Priority:
+1. Characters (highest priority)
+2. Furniture
+3. Items
+4. World tiles (lowest priority)
 
 USER INTERFACE IMPLEMENTATION
 ----------------------------
