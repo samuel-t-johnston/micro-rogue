@@ -1,5 +1,4 @@
 import { CONFIG_SETTINGS } from '../utils/config.js';
-import { equals } from '../utils/coordinates.js';
 import { RENDER_SYMBOLS } from '../utils/symbols.js';
 
 // Helper function to find furniture at a specific position

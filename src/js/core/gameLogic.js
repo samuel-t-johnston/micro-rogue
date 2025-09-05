@@ -5,7 +5,7 @@ import {
 } from './world.js';
 import { render } from '../systems/renderer.js';
 import { addMessage, updateUI } from '../ui/ui.js';
-import { GameState, DungeonLevel } from './gameState.js';
+import { GameState } from './gameState.js';
 import { addDelta, toString } from '../utils/coordinates.js';
 import { saveSystem } from '../systems/saveSystem.js';
 import { CONFIG_SETTINGS } from '../utils/config.js';

@@ -1,4 +1,3 @@
-import { create, equals } from '../utils/coordinates.js';
 import { LevelLoader } from '../systems/levelLoader.js';
 
 // File-based world loading
