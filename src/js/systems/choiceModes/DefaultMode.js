@@ -15,6 +15,7 @@ export class DefaultMode extends BaseMode {
       'arrowright',
       'p',
       'u',
+      'e',
       'escape',
     ];
   }
@@ -59,6 +60,21 @@ export class DefaultMode extends BaseMode {
         // Enter directional choice mode for use action
         modeManager.setMode('directional', { action: 'use' });
         break;
+      case 'e': {
+        // Check if there are equipment items to equip
+        const availableEquipment = gameActions.getAvailableEquipment();
+        if (availableEquipment.length > 0) {
+          // Enter numeric choice mode for equipment selection
+          modeManager.setMode('numeric', {
+            action: 'equip',
+            items: availableEquipment,
+          });
+        } else {
+          // No equipment - show message
+          gameActions.showMessage('You have no equipment to equip.');
+        }
+        break;
+      }
       case 'escape':
         // No action in default mode
         break;
@@ -74,7 +90,8 @@ export class DefaultMode extends BaseMode {
     return [
       { label: 'Movement:', keys: 'WASD or Arrow Keys' },
       { label: 'P:', keys: 'Pick up' },
-      { label: 'U:', keys: 'Use something nearby' }
+      { label: 'U:', keys: 'Use something nearby' },
+      { label: 'E:', keys: 'Equip item' }
     ];
   }
 }

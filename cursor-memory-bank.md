@@ -4,6 +4,7 @@
 - Complete refactoring: modular architecture, 276 tests passing
 - Character system with save/load functionality implemented
 - Data-driven rendering and mode-agnostic UI
+- Equipment system with inventory-based equipping implemented
 
 ## MAJOR REFACTORING COMPLETED:
 
@@ -25,10 +26,19 @@
 - **Serialization**: Handles complex objects (Character, Furniture, Maps)
 - **Version control**: `saveFileCompatibilityVersion` for future migration
 
+### Equipment System
+- **Inventory-based equipping**: 'E' key triggers equipment selection from inventory
+- **Slot management**: Equipment slots (head, body, hands, legs, feet) with collision detection
+- **Replacement confirmation**: YNMode for handling occupied slots with inventory management
+- **Choice mode integration**: NumericMode for equipment selection, YNMode for confirmation
+- **Game actions**: Complete equipment logic in gameLogic.js with InputHandler integration
+- **UI display**: Equipment items shown with numbered list in controls (like pickup system)
+- **Bug fixes**: Fixed unequipItem method to properly return unequipped items to inventory
+
 ### Test Coverage
 - **276 tests passing** across 14 test suites
 - **New test files**: `dungeonLevel.test.js`, `gameState.test.js`, `saveSystem.test.js`
-- **Updated tests**: Character system, world generation, save/load functionality
+- **Updated tests**: Character system, world generation, save/load functionality, choice modes
 - **Comprehensive coverage**: All new features and existing functionality
 
 ## CURRENT ARCHITECTURE:

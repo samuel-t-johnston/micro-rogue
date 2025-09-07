@@ -3,6 +3,7 @@ import {
   DefaultMode, 
   DirectionalMode, 
   NumericMode, 
+  YNMode,
   ModeRegistry,
   defaultModeRegistry 
 } from '../src/js/systems/choiceModes/index.js';
@@ -43,12 +44,14 @@ describe('Choice Modes', () => {
 
     beforeEach(() => {
       defaultMode = new DefaultMode();
-      mockGameActions = {
-        movePlayer: jest.fn(),
-        pickUpItem: jest.fn(),
-        getAvailableItems: jest.fn(),
-        useFurniture: jest.fn()
-      };
+    mockGameActions = {
+      movePlayer: jest.fn(),
+      pickUpItem: jest.fn(),
+      getAvailableItems: jest.fn(),
+      useFurniture: jest.fn(),
+      getAvailableEquipment: jest.fn(),
+      showMessage: jest.fn()
+    };
       mockModeManager = {
         setMode: jest.fn(),
         resetToDefault: jest.fn()
@@ -102,6 +105,28 @@ describe('Choice Modes', () => {
       expect(mockModeManager.setMode).toHaveBeenCalledWith('directional', { action: 'use' });
     });
 
+    test('should handle equip action with available equipment', () => {
+      const equipment = [{ name: 'Helmet', itemId: 'helmet' }];
+      mockGameActions.getAvailableEquipment.mockReturnValue(equipment);
+      
+      defaultMode.handleInput('e', null, null, null, mockGameActions, mockModeManager);
+      
+      expect(mockGameActions.getAvailableEquipment).toHaveBeenCalled();
+      expect(mockModeManager.setMode).toHaveBeenCalledWith('numeric', {
+        action: 'equip',
+        items: equipment
+      });
+    });
+
+    test('should show message when no equipment available', () => {
+      mockGameActions.getAvailableEquipment.mockReturnValue([]);
+      
+      defaultMode.handleInput('e', null, null, null, mockGameActions, mockModeManager);
+      
+      expect(mockGameActions.getAvailableEquipment).toHaveBeenCalled();
+      expect(mockGameActions.showMessage).toHaveBeenCalledWith('You have no equipment to equip.');
+    });
+
     test('should provide display text', () => {
       const displayText = defaultMode.getDisplayText();
       expect(displayText).toBe('What would you like to do?');
@@ -112,7 +137,8 @@ describe('Choice Modes', () => {
       expect(instructions).toEqual([
         { label: 'Movement:', keys: 'WASD or Arrow Keys' },
         { label: 'P:', keys: 'Pick up' },
-        { label: 'U:', keys: 'Use something nearby' }
+        { label: 'U:', keys: 'Use something nearby' },
+        { label: 'E:', keys: 'Equip item' }
       ]);
     });
   });
@@ -199,6 +225,118 @@ describe('Choice Modes', () => {
     test('should provide display text for pickup action', () => {
       const displayText = numericMode.getDisplayText({ action: 'pickup' });
       expect(displayText).toBe('Pick up - What would you like to pick up?');
+    });
+
+    test('should handle equip action', () => {
+      const mockGameActions = {
+        equipItemByIndex: jest.fn().mockReturnValue(true)
+      };
+      const mockModeManager = { resetToDefault: jest.fn() };
+      const context = { action: 'equip' };
+
+      const result = numericMode.handleInput('1', context, null, null, mockGameActions, mockModeManager);
+
+      expect(result).toBe(true);
+      expect(mockGameActions.equipItemByIndex).toHaveBeenCalledWith(1, mockModeManager);
+      expect(mockModeManager.resetToDefault).toHaveBeenCalled();
+    });
+
+    test('should provide display text for equip action', () => {
+      const context = { action: 'equip' };
+      const displayText = numericMode.getDisplayText(context);
+      expect(displayText).toBe('Equip - What would you like to equip?');
+    });
+
+    test('should provide control instructions for equip action', () => {
+      const context = { action: 'equip' };
+      const instructions = numericMode.getControlInstructions(context);
+      expect(instructions).toEqual([
+        { label: 'Choose equip:', keys: '0-9' },
+        { label: 'ESC:', keys: 'Cancel' }
+      ]);
+    });
+  });
+
+  describe('YNMode', () => {
+    let ynMode;
+    let mockGameActions;
+    let mockModeManager;
+
+    beforeEach(() => {
+      ynMode = new YNMode();
+      mockGameActions = {
+        equipItemWithReplacement: jest.fn().mockReturnValue(true)
+      };
+      mockModeManager = {
+        resetToDefault: jest.fn()
+      };
+    });
+
+    test('should have correct valid keys', () => {
+      expect(ynMode.validKeys).toEqual(['y', 'n', 'escape']);
+    });
+
+    test('should handle escape key', () => {
+      const result = ynMode.handleInput('escape', null, null, null, mockGameActions, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(mockModeManager.resetToDefault).toHaveBeenCalled();
+    });
+
+    test('should handle Y key for equip action', () => {
+      const context = {
+        action: 'equip',
+        itemIndex: 0,
+        existingItem: { name: 'Old Helm' },
+        slot: 'head'
+      };
+
+      const result = ynMode.handleInput('y', context, null, null, mockGameActions, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(mockGameActions.equipItemWithReplacement).toHaveBeenCalledWith(0, context.existingItem, context.slot);
+      expect(mockModeManager.resetToDefault).toHaveBeenCalled();
+    });
+
+    test('should handle N key', () => {
+      const context = { action: 'equip' };
+
+      const result = ynMode.handleInput('n', context, null, null, mockGameActions, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(mockModeManager.resetToDefault).toHaveBeenCalled();
+      expect(mockGameActions.equipItemWithReplacement).not.toHaveBeenCalled();
+    });
+
+    test('should return false for invalid keys', () => {
+      const result = ynMode.handleInput('x', null, null, null, mockGameActions, mockModeManager);
+      expect(result).toBe(false);
+    });
+
+    test('should provide display text for equip action', () => {
+      const context = {
+        action: 'equip',
+        existingItem: { name: 'Iron Helm' },
+        newItem: { name: 'Leather Helm' },
+        slot: 'head'
+      };
+
+      const displayText = ynMode.getDisplayText(context);
+      expect(displayText).toBe('You have a Iron Helm equipped in your head slot. Remove it to equip Leather Helm?');
+    });
+
+    test('should provide default display text', () => {
+      const displayText = ynMode.getDisplayText(null);
+      expect(displayText).toBe('Yes or No?');
+    });
+
+    test('should provide control instructions', () => {
+      const instructions = ynMode.getControlInstructions();
+      expect(instructions).toEqual([
+        { label: 'Y:', keys: 'Yes' },
+        { label: 'N:', keys: 'No' },
+        { label: 'ESC:', keys: 'Cancel' }
+      ]);
     });
   });
 

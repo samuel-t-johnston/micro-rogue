@@ -1,4 +1,4 @@
-import { pickUpItem, movePlayer, useFurniture } from '../src/js/core/gameLogic.js';
+import { pickUpItem, movePlayer, useFurniture, getAvailableEquipment, equipItemByIndex, equipItemWithReplacement } from '../src/js/core/gameLogic.js';
 import { GameState } from '../src/js/core/gameState.js';
 import { Furniture } from '../src/js/entities/furniture.js';
 
@@ -64,6 +64,10 @@ describe('gameLogic', () => {
     gameState.itemsData = {
       'sword': { name: 'Iron Sword', type: 'weapon' },
       'potion': { name: 'Health Potion', type: 'consumable' },
+      'leather_helm': { name: 'Leather Helm', type: 'armor', equipment: { slot: 'head' } },
+      'leather_armor': { name: 'Leather Armor', type: 'armor', equipment: { slot: 'body' } },
+      'ring_power': { name: 'Ring of Power', type: 'ring', equipment: { slot: 'rings' } },
+      'iron_helm': { name: 'Iron Helm', type: 'armor', equipment: { slot: 'head' } }
     };
 
     // Mock furniture data
@@ -585,6 +589,148 @@ describe('gameLogic', () => {
       
       expect(result).toBe(true);
       expect(furniture.state).toBe('open');
+    });
+  });
+
+  describe('getAvailableEquipment', () => {
+    test('should return equipment items from inventory', () => {
+      // Add equipment items to inventory
+      const helmet = { name: 'Leather Helm', itemId: 'leather_helm', equipment: { slot: 'head' } };
+      const armor = { name: 'Leather Armor', itemId: 'leather_armor', equipment: { slot: 'body' } };
+      const potion = { name: 'Potion', itemId: 'potion', usable: { use_effect: 'heal' } };
+      
+      gameState.player.addToInventory(helmet);
+      gameState.player.addToInventory(armor);
+      gameState.player.addToInventory(potion);
+      
+      const availableEquipment = getAvailableEquipment(gameState);
+      
+      expect(availableEquipment).toHaveLength(2);
+      expect(availableEquipment).toContain(helmet);
+      expect(availableEquipment).toContain(armor);
+      expect(availableEquipment).not.toContain(potion);
+    });
+
+    test('should exclude rings from equipment list', () => {
+      // Add equipment items including rings
+      const helmet = { name: 'Leather Helm', itemId: 'leather_helm', equipment: { slot: 'head' } };
+      const ring = { name: 'Ring of Power', itemId: 'ring_power', equipment: { slot: 'rings' } };
+      
+      gameState.player.addToInventory(helmet);
+      gameState.player.addToInventory(ring);
+      
+      const availableEquipment = getAvailableEquipment(gameState);
+      
+      expect(availableEquipment).toHaveLength(1);
+      expect(availableEquipment).toContain(helmet);
+      expect(availableEquipment).not.toContain(ring);
+    });
+
+    test('should return empty array when no equipment in inventory', () => {
+      const availableEquipment = getAvailableEquipment(gameState);
+      expect(availableEquipment).toHaveLength(0);
+    });
+  });
+
+  describe('equipItemByIndex', () => {
+    test('should equip item when slot is empty', () => {
+      // Add equipment to inventory
+      const helmet = { name: 'Leather Helm', itemId: 'leather_helm', equipment: { slot: 'head' } };
+      gameState.player.addToInventory(helmet);
+      
+      const mockModeManager = { setMode: jest.fn() };
+      const result = equipItemByIndex(0, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(gameState.player.equipment.head).toEqual(helmet);
+      expect(gameState.player.inventory).not.toContain(helmet);
+      expect(addMessage).toHaveBeenCalledWith("Equipped Leather Helm in head slot.", gameState, gameState.player);
+    });
+
+    test('should enter YN mode when slot is occupied', () => {
+      // Add equipment to inventory
+      const helmet = { name: 'Leather Helm', itemId: 'leather_helm', equipment: { slot: 'head' } };
+      gameState.player.addToInventory(helmet);
+      
+      // Equip existing item in head slot
+      const existingHelmet = { name: 'Iron Helm', itemId: 'iron_helm', equipment: { slot: 'head' } };
+      gameState.player.equipItem(existingHelmet, 'head');
+      
+      const mockModeManager = { setMode: jest.fn() };
+      const result = equipItemByIndex(0, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(false);
+      expect(mockModeManager.setMode).toHaveBeenCalledWith('yn', {
+        action: 'equip',
+        itemIndex: 0,
+        newItem: helmet,
+        existingItem: existingHelmet,
+        slot: 'head'
+      });
+    });
+
+    test('should return false for invalid item index', () => {
+      const mockModeManager = { setMode: jest.fn() };
+      const result = equipItemByIndex(5, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(false);
+      expect(addMessage).toHaveBeenCalledWith('Invalid equipment selection.', gameState, gameState.player);
+    });
+  });
+
+  describe('equipItemWithReplacement', () => {
+    test('should replace equipment and add old item to inventory', () => {
+      // Add equipment to inventory
+      const helmet = { name: 'Leather Helm', itemId: 'leather_helm', equipment: { slot: 'head' } };
+      gameState.player.addToInventory(helmet);
+      
+      // Equip existing item in head slot
+      const existingHelmet = { name: 'Iron Helm', itemId: 'iron_helm', equipment: { slot: 'head' } };
+      gameState.player.equipItem(existingHelmet, 'head');
+      
+      const mockModeManager = { setMode: jest.fn() };
+      const result = equipItemWithReplacement(0, existingHelmet, 'head', gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(gameState.player.equipment.head).toEqual(helmet);
+      expect(gameState.player.inventory).toContain(existingHelmet);
+      expect(gameState.player.inventory).not.toContain(helmet);
+      expect(addMessage).toHaveBeenCalledWith("Unequipped Iron Helm and added to inventory.", gameState, gameState.player);
+      expect(addMessage).toHaveBeenCalledWith("Equipped Leather Helm in head slot.", gameState, gameState.player);
+    });
+
+    test('should drop old item when inventory is full', () => {
+      // Fill inventory to capacity (5 items)
+      for (let i = 0; i < 5; i++) {
+        gameState.player.addToInventory({ name: `Item ${i}`, type: 'misc' });
+      }
+      
+      // Add equipment to inventory (this should fail since inventory is full)
+      const helmet = { name: 'Leather Helm', itemId: 'leather_helm', equipment: { slot: 'head' } };
+      const added = gameState.player.addToInventory(helmet);
+      expect(added).toBe(false); // Should not be able to add more items
+      
+      // Manually add the helmet to inventory for the test (simulating a full inventory scenario)
+      gameState.player.inventory.push(helmet);
+      
+      // Equip existing item in head slot
+      const existingHelmet = { name: 'Iron Helm', itemId: 'iron_helm', equipment: { slot: 'head' } };
+      gameState.player.equipItem(existingHelmet, 'head');
+      
+      const mockModeManager = { setMode: jest.fn() };
+      const result = equipItemWithReplacement(0, existingHelmet, 'head', gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(gameState.player.equipment.head).toEqual(helmet);
+      expect(addMessage).toHaveBeenCalledWith("Unequipped Iron Helm (inventory full, item dropped).", gameState, gameState.player);
+    });
+
+    test('should return false for invalid item index', () => {
+      const mockModeManager = { setMode: jest.fn() };
+      const result = equipItemWithReplacement(5, null, 'head', gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(false);
+      expect(addMessage).toHaveBeenCalledWith('Invalid equipment selection.', gameState, gameState.player);
     });
   });
 }); 

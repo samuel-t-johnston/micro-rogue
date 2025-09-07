@@ -211,7 +211,7 @@ describe('Character', () => {
       
       const unequippedRing = character.unequipItem('rings', 0);
       
-      expect(unequippedRing).toBe(null); // Returns null when unequipping
+      expect(unequippedRing).toEqual(ring); // Returns the unequipped ring
       expect(character.equipment.rings[0]).toBe(null);
     });
 

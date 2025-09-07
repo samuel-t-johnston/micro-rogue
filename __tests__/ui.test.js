@@ -242,4 +242,89 @@ describe('UI Functions', () => {
     });
   });
 
+  describe('Equipment Display in Controls', () => {
+    let mockChoiceModeManager;
+
+    beforeEach(() => {
+      mockChoiceModeManager = {
+        getCurrentMode: jest.fn().mockReturnValue('numeric'),
+        getActionContext: jest.fn().mockReturnValue(null),
+        isInSpecialMode: jest.fn().mockReturnValue(true),
+        getModeDisplayText: jest.fn().mockReturnValue('Equip - What would you like to equip?'),
+        getModeControlInstructions: jest.fn().mockReturnValue([
+          { label: 'Choose equip:', keys: '0-9' },
+          { label: 'ESC:', keys: 'Cancel' }
+        ])
+      };
+
+      // Mock all DOM elements needed by updateUI
+      const mockElement = {
+        innerHTML: '',
+        textContent: '',
+        appendChild: jest.fn(),
+        querySelector: jest.fn().mockReturnValue({ textContent: '' })
+      };
+
+      const mockControlsElement = {
+        innerHTML: '',
+        textContent: '',
+        appendChild: jest.fn(),
+        querySelector: jest.fn().mockReturnValue({ textContent: '' })
+      };
+
+      document.getElementById = jest.fn((id) => {
+        if (id === 'controls') {
+          return mockControlsElement;
+        }
+        return mockElement;
+      });
+
+      document.querySelector = jest.fn().mockReturnValue({ textContent: '' });
+      document.createElement = jest.fn().mockReturnValue(mockElement);
+    });
+
+    test('should display equipment items in controls for equip action', () => {
+      const context = {
+        action: 'equip',
+        items: [
+          { name: 'Leather Helm', itemId: 'leather_helm' },
+          { name: 'Leather Armor', itemId: 'leather_armor' }
+        ]
+      };
+
+      // Set up the choice mode manager to return the context
+      mockChoiceModeManager.getActionContext.mockReturnValue(context);
+
+      updateUI(mockGameState, mockPlayer, mockChoiceModeManager, context);
+
+      // Get the controls element that was mocked
+      const controlsElement = document.getElementById('controls');
+      expect(controlsElement.innerHTML).toContain('Available equipment:');
+      expect(controlsElement.innerHTML).toContain('0. Leather Helm');
+      expect(controlsElement.innerHTML).toContain('1. Leather Armor');
+    });
+
+    test('should not display equipment section for non-equip actions', () => {
+      const context = {
+        action: 'pickup',
+        items: [{ name: 'Sword', itemId: 'sword' }]
+      };
+
+      updateUI(mockGameState, mockPlayer, mockChoiceModeManager, context);
+
+      expect(mockGameDisplay.innerHTML).not.toContain('Available equipment:');
+    });
+
+    test('should handle empty equipment list', () => {
+      const context = {
+        action: 'equip',
+        items: []
+      };
+
+      updateUI(mockGameState, mockPlayer, mockChoiceModeManager, context);
+
+      expect(mockGameDisplay.innerHTML).not.toContain('Available equipment:');
+    });
+  });
+
 }); 

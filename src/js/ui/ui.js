@@ -90,6 +90,11 @@ export function updateControlsUI(choiceModeManager) {
             controlsHTML += `<div class="control-group">${index}. ${item.name} (${item.containerName})</div>`;
           }
         });
+      } else if (context && context.action === 'equip' && context.items) {
+        controlsHTML += '<div class="control-group"><strong>Available equipment:</strong></div>';
+        context.items.forEach((item, index) => {
+          controlsHTML += `<div class="control-group">${index}. ${item.name}</div>`;
+        });
       }
       
       controlsHTML += '</div>';

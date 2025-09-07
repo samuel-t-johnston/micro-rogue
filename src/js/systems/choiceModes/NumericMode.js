@@ -19,9 +19,14 @@ export class NumericMode extends BaseMode {
       return false;
     }
 
-    // Execute the pickup action with the selected item index
+    // Execute the action based on context
     if (context && context.action === 'pickup') {
       const success = gameActions.pickUpItemByIndex(itemIndex);
+      if (success) {
+        modeManager.resetToDefault();
+      }
+    } else if (context && context.action === 'equip') {
+      const success = gameActions.equipItemByIndex(itemIndex, modeManager);
       if (success) {
         modeManager.resetToDefault();
       }
@@ -33,13 +38,16 @@ export class NumericMode extends BaseMode {
   getDisplayText(context) {
     if (context && context.action === 'pickup') {
       return 'Pick up - What would you like to pick up?';
+    } else if (context && context.action === 'equip') {
+      return 'Equip - What would you like to equip?';
     }
     return 'Choose item';
   }
 
-  getControlInstructions(_context) {
+  getControlInstructions(context) {
+    const action = context?.action || 'item';
     return [
-      { label: 'Choose item:', keys: '0-9' },
+      { label: `Choose ${action}:`, keys: '0-9' },
       { label: 'ESC:', keys: 'Cancel' }
     ];
   }

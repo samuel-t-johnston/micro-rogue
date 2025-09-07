@@ -39,6 +39,30 @@
       "effect": "armor+1"
     }
   },
+  "amulet_of_health": {
+    "name": "Amulet of Health",
+    "symbol": "$",
+    "equipment": {
+      "slot": "neck",
+      "effect": "hpBonus+2"
+    }
+  },
+  "iron_dagger": {
+    "name": "Iron Dagger",
+    "symbol": "$",
+    "equipment": {
+      "slot": "weapon",
+      "effect": "attack+1"
+    }
+  },
+  "iron_buckler": {
+    "name": "Iron Buckler",
+    "symbol": "$",
+    "equipment": {
+      "slot": "weapon",
+      "effect": "defense+1"
+    }
+  },
   "potion_vial": {
     "name": "Potion Vial",
     "symbol": "$",

@@ -491,3 +491,102 @@ export function checkAutoSave(gameState) {
     addMessage('Game auto-saved!', gameState, gameState.player);
   }
 }
+
+// Get all equipment items from player's inventory
+export function getAvailableEquipment(gameState) {
+  return gameState.player.inventory.filter(item => {
+    const itemData = gameState.itemsData[item.itemId];
+    return itemData && itemData.equipment && itemData.equipment.slot !== 'rings';
+  });
+}
+
+// Equip an item by index from available equipment
+export function equipItemByIndex(itemIndex, gameState, gameDisplay, choiceModeManager) {
+  const availableEquipment = getAvailableEquipment(gameState);
+  
+  if (itemIndex < 0 || itemIndex >= availableEquipment.length) {
+    addMessage('Invalid equipment selection.', gameState, gameState.player);
+    return false;
+  }
+
+  const selectedItem = availableEquipment[itemIndex];
+  const itemData = gameState.itemsData[selectedItem.itemId];
+  const slot = itemData.equipment.slot;
+  
+  // Check if slot is already occupied
+  const existingItem = gameState.player.equipment[slot];
+  
+  if (existingItem) {
+    // Slot is occupied - ask for confirmation
+    choiceModeManager.setMode('yn', {
+      action: 'equip',
+      itemIndex: itemIndex,
+      newItem: selectedItem,
+      existingItem: existingItem,
+      slot: slot
+    });
+    return false; // Don't complete the action yet
+  } else {
+    // Slot is free - equip immediately
+    return equipItemDirectly(selectedItem, slot, gameState, gameDisplay, choiceModeManager);
+  }
+}
+
+// Equip item with replacement (after YN confirmation)
+export function equipItemWithReplacement(itemIndex, existingItem, slot, gameState, gameDisplay, choiceModeManager) {
+  const availableEquipment = getAvailableEquipment(gameState);
+  
+  if (itemIndex < 0 || itemIndex >= availableEquipment.length) {
+    addMessage('Invalid equipment selection.', gameState, gameState.player);
+    return false;
+  }
+
+  const selectedItem = availableEquipment[itemIndex];
+  
+  // Unequip existing item and add to inventory
+  if (existingItem) {
+    const unequippedItem = gameState.player.unequipItem(slot);
+    if (unequippedItem) {
+      // Try to add to inventory
+      if (gameState.player.canAddToInventory()) {
+        gameState.player.addToInventory(unequippedItem);
+        addMessage(`Unequipped ${unequippedItem.name} and added to inventory.`, gameState, gameState.player);
+      } else {
+        // Inventory full - drop the item
+        addMessage(`Unequipped ${unequippedItem.name} (inventory full, item dropped).`, gameState, gameState.player);
+      }
+    }
+  }
+  
+  // Equip the new item
+  return equipItemDirectly(selectedItem, slot, gameState, gameDisplay, choiceModeManager);
+}
+
+// Directly equip an item (internal helper)
+function equipItemDirectly(item, slot, gameState, gameDisplay, choiceModeManager) {
+  const itemData = gameState.itemsData[item.itemId];
+  
+  // Remove from inventory
+  const itemIndex = gameState.player.inventory.findIndex(invItem => invItem === item);
+  if (itemIndex !== -1) {
+    gameState.player.removeFromInventory(itemIndex);
+  }
+  
+  // Equip the item
+  const success = gameState.player.equipItem(item, slot);
+  
+  if (success) {
+    addMessage(`Equipped ${item.name} in ${slot} slot.`, gameState, gameState.player);
+    render(gameState, gameDisplay);
+    updateUI(gameState, gameState.player, choiceModeManager);
+    return true;
+  } else {
+    addMessage(`Failed to equip ${item.name}.`, gameState, gameState.player);
+    return false;
+  }
+}
+
+// Show a message (helper function for game actions)
+export function showMessage(message, gameState) {
+  addMessage(message, gameState, gameState.player);
+}

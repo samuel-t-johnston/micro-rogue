@@ -100,7 +100,9 @@ export class Character {
   unequipItem(slot, ringIndex = null) {
     if (slot === 'rings' && ringIndex !== null) {
       if (ringIndex >= 0 && ringIndex < this.equipment.rings.length) {
-        return (this.equipment.rings[ringIndex] = null);
+        const item = this.equipment.rings[ringIndex];
+        this.equipment.rings[ringIndex] = null;
+        return item;
       }
     } else if (Object.prototype.hasOwnProperty.call(this.equipment, slot)) {
       const item = this.equipment[slot];
