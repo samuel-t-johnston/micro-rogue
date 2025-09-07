@@ -34,9 +34,11 @@
 - **Game actions**: Complete equipment logic in gameLogic.js with InputHandler integration
 - **UI display**: Equipment items shown with numbered list in controls (like pickup system)
 - **Bug fixes**: Fixed unequipItem method to properly return unequipped items to inventory
+- **Weapon equipping**: Automatic slot selection for weapons (weapon1/weapon2), dual-wielding support
+- **Weapon replacement**: NumericMode dialog for selecting which weapon to replace when both slots full
 
 ### Test Coverage
-- **276 tests passing** across 14 test suites
+- **301 tests passing** across 14 test suites
 - **New test files**: `dungeonLevel.test.js`, `gameState.test.js`, `saveSystem.test.js`
 - **Updated tests**: Character system, world generation, save/load functionality, choice modes
 - **Comprehensive coverage**: All new features and existing functionality

@@ -93,6 +93,12 @@ Equipment Slots:
 - Armor slots: Head, Body, Hands, Legs, Feet
 - Jewelry slots: Neck (1 slot), Rings (10 slots)
 
+Weapon Equipping:
+- Automatic slot selection: Weapons equipped in first available slot (weapon1 or weapon2)
+- Dual-wielding support: Can equip weapons in both weapon slots
+- Replacement system: When both slots are full, player chooses which weapon to replace
+- Weapon replacement dialog: NumericMode shows equipped weapons for selection
+
 ITEM SYSTEM
 -----------
 
@@ -126,6 +132,9 @@ EQUIPMENT EFFECTS LIST
 ----------------------
  [TODO] These don't do anything yet.
  - armor+X
+ - hpBonus+X
+ - attack+X
+ - defense+X
 
 ITEM USE-EFFECTS LIST
 ---------------------
@@ -186,6 +195,7 @@ Numeric Choice Mode:
 - Numbered selection: 0-9 keys for item/equipment selection
 - ESC key cancels action and returns to default mode
 - Successful actions automatically return to default mode
+- Weapon replacement: Shows equipped weapons for selection when both weapon slots are full
 
 Yes/No Choice Mode:
 - Triggered when attempting to equip item in occupied slot
@@ -251,3 +261,4 @@ v0.9.0 - Item loading and random placement system with '$' symbol representation
 v0.10.0 - Item pickup functionality with 'P' key, numbered inventory display, and streamlined UI controls
 v0.11.0 - Furniture system with stateful objects, collision detection, and choice mode interaction
 v0.12.0 - Equipment system with inventory-based equipping, slot management, and replacement confirmation
+v0.13.0 - Weapon equipping system with automatic slot selection and dual-wielding support

@@ -116,7 +116,7 @@ Item Validation Rules:
 - All items must have a "name" property
 - Equipment items must have "slot" and "effect" sub-properties
 - Equipment slots must be one of: weapon, head, body, hands, legs, feet, neck, ring
-- Equipment effects must follow pattern: "armor+X" where X is a positive integer
+- Equipment effects must follow pattern: "armor+X", "hpBonus+X", "attack+X", or "defense+X" where X is a positive integer
 - Usable items must have "use_effect" sub-property
 - Usable effects must follow pattern: "currentHp+X" where X is a positive integer
 
@@ -258,10 +258,10 @@ Directional Choice Mode:
 
 Numeric Choice Mode:
 - Numbered selection: 0-9 keys for item/equipment selection
-- Context-aware actions (pickup, equip)
+- Context-aware actions (pickup, equip, weapon_replace)
 - Visual feedback with numbered options
 - Automatic mode exit on successful actions
-- Support for both item pickup and equipment selection
+- Support for item pickup, equipment selection, and weapon replacement
 
 Yes/No Choice Mode:
 - Y/N keys for confirmation dialogs
@@ -379,3 +379,4 @@ v0.21.0 - Code refactoring: Extracted Furniture class to encapsulate furniture b
 v0.22.0 - Choice mode system with directional input for furniture interaction (U key)
 v0.23.0 - Level loading system with JSON-based level definitions and LevelLoader class
 v0.24.0 - Equipment system with inventory-based equipping, slot management, and replacement confirmation
+v0.25.0 - Weapon equipping system with automatic slot selection, dual-wielding support, and weapon replacement dialog

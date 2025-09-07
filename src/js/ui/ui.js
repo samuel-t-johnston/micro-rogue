@@ -95,6 +95,11 @@ export function updateControlsUI(choiceModeManager) {
         context.items.forEach((item, index) => {
           controlsHTML += `<div class="control-group">${index}. ${item.name}</div>`;
         });
+      } else if (context && context.action === 'weapon_replace' && context.weapons) {
+        controlsHTML += '<div class="control-group"><strong>Equipped weapons:</strong></div>';
+        context.weapons.forEach((weapon, index) => {
+          controlsHTML += `<div class="control-group">${index}. ${weapon.item.name} (${weapon.slot})</div>`;
+        });
       }
       
       controlsHTML += '</div>';

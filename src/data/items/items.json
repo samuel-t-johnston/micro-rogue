@@ -60,7 +60,7 @@
     "symbol": "$",
     "equipment": {
       "slot": "weapon",
-      "effect": "defense+1"
+      "effect": "armor+1"
     }
   },
   "potion_vial": {

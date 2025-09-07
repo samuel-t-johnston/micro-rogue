@@ -500,6 +500,34 @@ export function getAvailableEquipment(gameState) {
   });
 }
 
+// Handle weapon equipping with special logic for two weapon slots
+function handleWeaponEquipping(selectedItem, gameState, gameDisplay, choiceModeManager) {
+  const weapon1 = gameState.player.equipment.weapon1;
+  const weapon2 = gameState.player.equipment.weapon2;
+  
+  // Check if there's an empty weapon slot
+  if (!weapon1) {
+    // First weapon slot is empty - equip there
+    return equipItemDirectly(selectedItem, 'weapon1', gameState, gameDisplay, choiceModeManager);
+  } else if (!weapon2) {
+    // Second weapon slot is empty - equip there
+    return equipItemDirectly(selectedItem, 'weapon2', gameState, gameDisplay, choiceModeManager);
+  } else {
+    // Both weapon slots are occupied - ask which one to replace
+    const equippedWeapons = [
+      { item: weapon1, slot: 'weapon1' },
+      { item: weapon2, slot: 'weapon2' }
+    ];
+    
+    choiceModeManager.setMode('numeric', {
+      action: 'weapon_replace',
+      newItem: selectedItem,
+      weapons: equippedWeapons
+    });
+    return false; // Don't complete the action yet
+  }
+}
+
 // Equip an item by index from available equipment
 export function equipItemByIndex(itemIndex, gameState, gameDisplay, choiceModeManager) {
   const availableEquipment = getAvailableEquipment(gameState);
@@ -512,6 +540,11 @@ export function equipItemByIndex(itemIndex, gameState, gameDisplay, choiceModeMa
   const selectedItem = availableEquipment[itemIndex];
   const itemData = gameState.itemsData[selectedItem.itemId];
   const slot = itemData.equipment.slot;
+  
+  // Special handling for weapons (two weapon slots)
+  if (slot === 'weapon') {
+    return handleWeaponEquipping(selectedItem, gameState, gameDisplay, choiceModeManager);
+  }
   
   // Check if slot is already occupied
   const existingItem = gameState.player.equipment[slot];
@@ -560,6 +593,47 @@ export function equipItemWithReplacement(itemIndex, existingItem, slot, gameStat
   
   // Equip the new item
   return equipItemDirectly(selectedItem, slot, gameState, gameDisplay, choiceModeManager);
+}
+
+// Replace weapon in specific slot
+export function replaceWeapon(weaponIndex, gameState, gameDisplay, choiceModeManager) {
+  // This function will be called from NumericMode when user selects which weapon to replace
+  // The context should contain the newItem and weapons array
+  const context = choiceModeManager.getActionContext();
+  
+  if (!context || context.action !== 'weapon_replace') {
+    addMessage('Invalid weapon replacement context.', gameState, gameState.player);
+    return false;
+  }
+  
+  const { newItem, weapons } = context;
+  
+  if (weaponIndex < 0 || weaponIndex >= weapons.length) {
+    addMessage('Invalid weapon selection.', gameState, gameState.player);
+    return false;
+  }
+  
+  const selectedWeapon = weapons[weaponIndex];
+  const slot = selectedWeapon.slot;
+  const existingItem = selectedWeapon.item;
+  
+  // Unequip the existing weapon and add to inventory
+  if (existingItem) {
+    const unequippedItem = gameState.player.unequipItem(slot);
+    if (unequippedItem) {
+      // Try to add to inventory
+      if (gameState.player.canAddToInventory()) {
+        gameState.player.addToInventory(unequippedItem);
+        addMessage(`Unequipped ${unequippedItem.name} and added to inventory.`, gameState, gameState.player);
+      } else {
+        // Inventory full - drop the item
+        addMessage(`Unequipped ${unequippedItem.name} (inventory full, item dropped).`, gameState, gameState.player);
+      }
+    }
+  }
+  
+  // Equip the new weapon
+  return equipItemDirectly(newItem, slot, gameState, gameDisplay, choiceModeManager);
 }
 
 // Directly equip an item (internal helper)

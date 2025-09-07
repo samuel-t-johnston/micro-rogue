@@ -19,8 +19,8 @@ const ITEM_RULES = {
         validValues: ['weapon', 'head', 'body', 'hands', 'legs', 'feet', 'neck', 'ring']
       },
       effect: {
-        pattern: /^armor\+(\d+)$/,
-        description: 'armor+X where X is an integer'
+        pattern: /^(armor|hpBonus|attack|defense)\+(\d+)$/,
+        description: 'armor+X, hpBonus+X, attack+X, or defense+X where X is an integer'
       }
     },
     usable: {
@@ -194,11 +194,11 @@ describe('Item Data Validation', () => {
       Object.entries(itemsData).forEach(([itemId, item]) => {
         if (item.hasOwnProperty('equipment')) {
           const effect = item.equipment.effect;
-          const match = effect.match(/^armor\+(\d+)$/);
+          const match = effect.match(/^(armor|hpBonus|attack|defense)\+(\d+)$/);
           expect(match).toBeTruthy();
           
-          const armorValue = parseInt(match[1], 10);
-          expect(armorValue).toBeGreaterThan(0);
+          const effectValue = parseInt(match[2], 10);
+          expect(effectValue).toBeGreaterThan(0);
         }
       });
     });

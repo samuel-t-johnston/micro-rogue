@@ -30,6 +30,11 @@ export class NumericMode extends BaseMode {
       if (success) {
         modeManager.resetToDefault();
       }
+    } else if (context && context.action === 'weapon_replace') {
+      const success = gameActions.replaceWeapon(itemIndex);
+      if (success) {
+        modeManager.resetToDefault();
+      }
     }
 
     return true;
@@ -40,6 +45,8 @@ export class NumericMode extends BaseMode {
       return 'Pick up - What would you like to pick up?';
     } else if (context && context.action === 'equip') {
       return 'Equip - What would you like to equip?';
+    } else if (context && context.action === 'weapon_replace') {
+      return 'Replace weapon - Which weapon would you like to replace?';
     }
     return 'Choose item';
   }
