@@ -69,12 +69,18 @@ export function movePlayer(
   // Check for auto-save
   checkAutoSave(gameState);
 
-  // Check if there's an item at the new position
-  const itemAtPosition = gameState.currentLevel.getItemAt(newPos.x, newPos.y);
-  if (itemAtPosition) {
-    const itemName =
-      gameState.itemsData[itemAtPosition.itemId]?.name || 'Unknown Item';
-    addMessage(`You see a ${itemName} here.`, gameState, gameState.player);
+  // Check if there are items at the new position
+  const itemsAtPosition = gameState.currentLevel.getItemsAt(newPos.x, newPos.y);
+  if (itemsAtPosition.length > 0) {
+    const itemNames = itemsAtPosition.map(item => 
+      gameState.itemsData[item.itemId]?.name || 'Unknown Item'
+    );
+    
+    if (itemNames.length === 1) {
+      addMessage(`You see a ${itemNames[0]} here.`, gameState, gameState.player);
+    } else {
+      addMessage(`You see: ${itemNames.join(', ')}`, gameState, gameState.player);
+    }
   }
 
   // Check if there's furniture at the new position
@@ -260,19 +266,19 @@ export function getAvailableItems(gameState) {
   const availableItems = [];
 
   // Check for items on the ground
-  const itemAtPosition = gameState.currentLevel.getItemAt(
+  const itemsAtPosition = gameState.currentLevel.getItemsAt(
     playerPos.x,
     playerPos.y
   );
-  if (itemAtPosition) {
+  itemsAtPosition.forEach(item => {
     const itemName =
-      gameState.itemsData[itemAtPosition.itemId]?.name || 'Unknown Item';
+      gameState.itemsData[item.itemId]?.name || 'Unknown Item';
     availableItems.push({
-      ...itemAtPosition,
+      ...item,
       name: itemName,
       source: 'ground',
     });
-  }
+  });
 
   // Check for items in open containers
   const furnitureAtPosition = gameState.currentLevel.getFurnitureAt(

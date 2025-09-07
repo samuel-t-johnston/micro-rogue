@@ -20,6 +20,11 @@ export class DungeonLevel {
     return this.items.find(item => item.x === x && item.y === y);
   }
 
+  // Get all items at specific position
+  getItemsAt(x, y) {
+    return this.items.filter(item => item.x === x && item.y === y);
+  }
+
   // Get furniture at specific position
   getFurnitureAt(x, y) {
     return this.furniture.find(

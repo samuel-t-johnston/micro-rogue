@@ -38,7 +38,7 @@
 - **Weapon replacement**: NumericMode dialog for selecting which weapon to replace when both slots full
 
 ### Test Coverage
-- **301 tests passing** across 14 test suites
+- **302 tests passing** across 14 test suites
 - **New test files**: `dungeonLevel.test.js`, `gameState.test.js`, `saveSystem.test.js`
 - **Updated tests**: Character system, world generation, save/load functionality, choice modes
 - **Comprehensive coverage**: All new features and existing functionality

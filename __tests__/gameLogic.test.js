@@ -67,7 +67,8 @@ describe('gameLogic', () => {
       'leather_helm': { name: 'Leather Helm', type: 'armor', equipment: { slot: 'head' } },
       'leather_armor': { name: 'Leather Armor', type: 'armor', equipment: { slot: 'body' } },
       'ring_power': { name: 'Ring of Power', type: 'ring', equipment: { slot: 'rings' } },
-      'iron_helm': { name: 'Iron Helm', type: 'armor', equipment: { slot: 'head' } }
+      'iron_helm': { name: 'Iron Helm', type: 'armor', equipment: { slot: 'head' } },
+      'iron_dagger': { name: 'Iron Dagger', type: 'weapon', equipment: { slot: 'weapon', effect: 'attack+1' } }
     };
 
     // Mock furniture data
@@ -285,6 +286,16 @@ describe('gameLogic', () => {
       movePlayer(1, 0, gameState, mockGameDisplay, mockChoiceModeManager);
       
       expect(addMessage).toHaveBeenCalledWith("You see a Iron Sword here.", gameState, gameState.player);
+    });
+
+    test('should show multiple items message when moving to position with multiple items', () => {
+      // Add multiple items at target position
+      gameState.currentLevel.addItem(4, 3, 'iron_dagger');
+      gameState.currentLevel.addItem(4, 3, 'iron_dagger');
+      
+      movePlayer(1, 0, gameState, mockGameDisplay, mockChoiceModeManager);
+      
+      expect(addMessage).toHaveBeenCalledWith("You see: Iron Dagger, Iron Dagger", gameState, gameState.player);
     });
 
     test('should show furniture message when moving to position with furniture', () => {
