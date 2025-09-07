@@ -1,7 +1,7 @@
 // Configuration settings for the game
 export const CONFIG_SETTINGS = {
   // Game version
-  gameVersion: "0.0.1",
+  gameVersion: "0.0.2",
 
   // Viewport/UI dimensions
   viewportWidth: 51,

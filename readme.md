@@ -4,7 +4,7 @@ I created Rogµe as a playground to experiment with agentic AI tools. I'm curren
 
 # State of the Game
 
- - Latest Version: 0.0.1 "Groundwork"
+ - Latest Version: 0.0.2 "Persistence"
  - Latest Stable Version: N/A
 
 The game is very early, but already includes a number of important features:
@@ -16,13 +16,11 @@ The game is very early, but already includes a number of important features:
  - Items and picking up
  - Dungeon "Furniture" like boulders, doors, and chests
    - Doors and chests can be opened. Chests can be looted
+ - Saving, loading, autosave
 
 ## Roadmap
 
 (0.0.x versions are laying basic groundwork for the game, with 0.1.0 being the first minor "release".)
-
-### 0.0.2 - Persistence
- - Saving & loading
 
 ### 0.0.3 - Materialism
  - Items do things

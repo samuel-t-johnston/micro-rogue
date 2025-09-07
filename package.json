@@ -1,6 +1,6 @@
 {
   "name": "ROGµE",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ROGµE",
   "main": "src/js/core/game.js",
   "type": "module",
