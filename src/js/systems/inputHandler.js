@@ -1,5 +1,5 @@
 // Input handler class for managing user input
-import { movePlayer, pickUpItem, getAvailableItems, pickUpItemByIndex, useFurniture, getAvailableEquipment, equipItemByIndex, equipItemWithReplacement, replaceWeapon, showMessage, getEquippedItems, removeEquipmentByIndex, removeEquipmentWithDrop } from '../core/gameLogic.js';
+import { movePlayer, pickUpItem, getAvailableItems, pickUpItemByIndex, useFurniture, getAvailableEquipment, equipItemByIndex, equipItemWithReplacement, replaceWeapon, showMessage, getEquippedItems, removeEquipmentByIndex, removeEquipmentWithDrop, dropItemFromInventory, dropItemWithContainerCheck, getInventoryItems } from '../core/gameLogic.js';
 
 export class InputHandler {
   constructor(gameState, gameDisplay, choiceModeManager, updateGameUICallback) {
@@ -26,6 +26,10 @@ export class InputHandler {
 
       getAvailableItems: () => {
         return getAvailableItems(this.gameState);
+      },
+
+      getInventoryItems: () => {
+        return getInventoryItems(this.gameState);
       },
 
       pickUpItemByIndex: index => {
@@ -66,6 +70,14 @@ export class InputHandler {
 
       removeEquipmentWithDrop: (item, slot, ringIndex) => {
         return removeEquipmentWithDrop(item, slot, ringIndex, this.gameState, this.gameDisplay, this.choiceModeManager);
+      },
+
+      dropItemFromInventory: (itemIndex) => {
+        return dropItemFromInventory(itemIndex, this.gameState, this.gameDisplay, this.choiceModeManager);
+      },
+
+      dropItemWithContainerCheck: (item, itemIndex, furniture) => {
+        return dropItemWithContainerCheck(item, itemIndex, furniture, this.gameState, this.gameDisplay, this.choiceModeManager);
       },
     };
   }

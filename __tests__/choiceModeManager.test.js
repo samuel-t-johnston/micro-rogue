@@ -112,7 +112,7 @@ describe('ChoiceModeManager', () => {
     });
 
     test('should return false for invalid keys', () => {
-      const result = choiceModeManager.handleInput('x', mockGameState, mockGameDisplay, mockGameActions);
+      const result = choiceModeManager.handleInput('z', mockGameState, mockGameDisplay, mockGameActions);
       expect(result).toBe(false);
     });
   });

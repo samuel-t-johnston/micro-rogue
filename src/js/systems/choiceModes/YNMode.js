@@ -33,6 +33,15 @@ export class YNMode extends BaseMode {
         if (success) {
           modeManager.resetToDefault();
         }
+      } else if (context && context.action === 'place_in_container') {
+        const success = gameActions.dropItemWithContainerCheck(
+          context.item,
+          context.itemIndex,
+          context.furniture
+        );
+        if (success) {
+          modeManager.resetToDefault();
+        }
       }
     } else if (key.toLowerCase() === 'n') {
       // Cancel - just return to default mode
@@ -53,6 +62,10 @@ export class YNMode extends BaseMode {
     } else if (context && context.action === 'drop_equipment') {
       const itemName = context.item?.name || 'Unknown Item';
       return `There is no room in your inventory. Drop the ${itemName} on the ground?`;
+    } else if (context && context.action === 'place_in_container') {
+      const itemName = context.item?.name || 'Unknown Item';
+      const furnitureName = context.furniture?.getName() || 'container';
+      return `There is a ${furnitureName} here. Place the ${itemName} in the ${furnitureName}?`;
     }
     return 'Yes or No?';
   }

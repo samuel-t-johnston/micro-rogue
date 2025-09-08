@@ -37,9 +37,11 @@
 - **Weapon equipping**: Automatic slot selection for weapons (weapon1/weapon2), dual-wielding support
 - **Weapon replacement**: NumericMode dialog for selecting which weapon to replace when both slots full
 - **Equipment removal**: 'R' key to remove equipped items, inventory management with drop confirmation
+- **Item dropping**: 'X' key to drop items from inventory, smart container detection and placement
+- **UI bug fix**: Fixed inventory items display in drop action NumericMode
 
 ### Test Coverage
-- **302 tests passing** across 14 test suites
+- **333 tests passing** across 14 test suites (1 skipped)
 - **New test files**: `dungeonLevel.test.js`, `gameState.test.js`, `saveSystem.test.js`
 - **Updated tests**: Character system, world generation, save/load functionality, choice modes
 - **Comprehensive coverage**: All new features and existing functionality

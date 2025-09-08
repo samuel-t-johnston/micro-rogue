@@ -17,6 +17,7 @@ export class DefaultMode extends BaseMode {
       'u',
       'e',
       'r',
+      'x',
       'escape',
     ];
   }
@@ -91,6 +92,21 @@ export class DefaultMode extends BaseMode {
         }
         break;
       }
+      case 'x': {
+        // Check if there are items in inventory to drop
+        const inventoryItems = gameActions.getInventoryItems();
+        if (inventoryItems.length > 0) {
+          // Enter numeric choice mode for item dropping
+          modeManager.setMode('numeric', {
+            action: 'drop',
+            items: inventoryItems,
+          });
+        } else {
+          // No items - show message
+          gameActions.showMessage('You have no items to drop.');
+        }
+        break;
+      }
       case 'escape':
         // No action in default mode
         break;
@@ -108,7 +124,8 @@ export class DefaultMode extends BaseMode {
       { label: 'P:', keys: 'Pick up' },
       { label: 'U:', keys: 'Use something nearby' },
       { label: 'E:', keys: 'Equip item' },
-      { label: 'R:', keys: 'Remove equipment' }
+      { label: 'R:', keys: 'Remove equipment' },
+      { label: 'X:', keys: 'Drop item' }
     ];
   }
 }

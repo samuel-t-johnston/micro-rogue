@@ -396,6 +396,29 @@ describe('UI Functions', () => {
 
       expect(mockGameDisplay.innerHTML).not.toContain('Equipped items:');
     });
+
+    test('should display inventory items in controls for drop action', () => {
+      const context = {
+        action: 'drop',
+        items: [
+          { name: 'Sword', itemId: 'sword' },
+          { name: 'Potion', itemId: 'potion' },
+          { name: 'Ring', itemId: 'ring_power' }
+        ]
+      };
+
+      // Set up the choice mode manager to return the context
+      mockChoiceModeManager.getActionContext.mockReturnValue(context);
+
+      updateUI(mockGameState, mockPlayer, mockChoiceModeManager, context);
+
+      // Get the controls element that was mocked
+      const controlsElement = document.getElementById('controls');
+      expect(controlsElement.innerHTML).toContain('Inventory items:');
+      expect(controlsElement.innerHTML).toContain('0. Sword');
+      expect(controlsElement.innerHTML).toContain('1. Potion');
+      expect(controlsElement.innerHTML).toContain('2. Ring');
+    });
   });
 
 }); 

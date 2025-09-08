@@ -42,6 +42,13 @@ export class NumericMode extends BaseMode {
       if (success && !modeManager.isInSpecialMode()) {
         modeManager.resetToDefault();
       }
+    } else if (context && context.action === 'drop') {
+      const success = gameActions.dropItemFromInventory(itemIndex);
+      // Only reset to default if the drop was actually completed
+      // (not if it just set up a confirmation dialog)
+      if (success && !modeManager.isInSpecialMode()) {
+        modeManager.resetToDefault();
+      }
     }
 
     return true;
@@ -56,6 +63,8 @@ export class NumericMode extends BaseMode {
       return 'Replace weapon - Which weapon would you like to replace?';
     } else if (context && context.action === 'remove') {
       return 'Remove equipment - What would you like to remove?';
+    } else if (context && context.action === 'drop') {
+      return 'Drop item - What would you like to drop?';
     }
     return 'Choose item';
   }

@@ -48,6 +48,7 @@ describe('Choice Modes', () => {
       movePlayer: jest.fn(),
       pickUpItem: jest.fn(),
       getAvailableItems: jest.fn(),
+      getInventoryItems: jest.fn(),
       useFurniture: jest.fn(),
       getAvailableEquipment: jest.fn(),
       showMessage: jest.fn()
@@ -132,6 +133,28 @@ describe('Choice Modes', () => {
       expect(displayText).toBe('What would you like to do?');
     });
 
+    test('should handle drop action with available items', () => {
+      const items = [{ name: 'Sword', itemId: 'sword' }];
+      mockGameActions.getInventoryItems.mockReturnValue(items);
+      
+      defaultMode.handleInput('x', null, null, null, mockGameActions, mockModeManager);
+      
+      expect(mockGameActions.getInventoryItems).toHaveBeenCalled();
+      expect(mockModeManager.setMode).toHaveBeenCalledWith('numeric', {
+        action: 'drop',
+        items: items
+      });
+    });
+
+    test('should show message when no items available for drop', () => {
+      mockGameActions.getInventoryItems.mockReturnValue([]);
+      
+      defaultMode.handleInput('x', null, null, null, mockGameActions, mockModeManager);
+      
+      expect(mockGameActions.getInventoryItems).toHaveBeenCalled();
+      expect(mockGameActions.showMessage).toHaveBeenCalledWith('You have no items to drop.');
+    });
+
     test('should provide control instructions', () => {
       const instructions = defaultMode.getControlInstructions();
       expect(instructions).toEqual([
@@ -139,7 +162,8 @@ describe('Choice Modes', () => {
         { label: 'P:', keys: 'Pick up' },
         { label: 'U:', keys: 'Use something nearby' },
         { label: 'E:', keys: 'Equip item' },
-        { label: 'R:', keys: 'Remove equipment' }
+        { label: 'R:', keys: 'Remove equipment' },
+        { label: 'X:', keys: 'Drop item' }
       ]);
     });
   });
@@ -296,6 +320,46 @@ describe('Choice Modes', () => {
       const displayText = numericMode.getDisplayText(context);
       expect(displayText).toBe('Remove equipment - What would you like to remove?');
     });
+
+    test('should handle drop action', () => {
+      const mockGameActions = {
+        dropItemFromInventory: jest.fn().mockReturnValue(true)
+      };
+      const mockModeManager = { 
+        resetToDefault: jest.fn(),
+        isInSpecialMode: jest.fn().mockReturnValue(false)
+      };
+      const context = { action: 'drop' };
+
+      const result = numericMode.handleInput('1', context, null, null, mockGameActions, mockModeManager);
+
+      expect(result).toBe(true);
+      expect(mockGameActions.dropItemFromInventory).toHaveBeenCalledWith(1);
+      expect(mockModeManager.resetToDefault).toHaveBeenCalled();
+    });
+
+    test('should not reset to default when drop action sets up confirmation dialog', () => {
+      const mockGameActions = {
+        dropItemFromInventory: jest.fn().mockReturnValue(true)
+      };
+      const mockModeManager = { 
+        resetToDefault: jest.fn(),
+        isInSpecialMode: jest.fn().mockReturnValue(true) // YN mode was set up
+      };
+      const context = { action: 'drop' };
+
+      const result = numericMode.handleInput('1', context, null, null, mockGameActions, mockModeManager);
+
+      expect(result).toBe(true);
+      expect(mockGameActions.dropItemFromInventory).toHaveBeenCalledWith(1);
+      expect(mockModeManager.resetToDefault).not.toHaveBeenCalled();
+    });
+
+    test('should provide display text for drop action', () => {
+      const context = { action: 'drop' };
+      const displayText = numericMode.getDisplayText(context);
+      expect(displayText).toBe('Drop item - What would you like to drop?');
+    });
   });
 
   describe('YNMode', () => {
@@ -411,6 +475,40 @@ describe('Choice Modes', () => {
 
       const displayText = ynMode.getDisplayText(context);
       expect(displayText).toBe('There is no room in your inventory. Drop the Sword on the ground?');
+    });
+
+    test('should handle Y key for place_in_container action', () => {
+      const context = {
+        action: 'place_in_container',
+        item: { name: 'Sword', itemId: 'sword' },
+        itemIndex: 0,
+        furniture: { getName: () => 'Chest' }
+      };
+
+      mockGameActions = {
+        dropItemWithContainerCheck: jest.fn().mockReturnValue(true)
+      };
+
+      const result = ynMode.handleInput('y', context, null, null, mockGameActions, mockModeManager);
+
+      expect(result).toBe(true);
+      expect(mockGameActions.dropItemWithContainerCheck).toHaveBeenCalledWith(
+        context.item,
+        context.itemIndex,
+        context.furniture
+      );
+      expect(mockModeManager.resetToDefault).toHaveBeenCalled();
+    });
+
+    test('should provide display text for place_in_container action', () => {
+      const context = {
+        action: 'place_in_container',
+        item: { name: 'Sword', itemId: 'sword' },
+        furniture: { getName: () => 'Chest' }
+      };
+
+      const displayText = ynMode.getDisplayText(context);
+      expect(displayText).toBe('There is a Chest here. Place the Sword in the Chest?');
     });
   });
 

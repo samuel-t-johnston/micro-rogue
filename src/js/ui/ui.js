@@ -106,6 +106,11 @@ export function updateControlsUI(choiceModeManager) {
           const slotName = equipment.slot === 'rings' ? `ring${equipment.ringIndex + 1}` : equipment.slot;
           controlsHTML += `<div class="control-group">${index}. ${equipment.item.name} (${slotName})</div>`;
         });
+      } else if (context && context.action === 'drop' && context.items) {
+        controlsHTML += '<div class="control-group"><strong>Inventory items:</strong></div>';
+        context.items.forEach((item, index) => {
+          controlsHTML += `<div class="control-group">${index}. ${item.name}</div>`;
+        });
       }
       
       controlsHTML += '</div>';

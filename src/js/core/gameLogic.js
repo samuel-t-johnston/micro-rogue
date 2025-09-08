@@ -506,6 +506,11 @@ export function getAvailableEquipment(gameState) {
   });
 }
 
+// Get all items in player inventory
+export function getInventoryItems(gameState) {
+  return gameState.player.inventory;
+}
+
 // Get all equipped items from player
 export function getEquippedItems(gameState) {
   return gameState.player.getEquippedItems();
@@ -706,6 +711,68 @@ function dropItem(item, gameState, gameDisplay) {
   
   // Add item to the current level
   currentLevel.addItem(playerPos.x, playerPos.y, item.itemId);
+}
+
+// Drop item from inventory by index
+export function dropItemFromInventory(itemIndex, gameState, gameDisplay, choiceModeManager) {
+  const inventory = gameState.player.inventory;
+  
+  if (itemIndex < 0 || itemIndex >= inventory.length) {
+    addMessage('Invalid item selection.', gameState, gameState.player);
+    return false;
+  }
+  
+  const item = inventory[itemIndex];
+  
+  // Check if there's a container at the player's location
+  const playerPos = gameState.getPlayerPosition();
+  const currentLevel = gameState.currentLevel;
+  const furnitureAtPosition = currentLevel.getFurnitureAt(playerPos.x, playerPos.y);
+  
+  if (furnitureAtPosition && furnitureAtPosition.isContainer()) {
+    // There's a container - ask if player wants to place item in it
+    choiceModeManager.setMode('yn', {
+      action: 'place_in_container',
+      item: item,
+      itemIndex: itemIndex,
+      furniture: furnitureAtPosition
+    });
+    return true;
+  } else {
+    // No container - drop item directly on the ground
+    return dropItemWithContainerCheck(item, itemIndex, null, gameState, gameDisplay, choiceModeManager);
+  }
+}
+
+// Drop item with container check (used by both direct drop and container placement)
+export function dropItemWithContainerCheck(item, itemIndex, furniture, gameState, gameDisplay, choiceModeManager) {
+  // Remove item from inventory
+  const removedItem = gameState.player.removeFromInventory(itemIndex);
+  
+  if (!removedItem) {
+    addMessage('Failed to remove item from inventory.', gameState, gameState.player);
+    return false;
+  }
+  
+  if (furniture && furniture.isContainer()) {
+    // Place item in container
+    const success = furniture.addItemToContainer(removedItem);
+    if (success) {
+      addMessage(`Placed ${removedItem.name} in ${furniture.getName()}.`, gameState, gameState.player);
+    } else {
+      // Container is full - drop on ground instead
+      dropItem(removedItem, gameState, gameDisplay);
+      addMessage(`The ${furniture.getName()} is full. Dropped ${removedItem.name} on the ground.`, gameState, gameState.player);
+    }
+  } else {
+    // Drop item on the ground
+    dropItem(removedItem, gameState, gameDisplay);
+    addMessage(`Dropped ${removedItem.name} on the ground.`, gameState, gameState.player);
+  }
+  
+  render(gameState, gameDisplay);
+  updateUI(gameState, gameState.player, choiceModeManager);
+  return true;
 }
 
 // Directly equip an item (internal helper)

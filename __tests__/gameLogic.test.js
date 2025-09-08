@@ -1,4 +1,4 @@
-import { pickUpItem, movePlayer, useFurniture, getAvailableEquipment, equipItemByIndex, equipItemWithReplacement, getEquippedItems, removeEquipmentByIndex, removeEquipmentWithDrop } from '../src/js/core/gameLogic.js';
+import { pickUpItem, movePlayer, useFurniture, getAvailableEquipment, equipItemByIndex, equipItemWithReplacement, getEquippedItems, removeEquipmentByIndex, removeEquipmentWithDrop, dropItemFromInventory, dropItemWithContainerCheck } from '../src/js/core/gameLogic.js';
 import { GameState } from '../src/js/core/gameState.js';
 import { Furniture } from '../src/js/entities/furniture.js';
 
@@ -846,6 +846,155 @@ describe('gameLogic', () => {
       
       expect(result).toBe(true);
       expect(gameState.player.equipment.rings[0]).toBe(null);
+    });
+  });
+
+  describe('dropItemFromInventory', () => {
+    test('should drop item on ground when no container present', () => {
+      // Add item to inventory
+      const item = { name: 'Sword', itemId: 'sword' };
+      gameState.player.addToInventory(item);
+      
+      const mockModeManager = { setMode: jest.fn() };
+      const result = dropItemFromInventory(0, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(gameState.player.inventory).not.toContain(item);
+      
+      // Check that item was added to level
+      const playerPos = gameState.getPlayerPosition();
+      const itemAtPosition = gameState.currentLevel.getItemAt(playerPos.x, playerPos.y);
+      expect(itemAtPosition).toBeDefined();
+      expect(itemAtPosition.itemId).toBe('sword');
+      
+      expect(addMessage).toHaveBeenCalledWith('Dropped Sword on the ground.', gameState, gameState.player);
+    });
+
+    test('should enter YN mode when container is present', () => {
+      // Add item to inventory
+      const item = { name: 'Sword', itemId: 'sword' };
+      gameState.player.addToInventory(item);
+      
+      // Add container furniture at player position
+      const playerPos = gameState.getPlayerPosition();
+      const furnitureData = {
+        name: 'Chest',
+        symbol: 'C',
+        container: { capacity: 5 },
+        defaultState: 'closed',
+        stateful: true,
+        states: ['closed', 'open']
+      };
+      const container = gameState.currentLevel.addFurniture(playerPos.x, playerPos.y, 'chest', furnitureData);
+      
+      const mockModeManager = { setMode: jest.fn() };
+      const result = dropItemFromInventory(0, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(mockModeManager.setMode).toHaveBeenCalledWith('yn', {
+        action: 'place_in_container',
+        item: item,
+        itemIndex: 0,
+        furniture: container
+      });
+    });
+
+    test('should return false for invalid item index', () => {
+      const mockModeManager = { setMode: jest.fn() };
+      const result = dropItemFromInventory(5, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(false);
+      expect(addMessage).toHaveBeenCalledWith('Invalid item selection.', gameState, gameState.player);
+    });
+  });
+
+  describe('dropItemWithContainerCheck', () => {
+    test('should place item in container when furniture is provided', () => {
+      const item = { name: 'Sword', itemId: 'sword' };
+      gameState.player.addToInventory(item);
+      
+      const furnitureData = {
+        name: 'Chest',
+        symbol: 'C',
+        container: { capacity: 5 },
+        defaultState: 'closed',
+        stateful: true,
+        states: ['closed', 'open']
+      };
+      const container = new Furniture(0, 0, 'chest', furnitureData);
+      const mockModeManager = { setMode: jest.fn() };
+      
+      const result = dropItemWithContainerCheck(item, 0, container, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(gameState.player.inventory).not.toContain(item);
+      expect(container.getContainerItems()).toContain(item);
+      expect(addMessage).toHaveBeenCalledWith('Placed Sword in Chest.', gameState, gameState.player);
+    });
+
+    test('should drop item on ground when furniture is full', () => {
+      const item = { name: 'Sword', itemId: 'sword' };
+      gameState.player.addToInventory(item);
+      
+      const furnitureData = {
+        name: 'Chest',
+        symbol: 'C',
+        container: { capacity: 1 },
+        defaultState: 'closed',
+        stateful: true,
+        states: ['closed', 'open']
+      };
+      const container = new Furniture(0, 0, 'chest', furnitureData);
+      // Fill the container
+      container.addItemToContainer({ name: 'Other Item', itemId: 'other' });
+      
+      const mockModeManager = { setMode: jest.fn() };
+      
+      const result = dropItemWithContainerCheck(item, 0, container, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(gameState.player.inventory).not.toContain(item);
+      expect(container.getContainerItems()).not.toContain(item);
+      
+      // Check that item was dropped on ground
+      const playerPos = gameState.getPlayerPosition();
+      const itemAtPosition = gameState.currentLevel.getItemAt(playerPos.x, playerPos.y);
+      expect(itemAtPosition).toBeDefined();
+      expect(itemAtPosition.itemId).toBe('sword');
+      
+      expect(addMessage).toHaveBeenCalledWith('The Chest is full. Dropped Sword on the ground.', gameState, gameState.player);
+    });
+
+    test('should drop item on ground when no furniture provided', () => {
+      const item = { name: 'Sword', itemId: 'sword' };
+      gameState.player.addToInventory(item);
+      
+      const mockModeManager = { setMode: jest.fn() };
+      
+      const result = dropItemWithContainerCheck(item, 0, null, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(gameState.player.inventory).not.toContain(item);
+      
+      // Check that item was dropped on ground
+      const playerPos = gameState.getPlayerPosition();
+      const itemAtPosition = gameState.currentLevel.getItemAt(playerPos.x, playerPos.y);
+      expect(itemAtPosition).toBeDefined();
+      expect(itemAtPosition.itemId).toBe('sword');
+      
+      expect(addMessage).toHaveBeenCalledWith('Dropped Sword on the ground.', gameState, gameState.player);
+    });
+
+    test('should return false when item removal fails', () => {
+      const item = { name: 'Sword', itemId: 'sword' };
+      // Don't add item to inventory
+      
+      const mockModeManager = { setMode: jest.fn() };
+      
+      const result = dropItemWithContainerCheck(item, 0, null, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(false);
+      expect(addMessage).toHaveBeenCalledWith('Failed to remove item from inventory.', gameState, gameState.player);
     });
   });
 }); 
