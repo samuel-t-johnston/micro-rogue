@@ -1,5 +1,5 @@
 // Input handler class for managing user input
-import { movePlayer, pickUpItem, getAvailableItems, pickUpItemByIndex, useFurniture, getAvailableEquipment, equipItemByIndex, equipItemWithReplacement, replaceWeapon, showMessage } from '../core/gameLogic.js';
+import { movePlayer, pickUpItem, getAvailableItems, pickUpItemByIndex, useFurniture, getAvailableEquipment, equipItemByIndex, equipItemWithReplacement, replaceWeapon, showMessage, getEquippedItems, removeEquipmentByIndex, removeEquipmentWithDrop } from '../core/gameLogic.js';
 
 export class InputHandler {
   constructor(gameState, gameDisplay, choiceModeManager, updateGameUICallback) {
@@ -54,6 +54,18 @@ export class InputHandler {
 
       showMessage: (message) => {
         showMessage(message, this.gameState);
+      },
+
+      getEquippedItems: () => {
+        return getEquippedItems(this.gameState);
+      },
+
+      removeEquipmentByIndex: (itemIndex) => {
+        return removeEquipmentByIndex(itemIndex, this.gameState, this.gameDisplay, this.choiceModeManager);
+      },
+
+      removeEquipmentWithDrop: (item, slot, ringIndex) => {
+        return removeEquipmentWithDrop(item, slot, ringIndex, this.gameState, this.gameDisplay, this.choiceModeManager);
       },
     };
   }

@@ -506,6 +506,11 @@ export function getAvailableEquipment(gameState) {
   });
 }
 
+// Get all equipped items from player
+export function getEquippedItems(gameState) {
+  return gameState.player.getEquippedItems();
+}
+
 // Handle weapon equipping with special logic for two weapon slots
 function handleWeaponEquipping(selectedItem, gameState, gameDisplay, choiceModeManager) {
   const weapon1 = gameState.player.equipment.weapon1;
@@ -640,6 +645,67 @@ export function replaceWeapon(weaponIndex, gameState, gameDisplay, choiceModeMan
   
   // Equip the new weapon
   return equipItemDirectly(newItem, slot, gameState, gameDisplay, choiceModeManager);
+}
+
+// Remove equipment by index
+export function removeEquipmentByIndex(itemIndex, gameState, gameDisplay, choiceModeManager) {
+  const equippedItems = getEquippedItems(gameState);
+  
+  if (itemIndex < 0 || itemIndex >= equippedItems.length) {
+    addMessage('Invalid equipment selection.', gameState, gameState.player);
+    return false;
+  }
+  
+  const selectedEquipment = equippedItems[itemIndex];
+  const { item, slot, ringIndex } = selectedEquipment;
+  
+  // Check if inventory has space
+  if (gameState.player.canAddToInventory()) {
+    // Unequip and add to inventory
+    const unequippedItem = gameState.player.unequipItem(slot, ringIndex);
+    if (unequippedItem) {
+      gameState.player.addToInventory(unequippedItem);
+      addMessage(`Removed ${unequippedItem.name} and added to inventory.`, gameState, gameState.player);
+      render(gameState, gameDisplay);
+      updateUI(gameState, gameState.player, choiceModeManager);
+      return true;
+    }
+  } else {
+    // No inventory space - ask if player wants to drop it
+    choiceModeManager.setMode('yn', {
+      action: 'drop_equipment',
+      item: item,
+      slot: slot,
+      ringIndex: ringIndex
+    });
+    return true;
+  }
+  
+  return false;
+}
+
+// Remove equipment with drop confirmation
+export function removeEquipmentWithDrop(item, slot, ringIndex, gameState, gameDisplay, choiceModeManager) {
+  // Unequip the item
+  const unequippedItem = gameState.player.unequipItem(slot, ringIndex);
+  if (unequippedItem) {
+    // Drop the item at player's location
+    dropItem(unequippedItem, gameState, gameDisplay);
+    addMessage(`Removed ${unequippedItem.name} and dropped it on the ground.`, gameState, gameState.player);
+    render(gameState, gameDisplay);
+    updateUI(gameState, gameState.player, choiceModeManager);
+    return true;
+  }
+  return false;
+}
+
+// Drop an item at the player's location
+function dropItem(item, gameState, gameDisplay) {
+  const playerPos = gameState.getPlayerPosition();
+  const currentLevel = gameState.currentLevel;
+  
+  // Add item to the current level
+  currentLevel.addItem(playerPos.x, playerPos.y, item.itemId);
 }
 
 // Directly equip an item (internal helper)

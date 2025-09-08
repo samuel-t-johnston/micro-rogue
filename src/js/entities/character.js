@@ -111,4 +111,36 @@ export class Character {
     }
     return null;
   }
+
+  // Get all equipped items with their slots
+  getEquippedItems() {
+    const equippedItems = [];
+    
+    // Check all equipment slots
+    for (const [slot, item] of Object.entries(this.equipment)) {
+      if (item !== null) {
+        if (slot === 'rings') {
+          // Handle rings array
+          this.equipment.rings.forEach((ring, index) => {
+            if (ring !== null) {
+              equippedItems.push({
+                item: ring,
+                slot: 'rings',
+                ringIndex: index
+              });
+            }
+          });
+        } else {
+          // Regular equipment slots
+          equippedItems.push({
+            item: item,
+            slot: slot,
+            ringIndex: null
+          });
+        }
+      }
+    }
+    
+    return equippedItems;
+  }
 }

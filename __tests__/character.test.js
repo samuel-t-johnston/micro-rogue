@@ -224,5 +224,62 @@ describe('Character', () => {
       const result = character.unequipItem('rings', 15); // Invalid index
       expect(result).toBe(null);
     });
+
+    test('should get all equipped items with their slots', () => {
+      // Equip items in different slots
+      const weapon = { name: 'Sword', type: 'weapon' };
+      const helmet = { name: 'Helmet', type: 'armor' };
+      const ring1 = { name: 'Ring 1', type: 'ring' };
+      const ring2 = { name: 'Ring 2', type: 'ring' };
+      
+      character.equipItem(weapon, 'weapon1');
+      character.equipItem(helmet, 'head');
+      character.equipItem(ring1, 'rings');
+      character.equipItem(ring2, 'rings');
+      
+      const equippedItems = character.getEquippedItems();
+      
+      expect(equippedItems).toHaveLength(4);
+      
+      // Check weapon
+      const weaponItem = equippedItems.find(item => item.item === weapon);
+      expect(weaponItem).toBeDefined();
+      expect(weaponItem.slot).toBe('weapon1');
+      expect(weaponItem.ringIndex).toBe(null);
+      
+      // Check helmet
+      const helmetItem = equippedItems.find(item => item.item === helmet);
+      expect(helmetItem).toBeDefined();
+      expect(helmetItem.slot).toBe('head');
+      expect(helmetItem.ringIndex).toBe(null);
+      
+      // Check rings
+      const ring1Item = equippedItems.find(item => item.item === ring1);
+      expect(ring1Item).toBeDefined();
+      expect(ring1Item.slot).toBe('rings');
+      expect(ring1Item.ringIndex).toBe(0);
+      
+      const ring2Item = equippedItems.find(item => item.item === ring2);
+      expect(ring2Item).toBeDefined();
+      expect(ring2Item.slot).toBe('rings');
+      expect(ring2Item.ringIndex).toBe(1);
+    });
+
+    test('should return empty array when no items equipped', () => {
+      const equippedItems = character.getEquippedItems();
+      expect(equippedItems).toHaveLength(0);
+    });
+
+    test('should only return equipped items, not empty slots', () => {
+      // Equip only one item
+      const weapon = { name: 'Sword', type: 'weapon' };
+      character.equipItem(weapon, 'weapon1');
+      
+      const equippedItems = character.getEquippedItems();
+      
+      expect(equippedItems).toHaveLength(1);
+      expect(equippedItems[0].item).toEqual(weapon);
+      expect(equippedItems[0].slot).toBe('weapon1');
+    });
   });
 }); 

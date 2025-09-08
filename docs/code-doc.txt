@@ -380,3 +380,4 @@ v0.22.0 - Choice mode system with directional input for furniture interaction (U
 v0.23.0 - Level loading system with JSON-based level definitions and LevelLoader class
 v0.24.0 - Equipment system with inventory-based equipping, slot management, and replacement confirmation
 v0.25.0 - Weapon equipping system with automatic slot selection, dual-wielding support, and weapon replacement dialog
+v0.26.0 - Equipment removal system with 'R' key, inventory management, and drop confirmation for full inventory

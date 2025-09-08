@@ -100,6 +100,12 @@ export function updateControlsUI(choiceModeManager) {
         context.weapons.forEach((weapon, index) => {
           controlsHTML += `<div class="control-group">${index}. ${weapon.item.name} (${weapon.slot})</div>`;
         });
+      } else if (context && context.action === 'remove' && context.items) {
+        controlsHTML += '<div class="control-group"><strong>Equipped items:</strong></div>';
+        context.items.forEach((equipment, index) => {
+          const slotName = equipment.slot === 'rings' ? `ring${equipment.ringIndex + 1}` : equipment.slot;
+          controlsHTML += `<div class="control-group">${index}. ${equipment.item.name} (${slotName})</div>`;
+        });
       }
       
       controlsHTML += '</div>';

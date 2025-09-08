@@ -24,6 +24,15 @@ export class YNMode extends BaseMode {
         if (success) {
           modeManager.resetToDefault();
         }
+      } else if (context && context.action === 'drop_equipment') {
+        const success = gameActions.removeEquipmentWithDrop(
+          context.item,
+          context.slot,
+          context.ringIndex
+        );
+        if (success) {
+          modeManager.resetToDefault();
+        }
       }
     } else if (key.toLowerCase() === 'n') {
       // Cancel - just return to default mode
@@ -41,6 +50,9 @@ export class YNMode extends BaseMode {
       const newItemName = context.newItem?.name || 'Unknown Item';
       const slotName = context.slot || 'unknown';
       return `You have a ${existingItemName} equipped in your ${slotName} slot. Remove it to equip ${newItemName}?`;
+    } else if (context && context.action === 'drop_equipment') {
+      const itemName = context.item?.name || 'Unknown Item';
+      return `There is no room in your inventory. Drop the ${itemName} on the ground?`;
     }
     return 'Yes or No?';
   }

@@ -138,7 +138,8 @@ describe('Choice Modes', () => {
         { label: 'Movement:', keys: 'WASD or Arrow Keys' },
         { label: 'P:', keys: 'Pick up' },
         { label: 'U:', keys: 'Use something nearby' },
-        { label: 'E:', keys: 'Equip item' }
+        { label: 'E:', keys: 'Equip item' },
+        { label: 'R:', keys: 'Remove equipment' }
       ]);
     });
   });
@@ -255,6 +256,46 @@ describe('Choice Modes', () => {
         { label: 'ESC:', keys: 'Cancel' }
       ]);
     });
+
+    test('should handle remove action', () => {
+      const mockGameActions = {
+        removeEquipmentByIndex: jest.fn().mockReturnValue(true)
+      };
+      const mockModeManager = { 
+        resetToDefault: jest.fn(),
+        isInSpecialMode: jest.fn().mockReturnValue(false)
+      };
+      const context = { action: 'remove' };
+
+      const result = numericMode.handleInput('1', context, null, null, mockGameActions, mockModeManager);
+
+      expect(result).toBe(true);
+      expect(mockGameActions.removeEquipmentByIndex).toHaveBeenCalledWith(1);
+      expect(mockModeManager.resetToDefault).toHaveBeenCalled();
+    });
+
+    test('should not reset to default when remove action sets up confirmation dialog', () => {
+      const mockGameActions = {
+        removeEquipmentByIndex: jest.fn().mockReturnValue(true)
+      };
+      const mockModeManager = { 
+        resetToDefault: jest.fn(),
+        isInSpecialMode: jest.fn().mockReturnValue(true) // YN mode was set up
+      };
+      const context = { action: 'remove' };
+
+      const result = numericMode.handleInput('1', context, null, null, mockGameActions, mockModeManager);
+
+      expect(result).toBe(true);
+      expect(mockGameActions.removeEquipmentByIndex).toHaveBeenCalledWith(1);
+      expect(mockModeManager.resetToDefault).not.toHaveBeenCalled();
+    });
+
+    test('should provide display text for remove action', () => {
+      const context = { action: 'remove' };
+      const displayText = numericMode.getDisplayText(context);
+      expect(displayText).toBe('Remove equipment - What would you like to remove?');
+    });
   });
 
   describe('YNMode', () => {
@@ -337,6 +378,39 @@ describe('Choice Modes', () => {
         { label: 'N:', keys: 'No' },
         { label: 'ESC:', keys: 'Cancel' }
       ]);
+    });
+
+    test('should handle Y key for drop_equipment action', () => {
+      const context = {
+        action: 'drop_equipment',
+        item: { name: 'Sword', itemId: 'sword' },
+        slot: 'weapon1',
+        ringIndex: null
+      };
+
+      mockGameActions = {
+        removeEquipmentWithDrop: jest.fn().mockReturnValue(true)
+      };
+
+      const result = ynMode.handleInput('y', context, null, null, mockGameActions, mockModeManager);
+
+      expect(result).toBe(true);
+      expect(mockGameActions.removeEquipmentWithDrop).toHaveBeenCalledWith(
+        context.item,
+        context.slot,
+        context.ringIndex
+      );
+      expect(mockModeManager.resetToDefault).toHaveBeenCalled();
+    });
+
+    test('should provide display text for drop_equipment action', () => {
+      const context = {
+        action: 'drop_equipment',
+        item: { name: 'Sword', itemId: 'sword' }
+      };
+
+      const displayText = ynMode.getDisplayText(context);
+      expect(displayText).toBe('There is no room in your inventory. Drop the Sword on the ground?');
     });
   });
 

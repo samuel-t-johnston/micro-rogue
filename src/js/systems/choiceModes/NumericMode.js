@@ -35,6 +35,13 @@ export class NumericMode extends BaseMode {
       if (success) {
         modeManager.resetToDefault();
       }
+    } else if (context && context.action === 'remove') {
+      const success = gameActions.removeEquipmentByIndex(itemIndex);
+      // Only reset to default if the removal was actually completed
+      // (not if it just set up a confirmation dialog)
+      if (success && !modeManager.isInSpecialMode()) {
+        modeManager.resetToDefault();
+      }
     }
 
     return true;
@@ -47,6 +54,8 @@ export class NumericMode extends BaseMode {
       return 'Equip - What would you like to equip?';
     } else if (context && context.action === 'weapon_replace') {
       return 'Replace weapon - Which weapon would you like to replace?';
+    } else if (context && context.action === 'remove') {
+      return 'Remove equipment - What would you like to remove?';
     }
     return 'Choose item';
   }

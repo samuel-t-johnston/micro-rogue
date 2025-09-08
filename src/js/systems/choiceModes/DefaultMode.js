@@ -16,6 +16,7 @@ export class DefaultMode extends BaseMode {
       'p',
       'u',
       'e',
+      'r',
       'escape',
     ];
   }
@@ -75,6 +76,21 @@ export class DefaultMode extends BaseMode {
         }
         break;
       }
+      case 'r': {
+        // Check if there are equipped items to remove
+        const equippedItems = gameActions.getEquippedItems();
+        if (equippedItems.length > 0) {
+          // Enter numeric choice mode for equipment removal
+          modeManager.setMode('numeric', {
+            action: 'remove',
+            items: equippedItems,
+          });
+        } else {
+          // No equipment - show message
+          gameActions.showMessage('You have no equipment to remove.');
+        }
+        break;
+      }
       case 'escape':
         // No action in default mode
         break;
@@ -91,7 +107,8 @@ export class DefaultMode extends BaseMode {
       { label: 'Movement:', keys: 'WASD or Arrow Keys' },
       { label: 'P:', keys: 'Pick up' },
       { label: 'U:', keys: 'Use something nearby' },
-      { label: 'E:', keys: 'Equip item' }
+      { label: 'E:', keys: 'Equip item' },
+      { label: 'R:', keys: 'Remove equipment' }
     ];
   }
 }

@@ -1,10 +1,10 @@
 # Cursor Memory Bank
 
 ## CURRENT STATUS: Ready for New Features
-- Complete refactoring: modular architecture, 276 tests passing
+- Complete refactoring: modular architecture, 319 tests passing (1 skipped)
 - Character system with save/load functionality implemented
 - Data-driven rendering and mode-agnostic UI
-- Equipment system with inventory-based equipping implemented
+- Equipment system with inventory-based equipping and removal implemented
 
 ## MAJOR REFACTORING COMPLETED:
 
@@ -36,6 +36,7 @@
 - **Bug fixes**: Fixed unequipItem method to properly return unequipped items to inventory
 - **Weapon equipping**: Automatic slot selection for weapons (weapon1/weapon2), dual-wielding support
 - **Weapon replacement**: NumericMode dialog for selecting which weapon to replace when both slots full
+- **Equipment removal**: 'R' key to remove equipped items, inventory management with drop confirmation
 
 ### Test Coverage
 - **302 tests passing** across 14 test suites

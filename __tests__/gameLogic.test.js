@@ -1,4 +1,4 @@
-import { pickUpItem, movePlayer, useFurniture, getAvailableEquipment, equipItemByIndex, equipItemWithReplacement } from '../src/js/core/gameLogic.js';
+import { pickUpItem, movePlayer, useFurniture, getAvailableEquipment, equipItemByIndex, equipItemWithReplacement, getEquippedItems, removeEquipmentByIndex, removeEquipmentWithDrop } from '../src/js/core/gameLogic.js';
 import { GameState } from '../src/js/core/gameState.js';
 import { Furniture } from '../src/js/entities/furniture.js';
 
@@ -742,6 +742,110 @@ describe('gameLogic', () => {
       
       expect(result).toBe(false);
       expect(addMessage).toHaveBeenCalledWith('Invalid equipment selection.', gameState, gameState.player);
+    });
+  });
+
+  describe('getEquippedItems', () => {
+    test('should return equipped items from player', () => {
+      // Equip some items
+      const weapon = { name: 'Sword', itemId: 'sword' };
+      const helmet = { name: 'Helmet', itemId: 'helmet' };
+      
+      gameState.player.equipItem(weapon, 'weapon1');
+      gameState.player.equipItem(helmet, 'head');
+      
+      const equippedItems = getEquippedItems(gameState);
+      
+      expect(equippedItems).toHaveLength(2);
+      expect(equippedItems[0].item).toEqual(weapon);
+      expect(equippedItems[0].slot).toBe('weapon1');
+      expect(equippedItems[1].item).toEqual(helmet);
+      expect(equippedItems[1].slot).toBe('head');
+    });
+
+    test('should return empty array when no items equipped', () => {
+      const equippedItems = getEquippedItems(gameState);
+      expect(equippedItems).toHaveLength(0);
+    });
+  });
+
+  describe('removeEquipmentByIndex', () => {
+    test('should remove equipment and add to inventory when space available', () => {
+      // Equip an item
+      const weapon = { name: 'Sword', itemId: 'sword' };
+      gameState.player.equipItem(weapon, 'weapon1');
+      
+      const mockModeManager = { setMode: jest.fn() };
+      const result = removeEquipmentByIndex(0, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(gameState.player.equipment.weapon1).toBe(null);
+      expect(gameState.player.inventory).toContain(weapon);
+      expect(addMessage).toHaveBeenCalledWith('Removed Sword and added to inventory.', gameState, gameState.player);
+    });
+
+    test('should enter YN mode when inventory is full', () => {
+      // Fill inventory
+      for (let i = 0; i < 5; i++) {
+        gameState.player.addToInventory({ name: `Item ${i}`, itemId: `item${i}` });
+      }
+      
+      // Equip an item
+      const weapon = { name: 'Sword', itemId: 'sword' };
+      gameState.player.equipItem(weapon, 'weapon1');
+      
+      const mockModeManager = { setMode: jest.fn() };
+      const result = removeEquipmentByIndex(0, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(mockModeManager.setMode).toHaveBeenCalledWith('yn', {
+        action: 'drop_equipment',
+        item: weapon,
+        slot: 'weapon1',
+        ringIndex: null
+      });
+    });
+
+    test('should return false for invalid item index', () => {
+      const mockModeManager = { setMode: jest.fn() };
+      const result = removeEquipmentByIndex(5, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(false);
+      expect(addMessage).toHaveBeenCalledWith('Invalid equipment selection.', gameState, gameState.player);
+    });
+  });
+
+  describe('removeEquipmentWithDrop', () => {
+    test('should remove equipment and drop it on the ground', () => {
+      const weapon = { name: 'Sword', itemId: 'sword' };
+      
+      // First equip the weapon
+      gameState.player.equipItem(weapon, 'weapon1');
+      
+      const mockModeManager = { setMode: jest.fn() };
+      
+      const result = removeEquipmentWithDrop(weapon, 'weapon1', null, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(gameState.player.equipment.weapon1).toBe(null);
+      expect(addMessage).toHaveBeenCalledWith('Removed Sword and dropped it on the ground.', gameState, gameState.player);
+      
+      // Check that item was added to level
+      const playerPos = gameState.getPlayerPosition();
+      const itemAtPosition = gameState.currentLevel.getItemAt(playerPos.x, playerPos.y);
+      expect(itemAtPosition).toBeDefined();
+      expect(itemAtPosition.itemId).toBe('sword');
+    });
+
+    test('should handle ring equipment correctly', () => {
+      const ring = { name: 'Ring', itemId: 'ring' };
+      gameState.player.equipItem(ring, 'rings');
+      
+      const mockModeManager = { setMode: jest.fn() };
+      const result = removeEquipmentWithDrop(ring, 'rings', 0, gameState, mockGameDisplay, mockModeManager);
+      
+      expect(result).toBe(true);
+      expect(gameState.player.equipment.rings[0]).toBe(null);
     });
   });
 }); 
