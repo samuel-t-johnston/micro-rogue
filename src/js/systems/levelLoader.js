@@ -1,9 +1,12 @@
+import { DataFileLoader } from './dataFileLoader.js';
+
 // Level loading and parsing functions
 export class LevelLoader {
   constructor() {
     this.supportedTypes = ['fixed_layout'];
     this.furnitureData = null;
     this.symbolToFurnitureType = null;
+    this.dataLoader = new DataFileLoader();
   }
 
   // Load furniture data and create symbol lookup
@@ -13,14 +16,7 @@ export class LevelLoader {
     }
 
     try {
-      const response = await fetch('/data/furniture/furniture.json');
-      if (!response.ok) {
-        throw new Error(
-          `Failed to load furniture data: ${response.status} ${response.statusText}`
-        );
-      }
-
-      this.furnitureData = await response.json();
+      this.furnitureData = await this.dataLoader.loadFurniture();
       this.createSymbolLookup();
     } catch (error) {
       console.error('Error loading furniture data:', error);
@@ -45,14 +41,7 @@ export class LevelLoader {
       // Ensure furniture data is loaded first
       await this.loadFurnitureData();
 
-      const response = await fetch(levelPath);
-      if (!response.ok) {
-        throw new Error(
-          `Failed to load level: ${response.status} ${response.statusText}`
-        );
-      }
-
-      const levelData = await response.json();
+      const levelData = await this.dataLoader.loadLevel(levelPath);
       return this.parseLevel(levelData);
     } catch (error) {
       console.error('Error loading level:', error);

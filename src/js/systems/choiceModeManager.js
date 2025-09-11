@@ -3,16 +3,16 @@ import { defaultModeRegistry } from './choiceModes/index.js';
 // Choice mode manager to handle different input states
 export class ChoiceModeManager {
   constructor(onModeChange = null) {
-    this.currentMode = 'default';
+    this.currentMode = 'default'; 
     this.actionContext = null;
-    this.onModeChange = onModeChange;
+    this.onModeChange = onModeChange; // Callback function to update the game UI
     this.modeRegistry = defaultModeRegistry;
     this.currentModeInstance = null;
   }
 
   // Set the current choice mode and context
   setMode(mode, context = null) {
-    this.currentMode = mode;
+    this.currentMode = mode; // Set the current mode string
     this.actionContext = context;
     this.currentModeInstance = null; // Clear cached instance
     if (this.onModeChange) {
@@ -44,10 +44,10 @@ export class ChoiceModeManager {
   isInSpecialMode() {
     return this.currentMode !== 'default';
   }
-
-  // Handle input based on current mode
-  handleInput(key, gameState, gameDisplay, gameActions) {
-    // Get or create the current mode instance
+  
+  // Get or create the current mode instance
+  initCurrentModeInstance() {
+    // If the current mode instance is not already created, create it
     if (!this.currentModeInstance) {
       try {
         this.currentModeInstance = this.modeRegistry.getMode(this.currentMode);
@@ -55,6 +55,15 @@ export class ChoiceModeManager {
         console.error(`Unknown choice mode: ${this.currentMode}`, error);
         return false;
       }
+    }
+    return true;
+  }
+
+  // Handle input based on current mode
+  handleInput(key, gameState, gameDisplay, gameActions) {
+    // Get or create the current mode instance
+    if (!this.initCurrentModeInstance()) {
+      return false;
     }
 
     // Check if key is valid for current mode
@@ -76,13 +85,8 @@ export class ChoiceModeManager {
   // Get display text for current mode
   getModeDisplayText() {
     // Get or create the current mode instance
-    if (!this.currentModeInstance) {
-      try {
-        this.currentModeInstance = this.modeRegistry.getMode(this.currentMode);
-      } catch (error) {
-        console.error(`Unknown choice mode: ${this.currentMode}`, error);
-        return null;
-      }
+    if (!this.initCurrentModeInstance()) {
+      return null;
     }
 
     return this.currentModeInstance.getDisplayText(this.actionContext);
@@ -91,13 +95,8 @@ export class ChoiceModeManager {
   // Get control instructions for current mode
   getModeControlInstructions() {
     // Get or create the current mode instance
-    if (!this.currentModeInstance) {
-      try {
-        this.currentModeInstance = this.modeRegistry.getMode(this.currentMode);
-      } catch (error) {
-        console.error(`Unknown choice mode: ${this.currentMode}`, error);
-        return [];
-      }
+    if (!this.initCurrentModeInstance()) {
+      return [];
     }
 
     return this.currentModeInstance.getControlInstructions(this.actionContext);

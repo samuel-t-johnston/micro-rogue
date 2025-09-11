@@ -9,31 +9,19 @@ import { GameState } from './gameState.js';
 import { addDelta, toString } from '../utils/coordinates.js';
 import { saveSystem } from '../systems/saveSystem.js';
 import { CONFIG_SETTINGS } from '../utils/config.js';
+import { DataFileLoader } from '../systems/dataFileLoader.js';
+
+// Create a shared DataFileLoader instance
+const dataLoader = new DataFileLoader();
 
 // Load items from JSON file
 export async function loadItems() {
-  try {
-    const response = await fetch('/data/items/items.json');
-    const itemsData = await response.json();
-    console.log('Items loaded:', itemsData);
-    return itemsData;
-  } catch (error) {
-    console.error('Error loading items:', error);
-    return {};
-  }
+  return await dataLoader.loadItems();
 }
 
 // Load furniture from JSON file
 export async function loadFurniture() {
-  try {
-    const response = await fetch('/data/furniture/furniture.json');
-    const furnitureData = await response.json();
-    console.log('Furniture loaded:', furnitureData);
-    return furnitureData;
-  } catch (error) {
-    console.error('Error loading furniture:', error);
-    return {};
-  }
+  return await dataLoader.loadFurniture();
 }
 
 // Move player character
@@ -145,21 +133,6 @@ export async function initGame() {
 
   addMessage('Welcome to ROGµE!', gameState, gameState.player);
   addMessage('Use WASD or arrow keys to move.', gameState, gameState.player);
-  addMessage(
-    `Your character has ${gameState.player.maxHp} max HP.`,
-    gameState,
-    gameState.player
-  );
-  addMessage(
-    'You are in a simple room. Explore with WASD!',
-    gameState,
-    gameState.player
-  );
-  addMessage(
-    'You see some items ($) and furniture scattered around the room.',
-    gameState,
-    gameState.player
-  );
 
   return gameState;
 }

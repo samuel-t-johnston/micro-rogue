@@ -1,10 +1,12 @@
 # Cursor Memory Bank
 
-## CURRENT STATUS: Ready for New Features
-- Complete refactoring: modular architecture, 319 tests passing (1 skipped)
+## CURRENT STATUS: Equipment Effect System Design Phase
+- Complete refactoring: modular architecture, 334 tests passing (1 skipped)
 - Character system with save/load functionality implemented
 - Data-driven rendering and mode-agnostic UI
 - Equipment system with inventory-based equipping and removal implemented
+- DataFileLoader system for centralized data loading implemented
+- **NEXT TASK**: Implement equipment effect system with centralized templates and character effect tracking
 
 ## MAJOR REFACTORING COMPLETED:
 
@@ -40,8 +42,14 @@
 - **Item dropping**: 'X' key to drop items from inventory, smart container detection and placement
 - **UI bug fix**: Fixed inventory items display in drop action NumericMode
 
+### Data Loading System
+- **DataFileLoader class**: Centralized data loading with caching support
+- **Eliminated duplication**: Consolidated `loadItems()` and `loadFurniture()` functions
+- **Consistent error handling**: Unified approach across all data loading operations
+- **Future-ready**: Easy to extend for new data types (monsters, spells, etc.)
+
 ### Test Coverage
-- **333 tests passing** across 14 test suites (1 skipped)
+- **334 tests passing** across 14 test suites (1 skipped)
 - **New test files**: `dungeonLevel.test.js`, `gameState.test.js`, `saveSystem.test.js`
 - **Updated tests**: Character system, world generation, save/load functionality, choice modes
 - **Comprehensive coverage**: All new features and existing functionality
@@ -60,6 +68,148 @@ Renderer (data-driven) → JSON symbols and helper functions
 - Data-driven content (items/furniture from JSON)
 - Mode-agnostic UI with dynamic display generation
 - Comprehensive test coverage ensures reliability
+
+## EQUIPMENT EFFECT SYSTEM DESIGN
+====================================
+
+### GOALS
+- Implement centralized effect templates for easy maintenance and extensibility
+- Support regex-based effect parsing for flexible effect definitions
+- Track effect sources (equipment, spells, abilities) for future expansion
+- Separate base stats from bonused stats for clear UI display
+- Support both immediate effects (apply/remove) and ongoing effects (each turn)
+- Add effect validation through unit tests for development-time error catching
+
+### DESIGN CONSIDERATIONS
+- **Effect Stacking**: Additive for now, extensible for complex interactions later
+- **Effect Categories**: Group effects by type (defense, health, offense, debuff)
+- **Source Tracking**: Each effect knows its source for proper removal
+- **Temporary Effects**: Support for effects with turn counts and expiration
+- **Ongoing Effects**: `eachTurn` function for damage over time, regeneration, etc.
+- **Character Integration**: Base stats vs bonused stats separation
+- **Validation**: Static analysis in unit tests, not runtime validation
+
+### CURRENT ITEMS WITH EFFECTS
+From items.json:
+- leather_helm: "armor+1" (head slot)
+- leather_armor: "armor+1" (body slot)  
+- leather_gloves: "armor+1" (hands slot)
+- leather_tassets: "armor+1" (legs slot)
+- leather_shoes: "armor+1" (feet slot)
+- amulet_of_health: "hpBonus+2" (neck slot)
+- iron_dagger: "attack+1" (weapon slot)
+- iron_buckler: "armor+1" (weapon slot)
+
+### IMPLEMENTATION PLAN
+
+#### 1. Effect Registry (src/js/systems/effectRegistry.js)
+```javascript
+export const EFFECT_TEMPLATES = {
+  armor_up: {
+    regex: /^armor\+(\d+)$/,
+    category: 'defense',
+    apply: (character, value, source) => { /* add effect to character */ },
+    remove: (character, value, source) => { /* remove effect from character */ },
+    eachTurn: null // No ongoing effect
+  },
+  hp_bonus: {
+    regex: /^hpBonus\+(\d+)$/,
+    category: 'health',
+    apply: (character, value, source) => { /* add effect to character */ },
+    remove: (character, value, source) => { /* remove effect from character */ },
+    eachTurn: null
+  },
+  attack_up: {
+    regex: /^attack\+(\d+)$/,
+    category: 'offense',
+    apply: (character, value, source) => { /* add effect to character */ },
+    remove: (character, value, source) => { /* remove effect from character */ },
+    eachTurn: null
+  },
+  // Example temporary effect
+  poison: {
+    regex: /^poison\+(\d+)$/,
+    category: 'debuff',
+    apply: (character, value, source) => { /* add with turn count */ },
+    remove: (character, value, source) => { /* remove effect */ },
+    eachTurn: (character, value) => { /* damage each turn */ }
+  }
+};
+```
+
+#### 2. Enhanced Character Class (src/js/entities/character.js)
+Add to constructor:
+```javascript
+// Effect tracking
+this.effects = [];
+
+// Base stats (separate from bonuses)
+this.baseStats = {
+  body: body,
+  mind: mind,
+  agility: agility,
+  control: control,
+  hpBonus: hpBonus
+};
+
+// Bonused stats (calculated from base + effects)
+this.bonusedStats = {
+  body: body,
+  mind: mind,
+  agility: agility,
+  control: control,
+  hpBonus: hpBonus
+};
+```
+
+Add methods:
+```javascript
+addEffect(effect) { /* add effect and recalculate stats */ }
+removeEffect(type, source) { /* remove effect and recalculate stats */ }
+recalculateStats() { /* apply all effects to base stats */ }
+processEffects() { /* handle each-turn effects and expiration */ }
+```
+
+#### 3. Effect Manager (src/js/systems/effectManager.js)
+```javascript
+export class EffectManager {
+  static parseEffect(effectString) { /* parse effect string using regex */ }
+  static applyEffect(character, effectString, source) { /* apply parsed effect */ }
+  static removeEffect(character, effectString, source) { /* remove parsed effect */ }
+  static validateEffect(effectString) { /* validate effect format */ }
+}
+```
+
+#### 4. Equipment Integration (src/js/core/gameLogic.js)
+Modify equipment functions:
+```javascript
+// When equipping:
+EffectManager.applyEffect(character, itemData.equipment.effect, 'equipment');
+
+// When unequipping:
+EffectManager.removeEffect(character, itemData.equipment.effect, 'equipment');
+```
+
+#### 5. Unit Test Integration
+Add to existing item validation tests:
+```javascript
+test('all equipment items have valid effects', () => {
+  const items = loadItems();
+  for (const [itemId, itemData] of Object.entries(items)) {
+    if (itemData.equipment && itemData.equipment.effect) {
+      expect(EffectManager.validateEffect(itemData.equipment.effect)).toBe(true);
+    }
+  }
+});
+```
+
+### IMPLEMENTATION ORDER
+1. Create effectRegistry.js with basic effect templates
+2. Create effectManager.js with parsing and application logic
+3. Enhance Character class with effect tracking and stat separation
+4. Integrate with existing equipment system in gameLogic.js
+5. Add unit tests for effect validation
+6. Test with existing items to ensure effects work correctly
 
 ## PROJECT CONTEXT:
 - JavaScript roguelike game with Jest testing
