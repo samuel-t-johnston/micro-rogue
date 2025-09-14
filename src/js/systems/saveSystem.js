@@ -1,5 +1,6 @@
 import { CONFIG_SETTINGS } from '../utils/config.js';
 import { Character } from '../entities/character.js';
+import { StatBlock } from '../entities/statBlock.js';
 import { Furniture } from '../entities/furniture.js';
 import { DungeonLevel, GameState } from '../core/gameState.js';
 import { create } from '../utils/coordinates.js';
@@ -71,7 +72,8 @@ export class SaveSystem {
   deserializeGameState(saveData) {
     // Validate version compatibility
     if (saveData.version !== this.saveVersion) {
-      console.warn(`Save file version ${saveData.version} may not be compatible with current version ${this.saveVersion}`);
+      console.error(`Incompatible save file version ${saveData.version}. Expected ${this.saveVersion}. Starting new game.`);
+      return null;
     }
 
     // Create a proper GameState instance
@@ -103,11 +105,8 @@ export class SaveSystem {
   // Serialize Character object
   serializeCharacter(character) {
     return {
-      body: character.body,
-      mind: character.mind,
-      agility: character.agility,
-      control: character.control,
-      hpBonus: character.hpBonus,
+      baseStats: character.baseStats.toObject(),
+      bonusedStats: character.bonusedStats.toObject(),
       symbol: character.symbol,
       x: character.x,
       y: character.y,
@@ -116,24 +115,28 @@ export class SaveSystem {
       maxHp: character.maxHp,
       inventory: character.inventory,
       maxInventorySize: character.maxInventorySize,
-      equipment: character.equipment
+      equipment: character.equipment,
+      effects: character.effects
     };
   }
 
   // Deserialize Character object
   deserializeCharacter(characterData) {
     const character = new Character(
-      characterData.body,
-      characterData.mind,
-      characterData.agility,
-      characterData.control,
-      characterData.hpBonus,
+      characterData.baseStats.body,
+      characterData.baseStats.mind,
+      characterData.baseStats.agility,
+      characterData.baseStats.control,
+      characterData.baseStats.hpBonus,
       characterData.symbol,
       characterData.x || 0,
       characterData.y || 0,
       characterData.isPlayer || false
     );
     
+    // Restore bonused stats and effects
+    character.bonusedStats = StatBlock.fromObject(characterData.bonusedStats);
+    character.effects = characterData.effects || [];
     character.currentHp = characterData.currentHp;
     character.maxHp = characterData.maxHp;
     character.inventory = characterData.inventory || [];
@@ -152,6 +155,7 @@ export class SaveSystem {
     
     return character;
   }
+
 
   // Serialize DungeonLevel object
   serializeDungeonLevel(level) {

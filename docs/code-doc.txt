@@ -305,6 +305,8 @@ Character Management:
 - GameState maintains direct reference to player character for efficient access
 - Character positions stored as "x,y" keys in Map for O(1) lookup performance
 - Characters cannot occupy the same position (collision detection)
+- StatBlock class encapsulates character statistics with utility methods
+- Effect system with centralized templates and character effect tracking
 
 Character Operations:
 - addCharacter(character, x, y): Add character to level at specific position

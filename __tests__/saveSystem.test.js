@@ -52,11 +52,20 @@ describe('SaveSystem', () => {
       const serialized = saveSystem.serializeCharacter(character);
       
       expect(serialized).toEqual({
-        body: 2,
-        mind: 3,
-        agility: 4,
-        control: 1,
-        hpBonus: 5,
+        baseStats: {
+          body: 2,
+          mind: 3,
+          agility: 4,
+          control: 1,
+          hpBonus: 5
+        },
+        bonusedStats: {
+          body: 2,
+          mind: 3,
+          agility: 4,
+          control: 1,
+          hpBonus: 5
+        },
         symbol: 'G',
         x: 7,
         y: 8,
@@ -67,17 +76,27 @@ describe('SaveSystem', () => {
         maxInventorySize: 5,
         equipment: expect.objectContaining({
           weapon1: { name: 'Sword', type: 'weapon' }
-        })
+        }),
+        effects: []
       });
     });
 
     test('should deserialize character correctly', () => {
       const characterData = {
-        body: 3,
-        mind: 2,
-        agility: 4,
-        control: 1,
-        hpBonus: 2,
+        baseStats: {
+          body: 3,
+          mind: 2,
+          agility: 4,
+          control: 1,
+          hpBonus: 2
+        },
+        bonusedStats: {
+          body: 3,
+          mind: 2,
+          agility: 4,
+          control: 1,
+          hpBonus: 2
+        },
         symbol: 'O',
         x: 3,
         y: 4,
@@ -96,17 +115,18 @@ describe('SaveSystem', () => {
           feet: null,
           neck: null,
           rings: new Array(10).fill(null)
-        }
+        },
+        effects: []
       };
       
       const character = saveSystem.deserializeCharacter(characterData);
       
       expect(character).toBeInstanceOf(Character);
-      expect(character.body).toBe(3);
-      expect(character.mind).toBe(2);
-      expect(character.agility).toBe(4);
-      expect(character.control).toBe(1);
-      expect(character.hpBonus).toBe(2);
+      expect(character.bonusedStats.body).toBe(3);
+      expect(character.bonusedStats.mind).toBe(2);
+      expect(character.bonusedStats.agility).toBe(4);
+      expect(character.bonusedStats.control).toBe(1);
+      expect(character.bonusedStats.hpBonus).toBe(2);
       expect(character.symbol).toBe('O');
       expect(character.x).toBe(3);
       expect(character.y).toBe(4);
@@ -118,11 +138,20 @@ describe('SaveSystem', () => {
 
     test('should handle missing isPlayer field in deserialization', () => {
       const characterData = {
-        body: 1,
-        mind: 1,
-        agility: 1,
-        control: 1,
-        hpBonus: 0,
+        baseStats: {
+          body: 1,
+          mind: 1,
+          agility: 1,
+          control: 1,
+          hpBonus: 0
+        },
+        bonusedStats: {
+          body: 1,
+          mind: 1,
+          agility: 1,
+          control: 1,
+          hpBonus: 0
+        },
         symbol: '@',
         x: 0,
         y: 0,
@@ -131,7 +160,8 @@ describe('SaveSystem', () => {
         maxHp: 2,
         inventory: [],
         maxInventorySize: 5,
-        equipment: {}
+        equipment: {},
+        effects: []
       };
       
       const character = saveSystem.deserializeCharacter(characterData);
@@ -178,11 +208,20 @@ describe('SaveSystem', () => {
         furniture: [],
         characters: [
           {
-            body: 1,
-            mind: 1,
-            agility: 1,
-            control: 1,
-            hpBonus: 0,
+            baseStats: {
+              body: 1,
+              mind: 1,
+              agility: 1,
+              control: 1,
+              hpBonus: 0
+            },
+            bonusedStats: {
+              body: 1,
+              mind: 1,
+              agility: 1,
+              control: 1,
+              hpBonus: 0
+            },
             symbol: 'G',
             x: 1,
             y: 1,
@@ -191,14 +230,24 @@ describe('SaveSystem', () => {
             maxHp: 2,
             inventory: [],
             maxInventorySize: 5,
-            equipment: {}
+            equipment: {},
+            effects: []
           },
           {
-            body: 2,
-            mind: 2,
-            agility: 2,
-            control: 2,
-            hpBonus: 0,
+            baseStats: {
+              body: 2,
+              mind: 2,
+              agility: 2,
+              control: 2,
+              hpBonus: 0
+            },
+            bonusedStats: {
+              body: 2,
+              mind: 2,
+              agility: 2,
+              control: 2,
+              hpBonus: 0
+            },
             symbol: '@',
             x: 2,
             y: 2,
@@ -207,7 +256,8 @@ describe('SaveSystem', () => {
             maxHp: 4,
             inventory: [],
             maxInventorySize: 5,
-            equipment: {}
+            equipment: {},
+            effects: []
           }
         ],
         playerPosition: { x: 2, y: 2 }
@@ -347,17 +397,26 @@ describe('SaveSystem', () => {
 
     test('should handle missing required fields gracefully', () => {
       const incompleteData = {
-        version: '1.0.0',
+        version: '1.1.0',
         gameState: {
           score: 100,
           turns: 0,
           messages: [],
           player: {
-            body: 1,
-            mind: 1,
-            agility: 1,
-            control: 1,
-            hpBonus: 0,
+            baseStats: {
+              body: 1,
+              mind: 1,
+              agility: 1,
+              control: 1,
+              hpBonus: 0
+            },
+            bonusedStats: {
+              body: 1,
+              mind: 1,
+              agility: 1,
+              control: 1,
+              hpBonus: 0
+            },
             symbol: '@',
             x: 0,
             y: 0,
@@ -366,7 +425,8 @@ describe('SaveSystem', () => {
             maxHp: 2,
             inventory: [],
             maxInventorySize: 5,
-            equipment: {}
+            equipment: {},
+            effects: []
           }
         },
         currentLevel: {

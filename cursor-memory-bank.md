@@ -1,12 +1,44 @@
 # Cursor Memory Bank
 
-## CURRENT STATUS: Equipment Effect System Design Phase
-- Complete refactoring: modular architecture, 334 tests passing (1 skipped)
+## CURRENT STATUS: StatBlock Implementation Complete
+- Complete refactoring: modular architecture, 377 tests passing (1 skipped)
 - Character system with save/load functionality implemented
 - Data-driven rendering and mode-agnostic UI
 - Equipment system with inventory-based equipping and removal implemented
 - DataFileLoader system for centralized data loading implemented
-- **NEXT TASK**: Implement equipment effect system with centralized templates and character effect tracking
+- **COMPLETED**: Equipment effect system with centralized templates and character effect tracking
+- **COMPLETED**: Legacy property removal - Character class now uses baseStats/bonusedStats exclusively
+- **COMPLETED**: StatBlock class implementation - Encapsulated character statistics with utility methods
+
+## RECENT CHANGES: StatBlock Implementation (Latest Session)
+
+### What We Accomplished:
+1. **Created StatBlock Class**: New `src/js/entities/statBlock.js` with comprehensive utility methods
+2. **Refactored Character Class**: 
+   - `baseStats` and `bonusedStats` now use StatBlock instances
+   - Updated `recalculateStats()` to use `StatBlock.clone()`
+   - Added StatBlock import
+3. **Updated Save System**: 
+   - Modified serialization to use `StatBlock.toObject()`
+   - Modified deserialization to use `StatBlock.fromObject()`
+   - Added StatBlock import
+4. **Created Comprehensive Tests**: New `__tests__/statBlock.test.js` with 19 test cases
+5. **Maintained Full Compatibility**: All existing functionality preserved, 377 tests passing
+
+### StatBlock Features:
+- **Constructor**: Default values (body=1, mind=1, agility=1, control=1, hpBonus=0)
+- **Utility Methods**: `clone()`, `equals()`, `add()`, `subtract()`
+- **Access Methods**: `getStat()`, `setStat()`, `getStatNames()`
+- **Serialization**: `toObject()`, `fromObject()` for save/load
+- **Type Safety**: Error handling for invalid stat names
+- **Extensibility**: Easy to add new stats by updating constructor and methods
+
+### Benefits:
+- **Type Safety**: Clear interface for character statistics
+- **Extensibility**: Easy to add new stats without duplicating code
+- **Consistency**: Guarantees baseStats and bonusedStats have same structure
+- **Utility Methods**: Built-in operations for effect calculations
+- **Maintainability**: Centralized stat management logic
 
 ## MAJOR REFACTORING COMPLETED:
 

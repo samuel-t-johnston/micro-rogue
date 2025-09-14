@@ -111,10 +111,13 @@ describe('UI Functions', () => {
 
     // Setup mock player
     mockPlayer = {
-      body: 3,
-      mind: 2,
-      agility: 4,
-      control: 1,
+      bonusedStats: {
+        body: 3,
+        mind: 2,
+        agility: 4,
+        control: 1,
+        hpBonus: 0
+      },
       currentHp: 8,
       maxHp: 11,
       inventory: [

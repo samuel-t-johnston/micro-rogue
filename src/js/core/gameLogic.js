@@ -10,6 +10,7 @@ import { addDelta, toString } from '../utils/coordinates.js';
 import { saveSystem } from '../systems/saveSystem.js';
 import { CONFIG_SETTINGS } from '../utils/config.js';
 import { DataFileLoader } from '../systems/dataFileLoader.js';
+import { EffectManager } from '../systems/effectManager.js';
 
 // Create a shared DataFileLoader instance
 const dataLoader = new DataFileLoader();
@@ -567,6 +568,12 @@ export function equipItemWithReplacement(itemIndex, existingItem, slot, gameStat
   
   // Unequip existing item and add to inventory
   if (existingItem) {
+    // Remove equipment effects before unequipping
+    const existingItemData = gameState.itemsData[existingItem.itemId];
+    if (existingItemData && existingItemData.equipment && existingItemData.equipment.effect) {
+      EffectManager.removeEffect(gameState.player, existingItemData.equipment.effect, 'equipment');
+    }
+    
     const unequippedItem = gameState.player.unequipItem(slot);
     if (unequippedItem) {
       // Try to add to inventory
@@ -608,6 +615,12 @@ export function replaceWeapon(weaponIndex, gameState, gameDisplay, choiceModeMan
   
   // Unequip the existing weapon and add to inventory
   if (existingItem) {
+    // Remove equipment effects before unequipping
+    const existingItemData = gameState.itemsData[existingItem.itemId];
+    if (existingItemData && existingItemData.equipment && existingItemData.equipment.effect) {
+      EffectManager.removeEffect(gameState.player, existingItemData.equipment.effect, 'equipment');
+    }
+    
     const unequippedItem = gameState.player.unequipItem(slot);
     if (unequippedItem) {
       // Try to add to inventory
@@ -639,6 +652,12 @@ export function removeEquipmentByIndex(itemIndex, gameState, gameDisplay, choice
   
   // Check if inventory has space
   if (gameState.player.canAddToInventory()) {
+    // Remove equipment effects before unequipping
+    const itemData = gameState.itemsData[item.itemId];
+    if (itemData && itemData.equipment && itemData.equipment.effect) {
+      EffectManager.removeEffect(gameState.player, itemData.equipment.effect, 'equipment');
+    }
+    
     // Unequip and add to inventory
     const unequippedItem = gameState.player.unequipItem(slot, ringIndex);
     if (unequippedItem) {
@@ -664,6 +683,12 @@ export function removeEquipmentByIndex(itemIndex, gameState, gameDisplay, choice
 
 // Remove equipment with drop confirmation
 export function removeEquipmentWithDrop(item, slot, ringIndex, gameState, gameDisplay, choiceModeManager) {
+  // Remove equipment effects before unequipping
+  const itemData = gameState.itemsData[item.itemId];
+  if (itemData && itemData.equipment && itemData.equipment.effect) {
+    EffectManager.removeEffect(gameState.player, itemData.equipment.effect, 'equipment');
+  }
+  
   // Unequip the item
   const unequippedItem = gameState.player.unequipItem(slot, ringIndex);
   if (unequippedItem) {
@@ -762,6 +787,11 @@ function equipItemDirectly(item, slot, gameState, gameDisplay, choiceModeManager
   const success = gameState.player.equipItem(item, slot);
   
   if (success) {
+    // Apply equipment effects
+    if (itemData.equipment && itemData.equipment.effect) {
+      EffectManager.applyEffect(gameState.player, itemData.equipment.effect, 'equipment');
+    }
+    
     addMessage(`Equipped ${item.name} in ${slot} slot.`, gameState, gameState.player);
     render(gameState, gameDisplay);
     updateUI(gameState, gameState.player, choiceModeManager);

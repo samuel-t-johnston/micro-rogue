@@ -69,6 +69,11 @@ async function loadSavedGame() {
     
     // Update menu state
     updateMenuState(true);
+  } else {
+    // Save loading failed (incompatible version, corrupted data, etc.)
+    // Start a new game as fallback
+    console.log('Save loading failed, starting new game...');
+    await startNewGame();
   }
 }
 

@@ -1,16 +1,23 @@
+import { StatBlock } from './statBlock.js';
+
 // Character class for reusable character logic
 export class Character {
   constructor(body = 1, mind = 1, agility = 1, control = 1, hpBonus = 0, symbol = '@', x = 0, y = 0, isPlayer = false) {
-    this.body = body;
-    this.mind = mind;
-    this.agility = agility;
-    this.control = control;
-    this.hpBonus = hpBonus;
+    // Base stats (separate from bonuses)
+    this.baseStats = new StatBlock(body, mind, agility, control, hpBonus);
+    
+    // Bonused stats (calculated from base + effects)
+    this.bonusedStats = this.baseStats.clone();
+    
     this.symbol = symbol;
     this.x = x;
     this.y = y;
     this.isPlayer = isPlayer;
-    this.maxHp = this.body * 2 + this.hpBonus;
+    
+    // Effect tracking
+    this.effects = [];
+    
+    this.maxHp = this.bonusedStats.body * 2 + this.bonusedStats.hpBonus;
     this.currentHp = this.maxHp;
 
     // Inventory system
@@ -31,9 +38,9 @@ export class Character {
     };
   }
 
-  // Calculate max HP based on body and bonus
+  // Calculate max HP based on bonused stats
   calculateMaxHp() {
-    this.maxHp = this.body * 2 + this.hpBonus;
+    this.maxHp = this.bonusedStats.body * 2 + this.bonusedStats.hpBonus;
     return this.maxHp;
   }
 
@@ -142,5 +149,107 @@ export class Character {
     }
     
     return equippedItems;
+  }
+
+  // Effect management methods
+  
+  /**
+   * Add an effect to the character
+   * @param {Object} effect - The effect object to add
+   */
+  addEffect(effect) {
+    this.effects.push(effect);
+    this.recalculateStats();
+  }
+  
+  /**
+   * Remove an effect from the character by type and source
+   * @param {string} type - The effect type to remove
+   * @param {string} source - The source of the effect to remove
+   */
+  removeEffect(type, source) {
+    this.effects = this.effects.filter(effect => 
+      !(effect.type === type && effect.source === source)
+    );
+    this.recalculateStats();
+  }
+  
+  /**
+   * Recalculate all stats by applying effects to base stats
+   */
+  recalculateStats() {
+    // Reset to base stats
+    this.bonusedStats = this.baseStats.clone();
+    
+    // Apply all effects
+    for (const effect of this.effects) {
+      switch (effect.type) {
+        case 'armor_up':
+          // Armor effects will be handled by a separate armor system
+          // For now, we just track the effect
+          break;
+        case 'hp_bonus':
+          this.bonusedStats.hpBonus += effect.value;
+          break;
+        case 'attack_up':
+          // Attack effects will be handled by a separate combat system
+          // For now, we just track the effect
+          break;
+        // Add more effect types as needed
+      }
+    }
+    
+    // Recalculate derived stats
+    this.calculateMaxHp();
+    if (this.currentHp > this.maxHp) {
+      this.currentHp = this.maxHp;
+    }
+  }
+  
+  /**
+   * Process each-turn effects (called at the start of each turn)
+   */
+  processEffects() {
+    // Process each-turn effects
+    for (let i = this.effects.length - 1; i >= 0; i--) {
+      const effect = this.effects[i];
+      
+      // Handle temporary effects with turn counts
+      if (effect.turns !== undefined) {
+        effect.turns--;
+        if (effect.turns <= 0) {
+          // Effect expires
+          this.effects.splice(i, 1);
+          continue;
+        }
+      }
+      
+      // Process each-turn effects
+      if (effect.eachTurn) {
+        const shouldContinue = effect.eachTurn(this, effect.value);
+        if (!shouldContinue) {
+          this.effects.splice(i, 1);
+        }
+      }
+    }
+    
+    this.recalculateStats();
+  }
+  
+  /**
+   * Get all active effects
+   * @returns {Array} - Array of active effects
+   */
+  getActiveEffects() {
+    return [...this.effects];
+  }
+  
+  /**
+   * Get effects by category
+   * @param {string} category - The category to filter by
+   * @returns {Array} - Array of effects in the specified category
+   */
+  getEffectsByCategory(category) {
+    return this.effects.filter(effect => effect.category === category);
   }
 }

@@ -9,11 +9,11 @@ describe('Character', () => {
 
   describe('Constructor', () => {
     test('should create character with correct attributes', () => {
-      expect(character.body).toBe(3);
-      expect(character.mind).toBe(2);
-      expect(character.agility).toBe(4);
-      expect(character.control).toBe(1);
-      expect(character.hpBonus).toBe(5);
+      expect(character.bonusedStats.body).toBe(3);
+      expect(character.bonusedStats.mind).toBe(2);
+      expect(character.bonusedStats.agility).toBe(4);
+      expect(character.bonusedStats.control).toBe(1);
+      expect(character.bonusedStats.hpBonus).toBe(5);
       expect(character.symbol).toBe('@');
       expect(character.x).toBe(5);
       expect(character.y).toBe(5);
@@ -28,11 +28,11 @@ describe('Character', () => {
 
     test('should initialize with default values', () => {
       const defaultCharacter = new Character();
-      expect(defaultCharacter.body).toBe(1);
-      expect(defaultCharacter.mind).toBe(1);
-      expect(defaultCharacter.agility).toBe(1);
-      expect(defaultCharacter.control).toBe(1);
-      expect(defaultCharacter.hpBonus).toBe(0);
+      expect(defaultCharacter.bonusedStats.body).toBe(1);
+      expect(defaultCharacter.bonusedStats.mind).toBe(1);
+      expect(defaultCharacter.bonusedStats.agility).toBe(1);
+      expect(defaultCharacter.bonusedStats.control).toBe(1);
+      expect(defaultCharacter.bonusedStats.hpBonus).toBe(0);
       expect(defaultCharacter.symbol).toBe('@');
       expect(defaultCharacter.x).toBe(0);
       expect(defaultCharacter.y).toBe(0);

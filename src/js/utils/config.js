@@ -9,6 +9,6 @@ export const CONFIG_SETTINGS = {
   maxMessages: 30,
   
   // Save system settings
-  saveFileCompatibilityVersion: "1.0.0",
+  saveFileCompatibilityVersion: "1.1.0",
   saveFrequency: 10,
 };

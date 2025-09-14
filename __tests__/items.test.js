@@ -1,4 +1,5 @@
 import itemsData from '../src/data/items/items.json';
+import { EffectManager } from '../src/js/systems/effectManager.js';
 
 // Item validation rules and configurations
 const ITEM_RULES = {
@@ -245,6 +246,35 @@ describe('Item Data Validation', () => {
   });
 
 
+
+  describe('Effect Manager Integration', () => {
+    test('all equipment items should have valid effects according to EffectManager', () => {
+      const errors = [];
+      
+      Object.entries(itemsData).forEach(([itemId, item]) => {
+        if (item.hasOwnProperty('equipment') && item.equipment.hasOwnProperty('effect')) {
+          const isValid = EffectManager.validateEffect(item.equipment.effect);
+          if (!isValid) {
+            errors.push(`Item "${itemId}" has invalid effect "${item.equipment.effect}"`);
+          }
+        }
+      });
+      
+      if (errors.length > 0) {
+        throw new Error(`Effect validation errors found:\n${errors.join('\n')}`);
+      }
+    });
+
+    test('all equipment effects should be parseable by EffectManager', () => {
+      Object.entries(itemsData).forEach(([itemId, item]) => {
+        if (item.hasOwnProperty('equipment') && item.equipment.hasOwnProperty('effect')) {
+          const parsed = EffectManager.parseEffect(item.equipment.effect);
+          expect(parsed).not.toBeNull();
+          expect(parsed.value).toBeGreaterThan(0);
+        }
+      });
+    });
+  });
 
   describe('Comprehensive Validation', () => {
     test('all items should pass comprehensive validation', () => {

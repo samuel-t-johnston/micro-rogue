@@ -153,10 +153,10 @@ export function updateUI(gameState, player, choiceModeManager = null) {
 
   // Update character attributes
   document.getElementById('char-level').textContent = player.level || 1;
-  document.getElementById('body').textContent = player.body;
-  document.getElementById('mind').textContent = player.mind;
-  document.getElementById('agility').textContent = player.agility;
-  document.getElementById('control').textContent = player.control;
+  document.getElementById('body').textContent = player.bonusedStats.body;
+  document.getElementById('mind').textContent = player.bonusedStats.mind;
+  document.getElementById('agility').textContent = player.bonusedStats.agility;
+  document.getElementById('control').textContent = player.bonusedStats.control;
 
   // Update inventory and equipment
   updateInventoryUI(player);
