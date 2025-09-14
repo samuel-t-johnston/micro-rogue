@@ -1,6 +1,6 @@
 # Cursor Memory Bank
 
-## CURRENT STATUS: StatBlock Implementation Complete
+## CURRENT STATUS: Effect-Centric System Complete
 - Complete refactoring: modular architecture, 377 tests passing (1 skipped)
 - Character system with save/load functionality implemented
 - Data-driven rendering and mode-agnostic UI
@@ -9,36 +9,40 @@
 - **COMPLETED**: Equipment effect system with centralized templates and character effect tracking
 - **COMPLETED**: Legacy property removal - Character class now uses baseStats/bonusedStats exclusively
 - **COMPLETED**: StatBlock class implementation - Encapsulated character statistics with utility methods
+- **COMPLETED**: Stat system alignment - Added guard and attack stats, updated effects to match
+- **COMPLETED**: Effect-centric refactoring - Effects now know how to apply and remove themselves
 
-## RECENT CHANGES: StatBlock Implementation (Latest Session)
+## RECENT CHANGES: Effect-Centric Refactoring (Latest Session)
 
 ### What We Accomplished:
-1. **Created StatBlock Class**: New `src/js/entities/statBlock.js` with comprehensive utility methods
-2. **Refactored Character Class**: 
-   - `baseStats` and `bonusedStats` now use StatBlock instances
-   - Updated `recalculateStats()` to use `StatBlock.clone()`
-   - Added StatBlock import
-3. **Updated Save System**: 
-   - Modified serialization to use `StatBlock.toObject()`
-   - Modified deserialization to use `StatBlock.fromObject()`
-   - Added StatBlock import
-4. **Created Comprehensive Tests**: New `__tests__/statBlock.test.js` with 19 test cases
-5. **Maintained Full Compatibility**: All existing functionality preserved, 377 tests passing
+1. **Created Base Effect Class**: `src/js/entities/effect.js` with `applyTo(character)` and `removeFrom(character)` methods
+2. **Implemented Concrete Effect Classes**:
+   - `HpBonusEffect` - adds to character's hpBonus stat
+   - `GuardEffect` - adds to character's guard stat  
+   - `AttackEffect` - adds to character's attack stat
+   - `PoisonEffect` - deals damage each turn for limited duration
+3. **Updated Character Class**: 
+   - `recalculateStats()` now calls `effect.applyTo(this)` for each effect
+   - `removeEffect()` now calls `effect.removeFrom(this)` before removing
+   - `processEffects()` now calls `effect.eachTurn(this)` for turn-based effects
+4. **Updated EffectManager**: 
+   - Added `createEffect()` method to instantiate Effect classes
+   - Updated `applyEffect()` and `removeEffect()` to use new system
+5. **Updated All Tests**: Fixed 6 failing tests to use new Effect classes instead of plain objects
 
-### StatBlock Features:
-- **Constructor**: Default values (body=1, mind=1, agility=1, control=1, hpBonus=0)
-- **Utility Methods**: `clone()`, `equals()`, `add()`, `subtract()`
-- **Access Methods**: `getStat()`, `setStat()`, `getStatNames()`
-- **Serialization**: `toObject()`, `fromObject()` for save/load
-- **Type Safety**: Error handling for invalid stat names
-- **Extensibility**: Easy to add new stats by updating constructor and methods
+### New Effect System:
+- **Effect-Centric Design**: Effects know how to apply and remove themselves
+- **Symmetrical Interface**: `applyTo(character)` and `removeFrom(character)` methods
+- **Single Interface**: All effect types use the same interface
+- **Minimal Character API**: Effects only need access to what they modify
+- **Extensible**: Easy to add new effect types by creating new classes
 
 ### Benefits:
-- **Type Safety**: Clear interface for character statistics
-- **Extensibility**: Easy to add new stats without duplicating code
-- **Consistency**: Guarantees baseStats and bonusedStats have same structure
-- **Utility Methods**: Built-in operations for effect calculations
-- **Maintainability**: Centralized stat management logic
+- **Single Responsibility**: Each effect class handles its own logic
+- **Open/Closed Principle**: Easy to add new effects without modifying existing code
+- **No Giant Switch Statements**: Character class doesn't need to know about every effect type
+- **Better Encapsulation**: Effect logic is contained within effect classes
+- **Easier Testing**: Each effect can be tested independently
 
 ## MAJOR REFACTORING COMPLETED:
 
