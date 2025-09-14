@@ -2,9 +2,9 @@ import { StatBlock } from './statBlock.js';
 
 // Character class for reusable character logic
 export class Character {
-  constructor(body = 1, mind = 1, agility = 1, control = 1, hpBonus = 0, symbol = '@', x = 0, y = 0, isPlayer = false) {
+  constructor(body = 1, mind = 1, agility = 1, control = 1, hpBonus = 0, symbol = '@', x = 0, y = 0, isPlayer = false, guard = 0, attack = 0) {
     // Base stats (separate from bonuses)
-    this.baseStats = new StatBlock(body, mind, agility, control, hpBonus);
+    this.baseStats = new StatBlock(body, mind, agility, control, hpBonus, guard, attack);
     
     // Bonused stats (calculated from base + effects)
     this.bonusedStats = this.baseStats.clone();
@@ -18,6 +18,7 @@ export class Character {
     this.effects = [];
     
     this.maxHp = this.bonusedStats.body * 2 + this.bonusedStats.hpBonus;
+    this.maxGuard = this.bonusedStats.agility * 2 + this.bonusedStats.guard;
     this.currentHp = this.maxHp;
 
     // Inventory system
@@ -42,6 +43,12 @@ export class Character {
   calculateMaxHp() {
     this.maxHp = this.bonusedStats.body * 2 + this.bonusedStats.hpBonus;
     return this.maxHp;
+  }
+
+  // Calculate max Guard based on bonused stats
+  calculateMaxGuard() {
+    this.maxGuard = this.bonusedStats.agility * 2 + this.bonusedStats.guard;
+    return this.maxGuard;
   }
 
   // Heal character (won't exceed max HP)
@@ -168,10 +175,23 @@ export class Character {
    * @param {string} source - The source of the effect to remove
    */
   removeEffect(type, source) {
-    this.effects = this.effects.filter(effect => 
-      !(effect.type === type && effect.source === source)
+    // Find the effect to remove
+    const effectToRemove = this.effects.find(effect => 
+      effect.type === type && effect.source === source
     );
-    this.recalculateStats();
+    
+    if (effectToRemove) {
+      // Call removeFrom on the effect before removing it
+      effectToRemove.removeFrom(this);
+      
+      // Remove the effect from the list
+      this.effects = this.effects.filter(effect => 
+        !(effect.type === type && effect.source === source)
+      );
+      
+      // Recalculate stats
+      this.recalculateStats();
+    }
   }
   
   /**
@@ -181,26 +201,14 @@ export class Character {
     // Reset to base stats
     this.bonusedStats = this.baseStats.clone();
     
-    // Apply all effects
+    // Apply all effects using their applyTo method
     for (const effect of this.effects) {
-      switch (effect.type) {
-        case 'armor_up':
-          // Armor effects will be handled by a separate armor system
-          // For now, we just track the effect
-          break;
-        case 'hp_bonus':
-          this.bonusedStats.hpBonus += effect.value;
-          break;
-        case 'attack_up':
-          // Attack effects will be handled by a separate combat system
-          // For now, we just track the effect
-          break;
-        // Add more effect types as needed
-      }
+      effect.applyTo(this);
     }
     
     // Recalculate derived stats
     this.calculateMaxHp();
+    this.calculateMaxGuard();
     if (this.currentHp > this.maxHp) {
       this.currentHp = this.maxHp;
     }
@@ -214,22 +222,11 @@ export class Character {
     for (let i = this.effects.length - 1; i >= 0; i--) {
       const effect = this.effects[i];
       
-      // Handle temporary effects with turn counts
-      if (effect.turns !== undefined) {
-        effect.turns--;
-        if (effect.turns <= 0) {
-          // Effect expires
-          this.effects.splice(i, 1);
-          continue;
-        }
-      }
-      
-      // Process each-turn effects
-      if (effect.eachTurn) {
-        const shouldContinue = effect.eachTurn(this, effect.value);
-        if (!shouldContinue) {
-          this.effects.splice(i, 1);
-        }
+      // Process each-turn effects using the effect's eachTurn method
+      const shouldContinue = effect.eachTurn(this);
+      if (!shouldContinue) {
+        // Effect should be removed
+        this.effects.splice(i, 1);
       }
     }
     

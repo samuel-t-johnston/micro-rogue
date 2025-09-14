@@ -64,6 +64,8 @@ document.getElementById = jest.fn((id) => {
     case 'mind':
     case 'agility':
     case 'control':
+    case 'guard':
+    case 'attack':
     case 'weapon1-slot':
     case 'weapon2-slot':
     case 'head-slot':

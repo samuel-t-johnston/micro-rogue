@@ -1,10 +1,11 @@
 // Effect Manager - Handles parsing, applying, and removing effects
 import { EFFECT_TEMPLATES } from './effectRegistry.js';
+import { HpBonusEffect, GuardEffect, AttackEffect, PoisonEffect } from '../entities/effects/index.js';
 
 export class EffectManager {
   /**
    * Parse an effect string using regex templates
-   * @param {string} effectString - The effect string to parse (e.g., "armor+1")
+   * @param {string} effectString - The effect string to parse (e.g., "guard+1")
    * @returns {Object|null} - Parsed effect object or null if invalid
    */
   static parseEffect(effectString) {
@@ -20,6 +21,32 @@ export class EffectManager {
     }
     return null; // Invalid effect
   }
+
+  /**
+   * Create an Effect instance from an effect string
+   * @param {string} effectString - The effect string to parse (e.g., "guard+1")
+   * @param {string} source - The source of the effect (e.g., 'equipment')
+   * @returns {Effect|null} - Effect instance or null if invalid
+   */
+  static createEffect(effectString, source) {
+    const parsed = this.parseEffect(effectString);
+    if (!parsed) return null;
+
+    const { name, value } = parsed;
+
+    switch (name) {
+      case 'hp_bonus':
+        return new HpBonusEffect(value, source);
+      case 'guard_up':
+        return new GuardEffect(value, source);
+      case 'attack_up':
+        return new AttackEffect(value, source);
+      case 'poison':
+        return new PoisonEffect(value, source);
+      default:
+        return null;
+    }
+  }
   
   /**
    * Apply an effect to a character
@@ -29,9 +56,9 @@ export class EffectManager {
    * @returns {boolean} - True if effect was applied successfully
    */
   static applyEffect(character, effectString, source) {
-    const effect = this.parseEffect(effectString);
+    const effect = this.createEffect(effectString, source);
     if (effect) {
-      effect.template.apply(character, effect.value, source);
+      character.addEffect(effect);
       return true;
     }
     return false;
@@ -45,9 +72,9 @@ export class EffectManager {
    * @returns {boolean} - True if effect was removed successfully
    */
   static removeEffect(character, effectString, source) {
-    const effect = this.parseEffect(effectString);
-    if (effect) {
-      effect.template.remove(character, effect.value, source);
+    const parsed = this.parseEffect(effectString);
+    if (parsed) {
+      character.removeEffect(parsed.name, source);
       return true;
     }
     return false;

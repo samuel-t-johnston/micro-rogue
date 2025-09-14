@@ -1,11 +1,13 @@
 // StatBlock class - encapsulates character statistics
 export class StatBlock {
-  constructor(body = 1, mind = 1, agility = 1, control = 1, hpBonus = 0) {
+  constructor(body = 1, mind = 1, agility = 1, control = 1, hpBonus = 0, guard = 0, attack = 0) {
     this.body = body;
     this.mind = mind;
     this.agility = agility;
     this.control = control;
     this.hpBonus = hpBonus;
+    this.guard = guard;
+    this.attack = attack;
   }
 
   /**
@@ -13,7 +15,7 @@ export class StatBlock {
    * @returns {StatBlock} A new StatBlock with the same values
    */
   clone() {
-    return new StatBlock(this.body, this.mind, this.agility, this.control, this.hpBonus);
+    return new StatBlock(this.body, this.mind, this.agility, this.control, this.hpBonus, this.guard, this.attack);
   }
 
   /**
@@ -27,7 +29,9 @@ export class StatBlock {
            this.mind === other.mind &&
            this.agility === other.agility &&
            this.control === other.control &&
-           this.hpBonus === other.hpBonus;
+           this.hpBonus === other.hpBonus &&
+           this.guard === other.guard &&
+           this.attack === other.attack;
   }
 
   /**
@@ -44,7 +48,9 @@ export class StatBlock {
       this.mind + other.mind,
       this.agility + other.agility,
       this.control + other.control,
-      this.hpBonus + other.hpBonus
+      this.hpBonus + other.hpBonus,
+      this.guard + other.guard,
+      this.attack + other.attack
     );
   }
 
@@ -62,7 +68,9 @@ export class StatBlock {
       this.mind - other.mind,
       this.agility - other.agility,
       this.control - other.control,
-      this.hpBonus - other.hpBonus
+      this.hpBonus - other.hpBonus,
+      this.guard - other.guard,
+      this.attack - other.attack
     );
   }
 
@@ -71,7 +79,7 @@ export class StatBlock {
    * @returns {string[]} Array of stat property names
    */
   getStatNames() {
-    return ['body', 'mind', 'agility', 'control', 'hpBonus'];
+    return ['body', 'mind', 'agility', 'control', 'hpBonus', 'guard', 'attack'];
   }
 
   /**
@@ -108,7 +116,9 @@ export class StatBlock {
       mind: this.mind,
       agility: this.agility,
       control: this.control,
-      hpBonus: this.hpBonus
+      hpBonus: this.hpBonus,
+      guard: this.guard,
+      attack: this.attack
     };
   }
 
@@ -123,7 +133,9 @@ export class StatBlock {
       obj.mind || 0,
       obj.agility || 0,
       obj.control || 0,
-      obj.hpBonus || 0
+      obj.hpBonus || 0,
+      obj.guard || 0,
+      obj.attack || 0
     );
   }
 }

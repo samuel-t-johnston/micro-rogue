@@ -57,14 +57,18 @@ describe('SaveSystem', () => {
           mind: 3,
           agility: 4,
           control: 1,
-          hpBonus: 5
+          hpBonus: 5,
+          guard: 0,
+          attack: 0
         },
         bonusedStats: {
           body: 2,
           mind: 3,
           agility: 4,
           control: 1,
-          hpBonus: 5
+          hpBonus: 5,
+          guard: 0,
+          attack: 0
         },
         symbol: 'G',
         x: 7,
@@ -88,14 +92,18 @@ describe('SaveSystem', () => {
           mind: 2,
           agility: 4,
           control: 1,
-          hpBonus: 2
+          hpBonus: 2,
+          guard: 0,
+          attack: 0
         },
         bonusedStats: {
           body: 3,
           mind: 2,
           agility: 4,
           control: 1,
-          hpBonus: 2
+          hpBonus: 2,
+          guard: 0,
+          attack: 0
         },
         symbol: 'O',
         x: 3,
@@ -143,14 +151,18 @@ describe('SaveSystem', () => {
           mind: 1,
           agility: 1,
           control: 1,
-          hpBonus: 0
+          hpBonus: 0,
+          guard: 0,
+          attack: 0
         },
         bonusedStats: {
           body: 1,
           mind: 1,
           agility: 1,
           control: 1,
-          hpBonus: 0
+          hpBonus: 0,
+          guard: 0,
+          attack: 0
         },
         symbol: '@',
         x: 0,
@@ -213,14 +225,18 @@ describe('SaveSystem', () => {
               mind: 1,
               agility: 1,
               control: 1,
-              hpBonus: 0
+              hpBonus: 0,
+              guard: 0,
+              attack: 0
             },
             bonusedStats: {
               body: 1,
               mind: 1,
               agility: 1,
               control: 1,
-              hpBonus: 0
+              hpBonus: 0,
+              guard: 0,
+              attack: 0
             },
             symbol: 'G',
             x: 1,
@@ -239,14 +255,18 @@ describe('SaveSystem', () => {
               mind: 2,
               agility: 2,
               control: 2,
-              hpBonus: 0
+              hpBonus: 0,
+              guard: 0,
+              attack: 0
             },
             bonusedStats: {
               body: 2,
               mind: 2,
               agility: 2,
               control: 2,
-              hpBonus: 0
+              hpBonus: 0,
+              guard: 0,
+              attack: 0
             },
             symbol: '@',
             x: 2,
@@ -408,14 +428,18 @@ describe('SaveSystem', () => {
               mind: 1,
               agility: 1,
               control: 1,
-              hpBonus: 0
+              hpBonus: 0,
+              guard: 0,
+              attack: 0
             },
             bonusedStats: {
               body: 1,
               mind: 1,
               agility: 1,
               control: 1,
-              hpBonus: 0
+              hpBonus: 0,
+              guard: 0,
+              attack: 0
             },
             symbol: '@',
             x: 0,

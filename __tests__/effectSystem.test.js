@@ -2,16 +2,17 @@
 import { EffectManager } from '../src/js/systems/effectManager.js';
 import { EFFECT_TEMPLATES } from '../src/js/systems/effectRegistry.js';
 import { Character } from '../src/js/entities/character.js';
+import { HpBonusEffect, GuardEffect, AttackEffect, PoisonEffect } from '../src/js/entities/effects/index.js';
 
 describe('Effect System', () => {
   describe('EffectManager', () => {
     describe('parseEffect', () => {
-      test('should parse valid armor effect', () => {
-        const result = EffectManager.parseEffect('armor+1');
+      test('should parse valid guard effect', () => {
+        const result = EffectManager.parseEffect('guard+1');
         expect(result).toEqual({
-          name: 'armor_up',
+          name: 'guard_up',
           value: 1,
-          template: EFFECT_TEMPLATES.armor_up
+          template: EFFECT_TEMPLATES.guard_up
         });
       });
 
@@ -60,7 +61,7 @@ describe('Effect System', () => {
 
     describe('validateEffect', () => {
       test('should validate correct effects', () => {
-        expect(EffectManager.validateEffect('armor+1')).toBe(true);
+        expect(EffectManager.validateEffect('guard+1')).toBe(true);
         expect(EffectManager.validateEffect('hpBonus+5')).toBe(true);
         expect(EffectManager.validateEffect('attack+3')).toBe(true);
         expect(EffectManager.validateEffect('poison+2')).toBe(true);
@@ -87,12 +88,11 @@ describe('Effect System', () => {
         
         expect(character.bonusedStats.hpBonus).toBe(initialHpBonus + 3);
         expect(character.effects).toHaveLength(1);
-        expect(character.effects[0]).toEqual({
-          type: 'hp_bonus',
-          value: 3,
-          source: 'equipment',
-          category: 'health'
-        });
+        expect(character.effects[0]).toBeInstanceOf(HpBonusEffect);
+        expect(character.effects[0].type).toBe('hp_bonus');
+        expect(character.effects[0].value).toBe(3);
+        expect(character.effects[0].source).toBe('equipment');
+        expect(character.effects[0].category).toBe('health');
       });
 
       test('should remove hp bonus effect', () => {
@@ -135,7 +135,7 @@ describe('Effect System', () => {
     describe('getAvailableEffectTypes', () => {
       test('should return all available effect types', () => {
         const types = EffectManager.getAvailableEffectTypes();
-        expect(types).toContain('armor_up');
+        expect(types).toContain('guard_up');
         expect(types).toContain('hp_bonus');
         expect(types).toContain('attack_up');
         expect(types).toContain('poison');
@@ -144,8 +144,8 @@ describe('Effect System', () => {
 
     describe('getEffectTemplate', () => {
       test('should return correct template for valid effect', () => {
-        const template = EffectManager.getEffectTemplate('armor_up');
-        expect(template).toBe(EFFECT_TEMPLATES.armor_up);
+        const template = EffectManager.getEffectTemplate('guard_up');
+        expect(template).toBe(EFFECT_TEMPLATES.guard_up);
       });
 
       test('should return null for invalid effect', () => {
@@ -163,12 +163,8 @@ describe('Effect System', () => {
     });
 
     test('should track effects correctly', () => {
-      character.addEffect({
-        type: 'hp_bonus',
-        value: 5,
-        source: 'equipment',
-        category: 'health'
-      });
+      const effect = new HpBonusEffect(5, 'equipment');
+      character.addEffect(effect);
 
       expect(character.effects).toHaveLength(1);
       expect(character.getActiveEffects()).toHaveLength(1);
@@ -177,23 +173,15 @@ describe('Effect System', () => {
     test('should recalculate stats when effects change', () => {
       const initialHpBonus = character.bonusedStats.hpBonus;
       
-      character.addEffect({
-        type: 'hp_bonus',
-        value: 3,
-        source: 'equipment',
-        category: 'health'
-      });
+      const effect = new HpBonusEffect(3, 'equipment');
+      character.addEffect(effect);
 
       expect(character.bonusedStats.hpBonus).toBe(initialHpBonus + 3);
     });
 
     test('should maintain stat consistency', () => {
-      character.addEffect({
-        type: 'hp_bonus',
-        value: 2,
-        source: 'equipment',
-        category: 'health'
-      });
+      const effect = new HpBonusEffect(2, 'equipment');
+      character.addEffect(effect);
 
       // Verify that bonused stats are properly calculated
       expect(character.bonusedStats.hpBonus).toBe(2);
@@ -201,18 +189,11 @@ describe('Effect System', () => {
     });
 
     test('should filter effects by category', () => {
-      character.addEffect({
-        type: 'hp_bonus',
-        value: 2,
-        source: 'equipment',
-        category: 'health'
-      });
-      character.addEffect({
-        type: 'armor_up',
-        value: 1,
-        source: 'equipment',
-        category: 'defense'
-      });
+      const healthEffect = new HpBonusEffect(2, 'equipment');
+      const defenseEffect = new GuardEffect(1, 'equipment');
+      
+      character.addEffect(healthEffect);
+      character.addEffect(defenseEffect);
 
       const healthEffects = character.getEffectsByCategory('health');
       const defenseEffects = character.getEffectsByCategory('defense');
@@ -220,17 +201,12 @@ describe('Effect System', () => {
       expect(healthEffects).toHaveLength(1);
       expect(defenseEffects).toHaveLength(1);
       expect(healthEffects[0].type).toBe('hp_bonus');
-      expect(defenseEffects[0].type).toBe('armor_up');
+      expect(defenseEffects[0].type).toBe('guard_up');
     });
 
     test('should handle temporary effects with turn counts', () => {
-      character.addEffect({
-        type: 'poison',
-        value: 2,
-        source: 'spell',
-        category: 'debuff',
-        turns: 3
-      });
+      const poisonEffect = new PoisonEffect(2, 'spell', 3);
+      character.addEffect(poisonEffect);
 
       expect(character.effects[0].turns).toBe(3);
 

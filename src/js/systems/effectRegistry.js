@@ -2,19 +2,19 @@
 // Each effect template defines how to parse, apply, and remove effects
 
 export const EFFECT_TEMPLATES = {
-  armor_up: {
-    regex: /^armor\+(\d+)$/,
+  guard_up: {
+    regex: /^guard\+(\d+)$/,
     category: 'defense',
     apply: (character, value, source) => {
       character.addEffect({
-        type: 'armor_up',
+        type: 'guard_up',
         value: value,
         source: source,
         category: 'defense'
       });
     },
     remove: (character, value, source) => {
-      character.removeEffect('armor_up', source);
+      character.removeEffect('guard_up', source);
     },
     eachTurn: null // No ongoing effect
   },

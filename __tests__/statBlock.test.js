@@ -96,7 +96,7 @@ describe('StatBlock', () => {
     test('should return array of stat names', () => {
       const stats = new StatBlock();
       const names = stats.getStatNames();
-      expect(names).toEqual(['body', 'mind', 'agility', 'control', 'hpBonus']);
+      expect(names).toEqual(['body', 'mind', 'agility', 'control', 'hpBonus', 'guard', 'attack']);
     });
   });
 
@@ -139,7 +139,9 @@ describe('StatBlock', () => {
         mind: 3,
         agility: 7,
         control: 2,
-        hpBonus: 10
+        hpBonus: 10,
+        guard: 0,
+        attack: 0
       });
     });
   });

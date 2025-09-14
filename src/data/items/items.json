@@ -4,7 +4,7 @@
     "symbol": "$",
     "equipment": {
       "slot": "head",
-      "effect": "armor+1"
+      "effect": "guard+1"
     }
   },
   "leather_armor": {
@@ -12,7 +12,7 @@
     "symbol": "$",
     "equipment": {
       "slot": "body",
-      "effect": "armor+1"
+      "effect": "guard+1"
     }
   },
   "leather_gloves": {
@@ -20,7 +20,7 @@
     "symbol": "$",
     "equipment": {
       "slot": "hands",
-      "effect": "armor+1"
+      "effect": "guard+1"
     }
   },
   "leather_tassets": {
@@ -28,7 +28,7 @@
     "symbol": "$",
     "equipment": {
       "slot": "legs",
-      "effect": "armor+1"
+      "effect": "guard+1"
     }
   },
   "leather_shoes": {
@@ -36,7 +36,7 @@
     "symbol": "$",
     "equipment": {
       "slot": "feet",
-      "effect": "armor+1"
+      "effect": "guard+1"
     }
   },
   "amulet_of_health": {
@@ -60,7 +60,7 @@
     "symbol": "$",
     "equipment": {
       "slot": "weapon",
-      "effect": "armor+1"
+      "effect": "guard+1"
     }
   },
   "potion_vial": {

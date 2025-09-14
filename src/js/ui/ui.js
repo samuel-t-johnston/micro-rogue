@@ -157,6 +157,8 @@ export function updateUI(gameState, player, choiceModeManager = null) {
   document.getElementById('mind').textContent = player.bonusedStats.mind;
   document.getElementById('agility').textContent = player.bonusedStats.agility;
   document.getElementById('control').textContent = player.bonusedStats.control;
+  document.getElementById('guard').textContent = player.bonusedStats.guard;
+  document.getElementById('attack').textContent = player.bonusedStats.attack;
 
   // Update inventory and equipment
   updateInventoryUI(player);
