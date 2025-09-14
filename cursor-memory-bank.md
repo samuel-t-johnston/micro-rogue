@@ -1,6 +1,6 @@
 # Cursor Memory Bank
 
-## CURRENT STATUS: Effect-Centric System Complete
+## CURRENT STATUS: Consumable System Complete
 - Complete refactoring: modular architecture, 377 tests passing (1 skipped)
 - Character system with save/load functionality implemented
 - Data-driven rendering and mode-agnostic UI
@@ -11,38 +11,51 @@
 - **COMPLETED**: StatBlock class implementation - Encapsulated character statistics with utility methods
 - **COMPLETED**: Stat system alignment - Added guard and attack stats, updated effects to match
 - **COMPLETED**: Effect-centric refactoring - Effects now know how to apply and remove themselves
+- **COMPLETED**: Consumable system - Immediate one-time effects for potions and food items
 
-## RECENT CHANGES: Effect-Centric Refactoring (Latest Session)
+## RECENT CHANGES: Consumable System Implementation (Latest Session)
 
 ### What We Accomplished:
-1. **Created Base Effect Class**: `src/js/entities/effect.js` with `applyTo(character)` and `removeFrom(character)` methods
-2. **Implemented Concrete Effect Classes**:
-   - `HpBonusEffect` - adds to character's hpBonus stat
-   - `GuardEffect` - adds to character's guard stat  
-   - `AttackEffect` - adds to character's attack stat
-   - `PoisonEffect` - deals damage each turn for limited duration
-3. **Updated Character Class**: 
-   - `recalculateStats()` now calls `effect.applyTo(this)` for each effect
-   - `removeEffect()` now calls `effect.removeFrom(this)` before removing
-   - `processEffects()` now calls `effect.eachTurn(this)` for turn-based effects
-4. **Updated EffectManager**: 
-   - Added `createEffect()` method to instantiate Effect classes
-   - Updated `applyEffect()` and `removeEffect()` to use new system
-5. **Updated All Tests**: Fixed 6 failing tests to use new Effect classes instead of plain objects
+1. **Updated Potion Vial Item**: 
+   - Changed from `usable` property to `consumable` property
+   - Updated effect from `currentHp+1` to `currentHp+5` for better gameplay
+   - Changed `use_effect` to `consume_effect` for clarity
+2. **Added Consume Action**: 
+   - Added "C" hotkey to DefaultMode for consuming items
+   - Added consume action to NumericMode for item selection
+   - Updated control instructions to include "C: Consume item"
+3. **Created Consume Logic**: 
+   - Added `getConsumableItems()` function to filter consumable items from inventory
+   - Added `consumeItemByIndex()` function to handle item consumption
+   - Implemented simple parsing for immediate effects (e.g., "currentHp+5")
+   - Used existing `heal()` method for HP restoration
+4. **Updated Item Validation**: 
+   - Updated test rules to expect `consumable` instead of `usable`
+   - Updated validation patterns for `consume_effect` property
+   - Fixed all related tests to use new property names
 
-### New Effect System:
-- **Effect-Centric Design**: Effects know how to apply and remove themselves
-- **Symmetrical Interface**: `applyTo(character)` and `removeFrom(character)` methods
-- **Single Interface**: All effect types use the same interface
-- **Minimal Character API**: Effects only need access to what they modify
-- **Extensible**: Easy to add new effect types by creating new classes
+### New Consumable System:
+- **Immediate Effects**: One-time effects that don't persist (unlike equipment effects)
+- **Simple Parsing**: Direct stat modifications without complex effect system
+- **Clear Separation**: Consumables vs equipment effects are distinct systems
+- **User-Friendly**: "C" hotkey makes consuming items intuitive
+- **Extensible**: Easy to add new consume effect types in the future
 
 ### Benefits:
-- **Single Responsibility**: Each effect class handles its own logic
-- **Open/Closed Principle**: Easy to add new effects without modifying existing code
-- **No Giant Switch Statements**: Character class doesn't need to know about every effect type
-- **Better Encapsulation**: Effect logic is contained within effect classes
-- **Easier Testing**: Each effect can be tested independently
+- **Clear Distinction**: Consumables are immediate, equipment effects are persistent
+- **Better UX**: Dedicated consume action with clear hotkey
+- **Simpler Logic**: Immediate effects don't need complex state management
+- **Future Ready**: System ready for scrolls, wands, and other one-use items
+- **Incremental Design**: Focused on consumables first, other item types later
+
+### Bug Fixes:
+1. **Fixed Missing Game Actions**: Added `getConsumableItems` and `consumeItemByIndex` to the `gameActions` object in `inputHandler.js`
+   - **Root Cause**: Functions were exported from `gameLogic.js` but not included in the `gameActions` object passed to choice modes
+   - **Solution**: Updated imports and `createGameActions()` method to include the missing functions
+
+2. **Fixed Missing UI Display**: Added consume action case to `updateControlsUI()` in `ui.js`
+   - **Root Cause**: UI had cases for `pickup`, `equip`, `remove`, and `drop` actions but was missing `consume` action
+   - **Solution**: Added `else if (context && context.action === 'consume' && context.items)` block to display consumable items list
 
 ## MAJOR REFACTORING COMPLETED:
 

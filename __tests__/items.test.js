@@ -24,9 +24,9 @@ const ITEM_RULES = {
         description: 'guard+X, hpBonus+X, attack+X, or defense+X where X is an integer'
       }
     },
-    usable: {
-      required: ['use_effect'],
-      use_effect: {
+    consumable: {
+      required: ['consume_effect'],
+      consume_effect: {
         pattern: /^currentHp\+(\d+)$/,
         description: 'currentHp+X where X is an integer'
       }
@@ -205,37 +205,37 @@ describe('Item Data Validation', () => {
     });
   });
 
-  describe('Usable Property Validation', () => {
-    test('usable items should have required sub-properties', () => {
+  describe('Consumable Property Validation', () => {
+    test('consumable items should have required sub-properties', () => {
       const errors = [];
       
       Object.entries(itemsData).forEach(([itemId, item]) => {
-        if (item.hasOwnProperty('usable')) {
+        if (item.hasOwnProperty('consumable')) {
           errors.push(...validatePropertyRules(item, itemId));
         }
       });
       
       if (errors.length > 0) {
-        throw new Error(`Usable validation errors found:\n${errors.join('\n')}`);
+        throw new Error(`Consumable validation errors found:\n${errors.join('\n')}`);
       }
     });
 
-    test('usable items should have valid use_effect values', () => {
-      const useEffectPattern = ITEM_RULES.properties.usable.use_effect.pattern;
+    test('consumable items should have valid consume_effect values', () => {
+      const consumeEffectPattern = ITEM_RULES.properties.consumable.consume_effect.pattern;
       
       Object.entries(itemsData).forEach(([itemId, item]) => {
-        if (item.hasOwnProperty('usable')) {
-          expect(item.usable).toHaveProperty('use_effect');
-          expect(useEffectPattern.test(item.usable.use_effect)).toBe(true);
+        if (item.hasOwnProperty('consumable')) {
+          expect(item.consumable).toHaveProperty('consume_effect');
+          expect(consumeEffectPattern.test(item.consumable.consume_effect)).toBe(true);
         }
       });
     });
 
-    test('usable use_effect values should have positive integers', () => {
+    test('consumable consume_effect values should have positive integers', () => {
       Object.entries(itemsData).forEach(([itemId, item]) => {
-        if (item.hasOwnProperty('usable')) {
-          const useEffect = item.usable.use_effect;
-          const match = useEffect.match(/^currentHp\+(\d+)$/);
+        if (item.hasOwnProperty('consumable')) {
+          const consumeEffect = item.consumable.consume_effect;
+          const match = consumeEffect.match(/^currentHp\+(\d+)$/);
           expect(match).toBeTruthy();
           
           const hpValue = parseInt(match[1], 10);

@@ -18,6 +18,7 @@ export class DefaultMode extends BaseMode {
       'e',
       'r',
       'x',
+      'c',
       'escape',
     ];
   }
@@ -107,6 +108,21 @@ export class DefaultMode extends BaseMode {
         }
         break;
       }
+      case 'c': {
+        // Check if there are consumable items in inventory
+        const consumableItems = gameActions.getConsumableItems();
+        if (consumableItems.length > 0) {
+          // Enter numeric choice mode for consumable selection
+          modeManager.setMode('numeric', {
+            action: 'consume',
+            items: consumableItems,
+          });
+        } else {
+          // No consumables - show message
+          gameActions.showMessage('You have no consumable items.');
+        }
+        break;
+      }
       case 'escape':
         // No action in default mode
         break;
@@ -125,7 +141,8 @@ export class DefaultMode extends BaseMode {
       { label: 'U:', keys: 'Use something nearby' },
       { label: 'E:', keys: 'Equip item' },
       { label: 'R:', keys: 'Remove equipment' },
-      { label: 'X:', keys: 'Drop item' }
+      { label: 'X:', keys: 'Drop item' },
+      { label: 'C:', keys: 'Consume item' }
     ];
   }
 }

@@ -163,7 +163,8 @@ describe('Choice Modes', () => {
         { label: 'U:', keys: 'Use something nearby' },
         { label: 'E:', keys: 'Equip item' },
         { label: 'R:', keys: 'Remove equipment' },
-        { label: 'X:', keys: 'Drop item' }
+        { label: 'X:', keys: 'Drop item' },
+        { label: 'C:', keys: 'Consume item' }
       ]);
     });
   });

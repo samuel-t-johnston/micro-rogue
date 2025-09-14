@@ -111,6 +111,11 @@ export function updateControlsUI(choiceModeManager) {
         context.items.forEach((item, index) => {
           controlsHTML += `<div class="control-group">${index}. ${item.name}</div>`;
         });
+      } else if (context && context.action === 'consume' && context.items) {
+        controlsHTML += '<div class="control-group"><strong>Consumable items:</strong></div>';
+        context.items.forEach((item, index) => {
+          controlsHTML += `<div class="control-group">${index}. ${item.name}</div>`;
+        });
       }
       
       controlsHTML += '</div>';

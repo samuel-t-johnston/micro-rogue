@@ -49,6 +49,11 @@ export class NumericMode extends BaseMode {
       if (success && !modeManager.isInSpecialMode()) {
         modeManager.resetToDefault();
       }
+    } else if (context && context.action === 'consume') {
+      const success = gameActions.consumeItemByIndex(itemIndex);
+      if (success) {
+        modeManager.resetToDefault();
+      }
     }
 
     return true;
@@ -65,6 +70,8 @@ export class NumericMode extends BaseMode {
       return 'Remove equipment - What would you like to remove?';
     } else if (context && context.action === 'drop') {
       return 'Drop item - What would you like to drop?';
+    } else if (context && context.action === 'consume') {
+      return 'Consume - What would you like to consume?';
     }
     return 'Choose item';
   }

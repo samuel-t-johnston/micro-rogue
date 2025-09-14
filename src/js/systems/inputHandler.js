@@ -15,7 +15,9 @@ import {
   removeEquipmentWithDrop, 
   dropItemFromInventory, 
   dropItemWithContainerCheck, 
-  getInventoryItems 
+  getInventoryItems,
+  getConsumableItems,
+  consumeItemByIndex
 } from '../core/gameLogic.js';
 
 export class InputHandler {
@@ -95,6 +97,14 @@ export class InputHandler {
 
       dropItemWithContainerCheck: (item, itemIndex, furniture) => {
         return dropItemWithContainerCheck(item, itemIndex, furniture, this.gameState, this.gameDisplay, this.choiceModeManager);
+      },
+
+      getConsumableItems: () => {
+        return getConsumableItems(this.gameState);
+      },
+
+      consumeItemByIndex: (itemIndex) => {
+        return consumeItemByIndex(itemIndex, this.gameState, this.gameDisplay, this.choiceModeManager);
       },
     };
   }

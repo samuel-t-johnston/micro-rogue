@@ -490,6 +490,52 @@ export function getEquippedItems(gameState) {
   return gameState.player.getEquippedItems();
 }
 
+// Get all consumable items from player's inventory
+export function getConsumableItems(gameState) {
+  return gameState.player.inventory.filter(item => {
+    const itemData = gameState.itemsData[item.itemId];
+    return itemData && itemData.consumable;
+  });
+}
+
+// Consume an item by index from available consumable items
+export function consumeItemByIndex(itemIndex, gameState, gameDisplay, choiceModeManager) {
+  const consumableItems = getConsumableItems(gameState);
+  
+  if (itemIndex < 0 || itemIndex >= consumableItems.length) {
+    addMessage('Invalid consumable selection.', gameState, gameState.player);
+    return false;
+  }
+  
+  const selectedItem = consumableItems[itemIndex];
+  const itemData = gameState.itemsData[selectedItem.itemId];
+  const consumeEffect = itemData.consumable.consume_effect;
+  
+  // Parse and apply the consume effect
+  if (consumeEffect) {
+    // Simple parsing for immediate effects (e.g., "currentHp+5")
+    const match = consumeEffect.match(/^currentHp\+(\d+)$/);
+    if (match) {
+      const healAmount = parseInt(match[1]);
+      gameState.player.heal(healAmount);
+      addMessage(`Consumed ${selectedItem.name} and healed ${healAmount} HP!`, gameState, gameState.player);
+    } else {
+      addMessage(`Unknown consume effect: ${consumeEffect}`, gameState, gameState.player);
+      return false;
+    }
+  }
+  
+  // Remove item from inventory
+  const inventoryIndex = gameState.player.inventory.findIndex(invItem => invItem === selectedItem);
+  if (inventoryIndex !== -1) {
+    gameState.player.removeFromInventory(inventoryIndex);
+  }
+  
+  render(gameState, gameDisplay);
+  updateUI(gameState, gameState.player, choiceModeManager);
+  return true;
+}
+
 // Handle weapon equipping with special logic for two weapon slots
 function handleWeaponEquipping(selectedItem, gameState, gameDisplay, choiceModeManager) {
   const weapon1 = gameState.player.equipment.weapon1;

@@ -66,8 +66,8 @@
   "potion_vial": {
     "name": "Potion Vial",
     "symbol": "$",
-    "usable": {
-      "use_effect": "currentHp+1"
+    "consumable": {
+      "consume_effect": "currentHp+5"
     }
   }
 } 
