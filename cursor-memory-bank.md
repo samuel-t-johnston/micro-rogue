@@ -1,6 +1,6 @@
 # Cursor Memory Bank
 
-## CURRENT STATUS: Consumable System Complete
+## CURRENT STATUS: Attributes Tab Complete
 - Complete refactoring: modular architecture, 377 tests passing (1 skipped)
 - Character system with save/load functionality implemented
 - Data-driven rendering and mode-agnostic UI
@@ -12,8 +12,56 @@
 - **COMPLETED**: Stat system alignment - Added guard and attack stats, updated effects to match
 - **COMPLETED**: Effect-centric refactoring - Effects now know how to apply and remove themselves
 - **COMPLETED**: Consumable system - Immediate one-time effects for potions and food items
+- **COMPLETED**: Attributes tab - Detailed character stats and effects display
 
-## RECENT CHANGES: Consumable System Implementation (Latest Session)
+## RECENT CHANGES: Attributes Tab Implementation (Latest Session)
+
+### What We Accomplished:
+1. **Added Third Tab**: 
+   - Added "Attributes" tab button to the existing tab system
+   - Created new tab panel with comprehensive stats and effects display
+   - Integrated with existing tab switching functionality
+
+2. **Stats Display**: 
+   - **Core Stats**: Body, Mind, Agility, Control with base and modified values
+   - **Derived Stats**: Max HP, HP, Max Guard, Guard with proper calculations
+   - **Combat Stats**: Attack with base and modified values
+   - **Side-by-side Comparison**: Base stats vs modified stats for easy comparison
+
+3. **Effects Display**: 
+   - **Comprehensive List**: All active effects with detailed information
+   - **Effect Details**: Name, values, category, source, and duration
+   - **Source Formatting**: Equipment names instead of technical slot names
+   - **Sorted Display**: Effects ordered by source for consistent presentation
+   - **Duration Handling**: "--" for permanent effects, turn count for temporary
+
+4. **CSS Styling**: 
+   - **Table Layout**: Clean grid-based layout for stats and effects
+   - **Color Coding**: Different colors for different types of information
+   - **Responsive Design**: Proper spacing and alignment
+   - **Scrollable Effects**: Effects list scrolls when there are many effects
+
+5. **JavaScript Integration**: 
+   - **updateAttributesUI()**: New function to populate the attributes tab
+   - **updateEffectsList()**: Helper function to display active effects
+   - **Test Compatibility**: Safety checks for test environment
+   - **Real-time Updates**: Attributes update automatically with character changes
+
+### New Attributes Tab Features:
+- **Detailed Stats View**: Complete character statistics with base vs modified comparison
+- **Effect Tracking**: Visual display of all active effects and their sources
+- **Player-Friendly**: Clear formatting and organization for easy understanding
+- **Developer-Friendly**: Great for debugging and verifying effect system functionality
+- **Extensible**: Easy to add new stats and effect types in the future
+
+### Benefits:
+- **Complete Visibility**: Players can see exactly how their character is affected by equipment and effects
+- **Debugging Tool**: Developers can easily verify that effects are working correctly
+- **User Experience**: Clear, organized display of character information
+- **Future Ready**: System ready for new stats and effect types
+- **Test Compatible**: Works in both game and test environments
+
+## PREVIOUS CHANGES: Consumable System Implementation
 
 ### What We Accomplished:
 1. **Updated Potion Vial Item**: 

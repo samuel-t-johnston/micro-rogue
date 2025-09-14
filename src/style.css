@@ -481,6 +481,142 @@ body {
   color: #ff6666;
 }
 
+/* Attributes tab styling */
+.attributes-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stats-table {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.stats-header {
+  display: grid;
+  grid-template-columns: 1fr 60px 80px;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 2px solid #006400;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #00ff00;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: 1fr 60px 80px;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.9em;
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+}
+
+.stat-name {
+  color: #e8e8e8;
+  font-weight: bold;
+}
+
+.stat-base {
+  color: #aaa;
+  text-align: center;
+}
+
+.stat-modified {
+  color: #00ff00;
+  text-align: center;
+  font-weight: bold;
+}
+
+.effects-section {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.effects-header {
+  display: grid;
+  grid-template-columns: 1fr 80px 100px 120px 80px;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 2px solid #006400;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #00ff00;
+  font-size: 0.85em;
+}
+
+.effects-list {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.effect-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 100px 120px 80px;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.8em;
+}
+
+.effect-row:last-child {
+  border-bottom: none;
+}
+
+.effect-name {
+  color: #e8e8e8;
+  font-weight: bold;
+}
+
+.effect-values {
+  color: #00ff00;
+  text-align: center;
+}
+
+.effect-category {
+  color: #ffaa00;
+  text-align: center;
+}
+
+.effect-source {
+  color: #aaa;
+  text-align: center;
+  font-size: 0.75em;
+}
+
+.effect-duration {
+  color: #ff6666;
+  text-align: center;
+}
+
+/* Scrollbar styling for effects list */
+.effects-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.effects-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.effects-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.effects-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .game-container {

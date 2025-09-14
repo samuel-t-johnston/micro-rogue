@@ -53,6 +53,114 @@ export function updateInventoryUI(player) {
     `Inventory (${player.inventory.length}/${player.maxInventorySize})`;
 }
 
+export function updateAttributesUI(player) {
+  // Check if attributes tab elements exist (for test environment compatibility)
+  const bodyBaseElement = document.getElementById('attr-body-base');
+  if (!bodyBaseElement) {
+    return; // Skip attributes update if elements don't exist (e.g., in tests)
+  }
+
+  // Check if player has the required stat structure (for test environment compatibility)
+  if (!player.baseStats || !player.bonusedStats) {
+    return; // Skip attributes update if player doesn't have stat structure (e.g., in tests)
+  }
+
+  // Update core stats
+  document.getElementById('attr-body-base').textContent = player.baseStats.body;
+  document.getElementById('attr-body-modified').textContent = player.bonusedStats.body;
+  document.getElementById('attr-mind-base').textContent = player.baseStats.mind;
+  document.getElementById('attr-mind-modified').textContent = player.bonusedStats.mind;
+  document.getElementById('attr-agility-base').textContent = player.baseStats.agility;
+  document.getElementById('attr-agility-modified').textContent = player.bonusedStats.agility;
+  document.getElementById('attr-control-base').textContent = player.baseStats.control;
+  document.getElementById('attr-control-modified').textContent = player.bonusedStats.control;
+
+  // Update derived stats
+  const baseMaxHp = player.baseStats.body * 2 + player.baseStats.hpBonus;
+  const modifiedMaxHp = player.maxHp;
+  document.getElementById('attr-maxhp-base').textContent = baseMaxHp;
+  document.getElementById('attr-maxhp-modified').textContent = modifiedMaxHp;
+  document.getElementById('attr-hp-current').textContent = player.currentHp;
+
+  const baseMaxGuard = player.baseStats.agility * 2 + player.baseStats.guard;
+  const modifiedMaxGuard = player.maxGuard;
+  document.getElementById('attr-maxguard-base').textContent = baseMaxGuard;
+  document.getElementById('attr-maxguard-modified').textContent = modifiedMaxGuard;
+  document.getElementById('attr-guard-current').textContent = player.bonusedStats.guard;
+
+  // Update combat stats
+  document.getElementById('attr-attack-base').textContent = player.baseStats.attack;
+  document.getElementById('attr-attack-modified').textContent = player.bonusedStats.attack;
+
+  // Update effects list
+  updateEffectsList(player);
+}
+
+function updateEffectsList(player) {
+  const effectsList = document.getElementById('effects-list');
+  if (!effectsList) {
+    return; // Skip effects update if element doesn't exist (e.g., in tests)
+  }
+  
+  effectsList.innerHTML = '';
+
+  if (player.effects.length === 0) {
+    const noEffectsRow = document.createElement('div');
+    noEffectsRow.className = 'effect-row';
+    noEffectsRow.innerHTML = '<span class="effect-name">No active effects</span>';
+    effectsList.appendChild(noEffectsRow);
+    return;
+  }
+
+  // Sort effects by source for consistent display
+  const sortedEffects = [...player.effects].sort((a, b) => {
+    if (a.source !== b.source) {
+      return a.source.localeCompare(b.source);
+    }
+    return a.type.localeCompare(b.type);
+  });
+
+  sortedEffects.forEach(effect => {
+    const effectRow = document.createElement('div');
+    effectRow.className = 'effect-row';
+
+    // Format effect name
+    const effectName = effect.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+    // Format effect values
+    const effectValues = effect.value ? `+${effect.value}` : '--';
+
+    // Format effect category
+    const effectCategory = effect.category || 'unknown';
+
+    // Format effect source
+    let effectSource = effect.source || 'unknown';
+    if (effectSource.startsWith('equipment(')) {
+      // Extract slot from "equipment(weapon1)" format
+      const slot = effectSource.replace('equipment(', '').replace(')', '');
+      const equippedItem = player.equipment[slot];
+      effectSource = equippedItem ? equippedItem.name : `${slot} slot`;
+    } else if (effectSource.startsWith('creature(')) {
+      // Extract creature name from "creature(spider)" format
+      const creature = effectSource.replace('creature(', '').replace(')', '');
+      effectSource = creature.charAt(0).toUpperCase() + creature.slice(1);
+    }
+
+    // Format duration
+    const duration = effect.turns !== null ? `${effect.turns} turns` : '--';
+
+    effectRow.innerHTML = `
+      <span class="effect-name">${effectName}</span>
+      <span class="effect-values">${effectValues}</span>
+      <span class="effect-category">${effectCategory}</span>
+      <span class="effect-source">${effectSource}</span>
+      <span class="effect-duration">${duration}</span>
+    `;
+
+    effectsList.appendChild(effectRow);
+  });
+}
+
 export function updateControlsUI(choiceModeManager) {
   const controlsElement = document.getElementById('controls');
 
@@ -167,6 +275,9 @@ export function updateUI(gameState, player, choiceModeManager = null) {
 
   // Update inventory and equipment
   updateInventoryUI(player);
+
+  // Update attributes tab
+  updateAttributesUI(player);
 
   // Update controls if choice mode manager is provided
   if (choiceModeManager) {
