@@ -12,7 +12,7 @@ export class Effect {
    * Apply this effect to a character
    * @param {Character} character - The character to apply the effect to
    */
-  applyTo(character) {
+  applyTo(_character) {
     // Override in subclasses
     throw new Error('applyTo method must be implemented by subclass');
   }
@@ -21,7 +21,7 @@ export class Effect {
    * Remove this effect from a character
    * @param {Character} character - The character to remove the effect from
    */
-  removeFrom(character) {
+  removeFrom(_character) {
     // Override in subclasses
     throw new Error('removeFrom method must be implemented by subclass');
   }
@@ -31,7 +31,7 @@ export class Effect {
    * @param {Character} character - The character the effect is applied to
    * @returns {boolean} - true if effect should continue, false if it should be removed
    */
-  eachTurn(character) {
+  eachTurn(_character) {
     // Override in subclasses for temporary effects
     return true; // Default: effect continues
   }

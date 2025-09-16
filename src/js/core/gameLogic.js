@@ -739,7 +739,7 @@ export function removeEquipmentWithDrop(item, slot, ringIndex, gameState, gameDi
   const unequippedItem = gameState.player.unequipItem(slot, ringIndex);
   if (unequippedItem) {
     // Drop the item at player's location
-    dropItem(unequippedItem, gameState, gameDisplay);
+    dropItem(unequippedItem, gameState);
     addMessage(`Removed ${unequippedItem.name} and dropped it on the ground.`, gameState, gameState.player);
     render(gameState, gameDisplay);
     updateUI(gameState, gameState.player, choiceModeManager);
@@ -749,7 +749,7 @@ export function removeEquipmentWithDrop(item, slot, ringIndex, gameState, gameDi
 }
 
 // Drop an item at the player's location
-function dropItem(item, gameState, gameDisplay) {
+function dropItem(item, gameState) {
   const playerPos = gameState.getPlayerPosition();
   const currentLevel = gameState.currentLevel;
   
@@ -805,12 +805,12 @@ export function dropItemWithContainerCheck(item, itemIndex, furniture, gameState
       addMessage(`Placed ${removedItem.name} in ${furniture.getName()}.`, gameState, gameState.player);
     } else {
       // Container is full - drop on ground instead
-      dropItem(removedItem, gameState, gameDisplay);
+      dropItem(removedItem, gameState);
       addMessage(`The ${furniture.getName()} is full. Dropped ${removedItem.name} on the ground.`, gameState, gameState.player);
     }
   } else {
     // Drop item on the ground
-    dropItem(removedItem, gameState, gameDisplay);
+    dropItem(removedItem, gameState);
     addMessage(`Dropped ${removedItem.name} on the ground.`, gameState, gameState.player);
   }
   

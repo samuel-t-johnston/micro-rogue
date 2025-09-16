@@ -10,7 +10,7 @@ export class PoisonEffect extends Effect {
    * Apply poison to character (no immediate effect, just tracking)
    * @param {Character} character - The character to apply the effect to
    */
-  applyTo(character) {
+  applyTo(_character) {
     // Poison doesn't modify stats, just tracks the effect
     // The damage is applied each turn via eachTurn()
   }
@@ -19,7 +19,7 @@ export class PoisonEffect extends Effect {
    * Remove poison from character (no stat changes to reverse)
    * @param {Character} character - The character to remove the effect from
    */
-  removeFrom(character) {
+  removeFrom(_character) {
     // Poison doesn't modify stats, so nothing to reverse
   }
 
