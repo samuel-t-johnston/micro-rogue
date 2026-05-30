@@ -15,7 +15,7 @@ Open questions and deferred decisions are noted inline where they land on the ro
 *Done when: a static room renders correctly on a phone browser, the PRNG is wired in, and the project structure is established.*
 
 - [x] Project structure: directory layout, ES module setup, no bundler initially
-- [ ] PRNG: Mulberry32 implementation, single shared instance, seeded from a fixed value
+- [x] PRNG: Mulberry32 implementation, single shared instance, seeded from a fixed value
 - [ ] Renderer interface stub: `renderer` abstraction that owns tile geometry; sprite implementation only
 - [x] Canvas setup: sized to viewport, multiplied by `devicePixelRatio`, resize/orientation handlers
 - [ ] Static level loader: hardcoded room, base tile array, no overrides, no entities

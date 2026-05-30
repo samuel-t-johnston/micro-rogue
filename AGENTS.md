@@ -7,12 +7,13 @@ If you find contradictory information in your context, explain the contradiction
 
 - Practice TDD where applicable (see Testing section).
 - After you write code, review it for clarity, simplicity, and de-duplication.
-- When code is written, tested and reviewed, update documentation.
+- When code is written, tested and reviewed, consider updating documentation like MD files.
 
 # Code Style
  - Use modern Javascript with modules and classes.
  - ES modules only, no CommonJS, no bundler.
- - All random calls go through the shared seeded RNG (ADR-004). `Math.random()` is forbidden in source and tests.
+ - Use JS Doc-style comments where applicable. Comments should be concise and make the code easier to read. Do not include comments where code is straightforward, short, and/or self-documenting via function and parameter names.
+ - All random calls go through the shared seeded RNG - `rng.js`. `Math.random()` is forbidden in source and tests.
 
 # Dev Environment
 
