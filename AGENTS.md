@@ -5,9 +5,9 @@ Micro-Rogue (stylized ROGµE) is a game engine for traditional roguelike games w
 
 If you find contradictory information in your context, explain the contradiction and the sources, then request guidance. Do not leave code and/or documentation in a contradictory state - clean it up before proceeding. Do not arbitrarily pick an option if the correct action is not clear.
 
-Practice TDD where applicable (see Testing section).
-After you write code, review it for clarity, simplicity, and de-duplication.
-When code is written, tested and reviewed, update documentation.
+- Practice TDD where applicable (see Testing section).
+- After you write code, review it for clarity, simplicity, and de-duplication.
+- When code is written, tested and reviewed, update documentation.
 
 # Code Style
  - Use modern Javascript with modules and classes.
@@ -16,7 +16,7 @@ When code is written, tested and reviewed, update documentation.
 
 # Dev Environment
 
-Node.js is a dev-time dependency only — the shipped game is browser-only with no bundler (per ADR-014: Dev Server Root).
+Node.js is a dev-time dependency only — the shipped game is browser-only with no bundler.
 
 Setup:
 
