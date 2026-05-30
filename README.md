@@ -81,7 +81,9 @@ Run tests with `npm test` (watch mode) or `npm run test:run` (single pass).
 ### How To...?
 
 The `docs/howto` directory contains files with directions for making specific changes to ROGμE. These are designed to be helpful to both human devs and AI coding assistants, and provide an easy way to start making the game your own.
-	
+
+The code itself is documented with JS Doc-style comments to help with discovery and understanding.
+
 ## Credits
 
 ROGμE is made by Sam Johnston, with help from Claude Code 🤖.
