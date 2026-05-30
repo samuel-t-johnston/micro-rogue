@@ -1,7 +1,5 @@
 # Roadmap
-Purpose: This document is intended to be a place where I can jot down long-term plans for ROGµE.
-
-AI AGENTS SHOULD IGNORE THIS FILE UNLESS EXPLICITLY TOLD OTHERWISE.
+Purpose: This document is intended to be a place where I can jot down long-term plans for ROGµE. It is not a comprehensive roadmap and will change as implementation continues.
 
 ---
 
@@ -18,7 +16,7 @@ Open questions and deferred decisions are noted inline where they land on the ro
 - [x] PRNG: Mulberry32 implementation, single shared instance, seeded from a fixed value
 - [ ] Renderer interface stub: `renderer` abstraction that owns tile geometry; sprite implementation only
 - [x] Canvas setup: sized to viewport, multiplied by `devicePixelRatio`, resize/orientation handlers
-- [ ] Static level loader: hardcoded room, base tile array, no overrides, no entities
+- [x] Static level loader: hardcoded room, base tile array, no overrides, no entities
 - [ ] Render the room: floor and wall tiles visible, camera centered, correct DPR
 - [x] PWA basics: manifest.json, viewport meta tag, service worker registration stub only (no caching yet — that lands in M7).
 - [ ] Debug overlay canvas: separate layer, togglable, tile coordinates on hover/tap

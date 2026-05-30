@@ -1,7 +1,9 @@
 import { AppState, createAppStateMachine } from './engine/app-state.js';
 import { readTheme } from './engine/theme.js';
+import { rng } from './engine/rng.js';
 import { createSplashScene } from './ui/splash.js';
 import { createMenuScene } from './ui/game-menu.js';
+import { createGameScene } from './ui/game-scene.js';
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -26,13 +28,15 @@ function getViewport() {
   return viewport;
 }
 
+rng.init(12345);
+
 const theme = readTheme();
 const appState = createAppStateMachine();
 
 function handleMenuAction(id) {
   switch (id) {
     case 'new':
-      console.log('[menu] New Game');
+      appState.transition(AppState.GAME);
       break;
     case 'quit':
       try {
@@ -52,6 +56,9 @@ appState.register(AppState.SPLASH, () =>
 );
 appState.register(AppState.MENU, () =>
   createMenuScene({ theme, getViewport, onAction: handleMenuAction })
+);
+appState.register(AppState.GAME, () =>
+  createGameScene()
 );
 
 resize();
