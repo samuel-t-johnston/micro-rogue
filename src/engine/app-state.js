@@ -1,0 +1,46 @@
+import { LayerStack } from '../render/layers.js';
+
+export const AppState = Object.freeze({
+  SPLASH: 'splash',
+  MENU: 'menu',
+});
+
+export function createAppStateMachine() {
+  const scenes = new Map();
+  const layers = new LayerStack();
+  let currentState = null;
+
+  function clearLayers() {
+    while (layers.top()) {
+      const layer = layers.pop();
+      layer.exit?.();
+    }
+  }
+
+  return {
+    register(state, sceneFactory) {
+      scenes.set(state, sceneFactory);
+    },
+    transition(state) {
+      const factory = scenes.get(state);
+      if (!factory) throw new Error(`No scene registered for state: ${String(state)}`);
+      clearLayers();
+      currentState = state;
+      const scene = factory();
+      layers.push(scene);
+      scene.enter?.();
+    },
+    render(ctx) {
+      layers.render(ctx);
+    },
+    handleInput(event) {
+      return layers.handleInput(event);
+    },
+    get state() {
+      return currentState;
+    },
+    get layers() {
+      return layers;
+    },
+  };
+}

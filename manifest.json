@@ -1,0 +1,11 @@
+{
+  "name": "ROGµE",
+  "short_name": "ROGµE",
+  "description": "A traditional roguelike game engine.",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0e0a",
+  "theme_color": "#111811",
+  "icons": []
+}

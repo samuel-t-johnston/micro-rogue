@@ -20,21 +20,23 @@ There are many good game engines for roguelikes. ROGμE tries to make life easie
 
 1. **It’s already a game!** Every system in ROGμE comes pre-populated with data. It’s playable as a game straight out of the box. You can start by tweaking settings, adding new items, or totally overhauling major systems. It’s up to you.
 2. **It’s web-native and cross platform!** It uses vanilla JavaScript and HTML. You can play it on mobile, tablet or desktop. No server setup or install necessary. In fact, you can play it on GitHub right now! <link coming soon>.
-3. **It’s AI-friendly!** ROGμE is designed from the ground up to work well with autonomous agents and AI-assisted devs. Not using AI? No problem. The same text documentation and skill files that help AI work in the codebase will tell you everything you want to know about ROGμE.
+3. **It’s AI-friendly!** ROGμE is designed from the ground up to work well with autonomous agents and AI-assisted devs. Not using AI? No problem. The same documentation that helps AI work in the codebase will tell you everything you want to know about ROGμE.
 	
 ## How Do I Get Started?
 
 TBD - Starting Points
-	• Development Environment Setup
-	• How Systems Fit Together
-	• UI
-	• Map Generation
-	• Saving and Loading
-	• NPCs and AI
-	• The Player 
-	• Actions
-	• Items
+- Development Environment Setup
+- How To: Modify Theme
+- How Systems Fit Together
+- UI
+- Map Generation
+- Saving and Loading
+- NPCs and AI
+- The Player 
+- Actions
+- Items
+
 	
 ## Credits
 
-ROGμE was made by Sam Johnston, with help from Claude Code 🤖.
+ROGμE is made by Sam Johnston, with help from Claude Code 🤖.

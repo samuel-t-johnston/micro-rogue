@@ -1,0 +1,1 @@
+//TODO: entity registry, component storage, spacial index

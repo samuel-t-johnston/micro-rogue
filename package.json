@@ -1,0 +1,21 @@
+{
+  "name": "rogue",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Micro-Rogue (stylized ROGµE) — a game engine for traditional roguelike games written in vanilla JavaScript and HTML.",
+  "scripts": {
+    "predev": "node scripts/check-port.mjs 8000",
+    "dev": "live-server --port=8000 --no-browser --ignore=node_modules",
+    "dev:kill": "kill-port 8000",
+    "dev:fresh": "npm run dev:kill && npm run dev",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "devDependencies": {
+    "happy-dom": "^15.11.7",
+    "kill-port": "^2.0.1",
+    "live-server": "^1.2.2",
+    "vitest": "^2.1.8"
+  }
+}

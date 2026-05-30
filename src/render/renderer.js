@@ -1,0 +1,1 @@
+//TODO: interface / base - owns tile geometry, coordinate math
