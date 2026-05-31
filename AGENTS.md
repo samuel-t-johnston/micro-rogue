@@ -9,6 +9,10 @@ If you find contradictory information in your context, explain the contradiction
 - After you write code, review it for clarity, simplicity, and de-duplication.
 - When code is written, tested and reviewed, consider updating documentation like MD files.
 
+# Q&A
+
+When presenting lists, questions, or any information with section headings where you expect me to respond, number those headings. This makes it easier for us to have a dialogue by referencing those numbers.
+
 # Code Style
  - Use modern Javascript with modules and classes.
  - ES modules only, no CommonJS, no bundler.
