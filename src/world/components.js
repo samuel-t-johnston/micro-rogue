@@ -22,4 +22,14 @@ export const components = {
   playerControlled() {
     return {};
   },
+
+  memory(initial = {}) {
+    return { ...initial };
+  },
+
+  // Array of sense functions: sense(entity, level, turnCount) → SenseResult[].
+  // Stored as function references — never serialized.
+  senses(fns = []) {
+    return [...fns];
+  },
 };

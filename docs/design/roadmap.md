@@ -28,24 +28,22 @@ Open questions and deferred decisions are noted inline where they land on the ro
 
 - [x] Entity model: base entity structure, component system, spatial index (`Map<"x,y", Entity[]>`)
 - [ ] Player entity: position, `health` component, `TurnTaker` component
-- [ ] Turn loop: player turn → resolve → next turn; action queue
-- [ ] Tap-to-move: tap a tile, pathfinder navigates there (A* or similar); cancel on re-tap
-- [ ] Context-sensitive tap: distinguish floor tap (move) from entity tap (placeholder)
-- [ ] Long press: secondary action hook (no actions yet, just the detection)
+- [x] Turn loop: player turn → resolve → next turn; action queue
+- [x] Tap-to-move: tap a tile, pathfinder navigates there (A* or similar); cancel on re-tap
+- [x] Context-sensitive tap: distinguish floor tap (move) from entity tap (placeholder)
 - [ ] Movement slide animation: entities slide between tiles, 80–120ms
 - [x] Camera follows player
 - [ ] Minimal HUD: HP number, turn count — anchored, stateless presentational component
 - [ ] Event log: in-memory ring buffer, structured entries with `display` strings; last 1–2 lines ghost-visible at map edge
-
-*Open question: exact pathfinding implementation. A* is the obvious choice; confirm no edge cases with the tile layer before committing.*
 
 ---
 
 ## M2 — The World Has Rules
 *Done when: walls block movement and sight, items exist on the map and can be picked up, and the tile override layer works.*
 
-- [ ] FOV: shadowcasting; remembered tiles vs. visible tiles vs. dark
-- [ ] Tile passability and opacity enforced in movement and FOV
+- [ ] FOV: shadowcasting; remembered tiles vs. visible tiles vs. dark. Uses senses (and possibly memory?) for tile perception.
+- [ ] Tile passability enforced in movement
+- [ ] Tile opacity enforced in FOV
 - [ ] Tile override layer: `getTile(x,y)` with override-first lookup; at least one dynamic tile (a door)
 - [ ] `openable` component: doors open on tap, block movement and light when closed
 - [ ] Passive entities: items on the map with `usable` or `equippable` components
@@ -158,3 +156,4 @@ These are explicitly out of scope until a concrete need exists:
 - **Dedicated map screen** — zoom-out-as-map first; separate map screen only if levels outgrow it
 - **Font size preferences** — desktop only, when settings system is built out
 - **ECS component subscription system** — `level.moveEntity()` is the current explicit coordination point for positional changes (ADR-018); extract to a subscription model if multiple independent systems need to react to the same component changes
+**Long press** - secondary action hook

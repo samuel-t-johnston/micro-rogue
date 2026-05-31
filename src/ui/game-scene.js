@@ -22,7 +22,7 @@ export function createGameScene({ getViewport }) {
   }
 
   function handleInput(event) {
-    if (!level || !inputController?.isWaiting()) return false;
+    if (!level || !inputController) return false;
 
     if (event.type === 'pointerdown') {
       const world = renderer.screenToWorld(event.x, event.y);
@@ -31,6 +31,12 @@ export function createGameScene({ getViewport }) {
       inputController.submit({ type: 'move', x: tx, y: ty });
       return true;
     }
+
+    if (event.type === 'keydown' && event.key === 'Escape') {
+      inputController.submit({ type: 'cancel' });
+      return true;
+    }
+
     return false;
   }
 

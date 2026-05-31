@@ -19,6 +19,8 @@ The AI planner never reads the map directly — only what senses report. This me
 
 ### Sense Types
 
+**Mega-vision** — Returns the complete world state: all entities, their exact positions, and component tags. Confidence is always 100; no FOV or light gating. Used for the player and for early AI development. Designed to be swapped for a real sense with no planner changes — same `SenseResult` shape.
+
 **Vision** — FOV algorithm (e.g. shadowcasting) gated by per-tile light level. Full detail on observed entities: exact position, appearance, visible equipment.
 
 **Darkvision** — Same FOV algorithm, skips light check. Silhouette-level detail rather than full.
@@ -33,6 +35,7 @@ Different senses yield different quality of information:
 
 | Sense | Position | Entity type | Detail | Notes |
 |---|---|---|---|---|
+| Mega-vision | Exact | Full | Complete | No filtering; entire world state |
 | Vision | Exact | Full | High | Blocked by opaque tiles and darkness |
 | Darkvision | Exact | Silhouette | Medium | Blocked by opaque tiles, ignores light |
 | Hearing | Approximate | Type hint | Low | Passes around corners, muffled by walls |
@@ -54,26 +57,17 @@ This lets the AI reason about stale data — a position seen 10 turns ago is les
 
 ## Memory
 
-Memory is separate from sense results. Rather than caching all perception, only data that **drove a decision** is retained. If a sense result triggered a plan, it is stored as the context justifying that plan. Background perception that didn't affect behavior evaporates.
+Memory is separate from sense results. Rather than caching all perception, only data that **drove a decision** is retained. Goals should clear keys they own when the condition that activated them resolves.
 
-### Memory Decay on the Goal
+### Entity-Level Shared Memory
 
-Decay is a property of the **goal**, not the creature. This keeps decay encapsulated and allows goals to have independent stickiness:
+Memory lives on the entity as a flat key-value store (`memory` component). All of an entity's goals read and write it freely. Goals may also mutate memory during evaluation as a side effect even when not activating — for example, a goal clearing its target key when a cancel condition fires.
 
-```javascript
-{
-  id: 'investigate',
-  priority: 50,
-  condition: 'alertCauseExists',
-  memory: {
-    alertCause: { pos, turn, source },
-  },
-  decayRate: 3,       // confidence drops per turn
-  minConfidence: 20,  // goal invalidates below this
-}
-```
+Shared memory is the right model for the player, where goals explicitly coordinate through state: `player-get-input` writes `autoMoveTarget`; `player-auto-move` reads and eventually clears it. Goal-owned memory with cross-goal writes creates reach-in coupling that shared memory avoids.
 
-A `vendetta` goal — a creature that was attacked and holds a grudge — might have near-zero decay. A `curious` goal triggered by a faint distant sound decays in a few turns. These feel like creature personality but live entirely in goal configuration.
+### Memory Decay (Deferred)
+
+For NPC goals with independent memory lifecycles (e.g. an `investigate` goal that forgets a sound after N turns), a goal-owned decay model may be reintroduced. Under that model each key would have an owning goal whose decay rules apply. This is deferred until NPC goal behavior requires it.
 
 ---
 
@@ -143,9 +137,17 @@ When `turnsRequired > 1`, the execution loop holds the action across turns and r
 
 ---
 
+## Tile Data and the Sense Abstraction
+
+The design principle is that planners never read the world directly — only what senses report. This fully applies to entity perception (position, type, status). For tile data it is currently a known deviation: pathfinding receives the full level directly via `context.level` rather than a filtered "known map" from the sense system.
+
+When real vision is implemented, tile visibility should be incorporated into sense results (a `visibleTiles` set or similar), and pathfinding should operate on tiles the entity has actually perceived. The player map display (fog of war) will derive from the same data. This deviation is tracked in ADR-021.
+
+---
+
 ## What to Avoid
 
 - Re-evaluating goals from scratch every turn — check invalidation conditions instead
 - Storing perception directly as memory — only retain what drove a decision
 - Treating squad communication as a special system — route it through hearing
-- Putting decay on the creature rather than the goal — goals should own their memory lifecycle
+- Putting decay on the creature — decay belongs on the owning goal (when goal-owned memory is used)
