@@ -7,7 +7,6 @@ Format: Context → Decision → Alternatives rejected → Consequences.
 ---
 
 ## ADR-001: Deployment Target
-Status: Accepted
 
 Context: Need to choose between PWA, native wrapper (Capacitor/Cordova), or native app as primary distribution target.
 
@@ -20,7 +19,6 @@ Consequences: Must handle iOS quirks (Web Audio, Safari PWA gaps) in web code. N
 ---
 
 ## ADR-002: Rendering Target
-Status: Accepted
 
 Context: Need a rendering approach for the tile map and entities.
 
@@ -33,7 +31,6 @@ Consequences: Must multiply canvas dimensions by `devicePixelRatio` for sharp re
 ---
 
 ## ADR-003: Renderer Interface (Sprite vs. ASCII)
-Status: Accepted
 
 Context: Sprite tiles and ASCII characters have different aspect ratios. If ASCII mode is added later without an abstraction, the rendering layer needs significant rework. UX doc explicitly flags this as an early architectural decision.
 
@@ -46,7 +43,6 @@ Consequences: First commit must include the renderer interface stub. Any code th
 ---
 
 ## ADR-004: PRNG
-Status: Accepted
 
 Context: The save system requires snapshotting exact RNG state and restoring it on load. Map generation requires full-pipeline seeded determinism. `Math.random()` is neither seedable nor serializable.
 
@@ -59,7 +55,6 @@ Consequences: All random calls must go through the shared RNG instance, never `M
 ---
 
 ## ADR-005: Save Format and Storage
-Status: Accepted
 
 Context: Need a save format and browser storage mechanism.
 
@@ -72,7 +67,6 @@ Consequences: Save size must stay within localStorage limits (~5MB). JSON readab
 ---
 
 ## ADR-006: Entity Model
-Status: Accepted
 
 Context: Need to model creatures, items, and furniture without a proliferating class hierarchy.
 
@@ -85,7 +79,6 @@ Consequences: The action system checks component presence, not entity type. Addi
 ---
 
 ## ADR-007: Tile Architecture
-Status: Accepted
 
 Context: Need a tile model that supports dynamic terrain without making every tile mutable.
 
@@ -98,7 +91,6 @@ Consequences: Tiles are data, not actors. Terrain effects (`enterEffect`, `itemE
 ---
 
 ## ADR-008: Item Location Model
-Status: Accepted
 
 Context: Items exist in multiple contexts (on the map, in inventory, equipped, in a container). A single `{x, y}` field doesn't cover this cleanly.
 
@@ -111,7 +103,6 @@ Consequences: All item location reads must handle the union. Serialization is st
 ---
 
 ## ADR-009: Map Generation Pipeline
-Status: Accepted
 
 Context: Need a map generation approach that supports both static layouts (early development) and procedural generation (later).
 
@@ -124,7 +115,6 @@ Consequences: Stage order must be stable for seeds to reproduce. Adding a stage 
 ---
 
 ## ADR-010: AI Architecture
-Status: Accepted
 
 Context: Need NPC behavior that produces legible, interesting enemies without a bespoke system per creature type.
 
@@ -137,7 +127,6 @@ Consequences: Blinding/deafening a creature is just disabling a sense component.
 ---
 
 ## ADR-011: Input Model
-Status: Accepted
 
 Context: Mobile-first game needs an input model designed for touch, not adapted from keyboard.
 
@@ -150,7 +139,6 @@ Consequences: Discrete zoom snap points, not continuous pinch-to-zoom. No mode-s
 ---
 
 ## ADR-012: UI Architecture
-Status: Accepted
 
 Context: Need a UI model that works across portrait mobile, landscape tablet, and desktop without maintaining separate codebases.
 
@@ -163,7 +151,6 @@ Consequences: Quick bar slot assignments are game state (saved with the run), no
 ---
 
 ## ADR-013: Display String Generation
-Status: Accepted
 
 Context: The event log needs both structured data (for debugging) and human-readable strings (for the message log). Strings could be pre-rendered at resolution time or reconstructed from structured data later.
 
@@ -176,7 +163,6 @@ Consequences: If localization becomes a real requirement, this decision should b
 ---
 
 ## ADR-014: Dev Server Root
-Status: Accepted
 
 Context: JS modules live in `src/`, static assets in `public/`, and `index.html` at the repo root. Serving only `public/` would make `src/` unreachable because dev servers block requests above their root.
 
@@ -189,7 +175,6 @@ Consequences: Any dev server pointed at the repo root works (`npx serve .`, VS C
 ---
 
 ## ADR-015: Testing Framework and Approach
-Status: Accepted
 
 Context: AI-assisted development benefits significantly from a tight test loop — tests constrain model output, catch regressions in subtle places (save migrations, seeded determinism), and give a hard signal for when generated code is done. Without a testing strategy, an AI assistant left to its own devices does not adopt TDD habits, and the project accumulates plausible-looking code that hasn't been verified against intent. The project is greenfield, ES modules, no bundler, browser-targeted.
 
@@ -202,7 +187,6 @@ Consequences: Node.js becomes a development dependency. The shipped game remains
 ---
 
 ## ADR-016: Entity Registry Implementation
-Status: Accepted
 
 Context: Need a concrete implementation strategy for entity IDs, component storage, and entity construction. ADR-006 established the component-based model but left implementation details open.
 
@@ -215,7 +199,6 @@ Consequences: Adding or removing a component must always go through the registry
 ---
 
 ## ADR-017: Turn Loop Async Model and Player Input Bridge
-Status: Accepted
 
 Context: The turn loop must pause for player input without blocking other browser work, and must be compatible with immediate AI resolution. The action system will eventually handle many action types (move, attack, use item), all of which the loop should handle uniformly.
 
@@ -228,7 +211,6 @@ Consequences: The turn module stays clean and doesn't distinguish player from AI
 ---
 
 ## ADR-018: Spatial Index Ownership and Positional Updates
-Status: Accepted
 
 Context: When an entity moves, two things must stay consistent: the entity's position component and the level's spatial index (`Map<"x,y", Entity[]>`). Need to decide who coordinates this update, and whether to use a generic subscription model.
 

@@ -5,7 +5,6 @@ const ITEMS = [
   { id: 'new', label: 'New Game' },
   { id: 'continue', label: 'Continue', requiresSave: true },
   { id: 'settings', label: 'Settings', disabled: true },
-  { id: 'quit', label: 'Quit' },
 ];
 
 const BUTTON_W = 260;

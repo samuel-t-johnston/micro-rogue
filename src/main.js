@@ -42,14 +42,6 @@ function handleMenuAction(id) {
     case 'new':
       appState.transition(AppState.GAME);
       break;
-    case 'quit':
-      try {
-        window.close();
-      } catch {
-        // Most browsers reject window.close() unless the tab was script-opened.
-        // Real "you can close this tab now" UI lands with the menu polish pass.
-      }
-      break;
     default:
       console.log(`[menu] ${id}`);
   }
