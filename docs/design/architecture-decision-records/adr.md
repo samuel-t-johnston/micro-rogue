@@ -200,3 +200,42 @@ Alternatives rejected: Jest (CommonJS-first architecture, ESM still flagged as e
 Consequences: Node.js becomes a development dependency. The shipped game remains browser-only with no bundler. `package.json` and `node_modules/` enter the project; `node_modules/` is gitignored. All random calls go through the seeded RNG — `Math.random()` is forbidden in source and tests. Time-dependent code uses an injected clock. Save migrations ship with frozen fixture files: a real save at the source version, committed alongside the migration, with a test that loads the fixture and asserts the post-migration shape. These fixture tests are never deleted. The agent file specifies TDD scope explicitly; the model is expected to follow it.
 
 ---
+
+## ADR-016: Entity Registry Implementation
+Status: Accepted
+
+Context: Need a concrete implementation strategy for entity IDs, component storage, and entity construction. ADR-006 established the component-based model but left implementation details open.
+
+Decision: Entities are plain objects `{ id }` with an integer ID assigned by a central registry. Components are stored in a `Map<string, object>` on each entity (`entity.components`). The registry maintains a secondary index (`Map<componentName, Set<entityId>>`) so systems can retrieve all entities with a given component in O(1) without iterating. All component add/remove goes through registry functions (`addComponent`, `removeComponent`) to keep the index consistent. Entity construction uses a component library of factory functions (one per component type) as the single definition site for component shape and defaults. Entity template files (creature/item definitions) are deferred until the entity variety warrants it.
+
+Alternatives rejected: GUIDs (more memory, harder to read in debug output, no benefit at roguelike entity counts); storing components as plain properties on the entity object (fast access but no generic index — every system that needs filtered queries has to iterate all entities); component index without entity-level Map (loses the clean "what does this entity have?" query at the entity level).
+
+Consequences: Adding or removing a component must always go through the registry, never by direct map mutation. The secondary index enables O(1) system queries (e.g. "all TurnTakers") without full entity iteration. Component factory functions are the single source of truth for component shape — no inline component literals elsewhere.
+
+---
+
+## ADR-017: Turn Loop Async Model and Player Input Bridge
+Status: Accepted
+
+Context: The turn loop must pause for player input without blocking other browser work, and must be compatible with immediate AI resolution. The action system will eventually handle many action types (move, attack, use item), all of which the loop should handle uniformly.
+
+Decision: The turn loop is `async`. `invokeAction(entity)` returns `Promise<boolean>` (boolean = free action per turn-order.md semantics). For AI entities, the action resolves synchronously (wrapped in `Promise.resolve()`). For the player, an `InputController` holds an unresolved promise that is resolved by the input system when the player commits an action (e.g. tap-to-move). The turn loop `await`s without knowing which path it took. `InputController` exposes `waitForInput()` (returns the pending promise) and `submit(action)` (resolves it and prepares the next).
+
+Alternatives rejected: Event-loop re-entry via `setTimeout` (convoluted, loses stack context); synchronous blocking loop with a game-state polling flag (freezes the browser main thread during player think time); separate async execution paths for player vs. AI (complicates the loop and leaks the player/AI distinction into the turn module).
+
+Consequences: The turn module stays clean and doesn't distinguish player from AI internally — that distinction lives in the action system. Any future player action (attack, use item) just resolves the same `InputController` promise. AI actions that need async work (e.g. remote evaluation, though unlikely) can also return real promises without structural change.
+
+---
+
+## ADR-018: Spatial Index Ownership and Positional Updates
+Status: Accepted
+
+Context: When an entity moves, two things must stay consistent: the entity's position component and the level's spatial index (`Map<"x,y", Entity[]>`). Need to decide who coordinates this update, and whether to use a generic subscription model.
+
+Decision: The level owns the spatial index alongside the tile layers. All positional changes go through a single function `level.moveEntity(entity, {x, y})` which updates both the position component and the index atomically. The action system calls this after validating the move (checking tile passability and index for blocking entities). The spatial index is a derived cache — it is not serialized but rebuilt from position components on load. A component subscription system (where systems subscribe to component changes) is explicitly deferred: the action system still depends on the level for validation regardless, so subscriptions would remove only the explicit `moveEntity` call while adding hidden side effects and infrastructure overhead. Extract to subscriptions if multiple independent systems need to react to position changes.
+
+Alternatives rejected: Action system updating position and index separately (risks divergence); entity updating its own position component and relying on a subscription to update the index (hidden side effects, infrastructure cost not justified by current subscriber count of one); storing the spatial index in the entity registry (conflates world-space concerns with entity storage).
+
+Consequences: `level.moveEntity()` is the single call site for all positional changes, including item drops and knockback. Nothing mutates an entity's position component directly. The spatial index is authoritative for "what is at X,Y" at runtime; position components are authoritative for serialization.
+
+---
