@@ -6,21 +6,7 @@ import { createEntityRegistry } from '../engine/entity-component-system.js';
 import { createTurnManager } from '../engine/turn-manager.js';
 import { createInputController } from '../engine/input-controller.js';
 import { createActionSystem } from '../actions/action-system.js';
-import { components } from '../world/components.js';
-
-function createPlayerEntity(registry, x, y) {
-  const entity = registry.createEntity();
-  registry.addComponent(entity, 'position', components.position(x, y));
-  registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
-  registry.addComponent(entity, 'playerControlled', components.playerControlled());
-  registry.addComponent(entity, 'renderable', {
-    sprite: null,
-    color: '#0a1a0a',
-    glyph: '@',
-    glyphColor: '#00cc44',
-  });
-  return entity;
-}
+import { createPlayer } from '../world/player.js';
 
 export function createGameScene({ getViewport }) {
   let level = null;
@@ -49,16 +35,17 @@ export function createGameScene({ getViewport }) {
   }
 
   return {
-    enter() {
-      Promise.all([
-        runPipeline(staticTestLevel, rng, registry),
-        renderer.load(),
-      ]).then(([loaded]) => {
+    async enter() {
+      try {
+        const [loaded] = await Promise.all([
+          runPipeline(staticTestLevel, rng, registry),
+          renderer.load(),
+        ]);
         level = loaded;
 
         const cx = Math.floor(level.width / 2);
         const cy = Math.floor(level.height / 2);
-        player = createPlayerEntity(registry, cx, cy);
+        player = await createPlayer(registry, cx, cy);
         level.placeEntity(player);
 
         renderer.setCamera(cx, cy);
@@ -72,9 +59,9 @@ export function createGameScene({ getViewport }) {
         turnManager.start();
 
         console.log('[game] Level ready:', level.width, 'x', level.height);
-      }).catch((err) => {
+      } catch (err) {
         console.error('[game] Failed to load level:', err);
-      });
+      }
     },
 
     render(ctx) {
