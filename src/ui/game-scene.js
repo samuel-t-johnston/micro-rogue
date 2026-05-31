@@ -1,28 +1,40 @@
 import { runPipeline } from '../world/generation/pipeline.js';
 import staticTestLevel from '../../data/pipelines/static-test-level.js';
 import { rng } from '../engine/rng.js';
+import { createRenderer } from '../render/renderer.js';
 
-export function createGameScene() {
+export function createGameScene({ getViewport }) {
   let level = null;
+  const renderer = createRenderer({ getViewport });
 
   return {
     enter() {
-      runPipeline(staticTestLevel, rng).then((loaded) => {
+      Promise.all([
+        runPipeline(staticTestLevel, rng),
+        renderer.load(),
+      ]).then(([loaded]) => {
         level = loaded;
-        console.log('[game] Level loaded:', level);
+        renderer.setCamera(level.width / 2, level.height / 2);
+        console.log('[game] Level ready:', level.width, 'x', level.height);
+      }).catch((err) => {
+        console.error('[game] Failed to load level:', err);
       });
     },
 
-    render(_ctx) {
-      // rendering deferred — level exists in memory once loading completes
+    render(ctx) {
+      if (!level) return;
+      const { width, height } = getViewport();
+      ctx.fillStyle = '#111';
+      ctx.fillRect(0, 0, width, height);
+      renderer.drawMap(ctx, level);
     },
 
-    handleInput(_event) {
-      return false;
+    screenToWorld(x, y) {
+      return renderer.screenToWorld(x, y);
     },
 
-    exit() {
-      level = null;
-    },
+    handleInput(_event) { return false; },
+
+    exit() { level = null; },
   };
 }
