@@ -27,14 +27,13 @@ Open questions and deferred decisions are noted inline where they land on the ro
 *Done when: a player entity appears on the map, moves via tap-to-move, and the turn loop ticks.*
 
 - [x] Entity model: base entity structure, component system, spatial index (`Map<"x,y", Entity[]>`)
-- [ ] Player entity: position, `health` component, `TurnTaker` component
+- [x] Player entity: position, `health` component, `TurnTaker` component
 - [x] Turn loop: player turn → resolve → next turn; action queue
 - [x] Tap-to-move: tap a tile, pathfinder navigates there (A* or similar); cancel on re-tap
 - [x] Context-sensitive tap: distinguish floor tap (move) from entity tap (placeholder)
-- [ ] Movement slide animation: entities slide between tiles, 80–120ms
 - [x] Camera follows player
-- [ ] Minimal HUD: HP number, turn count — anchored, stateless presentational component
-- [ ] Event log: in-memory ring buffer, structured entries with `display` strings; last 1–2 lines ghost-visible at map edge
+- [x] Minimal HUD: HP number, turn count — anchored, stateless presentational component
+- [x] Event log: in-memory ring buffer, structured entries with `display` strings; last 1–2 lines ghost-visible at map edge
 
 ---
 
@@ -137,6 +136,7 @@ Open questions and deferred decisions are noted inline where they land on the ro
 - [ ] Notification layer: compare sense results turn-over-turn, fan to log and emote system
 - [ ] Accessibility: 44×44px tap targets audit, color-not-sole-signal audit, handedness swap setting
 - [ ] Onboarding splash: dismissable, controls summary, hook for downstream content
+- [ ] Movement slide animation: entities slide between tiles, 80–120ms
 
 ---
 

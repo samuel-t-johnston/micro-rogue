@@ -7,8 +7,11 @@ import { createTurnManager } from '../engine/turn-manager.js';
 import { createInputController } from '../engine/input-controller.js';
 import { createActionSystem } from '../actions/action-system.js';
 import { createPlayer } from '../world/player.js';
+import { createEventLog } from '../engine/event-log.js';
+import { createHudWidget } from './widgets/hud.js';
+import { createMessageLogWidget } from './widgets/message-log.js';
 
-export function createGameScene({ getViewport }) {
+export function createGameScene({ theme, getViewport }) {
   let level = null;
   let player = null;
   let turnManager = null;
@@ -16,6 +19,9 @@ export function createGameScene({ getViewport }) {
 
   const registry = createEntityRegistry();
   const renderer = createRenderer({ getViewport });
+  const eventLog = createEventLog();
+  const hudWidget = createHudWidget({ theme, getViewport });
+  const messageLogWidget = createMessageLogWidget({ theme, getViewport });
 
   function getPlayerPos() {
     return registry.getComponent(player, 'position');
@@ -23,6 +29,8 @@ export function createGameScene({ getViewport }) {
 
   function handleInput(event) {
     if (!level || !inputController) return false;
+
+    if (messageLogWidget.handleInput(event)) return true;
 
     if (event.type === 'pointerdown') {
       const world = renderer.screenToWorld(event.x, event.y);
@@ -64,6 +72,8 @@ export function createGameScene({ getViewport }) {
         });
         turnManager.start();
 
+        eventLog.add({ turn: 0, display: 'You enter the dungeon.' });
+
         console.log('[game] Level ready:', level.width, 'x', level.height);
       } catch (err) {
         console.error('[game] Failed to load level:', err);
@@ -73,8 +83,6 @@ export function createGameScene({ getViewport }) {
     render(ctx) {
       if (!level) return;
 
-      // Camera must be updated before drawing so entities are positioned
-      // relative to the current player position, not last frame's.
       if (player) {
         const pos = getPlayerPos();
         renderer.setCamera(pos.x, pos.y);
@@ -85,6 +93,12 @@ export function createGameScene({ getViewport }) {
       ctx.fillRect(0, 0, width, height);
       renderer.drawMap(ctx, level);
       renderer.drawEntities(ctx, level);
+
+      const hp = player ? registry.getComponent(player, 'health') : { current: 0, max: 0 };
+      hudWidget.render(ctx, { hp, turn: turnManager?.playerTurnCount ?? 0 });
+
+      const recentLines = eventLog.getDisplayEntries(2).map(e => e.display);
+      messageLogWidget.render(ctx, { recentLines });
     },
 
     screenToWorld(x, y) {
