@@ -18,6 +18,7 @@ When presenting lists, questions, or any information with section headings where
  - ES modules only, no CommonJS, no bundler.
  - Use JS Doc-style comments where applicable. Comments should be concise and make the code easier to read. Do not include comments where code is straightforward, short, and/or self-documenting via function and parameter names.
  - All random calls go through the shared seeded RNG - `rng.js`. `Math.random()` is forbidden in source and tests.
+ - Use `new URL(relativePath, import.meta.url).href` for all asset and data file paths loaded at runtime in ES modules (sprite sheets, dynamically imported map files, etc.). Absolute paths like `/assets/...` resolve to the domain root, which breaks when the game is served from a subdirectory (e.g. GitHub Pages at `github.io/repo-name/`). If you know with certainty the game will always be served from the domain root or via a bundler that rewrites imports, this isn't required — but the `import.meta.url` pattern works in all cases and costs nothing.
 
 # Dev Environment
 
@@ -102,6 +103,6 @@ Explicitly call out new functionality that is not unit tested.
 
 # Documentation
 - `README.md` provides the high-level overview for humans, and general goals for the project.
-- `docs/howto` contains quick guides for common tasks, for humans and AIs.
+- `docs/howto` contains quick guides for common tasks, for humans and AIs. Whenever code is changed, consider whether a new "how-to" file would be helpful or an existing one should be updated.
 - `docs/design` contains design and architecture documents for different aspects of the game engine.
 - `docs/design/architecture-decision-records` contains ADRs for the project.

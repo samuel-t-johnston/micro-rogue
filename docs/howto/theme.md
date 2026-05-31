@@ -1,4 +1,4 @@
-# Update the Theme
+# Theme
 
 *How the theme works and how to change it.*
 

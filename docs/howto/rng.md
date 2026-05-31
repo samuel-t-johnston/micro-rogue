@@ -1,4 +1,4 @@
-# Update the RNG
+# RNG
 
 *How the RNG works and how to change it.*
 
