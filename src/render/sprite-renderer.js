@@ -7,7 +7,7 @@ export function createSpriteRenderer(tileSize) {
       return new Promise((resolve, reject) => {
         img.onload = () => { ready = true; resolve(); };
         img.onerror = reject;
-        img.src = `/assets/sprites/sprite-sheet-${tileSize}.png`;
+        img.src = new URL(`../../assets/sprites/sprite-sheet-${tileSize}.png`, import.meta.url).href;
       });
     },
 

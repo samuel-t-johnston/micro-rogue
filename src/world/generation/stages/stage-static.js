@@ -1,5 +1,6 @@
 export async function run(level, stageConfig, _blackboard, _rng) {
-  const mod = await import(`/data/maps/${stageConfig.layout}.js`);
+  const url = new URL(`../../../../data/maps/${stageConfig.layout}.js`, import.meta.url);
+  const mod = await import(url.href);
   const rows = mod.tiles.trim().split('\n');
   if (rows.length === 0) throw new Error(`Map "${stageConfig.layout}" is empty`);
   const width = rows[0].length;
