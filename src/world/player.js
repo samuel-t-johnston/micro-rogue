@@ -1,0 +1,17 @@
+import { components } from './components.js';
+
+// Creates and returns the player entity. Async so that a character creation
+// UI can be introduced here later without changing the call site in game-scene.
+export async function createPlayer(registry, x, y) {
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'position', components.position(x, y));
+  registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
+  registry.addComponent(entity, 'playerControlled', components.playerControlled());
+  registry.addComponent(entity, 'renderable', {
+    sprite: null,
+    color: '#0a1a0a',
+    glyph: '@',
+    glyphColor: '#00cc44',
+  });
+  return entity;
+}
