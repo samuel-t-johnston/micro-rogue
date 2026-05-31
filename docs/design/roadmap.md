@@ -26,14 +26,14 @@ Open questions and deferred decisions are noted inline where they land on the ro
 ## M1 — The Player Exists
 *Done when: a player entity appears on the map, moves via tap-to-move, and the turn loop ticks.*
 
-- [ ] Entity model: base entity structure, component system, spatial index (`Map<"x,y", Entity[]>`)
+- [x] Entity model: base entity structure, component system, spatial index (`Map<"x,y", Entity[]>`)
 - [ ] Player entity: position, `health` component, `TurnTaker` component
 - [ ] Turn loop: player turn → resolve → next turn; action queue
 - [ ] Tap-to-move: tap a tile, pathfinder navigates there (A* or similar); cancel on re-tap
 - [ ] Context-sensitive tap: distinguish floor tap (move) from entity tap (placeholder)
 - [ ] Long press: secondary action hook (no actions yet, just the detection)
 - [ ] Movement slide animation: entities slide between tiles, 80–120ms
-- [ ] Camera follows player
+- [x] Camera follows player
 - [ ] Minimal HUD: HP number, turn count — anchored, stateless presentational component
 - [ ] Event log: in-memory ring buffer, structured entries with `display` strings; last 1–2 lines ghost-visible at map edge
 
@@ -157,3 +157,4 @@ These are explicitly out of scope until a concrete need exists:
 - **Particles and projectile animations** — leave a hook in the animation system; implement when ranged combat exists
 - **Dedicated map screen** — zoom-out-as-map first; separate map screen only if levels outgrow it
 - **Font size preferences** — desktop only, when settings system is built out
+- **ECS component subscription system** — `level.moveEntity()` is the current explicit coordination point for positional changes (ADR-018); extract to a subscription model if multiple independent systems need to react to the same component changes

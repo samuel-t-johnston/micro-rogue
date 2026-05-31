@@ -47,11 +47,32 @@ export function createRenderer({ getViewport }) {
     }
   }
 
+  function drawEntities(ctx, level) {
+    for (const entity of level.entities) {
+      const pos = entity.components.get('position');
+      const renderable = entity.components.get('renderable');
+      if (!pos || !renderable) continue;
+      const { x, y } = worldToScreen(pos.x, pos.y);
+      if (!sprites.draw(ctx, renderable.sprite, x, y)) {
+        ctx.fillStyle = renderable.color ?? '#666';
+        ctx.fillRect(x, y, tileSize, tileSize);
+        if (renderable.glyph) {
+          ctx.fillStyle = renderable.glyphColor ?? '#fff';
+          ctx.font = `bold ${Math.floor(tileSize * 0.75)}px monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(renderable.glyph, x + tileSize / 2, y + tileSize / 2);
+        }
+      }
+    }
+  }
+
   return {
     load: () => sprites.load(),
     worldToScreen,
     screenToWorld,
     drawMap,
+    drawEntities,
     setCamera(x, y) {
       camera.x = x;
       camera.y = y;
