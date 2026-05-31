@@ -221,3 +221,39 @@ Alternatives rejected: Action system updating position and index separately (ris
 Consequences: `level.moveEntity()` is the single call site for all positional changes, including item drops and knockback. Nothing mutates an entity's position component directly. The spatial index is authoritative for "what is at X,Y" at runtime; position components are authoritative for serialization.
 
 ---
+
+## ADR-019: Entity-Level Shared Memory Over Goal-Owned Memory
+
+Context: ADR-010 described AI memory as goal-owned with per-goal decay, inspired by the FEAR paper. When implementing the player goal system, multiple goals needed to coordinate through shared state: `player-get-input` writes `autoMoveTarget`; `player-auto-move` reads and clears it. Goal-owned memory with cross-goal writes requires one goal to reach into another's private memory, creating coupling.
+
+Decision: Memory is an entity-level flat key-value store (`memory` component). All goals on an entity read and write it freely. Goals may also mutate memory during evaluation even when not activating (side-effect-during-evaluation is an allowed pattern). Goal-owned memory with decay is deferred as an optional future enhancement for NPC goals that need independent memory lifecycles.
+
+Alternatives rejected: Goal-owned memory with explicit cross-goal access (reach-in coupling makes the system harder to reason about); separate "world blackboard" shared across all entities (over-scoped; memory should be per-entity).
+
+Consequences: Memory is a component on the entity. Goals that write memory keys are responsible for clearing them when the condition resolves — this is a convention, not a structural guarantee. The decay story from ai-architecture.md is deferred; it will be revisited if NPC goals need independent memory lifecycles with configurable stickiness.
+
+---
+
+## ADR-020: Mega-Vision as Initial Test Sense
+
+Context: The sense architecture requires senses to be filtered world-state queries. Implementing real shadowcast FOV as the first sense would add FOV algorithm complexity before the goal system is validated. A simpler stand-in is needed for early development.
+
+Decision: Implement `mega-vision` as the first sense — returns all entities with confidence 100, no FOV or light gating. Uses the same `SenseResult` shape (`{ entityId, position, confidence, turnObserved, tags }`) as future real senses so it can be swapped out without planner changes. Both player and NPC goals use mega-vision until real senses are needed.
+
+Alternatives rejected: Implementing real shadowcast FOV immediately (correct but premature complexity when the goal system is the focus); skipping the sense abstraction and reading the level directly in goals (removes the ability to blind/confuse entities without special-casing, and makes FOV integration a breaking change later).
+
+Consequences: All entities "know" everything about the world. Stealth, detection, and information asymmetry are not possible until real senses replace mega-vision. The swap is intentionally low-friction: mega-vision's output shape is the interface real senses must match.
+
+---
+
+## ADR-021: Map Tile Data Bypasses Sense Abstraction (Known Deviation)
+
+Context: The AI architecture principle is "the planner never reads the map directly — only what senses report." Goals require tile passability for pathfinding. Implementing a filtered "known map" layer as the only tile data source would require vision senses to also return tile visibility, which is needed but not yet designed.
+
+Decision: Pass `level` directly in `PlanningContext` for pathfinding. This is a known deviation from the sense abstraction, documented here rather than silently present in the code. Tile visibility is not part of the sense system yet.
+
+Alternatives rejected: Adding a `visibleTiles` set to mega-vision now (correct direction, but the renderer and NPC pathfinding both need to be updated simultaneously — defer until real vision is implemented); omitting tile data from context and querying the level in goals directly (same deviation with no documentation trail).
+
+Consequences: Pathfinding uses full level passability regardless of what the entity has actually perceived. NPCs with limited vision can still plan optimal paths. When real vision is implemented, pathfinding should be updated to use a "last-known" tile layer from sense results. The player map display (fog of war) will also derive from tile visibility in sense results — that is the trigger for revisiting this ADR.
+
+---
