@@ -6,6 +6,7 @@ import { megaVision } from '../ai/senses/mega-vision.js';
 export async function createPlayer(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'position', components.position(x, y));
+  registry.addComponent(entity, 'health', components.health(20, 20));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
   registry.addComponent(entity, 'playerControlled', components.playerControlled());
   registry.addComponent(entity, 'memory', components.memory());

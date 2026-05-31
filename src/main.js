@@ -54,7 +54,7 @@ appState.register(AppState.MENU, () =>
   createMenuScene({ theme, getViewport, onAction: handleMenuAction })
 );
 appState.register(AppState.GAME, () =>
-  createGameScene({ getViewport })
+  createGameScene({ theme, getViewport })
 );
 
 resize();

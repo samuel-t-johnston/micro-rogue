@@ -27,6 +27,10 @@ export const components = {
     return { ...initial };
   },
 
+  health(current, max) {
+    return { current, max };
+  },
+
   // Array of sense functions: sense(entity, level, turnCount) → SenseResult[].
   // Stored as function references — never serialized.
   senses(fns = []) {
