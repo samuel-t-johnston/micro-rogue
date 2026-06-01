@@ -1,3 +1,5 @@
+// Manages top-level scene transitions. Each state maps to a scene factory; on
+// transition the current scene stack is torn down and the new scene is pushed.
 import { LayerStack } from '../render/layers.js';
 
 export const AppState = Object.freeze({

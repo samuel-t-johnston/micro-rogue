@@ -8,6 +8,7 @@ const PLAYER_GOALS = [playerAutoMove, playerGetInput];
 
 // Returns Promise<boolean> — false = action consumed a turn, true = free action.
 export function createActionSystem({ level, inputController }) {
+  // Action type → handler lookup. Add new action types here.
   const dispatch = {
     move: (entity, action) => executeMove(entity, action, level),
   };

@@ -1,3 +1,7 @@
+/**
+ * Creates a registry that owns all entities and maintains a reverse index for
+ * fast component-based queries. Each entity is `{ id, components: Map }`.
+ */
 export function createEntityRegistry() {
   let nextId = 1;
   const entities = new Map();          // id -> entity

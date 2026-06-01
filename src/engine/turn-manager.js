@@ -1,4 +1,4 @@
-// Turn loop using the energy accumulator model from turn-order.md.
+// Turn loop using the energy accumulator model (see docs/design/turn-order.md).
 // Entities act when their accumulator reaches 1. Speed < 1 acts less than once
 // per round; speed > 1 acts more. Default speed is 1.
 //

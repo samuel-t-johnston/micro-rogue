@@ -13,11 +13,6 @@ export async function createPlayer(registry, x, y) {
   registry.addComponent(entity, 'memory', components.memory());
   registry.addComponent(entity, 'senses', components.senses([createVisionSense()]));
   registry.addComponent(entity, 'tilePerception', components.tilePerception());
-  registry.addComponent(entity, 'renderable', {
-    sprite: null,
-    color: '#0a1a0a',
-    glyph: '@',
-    glyphColor: '#00cc44',
-  });
+  registry.addComponent(entity, 'renderable', components.renderable(null, '#0a1a0a', '@', '#00cc44'));
   return entity;
 }

@@ -31,5 +31,8 @@ export const rng = {
   /** Returns an integer in [min, max). */
   nextInt(min, max) { return Math.floor(advance() * (max - min)) + min; },
 
-  pick(arr) { return arr[Math.floor(advance() * arr.length)]; },
+  pick(arr) {
+    if (arr.length === 0) throw new Error('rng.pick called with empty array');
+    return arr[Math.floor(advance() * arr.length)];
+  },
 };

@@ -10,6 +10,11 @@ const AUTO_MOVE_DELAY_MS = 150;
 //   - a new enemy has appeared in vision since auto-move started
 //   - the target has been reached
 //   - no path exists to the target
+function cancelAutoMove(memory) {
+  delete memory.autoMoveTarget;
+  delete memory.knownEnemyIds;
+}
+
 export const playerAutoMove = {
   async evaluate(context) {
     const { memory, perception, selfState, level, hasPendingInput } = context;
@@ -19,8 +24,7 @@ export const playerAutoMove = {
 
     // Cancel: player tapped or pressed something while auto-moving
     if (hasPendingInput()) {
-      delete memory.autoMoveTarget;
-      delete memory.knownEnemyIds;
+      cancelAutoMove(memory);
       return null;
     }
 
@@ -30,23 +34,20 @@ export const playerAutoMove = {
     const hasNewEnemy = [...visibleEnemyIds].some(id => !knownEnemyIds.has(id));
 
     if (hasNewEnemy) {
-      delete memory.autoMoveTarget;
-      delete memory.knownEnemyIds;
+      cancelAutoMove(memory);
       return null;
     }
 
     // Cancel: reached target
     if (selfState.position.x === target.x && selfState.position.y === target.y) {
-      delete memory.autoMoveTarget;
-      delete memory.knownEnemyIds;
+      cancelAutoMove(memory);
       return null;
     }
 
     // Cancel: no path to target
     const path = findPath(selfState.position, target, level);
     if (!path || path.length === 0) {
-      delete memory.autoMoveTarget;
-      delete memory.knownEnemyIds;
+      cancelAutoMove(memory);
       return null;
     }
 
@@ -56,8 +57,7 @@ export const playerAutoMove = {
 
     // Re-check for a tap that arrived during the delay
     if (hasPendingInput()) {
-      delete memory.autoMoveTarget;
-      delete memory.knownEnemyIds;
+      cancelAutoMove(memory);
       return null;
     }
 

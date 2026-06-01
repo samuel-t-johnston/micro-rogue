@@ -1,3 +1,4 @@
+/** When multiple senses observe the same entity, keeps the highest-confidence reading. */
 function mergeSenseResults(rawResults) {
   const byEntityId = new Map();
   for (const result of rawResults) {
@@ -35,6 +36,10 @@ export function applySenses(entity, level, turnCount = 0) {
   return { rawResults, currentVisible };
 }
 
+/**
+ * Runs all senses, updates tilePerception, and returns the context object
+ * passed to each goal's evaluate(). Called once per entity turn.
+ */
 export function buildPlanningContext({ entity, level, inputController, turnCount }) {
   const memory = entity.components.get('memory');
   const pos = entity.components.get('position');

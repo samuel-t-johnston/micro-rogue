@@ -2,41 +2,38 @@
 // Always create components through these functions, never as inline object literals.
 
 export const components = {
-  position(x, y) {
-    return { x, y };
-  },
-
-  name(str) {
-    return str;
-  },
-
-  turnTaker(speed = 1) {
-    return { speed, accumulator: 0 };
-  },
-
   blocksMovement() {
     return {};
   },
 
-  opaque() {
-    return {};
-  },
-
-  // sprite: { col, row } matching the sprite sheet; color: CSS fallback if sprite unavailable
-  renderable(sprite, color) {
-    return { sprite, color };
-  },
-
-  playerControlled() {
-    return {};
+  health(current, max) {
+    return { current, max };
   },
 
   memory(initial = {}) {
     return { ...initial };
   },
 
-  health(current, max) {
-    return { current, max };
+  name(str) {
+    return str;
+  },
+
+  opaque() {
+    return {};
+  },
+
+  playerControlled() {
+    return {};
+  },
+
+  position(x, y) {
+    return { x, y };
+  },
+
+  // sprite: { col, row } matching the sprite sheet; color: CSS fallback if sprite unavailable.
+  // glyph/glyphColor: optional text character drawn over the tile when no sprite is available.
+  renderable(sprite, color, glyph, glyphColor) {
+    return { sprite, color, glyph, glyphColor };
   },
 
   // Array of sense functions: sense(entity, level, turnCount) → SenseResult[].
@@ -52,5 +49,9 @@ export const components = {
       visible: new Set(),
       memory: new Map(),
     };
+  },
+
+  turnTaker(speed = 1) {
+    return { speed, accumulator: 0 };
   },
 };

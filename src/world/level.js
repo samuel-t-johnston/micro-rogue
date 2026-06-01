@@ -58,6 +58,7 @@ export function createLevel() {
       try {
         if (getTileType(tileId).blocksMovement) return false;
       } catch {
+        console.warn(`isPassable: unregistered tile id "${tileId}" at (${x},${y})`);
         return false;
       }
       for (const entity of this.getEntitiesAt(x, y)) {

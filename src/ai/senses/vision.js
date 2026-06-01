@@ -27,6 +27,7 @@ export function createVisionSense({ range } = {}) {
         confidence: 100,
         turnObserved: turnCount,
         tags: {
+          // Any active NPC is treated as hostile until a faction/relationship system exists.
           isEnemy: e.components.has('turnTaker') && !e.components.has('playerControlled'),
           isPlayer: e.components.has('playerControlled'),
         },

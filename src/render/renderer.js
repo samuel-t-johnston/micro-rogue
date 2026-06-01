@@ -59,10 +59,19 @@ export function createRenderer({ getViewport }) {
   }
 
   function drawEntities(ctx, level, tilePerception) {
+    const { width, height } = getViewport();
+    const halfW = width / 2;
+    const halfH = height / 2;
+    const x0 = Math.floor(camera.x - halfW / tileSize);
+    const x1 = Math.ceil(camera.x + halfW / tileSize);
+    const y0 = Math.floor(camera.y - halfH / tileSize);
+    const y1 = Math.ceil(camera.y + halfH / tileSize);
+
     for (const entity of level.entities) {
       const pos = entity.components.get('position');
       const renderable = entity.components.get('renderable');
       if (!pos || !renderable) continue;
+      if (pos.x < x0 || pos.x > x1 || pos.y < y0 || pos.y > y1) continue;
       if (tilePerception && !tilePerception.visible.has(`${pos.x},${pos.y}`)) continue;
       const { x, y } = worldToScreen(pos.x, pos.y);
       if (!sprites.draw(ctx, renderable.sprite, x, y)) {
