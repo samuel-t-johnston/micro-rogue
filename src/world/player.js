@@ -10,6 +10,7 @@ export async function createPlayer(registry, x, y) {
   registry.addComponent(entity, 'health', components.health(20, 20));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
   registry.addComponent(entity, 'playerControlled', components.playerControlled());
+  registry.addComponent(entity, 'inventory', components.inventory());
   registry.addComponent(entity, 'memory', components.memory());
   registry.addComponent(entity, 'senses', components.senses([createVisionSense()]));
   registry.addComponent(entity, 'tilePerception', components.tilePerception());

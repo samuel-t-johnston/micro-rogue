@@ -43,10 +43,10 @@ Open questions and deferred decisions are noted inline where they land on the ro
 - [x] FOV: shadowcasting; remembered tiles vs. visible tiles vs. dark. Uses senses (and possibly memory?) for tile perception.
 - [x] Tile passability enforced in movement
 - [x] Tile opacity enforced in FOV
-- [ ] `openable` component: doors open on tap, block movement and light when closed
+- [x] `openable` component: doors open on tap, block movement and light when closed
 - [ ] Passive entities: items on the map with `usable` or `equippable` components
 - [ ] Item location model: discriminated union (`map`, `inventory`, `equipped`, `container`)
-- [ ] Pick up: tap item → moves to inventory
+- [x] Pick up: tap item → moves to inventory
 - [ ] Inventory screen: full-screen modal, item list, basic use/equip/drop actions
 - [ ] Character menu shell: card grid, back navigation, inventory as first card
 - [ ] Debug overlay: FOV boundary layer, passability grid layer

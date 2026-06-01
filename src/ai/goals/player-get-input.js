@@ -18,6 +18,10 @@ export const playerGetInput = {
       const dy = Math.abs(input.y - py);
       const isAdjacent = (dx <= 1 && dy <= 1) && !(dx === 0 && dy === 0);
 
+      if (dx === 0 && dy === 0) {
+        return { action: { type: 'selfInteract' } };
+      }
+
       if (isAdjacent) {
         const openableEntity = [...level.getEntitiesAt(input.x, input.y)]
           .find(e => e.components.has('openable'));
