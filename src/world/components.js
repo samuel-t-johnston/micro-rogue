@@ -1,6 +1,6 @@
 // Component factory functions — the single definition site for each component's shape and defaults.
 // Always create components through these functions, never as inline object literals.
-
+// Add new components in alphabetical order and keep them sorted.
 export const components = {
   blocksMovement() {
     return {};

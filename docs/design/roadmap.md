@@ -43,7 +43,6 @@ Open questions and deferred decisions are noted inline where they land on the ro
 - [x] FOV: shadowcasting; remembered tiles vs. visible tiles vs. dark. Uses senses (and possibly memory?) for tile perception.
 - [x] Tile passability enforced in movement
 - [x] Tile opacity enforced in FOV
-- [ ] Tile override layer: `getTile(x,y)` with override-first lookup; at least one dynamic tile (a door)
 - [ ] `openable` component: doors open on tap, block movement and light when closed
 - [ ] Passive entities: items on the map with `usable` or `equippable` components
 - [ ] Item location model: discriminated union (`map`, `inventory`, `equipped`, `container`)
@@ -156,4 +155,5 @@ These are explicitly out of scope until a concrete need exists:
 - **Dedicated map screen** — zoom-out-as-map first; separate map screen only if levels outgrow it
 - **Font size preferences** — desktop only, when settings system is built out
 - **ECS component subscription system** — `level.moveEntity()` is the current explicit coordination point for positional changes (ADR-018); extract to a subscription model if multiple independent systems need to react to the same component changes
-**Long press** - secondary action hook
+- **Long press** - secondary action hook
+- **Terrain modification** - Tile override layer: `getTile(x,y)` with override-first lookup;
