@@ -155,5 +155,5 @@ These are explicitly out of scope until a concrete need exists:
 - **Dedicated map screen** — zoom-out-as-map first; separate map screen only if levels outgrow it
 - **Font size preferences** — desktop only, when settings system is built out
 - **ECS component subscription system** — `level.moveEntity()` is the current explicit coordination point for positional changes (ADR-018); extract to a subscription model if multiple independent systems need to react to the same component changes
-- **Long press** - secondary action hook
+- **Long press** - secondary action hook - e.g. radial menu with options, like interact or move on an open door.
 - **Terrain modification** - Tile override layer: `getTile(x,y)` with override-first lookup;

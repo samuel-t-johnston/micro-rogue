@@ -68,7 +68,7 @@ export function createGameScene({ theme, getViewport }) {
         renderer.setCamera(cx, cy);
 
         inputController = createInputController();
-        const actionSystem = createActionSystem({ level, inputController });
+        const actionSystem = createActionSystem({ level, inputController, registry });
         turnManager = createTurnManager({
           getActiveEntities: () => registry.getEntitiesWith('turnTaker'),
           invokeAction: (entity) => actionSystem.invokeAction(entity),

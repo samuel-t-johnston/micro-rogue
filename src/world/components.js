@@ -22,6 +22,11 @@ export const components = {
     return {};
   },
 
+  // isOpen: current state. closedSprite/openSprite: { col, row } swapped on open/close.
+  openable(closedSprite, openSprite) {
+    return { isOpen: false, closedSprite, openSprite };
+  },
+
   playerControlled() {
     return {};
   },

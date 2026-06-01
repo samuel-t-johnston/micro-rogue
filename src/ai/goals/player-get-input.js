@@ -19,6 +19,11 @@ export const playerGetInput = {
       const isAdjacent = (dx <= 1 && dy <= 1) && !(dx === 0 && dy === 0);
 
       if (isAdjacent) {
+        const openableEntity = [...level.getEntitiesAt(input.x, input.y)]
+          .find(e => e.components.has('openable'));
+        if (openableEntity) {
+          return { action: { type: 'interact', targetEntityId: openableEntity.id } };
+        }
         return { action: { type: 'move', x: input.x, y: input.y } };
       }
 

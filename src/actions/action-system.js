@@ -1,4 +1,5 @@
 import { executeMove } from './action-types/action-move.js';
+import { executeInteract } from './action-types/action-interact.js';
 import { buildPlanningContext } from '../ai/planning-context.js';
 import { evaluateGoals } from '../ai/goal-evaluator.js';
 import { playerAutoMove } from '../ai/goals/player-auto-move.js';
@@ -7,10 +8,11 @@ import { playerGetInput } from '../ai/goals/player-get-input.js';
 const PLAYER_GOALS = [playerAutoMove, playerGetInput];
 
 // Returns Promise<boolean> — false = action consumed a turn, true = free action.
-export function createActionSystem({ level, inputController }) {
+export function createActionSystem({ level, inputController, registry }) {
   // Action type → handler lookup. Add new action types here.
   const dispatch = {
-    move: (entity, action) => executeMove(entity, action, level),
+    move:     (entity, action) => executeMove(entity, action, level),
+    interact: (entity, action) => executeInteract(entity, action, level, registry),
   };
 
   function executeAction(entity, action) {
