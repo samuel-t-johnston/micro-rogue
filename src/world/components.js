@@ -10,6 +10,16 @@ export const components = {
     return { current, max };
   },
 
+  inventory(items = []) {
+    return { items };
+  },
+
+  // location: { type: 'map' } | { type: 'inventory', ownerId } | { type: 'equipped', ownerId, slot } | { type: 'container', containerId }
+  // Map items also carry a position component; the other types do not.
+  item(location) {
+    return { location };
+  },
+
   memory(initial = {}) {
     return { ...initial };
   },
