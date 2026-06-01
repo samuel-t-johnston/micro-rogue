@@ -56,12 +56,12 @@ export function createLevel() {
       const tileId = this.getTile(x, y);
       if (!tileId) return false;
       try {
-        if (!getTileType(tileId).passable) return false;
+        if (getTileType(tileId).blocksMovement) return false;
       } catch {
         return false;
       }
       for (const entity of this.getEntitiesAt(x, y)) {
-        if (entity.components.has('blockMovement')) return false;
+        if (entity.components.has('blocksMovement')) return false;
       }
       return true;
     },

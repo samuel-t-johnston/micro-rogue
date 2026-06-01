@@ -6,7 +6,7 @@ describe('getTileType', () => {
     const floor = getTileType('floor');
     expect(floor.name).toBe('Floor');
     expect(floor.symbol).toBe('.');
-    expect(floor.passable).toBe(true);
+    expect(floor.blocksMovement).toBe(false);
     expect(floor.opaque).toBe(false);
     expect(floor.color).toBeDefined();
     expect(floor.sprite).toBeDefined();
@@ -16,7 +16,7 @@ describe('getTileType', () => {
     const wall = getTileType('wall');
     expect(wall.name).toBe('Wall');
     expect(wall.symbol).toBe('#');
-    expect(wall.passable).toBe(false);
+    expect(wall.blocksMovement).toBe(true);
     expect(wall.opaque).toBe(true);
   });
 

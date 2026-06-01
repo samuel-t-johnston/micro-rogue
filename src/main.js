@@ -73,10 +73,10 @@ function updateDebugPointer(x, y) {
   if (!debugOverlay) return;
   const scene = appState.layers.top();
   const world = scene?.screenToWorld?.(x, y);
-  debugOverlay.setPointerPos(
-    x, y,
-    world ? { x: Math.floor(world.x), y: Math.floor(world.y) } : null
-  );
+  if (!world) { debugOverlay.setPointerPos(x, y, null); return; }
+  const tx = Math.floor(world.x);
+  const ty = Math.floor(world.y);
+  debugOverlay.setPointerPos(x, y, scene.getDebugInfo?.(tx, ty) ?? { x: tx, y: ty });
 }
 requestAnimationFrame(frame);
 

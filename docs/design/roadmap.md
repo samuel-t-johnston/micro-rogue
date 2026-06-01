@@ -40,9 +40,9 @@ Open questions and deferred decisions are noted inline where they land on the ro
 ## M2 — The World Has Rules
 *Done when: walls block movement and sight, items exist on the map and can be picked up, and the tile override layer works.*
 
-- [ ] FOV: shadowcasting; remembered tiles vs. visible tiles vs. dark. Uses senses (and possibly memory?) for tile perception.
-- [ ] Tile passability enforced in movement
-- [ ] Tile opacity enforced in FOV
+- [x] FOV: shadowcasting; remembered tiles vs. visible tiles vs. dark. Uses senses (and possibly memory?) for tile perception.
+- [x] Tile passability enforced in movement
+- [x] Tile opacity enforced in FOV
 - [ ] Tile override layer: `getTile(x,y)` with override-first lookup; at least one dynamic tile (a door)
 - [ ] `openable` component: doors open on tap, block movement and light when closed
 - [ ] Passive entities: items on the map with `usable` or `equippable` components
