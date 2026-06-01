@@ -27,23 +27,22 @@ Open questions and deferred decisions are noted inline where they land on the ro
 *Done when: a player entity appears on the map, moves via tap-to-move, and the turn loop ticks.*
 
 - [x] Entity model: base entity structure, component system, spatial index (`Map<"x,y", Entity[]>`)
-- [ ] Player entity: position, `health` component, `TurnTaker` component
+- [x] Player entity: position, `health` component, `TurnTaker` component
 - [x] Turn loop: player turn → resolve → next turn; action queue
 - [x] Tap-to-move: tap a tile, pathfinder navigates there (A* or similar); cancel on re-tap
 - [x] Context-sensitive tap: distinguish floor tap (move) from entity tap (placeholder)
-- [ ] Movement slide animation: entities slide between tiles, 80–120ms
 - [x] Camera follows player
-- [ ] Minimal HUD: HP number, turn count — anchored, stateless presentational component
-- [ ] Event log: in-memory ring buffer, structured entries with `display` strings; last 1–2 lines ghost-visible at map edge
+- [x] Minimal HUD: HP number, turn count — anchored, stateless presentational component
+- [x] Event log: in-memory ring buffer, structured entries with `display` strings; last 1–2 lines ghost-visible at map edge
 
 ---
 
 ## M2 — The World Has Rules
 *Done when: walls block movement and sight, items exist on the map and can be picked up, and the tile override layer works.*
 
-- [ ] FOV: shadowcasting; remembered tiles vs. visible tiles vs. dark. Uses senses (and possibly memory?) for tile perception.
-- [ ] Tile passability enforced in movement
-- [ ] Tile opacity enforced in FOV
+- [x] FOV: shadowcasting; remembered tiles vs. visible tiles vs. dark. Uses senses (and possibly memory?) for tile perception.
+- [x] Tile passability enforced in movement
+- [x] Tile opacity enforced in FOV
 - [ ] Tile override layer: `getTile(x,y)` with override-first lookup; at least one dynamic tile (a door)
 - [ ] `openable` component: doors open on tap, block movement and light when closed
 - [ ] Passive entities: items on the map with `usable` or `equippable` components
@@ -137,6 +136,7 @@ Open questions and deferred decisions are noted inline where they land on the ro
 - [ ] Notification layer: compare sense results turn-over-turn, fan to log and emote system
 - [ ] Accessibility: 44×44px tap targets audit, color-not-sole-signal audit, handedness swap setting
 - [ ] Onboarding splash: dismissable, controls summary, hook for downstream content
+- [ ] Movement slide animation: entities slide between tiles, 80–120ms
 
 ---
 

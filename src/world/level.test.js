@@ -176,14 +176,14 @@ describe('isPassable', () => {
     expect(level.isPassable(0, 5)).toBe(false);
   });
 
-  it('returns false when a blockMovement entity is on a passable tile', () => {
-    const boulder = makeEntity(1, 1, [['blockMovement', {}]]);
+  it('returns false when a blocksMovement entity is on a passable tile', () => {
+    const boulder = makeEntity(1, 1, [['blocksMovement', {}]]);
     level.placeEntity(boulder);
     expect(level.isPassable(1, 1)).toBe(false);
   });
 
   it('returns true when a non-blocking entity is on a passable tile', () => {
-    const entity = makeEntity(1, 1); // no blockMovement
+    const entity = makeEntity(1, 1); // no blocksMovement
     level.placeEntity(entity);
     expect(level.isPassable(1, 1)).toBe(true);
   });

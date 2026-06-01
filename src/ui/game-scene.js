@@ -7,6 +7,8 @@ import { createTurnManager } from '../engine/turn-manager.js';
 import { createInputController } from '../engine/input-controller.js';
 import { createActionSystem } from '../actions/action-system.js';
 import { createPlayer } from '../world/player.js';
+import { applySenses } from '../ai/planning-context.js';
+import { getTileType } from '../world/tile-registry.js';
 
 export function createGameScene({ getViewport }) {
   let level = null;
@@ -53,6 +55,7 @@ export function createGameScene({ getViewport }) {
         const cy = Math.floor(level.height / 2);
         player = await createPlayer(registry, cx, cy);
         level.placeEntity(player);
+        applySenses(player, level);
 
         renderer.setCamera(cx, cy);
 
@@ -83,12 +86,29 @@ export function createGameScene({ getViewport }) {
       const { width, height } = getViewport();
       ctx.fillStyle = '#111';
       ctx.fillRect(0, 0, width, height);
-      renderer.drawMap(ctx, level);
-      renderer.drawEntities(ctx, level);
+      const tilePerception = player?.components.get('tilePerception');
+      renderer.drawMap(ctx, level, tilePerception);
+      renderer.drawEntities(ctx, level, tilePerception);
     },
 
     screenToWorld(x, y) {
       return renderer.screenToWorld(x, y);
+    },
+
+    getDebugInfo(tx, ty) {
+      if (!level) return { x: tx, y: ty };
+      const tileId = level.getTile(tx, ty);
+      if (!tileId) return { x: tx, y: ty };
+      const tile = getTileType(tileId);
+      const entities = [...level.getEntitiesAt(tx, ty)];
+      return {
+        x: tx,
+        y: ty,
+        tileName: tile.name,
+        entityNames: entities.map(e => e.components.get('name')).filter(Boolean),
+        passable: level.isPassable(tx, ty),
+        opaque: tile.opaque || entities.some(e => e.components.has('opaque')),
+      };
     },
 
     handleInput,

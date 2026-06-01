@@ -6,11 +6,19 @@ export const components = {
     return { x, y };
   },
 
+  name(str) {
+    return str;
+  },
+
   turnTaker(speed = 1) {
     return { speed, accumulator: 0 };
   },
 
-  blockMovement() {
+  blocksMovement() {
+    return {};
+  },
+
+  opaque() {
     return {};
   },
 
@@ -27,9 +35,18 @@ export const components = {
     return { ...initial };
   },
 
-  // Array of sense functions: sense(entity, level, turnCount) → SenseResult[].
+  // Array of sense functions: sense(entity, level, turnCount) → { entities, visibleTiles }.
   // Stored as function references — never serialized.
   senses(fns = []) {
     return [...fns];
+  },
+
+  // Tile-level perception. visible: tiles seen this turn. memory: all ever-seen tiles → tileId.
+  // Goals may read memory for navigation; renderer uses both for fog-of-war display.
+  tilePerception() {
+    return {
+      visible: new Set(),
+      memory: new Map(),
+    };
   },
 };
