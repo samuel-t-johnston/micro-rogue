@@ -12,6 +12,7 @@ import { getTileType } from '../world/tile-registry.js';
 import { createEventLog } from '../engine/event-log.js';
 import { createHudWidget } from './widgets/hud.js';
 import { createMessageLogWidget } from './widgets/message-log.js';
+import { createDialogController } from './dialog-controller.js';
 
 export function createGameScene({ theme, getViewport }) {
   let level = null;
@@ -24,6 +25,7 @@ export function createGameScene({ theme, getViewport }) {
   const eventLog = createEventLog();
   const hudWidget = createHudWidget({ theme, getViewport });
   const messageLogWidget = createMessageLogWidget({ theme, getViewport });
+  const dialogController = createDialogController({ theme, getViewport });
 
   function getPlayerPos() {
     return registry.getComponent(player, 'position');
@@ -32,6 +34,7 @@ export function createGameScene({ theme, getViewport }) {
   function handleInput(event) {
     if (!level || !inputController) return false;
 
+    if (dialogController.handleInput(event)) return true;
     if (messageLogWidget.handleInput(event)) return true;
 
     if (event.type === 'pointerdown') {
@@ -68,7 +71,7 @@ export function createGameScene({ theme, getViewport }) {
         renderer.setCamera(cx, cy);
 
         inputController = createInputController();
-        const actionSystem = createActionSystem({ level, inputController, registry });
+        const actionSystem = createActionSystem({ level, inputController, registry, dialogController });
         turnManager = createTurnManager({
           getActiveEntities: () => registry.getEntitiesWith('turnTaker'),
           invokeAction: (entity) => actionSystem.invokeAction(entity),
@@ -104,6 +107,8 @@ export function createGameScene({ theme, getViewport }) {
 
       const recentLines = eventLog.getDisplayEntries(2).map(e => e.display);
       messageLogWidget.render(ctx, { recentLines });
+
+      dialogController.render(ctx);
     },
 
     screenToWorld(x, y) {

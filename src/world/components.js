@@ -6,6 +6,10 @@ export const components = {
     return {};
   },
 
+  container() {
+    return {};
+  },
+
   health(current, max) {
     return { current, max };
   },
@@ -32,6 +36,8 @@ export const components = {
     return {};
   },
 
+  // This is currently used for furniture like doors. For furniture with inventories 
+  // (e.g. chests), use the container and inventory components instead.
   // isOpen: current state. closedSprite/openSprite: { col, row } swapped on open/close.
   openable(closedSprite, openSprite) {
     return { isOpen: false, closedSprite, openSprite };

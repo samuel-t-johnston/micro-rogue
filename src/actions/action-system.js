@@ -11,25 +11,25 @@ import { playerGetInput } from '../ai/goals/player-get-input.js';
 const PLAYER_GOALS = [playerAutoMove, playerAutoPickup, playerGetInput];
 
 // Returns Promise<boolean> — false = action consumed a turn, true = free action.
-export function createActionSystem({ level, inputController, registry }) {
+export function createActionSystem({ level, inputController, registry, dialogController }) {
   // Action type → handler lookup. Add new action types here.
   const dispatch = {
     move:         (entity, action) => executeMove(entity, action, level),
-    interact:     (entity, action) => executeInteract(entity, action, level, registry),
+    interact:     (entity, action) => executeInteract(entity, action, level, registry, dialogController),
     pickup:       (entity, action) => executePickup(entity, action, level, registry),
-    selfInteract: (entity, action) => executeSelfInteract(entity, action, level, registry),
+    selfInteract: (entity, action) => executeSelfInteract(entity, action, level, registry, dialogController),
   };
 
-  function executeAction(entity, action) {
+  async function executeAction(entity, action) {
     const handler = dispatch[action?.type];
-    return handler ? handler(entity, action) : false;
+    return handler ? await handler(entity, action) : false;
   }
 
   async function invokeAction(entity) {
     if (entity.components.has('playerControlled')) {
       const context = buildPlanningContext({ entity, level, inputController, turnCount: 0 });
       const result = await evaluateGoals(PLAYER_GOALS, context);
-      return result?.action ? executeAction(entity, result.action) : false;
+      return result?.action ? await executeAction(entity, result.action) : false;
     }
     // Non-player entities with TurnTaker but no AI just pass their turn.
     return false;
