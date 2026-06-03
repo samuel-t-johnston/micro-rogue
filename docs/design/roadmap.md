@@ -45,7 +45,7 @@ Open questions and deferred decisions are noted inline where they land on the ro
 - [x] Tile opacity enforced in FOV
 - [x] `openable` component: doors open on tap, block movement and light when closed
 - [ ] Passive entities: items on the map with `usable` or `equippable` components
-- [ ] Item location model: discriminated union (`map`, `inventory`, `equipped`, `container`)
+- [x] Item location model: discriminated union (`map`, `inventory`, `equipped`, `container`)
 - [x] Pick up: tap item → moves to inventory
 - [ ] Inventory screen: full-screen modal, item list, basic use/equip/drop actions
 - [ ] Character menu shell: card grid, back navigation, inventory as first card

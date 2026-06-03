@@ -1,4 +1,4 @@
-import { createBoulder, createDoor } from '../../furniture.js';
+import { createBoulder, createChest, createDoor } from '../../furniture.js';
 import { createPotion } from '../../items.js';
 
 // Temporary stage: places test furniture and items for development. Replace with a proper
@@ -10,4 +10,12 @@ export async function run(level, _stageConfig, _blackboard, _rng, registry) {
   level.placeEntity(createBoulder(registry, cx + 2, cy));
   level.placeEntity(createDoor(registry, 5, 3));
   level.placeEntity(createPotion(registry, cx - 2, cy));
+  level.placeEntity(createPotion(registry, cx - 2, cy + 1));
+  level.placeEntity(createPotion(registry, cx - 2, cy + 1));
+
+  const chest = createChest(registry, cx + 3, cy + 1);
+  const inventory = chest.components.get('inventory');
+  inventory.items.push(createPotion(registry, null, null, chest.id));
+  inventory.items.push(createPotion(registry, null, null, chest.id));
+  level.placeEntity(chest);
 }

@@ -58,7 +58,7 @@ Behavior is driven by presence of components, not type hierarchies:
 - `equippable`, `usable`, `throwable` — item interactions
 - `health`, `combatStats` — anything that can be fought
 - `AI` — anything that acts autonomously
-- `blockMovement`, `blockLight` — spatial properties shared across all kinds
+- `blocksMovement`, `opaque` — spatial properties shared across all kinds
 
 The action system checks component presence: `if (target.openable) → openAction()`. A trapped chest that fights back just gets `combatStats` added — no new class needed.
 
@@ -69,13 +69,13 @@ The action system checks component presence: `if (target.openable) → openActio
 Items can exist in multiple contexts. Model location as a discriminated union, not just `{x, y}`:
 
 ```javascript
-location: { type: 'map', x, y }
+location: { type: 'map' }                     // coordinates live in the position component
 location: { type: 'inventory', ownerId }
 location: { type: 'equipped', ownerId, slot }
 location: { type: 'container', containerId }
 ```
 
-This handles edge cases cleanly: items in carried containers, equipment dropped on death, nested inventories.
+This handles edge cases cleanly: items in carried containers, equipment dropped on death, nested inventories. The map case carries no coordinates because on-map items already have a `position` component — duplicating them in `location` would create two sources of truth (see ADR-022).
 
 ---
 

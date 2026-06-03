@@ -32,6 +32,10 @@ export function createEntityRegistry() {
     return entity.components.has(name);
   }
 
+  function getEntity(id) {
+    return entities.get(id) ?? null;
+  }
+
   function getEntitiesWith(name) {
     const ids = componentIndex.get(name);
     if (!ids) return [];
@@ -52,6 +56,7 @@ export function createEntityRegistry() {
     removeComponent,
     getComponent,
     hasComponent,
+    getEntity,
     getEntitiesWith,
     destroyEntity,
   };

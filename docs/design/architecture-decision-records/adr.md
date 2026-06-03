@@ -4,6 +4,8 @@ Decisions made during design, recorded here for continuity. Append new ADRs as d
 
 Format: Context → Decision → Alternatives rejected → Consequences.
 
+Entries should be ordered by numeric key, lowest to highest.
+
 ---
 
 ## ADR-001: Deployment Target
@@ -255,5 +257,17 @@ Decision: Pass `level` directly in `PlanningContext` for pathfinding. This is a 
 Alternatives rejected: Adding a `visibleTiles` set to mega-vision now (correct direction, but the renderer and NPC pathfinding both need to be updated simultaneously — defer until real vision is implemented); omitting tile data from context and querying the level in goals directly (same deviation with no documentation trail).
 
 Consequences: Pathfinding uses full level passability regardless of what the entity has actually perceived. NPCs with limited vision can still plan optimal paths. When real vision is implemented, pathfinding should be updated to use a "last-known" tile layer from sense results. The player map display (fog of war) will also derive from tile visibility in sense results — that is the trigger for revisiting this ADR.
+
+---
+
+## ADR-022: Item Location — No Coordinates in the Map Case (supersedes ADR-008)
+
+Context: ADR-008 modelled item location as a discriminated union with `{ type: 'map', x, y }` for on-map items. Items already carry a `position` component when on the map, so storing `x` and `y` in `item.location` creates two sources of truth for the same data. On every move, drop, or knock-back both would need updating in sync — a latent consistency bug with no upside.
+
+Decision: The map case carries no coordinates: `{ type: 'map' }`. The `position` component is the canonical location of an on-map item; `item.location.type` tells you which context the item is in. Non-map cases retain their payload because no other component owns that data: `{ type: 'inventory', ownerId }`, `{ type: 'equipped', ownerId, slot }`, `{ type: 'container', containerId }`. When an item is picked up, `level.removeEntity()` removes it from the spatial index and `item.location` is updated to `{ type: 'inventory', ownerId }` — the `position` component is left in place but is now inert (the entity is not in the level).
+
+Alternatives rejected: Keeping `x, y` in the map case (dual source of truth; both must be updated on every positional change); removing the `position` component on pickup (extra mutation, complicates drop/spawn logic, no benefit since the entity is not rendered or indexed once removed from the level).
+
+Consequences: Any code that needs the map coordinates of an on-map item reads the `position` component, not `item.location`. Serialization of in-inventory items omits coordinates entirely — the save system must reconstruct `position` only for items with `location.type === 'map'`.
 
 ---

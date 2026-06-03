@@ -23,10 +23,10 @@ export const playerGetInput = {
       }
 
       if (isAdjacent) {
-        const openableEntity = [...level.getEntitiesAt(input.x, input.y)]
-          .find(e => e.components.has('openable'));
-        if (openableEntity) {
-          return { action: { type: 'interact', targetEntityId: openableEntity.id } };
+        const interactable = [...level.getEntitiesAt(input.x, input.y)]
+          .find(e => e.components.has('openable') || e.components.has('container'));
+        if (interactable) {
+          return { action: { type: 'interact', targetEntityId: interactable.id } };
         }
         return { action: { type: 'move', x: input.x, y: input.y } };
       }
