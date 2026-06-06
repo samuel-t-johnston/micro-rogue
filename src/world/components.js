@@ -10,6 +10,13 @@ export const components = {
     return {};
   },
 
+  // Marks an entity as equippable in a named slot. Slot names come from data/equipment-slots.js
+  // (the Slots enum) — never bare strings — so typos crash at import time.
+  // Kept separate from `item` so non-item things (future spells, innate abilities) can also be equipped.
+  equippable(slot) {
+    return { slot };
+  },
+
   health(current, max) {
     return { current, max };
   },
@@ -74,5 +81,13 @@ export const components = {
 
   turnTaker(speed = 1) {
     return { speed, accumulator: 0 };
+  },
+
+  // An entity that wears equipment. slotNames defines the named slots available on this entity.
+  // Slots hold either an entity reference or null.
+  wearsEquipment(slotNames = []) {
+    const slots = {};
+    for (const name of slotNames) slots[name] = null;
+    return { slots };
   },
 };

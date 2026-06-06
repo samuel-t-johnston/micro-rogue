@@ -2,6 +2,8 @@ import { executeMove } from './action-types/action-move.js';
 import { executeInteract } from './action-types/action-interact.js';
 import { executePickup } from './action-types/action-pickup.js';
 import { executeSelfInteract } from './action-types/action-self-interact.js';
+import { executeEquip } from './action-types/action-equip.js';
+import { executeUnequip } from './action-types/action-unequip.js';
 import { buildPlanningContext } from '../ai/planning-context.js';
 import { evaluateGoals } from '../ai/goal-evaluator.js';
 import { playerAutoMove } from '../ai/goals/player-auto-move.js';
@@ -18,6 +20,8 @@ export function createActionSystem({ level, inputController, registry, dialogCon
     interact:     (entity, action) => executeInteract(entity, action, level, registry, dialogController),
     pickup:       (entity, action) => executePickup(entity, action, level, registry),
     selfInteract: (entity, action) => executeSelfInteract(entity, action, level, registry, dialogController),
+    equip:        (entity, action) => executeEquip(entity, action, level, registry),
+    unequip:      (entity, action) => executeUnequip(entity, action, level, registry),
   };
 
   async function executeAction(entity, action) {

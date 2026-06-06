@@ -13,7 +13,7 @@ function makeLevel() {
 }
 
 describe('executeSelfInteract', () => {
-  let registry, level, actor;
+  let registry, level, actor, dialogController;
 
   beforeEach(() => {
     registry = createEntityRegistry();
@@ -21,35 +21,36 @@ describe('executeSelfInteract', () => {
     actor = registry.createEntity();
     registry.addComponent(actor, 'position', { x: 2, y: 2 });
     registry.addComponent(actor, 'inventory', { items: [] });
+    dialogController = { showItemList: async () => ({ confirmed: false, taken: [] }) };
   });
 
-  it('returns true (free action) when no items are present', () => {
-    expect(executeSelfInteract(actor, {}, level, registry)).toBe(true);
+  it('returns true (free action) when no items are present', async () => {
+    expect(await executeSelfInteract(actor, {}, level, registry, dialogController)).toBe(true);
   });
 
-  it('picks up the item and returns false when exactly one item is present', () => {
+  it('picks up the item and returns false when exactly one item is present', async () => {
     const potion = createPotion(registry, 2, 2);
     level.placeEntity(potion);
 
-    const result = executeSelfInteract(actor, {}, level, registry);
+    const result = await executeSelfInteract(actor, {}, level, registry, dialogController);
 
     expect(result).toBe(false);
     expect(level.entities).not.toContain(potion);
     expect(actor.components.get('inventory').items).toContain(potion);
   });
 
-  it('returns true (free action) when multiple items are present', () => {
+  it('returns true (free action) when multiple items are present and the dialog is cancelled', async () => {
     level.placeEntity(createPotion(registry, 2, 2));
     level.placeEntity(createPotion(registry, 2, 2));
 
-    expect(executeSelfInteract(actor, {}, level, registry)).toBe(true);
+    expect(await executeSelfInteract(actor, {}, level, registry, dialogController)).toBe(true);
   });
 
-  it('does not pick up items from a different tile', () => {
+  it('does not pick up items from a different tile', async () => {
     const potion = createPotion(registry, 3, 2);
     level.placeEntity(potion);
 
-    executeSelfInteract(actor, {}, level, registry);
+    await executeSelfInteract(actor, {}, level, registry, dialogController);
 
     expect(level.entities).toContain(potion);
   });

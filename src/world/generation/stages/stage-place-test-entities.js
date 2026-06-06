@@ -1,5 +1,5 @@
 import { createBoulder, createChest, createDoor } from '../../furniture.js';
-import { createPotion } from '../../items.js';
+import { createDagger, createPotion } from '../../items.js';
 
 // Temporary stage: places test furniture and items for development. Replace with a proper
 // population stage (see roadmap M5) once map generation matures.
@@ -12,10 +12,11 @@ export async function run(level, _stageConfig, _blackboard, _rng, registry) {
   level.placeEntity(createPotion(registry, cx - 2, cy));
   level.placeEntity(createPotion(registry, cx - 2, cy + 1));
   level.placeEntity(createPotion(registry, cx - 2, cy + 1));
+  level.placeEntity(createDagger(registry, cx - 3, cy));
 
   const chest = createChest(registry, cx + 3, cy + 1);
   const inventory = chest.components.get('inventory');
   inventory.items.push(createPotion(registry, null, null, chest.id));
-  inventory.items.push(createPotion(registry, null, null, chest.id));
+  inventory.items.push(createDagger(registry, null, null, chest.id));
   level.placeEntity(chest);
 }

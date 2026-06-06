@@ -1,5 +1,6 @@
 import { components } from './components.js';
 import { createVisionSense } from '../ai/senses/vision.js';
+import { HUMANOID_SLOTS } from '../../data/equipment-slots.js';
 
 // Creates and returns the player entity. Async so that a character creation
 // UI can be introduced here later without changing the call site in game-scene.
@@ -11,6 +12,7 @@ export async function createPlayer(registry, x, y) {
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
   registry.addComponent(entity, 'playerControlled', components.playerControlled());
   registry.addComponent(entity, 'inventory', components.inventory());
+  registry.addComponent(entity, 'wearsEquipment', components.wearsEquipment(HUMANOID_SLOTS));
   registry.addComponent(entity, 'memory', components.memory());
   registry.addComponent(entity, 'senses', components.senses([createVisionSense()]));
   registry.addComponent(entity, 'tilePerception', components.tilePerception());
