@@ -151,6 +151,20 @@ export function createGameScene({ theme, getViewport }) {
       };
     },
 
+    // Viewport-wide data for the debug overlay's world-space layers (FOV, passability).
+    getDebugFrame() {
+      if (!level) return null;
+      const tp = player?.components.get('tilePerception');
+      return {
+        worldToScreen: renderer.worldToScreen,
+        tileSize: renderer.tileSize,
+        bounds: renderer.getVisibleTileRange(level),
+        isPassable: (x, y) => level.isPassable(x, y),
+        isVisible: (x, y) => !tp || tp.visible.has(`${x},${y}`),
+        isRemembered: (x, y) => tp?.memory.has(`${x},${y}`) ?? false,
+      };
+    },
+
     handleInput,
 
     exit() {

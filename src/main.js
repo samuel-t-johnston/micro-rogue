@@ -65,7 +65,7 @@ appState.transition(AppState.SPLASH);
 
 function frame() {
   appState.render(ctx);
-  debugOverlay?.render();
+  debugOverlay?.render(appState.layers.top());
   requestAnimationFrame(frame);
 }
 
@@ -89,9 +89,10 @@ canvas.addEventListener('pointermove', (e) => {
   updateDebugPointer(e.clientX, e.clientY);
 });
 window.addEventListener('keydown', (e) => {
-  if (debugOverlay && e.key === '`') {
-    debugOverlay.toggle();
-    return;
+  if (debugOverlay) {
+    if (e.key === '`') { debugOverlay.toggle(); return; }
+    if (e.key === '1') { debugOverlay.toggleFov(); return; }
+    if (e.key === '2') { debugOverlay.togglePassability(); return; }
   }
   appState.handleInput({ type: 'keydown', key: e.key });
 });
