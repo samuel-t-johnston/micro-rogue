@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { createRenderer } from './renderer.js';
 import { gameConfig } from '../engine/game-config.js';
+import { createLevel } from '../world/level.js';
+import { createEntityRegistry } from '../engine/entity-component-system.js';
+import { components } from '../world/components.js';
+import { RenderLayers } from './render-layers.js';
 
 const { tileSize } = gameConfig;
 
@@ -33,6 +37,90 @@ describe('worldToScreen', () => {
     r.setCamera(4, 3);
     const { x } = r.worldToScreen(2, 3);
     expect(x).toBe(160 - 2 * tileSize);
+  });
+});
+
+describe('drawEntities — layer ordering', () => {
+  // Recording ctx: tracks each fillRect call so we can verify draw order.
+  // The renderer falls back to fillRect when the sprite sheet isn't loaded,
+  // which is exactly our case (we don't call renderer.load()).
+  function makeRecordingCtx() {
+    const fills = [];
+    return {
+      _fills: fills,
+      set fillStyle(v) { this._lastFill = v; },
+      get fillStyle() { return this._lastFill; },
+      set strokeStyle(_) {},
+      set lineWidth(_) {},
+      set font(_) {},
+      set textAlign(_) {},
+      set textBaseline(_) {},
+      set globalAlpha(_) {},
+      fillRect(x, y, w, h) { fills.push({ x, y, w, h, color: this._lastFill }); },
+      fillText() {},
+    };
+  }
+
+  function entityAt(registry, name, x, y, layer) {
+    const e = registry.createEntity();
+    registry.addComponent(e, 'position', components.position(x, y));
+    registry.addComponent(e, 'renderable', components.renderable(null, name, undefined, undefined, layer));
+    return e;
+  }
+
+  function makeLevelWith(entities) {
+    const level = createLevel();
+    level.width = 10;
+    level.height = 10;
+    level.tiles = Array.from({ length: 10 }, () => Array(10).fill('floor'));
+    for (const e of entities) level.placeEntity(e);
+    return level;
+  }
+
+  it('draws lower-layer entities before higher-layer entities at the same tile', () => {
+    const r = createRenderer({ getViewport: () => ({ width: 320, height: 240 }) });
+    r.setCamera(5, 5);
+    const registry = createEntityRegistry();
+    // Insert creature FIRST (DEFAULT layer), then item (ITEM layer) — the dropped-item bug condition.
+    const creature = entityAt(registry, 'creature', 5, 5, RenderLayers.DEFAULT);
+    const item = entityAt(registry, 'item', 5, 5, RenderLayers.ITEM);
+    const level = makeLevelWith([creature, item]);
+
+    const ctx = makeRecordingCtx();
+    r.drawEntities(ctx, level, null);
+
+    expect(ctx._fills.map(f => f.color)).toEqual(['item', 'creature']);
+  });
+
+  it('defaults to DEFAULT layer when renderable.layer is undefined', () => {
+    const r = createRenderer({ getViewport: () => ({ width: 320, height: 240 }) });
+    r.setCamera(5, 5);
+    const registry = createEntityRegistry();
+    // No layer specified → component factory falls back to DEFAULT. Item at ITEM should still draw first.
+    const noLayer = registry.createEntity();
+    registry.addComponent(noLayer, 'position', components.position(5, 5));
+    registry.addComponent(noLayer, 'renderable', components.renderable(null, 'no-layer'));
+    const item = entityAt(registry, 'item', 5, 5, RenderLayers.ITEM);
+    const level = makeLevelWith([noLayer, item]);
+
+    const ctx = makeRecordingCtx();
+    r.drawEntities(ctx, level, null);
+
+    expect(ctx._fills.map(f => f.color)).toEqual(['item', 'no-layer']);
+  });
+
+  it('preserves insertion order for entities at the same layer (stable sort)', () => {
+    const r = createRenderer({ getViewport: () => ({ width: 320, height: 240 }) });
+    r.setCamera(5, 5);
+    const registry = createEntityRegistry();
+    const a = entityAt(registry, 'a', 5, 5, RenderLayers.DEFAULT);
+    const b = entityAt(registry, 'b', 5, 5, RenderLayers.DEFAULT);
+    const level = makeLevelWith([a, b]);
+
+    const ctx = makeRecordingCtx();
+    r.drawEntities(ctx, level, null);
+
+    expect(ctx._fills.map(f => f.color)).toEqual(['a', 'b']);
   });
 });
 

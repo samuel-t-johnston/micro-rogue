@@ -38,7 +38,7 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
 
   function buildInventory() {
     const body = createInventoryScreenBody({
-      theme,
+      theme, getViewport,
       getItems: () => getPlayer()?.components.get('inventory')?.items ?? [],
       onAction: (action) => {
         close();
@@ -56,7 +56,7 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
 
   function buildEquipment() {
     const body = createEquipmentScreenBody({
-      theme,
+      theme, getViewport,
       getSlots: () => {
         const wears = getPlayer()?.components.get('wearsEquipment');
         if (!wears) return [];
