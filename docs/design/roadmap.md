@@ -47,9 +47,9 @@ Open questions and deferred decisions are noted inline where they land on the ro
 - [x] Passive entities: items on the map with `usable` or `equippable` components
 - [x] Item location model: discriminated union (`map`, `inventory`, `equipped`, `container`)
 - [x] Pick up: tap item → moves to inventory
-- [ ] Inventory screen: full-screen modal, item list, basic use/equip/drop actions
+- [x] Inventory screen: full-screen modal, item list, basic use/equip/drop actions
 - [x] Character menu shell: card grid, back navigation, inventory as first card
-- [ ] Debug overlay: FOV boundary layer, passability grid layer
+- [x] Debug overlay: FOV boundary layer, passability grid layer
 
 *Note: the blackboard is not needed until map generation has stages that communicate. Stub it as an empty object in the level structure so the save format is correct, but don't implement it yet.*
 

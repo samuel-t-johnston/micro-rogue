@@ -24,15 +24,21 @@ export function createRenderer({ getViewport }) {
     };
   }
 
-  function drawMap(ctx, level, tilePerception) {
+  // Tile range covering the viewport, clamped to the level bounds.
+  function getVisibleTileRange(level) {
     const { width, height } = getViewport();
     const halfW = width / 2;
     const halfH = height / 2;
+    return {
+      x0: Math.max(0, Math.floor(camera.x - halfW / tileSize)),
+      x1: Math.min(level.width - 1, Math.ceil(camera.x + halfW / tileSize)),
+      y0: Math.max(0, Math.floor(camera.y - halfH / tileSize)),
+      y1: Math.min(level.height - 1, Math.ceil(camera.y + halfH / tileSize)),
+    };
+  }
 
-    const x0 = Math.max(0, Math.floor(camera.x - halfW / tileSize));
-    const x1 = Math.min(level.width - 1, Math.ceil(camera.x + halfW / tileSize));
-    const y0 = Math.max(0, Math.floor(camera.y - halfH / tileSize));
-    const y1 = Math.min(level.height - 1, Math.ceil(camera.y + halfH / tileSize));
+  function drawMap(ctx, level, tilePerception) {
+    const { x0, x1, y0, y1 } = getVisibleTileRange(level);
 
     for (let ty = y0; ty <= y1; ty++) {
       for (let tx = x0; tx <= x1; tx++) {
@@ -100,8 +106,10 @@ export function createRenderer({ getViewport }) {
 
   return {
     load: () => sprites.load(),
+    tileSize,
     worldToScreen,
     screenToWorld,
+    getVisibleTileRange,
     drawMap,
     drawEntities,
     setCamera(x, y) {
