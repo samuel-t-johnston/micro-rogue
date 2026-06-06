@@ -1,9 +1,11 @@
 import { components } from './components.js';
 import { Slots } from '../../data/equipment-slots.js';
+import { EffectTypes } from '../effects/effects.js';
 
 const SPRITES = {
-  potion: { col: 16, row: 16 }, // 1-indexed: col 17, row 17
-  dagger: { col: 19, row: 5 }, // 1-indexed: col 20, row 6
+  healingPotion: { col: 16, row: 16 }, // 1-indexed: col 17, row 17
+  potionOfPain:  { col: 20, row: 16 }, // 1-indexed: col 21, row 17
+  dagger:        { col: 19, row: 5 },  // 1-indexed: col 20, row 6
 };
 
 // Resolves item location from (x, y) for map items or entityId for contained items.
@@ -25,12 +27,26 @@ export function resolveItemLocation(registry, x, y, entityId) {
   throw new Error(`Entity ${entityId} has neither container nor inventory component`);
 }
 
-export function createPotion(registry, x, y, entityId) {
+export function createHealingPotion(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
-  registry.addComponent(entity, 'name', components.name('Potion'));
-  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.potion, '#07fe49ff'));
+  registry.addComponent(entity, 'name', components.name('Healing Potion'));
+  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.healingPotion, '#07fe49ff'));
   registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(entity, 'consumable', components.consumable(EffectTypes.HEAL, { amount: 10 }));
+  if (location.type === 'map') {
+    registry.addComponent(entity, 'position', components.position(x, y));
+  }
+  return entity;
+}
+
+export function createPotionOfPain(registry, x, y, entityId) {
+  const location = resolveItemLocation(registry, x, y, entityId);
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name('Potion of Pain'));
+  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.potionOfPain, '#a31a1aff'));
+  registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(entity, 'consumable', components.consumable(EffectTypes.DAMAGE, { amount: 5 }));
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));
   }

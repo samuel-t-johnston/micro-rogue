@@ -10,6 +10,14 @@ export const components = {
     return {};
   },
 
+  // Marks an entity as consumable (drinkable/edible/readable). The item is destroyed on use.
+  // effectType is a string key into the effects registry (src/effects/effects.js);
+  // params is the effect-specific payload, e.g. { amount: 10 } for heal/damage.
+  // Storing the type+params as data (not a function ref) so consumables serialize cleanly.
+  consumable(effectType, params = {}) {
+    return { effectType, params };
+  },
+
   // Marks an entity as equippable in a named slot. Slot names come from data/equipment-slots.js
   // (the Slots enum) — never bare strings — so typos crash at import time.
   // Kept separate from `item` so non-item things (future spells, innate abilities) can also be equipped.

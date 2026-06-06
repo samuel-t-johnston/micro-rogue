@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { playerAutoPickup } from './player-auto-pickup.js';
 import { createEntityRegistry } from '../../engine/entity-component-system.js';
 import { createLevel } from '../../world/level.js';
-import { createPotion } from '../../world/items.js';
+import { createHealingPotion } from '../../world/items.js';
 
 function makeLevel() {
   const level = createLevel();
@@ -30,13 +30,13 @@ describe('playerAutoPickup', () => {
   });
 
   it('returns null when there is pending input', () => {
-    level.placeEntity(createPotion(registry, 2, 2));
+    level.placeEntity(createHealingPotion(registry, 2, 2));
     const ctx = makeContext({ hasPendingInput: true, level });
     expect(playerAutoPickup.evaluate(ctx)).toBeNull();
   });
 
   it('returns null when the player has not moved since last evaluation', () => {
-    level.placeEntity(createPotion(registry, 2, 2));
+    level.placeEntity(createHealingPotion(registry, 2, 2));
     const memory = { autoPickupLastPos: { x: 2, y: 2 } };
     const ctx = makeContext({ memory, level });
     expect(playerAutoPickup.evaluate(ctx)).toBeNull();
@@ -48,14 +48,14 @@ describe('playerAutoPickup', () => {
   });
 
   it('returns null when multiple items are at the player position', () => {
-    level.placeEntity(createPotion(registry, 2, 2));
-    level.placeEntity(createPotion(registry, 2, 2));
+    level.placeEntity(createHealingPotion(registry, 2, 2));
+    level.placeEntity(createHealingPotion(registry, 2, 2));
     const ctx = makeContext({ level });
     expect(playerAutoPickup.evaluate(ctx)).toBeNull();
   });
 
   it('returns a pickup action when exactly one item is present and position changed', () => {
-    const potion = createPotion(registry, 2, 2);
+    const potion = createHealingPotion(registry, 2, 2);
     level.placeEntity(potion);
     const memory = { autoPickupLastPos: { x: 1, y: 2 } };
     const ctx = makeContext({ memory, level });
@@ -63,7 +63,7 @@ describe('playerAutoPickup', () => {
   });
 
   it('fires on the first evaluation when no prior position is stored in memory', () => {
-    const potion = createPotion(registry, 2, 2);
+    const potion = createHealingPotion(registry, 2, 2);
     level.placeEntity(potion);
     const ctx = makeContext({ level });
     expect(playerAutoPickup.evaluate(ctx)).toEqual({ action: { type: 'pickup', itemEntityId: potion.id } });
@@ -77,7 +77,7 @@ describe('playerAutoPickup', () => {
   });
 
   it('does not fire again on the next evaluation at the same position', () => {
-    const potion = createPotion(registry, 2, 2);
+    const potion = createHealingPotion(registry, 2, 2);
     level.placeEntity(potion);
     const memory = {};
     const ctx = makeContext({ memory, level });
