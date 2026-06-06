@@ -11,7 +11,8 @@ export const playerGetInput = {
     while (true) {
       const input = await awaitInput();
 
-      if (input.type === 'equip' || input.type === 'unequip' || input.type === 'consume') {
+      if (input.type === 'equip' || input.type === 'unequip' ||
+          input.type === 'consume' || input.type === 'drop') {
         return { action: input };
       }
 

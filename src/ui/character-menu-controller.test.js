@@ -7,7 +7,9 @@ import { createDagger, createHealingPotion } from '../world/items.js';
 import { executeEquip } from '../actions/action-types/action-equip.js';
 import { executeUnequip } from '../actions/action-types/action-unequip.js';
 import { executeConsume } from '../actions/action-types/action-consume.js';
+import { executeDrop } from '../actions/action-types/action-drop.js';
 import { Slots, HUMANOID_SLOTS } from '../../data/equipment-slots.js';
+import { createLevel } from '../world/level.js';
 
 const theme = {
   bg: '#000', surface: '#111', primary: '#444', accent: '#888',
@@ -92,44 +94,56 @@ describe('character menu — full equip/unequip flow', () => {
     controller.render(ctx);
   });
 
-  it('end-to-end: navigate to equipment, tap dagger, equip action runs, dagger lives in weapon slot', () => {
-    // 1) open menu → root
+  // Action menu layout (centered, PANEL_W=260, viewport 800x600):
+  //   panel.x = (800 - 260) / 2 = 270
+  //   For 2 actions (Equip/Unequip + Cancel):
+  //     panelH = 44(header) + 16(pad) + 2*44(buttons) + 1*8(gap) + 16(pad) = 172
+  //     panel.y = (600 - 172) / 2 = 214
+  //     Button 0 center: x=400, y=214+44+16+22 = 296
+  //   For 3 actions (Use + Drop + Cancel):
+  //     panelH = 44 + 16 + 3*44 + 2*8 + 16 = 224
+  //     panel.y = (600 - 224) / 2 = 188
+  //     Button 0 center: x=400, y=188+44+16+22 = 270
+  //     Button 1 center: y = 270 + 44 + 8 = 322
+
+  it('end-to-end: navigate to equipment, tap dagger row → Equip menu → confirm; then tap weapon slot → Unequip menu → confirm', () => {
     controller.open();
     const ctx = makeCtx();
     controller.render(ctx);
 
-    // 2) tap the Equipment card. Probe the right column at vertical center.
-    // Card layout: at viewport 800x600, cols = 5, but only 2 cards. Card width =
-    // floor((768 - 4*16)/5) = floor(704/5) = 140. Inventory at x=16, Equipment at x=172.
-    // Tap inside Equipment card.
+    // Tap Equipment card (index 1 in the card grid).
     controller.handleInput({ type: 'pointerdown', x: 240, y: 300 });
     controller.render(ctx);
 
-    // 3) tap the dagger row in the "Equippable in Inventory" section.
-    // Body starts at y = MARGIN(16) + HEADER_H(56) + MARGIN(16) = 88.
-    // Rows: section "Equipped" (28) + 2 slot rows (40 each) + section "Equippable in Inventory" (28) + dagger row (40).
-    // Dagger row starts at y = 88 + 28 + 80 + 28 = 224, height 40.
-    // Tap center: y = 244, x = 200 (within body).
+    // Tap the dagger row in the "Equippable in Inventory" section.
+    // Body y = 88. Rows: Equipped section (28) + 2 slot rows (80) + section (28) = 136 offset.
+    // Dagger row center: y = 88 + 136 + 20 = 244.
     controller.handleInput({ type: 'pointerdown', x: 200, y: 244 });
+    expect(submitted).toHaveLength(0); // menu just opened, nothing submitted yet
+    controller.render(ctx);
 
-    // Equip action must have been submitted and the menu closed
+    // Tap Equip button (button 0 of 2-action menu).
+    controller.handleInput({ type: 'pointerdown', x: 400, y: 296 });
+
     expect(submitted).toHaveLength(1);
     expect(submitted[0]).toEqual({ type: 'equip', itemEntityId: dagger.id });
     expect(controller.isOpen).toBe(false);
 
-    // 4) Run the action like the game would
     executeEquip(player, submitted[0], null, registry);
     expect(player.components.get('wearsEquipment').slots[Slots.WEAPON]).toBe(dagger);
-    expect(player.components.get('inventory').items).not.toContain(dagger);
 
-    // 5) Re-open, navigate to equipment, tap the weapon slot to unequip
+    // Re-open, navigate to equipment, tap the weapon slot to open Unequip menu, confirm.
     controller.open();
     controller.render(ctx);
     controller.handleInput({ type: 'pointerdown', x: 240, y: 300 });
     controller.render(ctx);
 
-    // Weapon slot is the first slot row: y = 88 + 28 = 116, height 40. Center: 136.
+    // Weapon slot row: body y = 88, after section header (28) = 116, center y = 136.
     controller.handleInput({ type: 'pointerdown', x: 200, y: 136 });
+    controller.render(ctx);
+
+    // Tap Unequip button.
+    controller.handleInput({ type: 'pointerdown', x: 400, y: 296 });
 
     expect(submitted).toHaveLength(2);
     expect(submitted[1]).toEqual({ type: 'unequip', slot: Slots.WEAPON });
@@ -140,8 +154,21 @@ describe('character menu — full equip/unequip flow', () => {
     expect(player.components.get('inventory').items).toContain(dagger);
   });
 
-  it('end-to-end: navigate to inventory, tap healing potion, consume action runs, HP restored, item destroyed', () => {
-    // Set up: give the player a health component and a healing potion in inventory.
+  it('equipment screen menu Cancel button dismisses without submitting', () => {
+    controller.open();
+    const ctx = makeCtx();
+    controller.render(ctx);
+    controller.handleInput({ type: 'pointerdown', x: 240, y: 300 }); // Equipment
+    controller.render(ctx);
+    controller.handleInput({ type: 'pointerdown', x: 200, y: 244 }); // Dagger row → menu
+    controller.render(ctx);
+    // Tap Cancel button (button 1 of 2-action menu): y = 296 + 52 = 348
+    controller.handleInput({ type: 'pointerdown', x: 400, y: 348 });
+    expect(submitted).toHaveLength(0);
+    expect(controller.isOpen).toBe(true); // menu still open, back at equipment screen
+  });
+
+  it('end-to-end: inventory → tap potion → Use → HP restored, potion destroyed', () => {
     registry.addComponent(player, 'health', components.health(8, 20));
     const potion = createHealingPotion(registry, null, null, player.id);
     player.components.get('inventory').items.push(potion);
@@ -150,15 +177,18 @@ describe('character menu — full equip/unequip flow', () => {
     const ctx = makeCtx();
     controller.render(ctx);
 
-    // Tap Inventory card. Cards laid out left-to-right at row 1: Inventory at index 0,
-    // Equipment at index 1. With viewport 800x600, cols=5 → card width 140, gap 16,
-    // Inventory at x=16, Equipment at x=172. Inventory card center: ~86 horizontally.
+    // Tap Inventory card (index 0). Center: ~86 horizontally.
     controller.handleInput({ type: 'pointerdown', x: 86, y: 300 });
     controller.render(ctx);
 
-    // Inventory rows are 36px tall, starting at body.y = 88. With dagger at index 0 and
-    // potion at index 1, the potion row is at y = 88 + 36 = 124, center y = 142.
+    // Tap the potion row. ROW_H=36, body.y=88. Dagger at index 0, potion at index 1.
+    // Potion row center: y = 88 + 36 + 18 = 142.
     controller.handleInput({ type: 'pointerdown', x: 200, y: 142 });
+    expect(submitted).toHaveLength(0); // menu just opened
+    controller.render(ctx);
+
+    // Tap Use button (button 0 of 3-action menu Use/Drop/Cancel).
+    controller.handleInput({ type: 'pointerdown', x: 400, y: 270 });
 
     expect(submitted).toHaveLength(1);
     expect(submitted[0]).toEqual({ type: 'consume', itemEntityId: potion.id });
@@ -168,6 +198,55 @@ describe('character menu — full equip/unequip flow', () => {
     expect(player.components.get('health').current).toBe(18);
     expect(player.components.get('inventory').items).not.toContain(potion);
     expect(registry.getEntity(potion.id)).toBeNull();
+  });
+
+  it('end-to-end: inventory → tap potion → Drop → potion appears on map at player position', () => {
+    const level = createLevel();
+    level.width = 5;
+    level.height = 5;
+    level.tiles = Array.from({ length: 5 }, () => Array(5).fill('floor'));
+    registry.addComponent(player, 'position', components.position(2, 3));
+
+    const potion = createHealingPotion(registry, null, null, player.id);
+    player.components.get('inventory').items.push(potion);
+
+    controller.open();
+    const ctx = makeCtx();
+    controller.render(ctx);
+    controller.handleInput({ type: 'pointerdown', x: 86, y: 300 }); // Inventory card
+    controller.render(ctx);
+    controller.handleInput({ type: 'pointerdown', x: 200, y: 142 }); // Potion row → menu
+    controller.render(ctx);
+
+    // Tap Drop (button 1 of 3-action menu Use/Drop/Cancel): y = 270 + 52 = 322.
+    controller.handleInput({ type: 'pointerdown', x: 400, y: 322 });
+
+    expect(submitted).toHaveLength(1);
+    expect(submitted[0]).toEqual({ type: 'drop', itemEntityId: potion.id });
+    expect(controller.isOpen).toBe(false);
+
+    executeDrop(player, submitted[0], level, registry);
+    expect(player.components.get('inventory').items).not.toContain(potion);
+    expect(level.getEntitiesAt(2, 3)).toContain(potion);
+    expect(potion.components.get('item').location).toEqual({ type: 'map' });
+  });
+
+  it('end-to-end: inventory → tap dagger → Equip menu shows Equip + Drop + Cancel (no Use)', () => {
+    controller.open();
+    const ctx = makeCtx();
+    controller.render(ctx);
+    controller.handleInput({ type: 'pointerdown', x: 86, y: 300 }); // Inventory card
+    controller.render(ctx);
+
+    // Tap the dagger row at index 0 (no potion this test). Center y = 88 + 18 = 106.
+    controller.handleInput({ type: 'pointerdown', x: 200, y: 106 });
+    controller.render(ctx);
+
+    // Equippable item menu has 3 actions (Equip/Drop/Cancel). Tap Equip (button 0).
+    controller.handleInput({ type: 'pointerdown', x: 400, y: 270 });
+
+    expect(submitted).toHaveLength(1);
+    expect(submitted[0]).toEqual({ type: 'equip', itemEntityId: dagger.id });
   });
 
   it('Escape key closes the menu from the root', () => {

@@ -1,6 +1,8 @@
 // Component factory functions — the single definition site for each component's shape and defaults.
 // Always create components through these functions, never as inline object literals.
 // Add new components in alphabetical order and keep them sorted.
+import { RenderLayers } from '../render/render-layers.js';
+
 export const components = {
   blocksMovement() {
     return {};
@@ -68,8 +70,11 @@ export const components = {
 
   // sprite: { col, row } matching the sprite sheet; color: CSS fallback if sprite unavailable.
   // glyph/glyphColor: optional text character drawn over the tile when no sprite is available.
-  renderable(sprite, color, glyph, glyphColor) {
-    return { sprite, color, glyph, glyphColor };
+  // layer: z-order from src/render/render-layers.js — lower draws first. Omitting it
+  // falls back to RenderLayers.DEFAULT (creatures, furniture); items override to ITEM
+  // so a creature standing on a dropped item draws on top.
+  renderable(sprite, color, glyph, glyphColor, layer = RenderLayers.DEFAULT) {
+    return { sprite, color, glyph, glyphColor, layer };
   },
 
   // Array of sense functions: sense(entity, level, turnCount) → SenseResult[].

@@ -1,6 +1,7 @@
 import { getTileType } from '../world/tile-registry.js';
 import { createSpriteRenderer } from './sprite-renderer.js';
 import { gameConfig } from '../engine/game-config.js';
+import { RenderLayers } from './render-layers.js';
 
 export function createRenderer({ getViewport }) {
   const { tileSize } = gameConfig;
@@ -67,12 +68,21 @@ export function createRenderer({ getViewport }) {
     const y0 = Math.floor(camera.y - halfH / tileSize);
     const y1 = Math.ceil(camera.y + halfH / tileSize);
 
+    // Cull off-screen and out-of-FOV entities first, then sort by render layer so
+    // lower layers (items) draw underneath higher layers (creatures, furniture).
+    // Stable sort preserves insertion order for ties.
+    const visible = [];
     for (const entity of level.entities) {
       const pos = entity.components.get('position');
       const renderable = entity.components.get('renderable');
       if (!pos || !renderable) continue;
       if (pos.x < x0 || pos.x > x1 || pos.y < y0 || pos.y > y1) continue;
       if (tilePerception && !tilePerception.visible.has(`${pos.x},${pos.y}`)) continue;
+      visible.push({ entity, pos, renderable });
+    }
+    visible.sort((a, b) => (a.renderable.layer ?? RenderLayers.DEFAULT) - (b.renderable.layer ?? RenderLayers.DEFAULT));
+
+    for (const { pos, renderable } of visible) {
       const { x, y } = worldToScreen(pos.x, pos.y);
       if (!sprites.draw(ctx, renderable.sprite, x, y)) {
         ctx.fillStyle = renderable.color ?? '#666';

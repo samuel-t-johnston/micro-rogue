@@ -5,6 +5,7 @@ import { executeSelfInteract } from './action-types/action-self-interact.js';
 import { executeEquip } from './action-types/action-equip.js';
 import { executeUnequip } from './action-types/action-unequip.js';
 import { executeConsume } from './action-types/action-consume.js';
+import { executeDrop } from './action-types/action-drop.js';
 import { buildPlanningContext } from '../ai/planning-context.js';
 import { evaluateGoals } from '../ai/goal-evaluator.js';
 import { playerAutoMove } from '../ai/goals/player-auto-move.js';
@@ -24,6 +25,7 @@ export function createActionSystem({ level, inputController, registry, dialogCon
     equip:        (entity, action) => executeEquip(entity, action, level, registry),
     unequip:      (entity, action) => executeUnequip(entity, action, level, registry),
     consume:      (entity, action) => executeConsume(entity, action, level, registry),
+    drop:         (entity, action) => executeDrop(entity, action, level, registry),
   };
 
   async function executeAction(entity, action) {

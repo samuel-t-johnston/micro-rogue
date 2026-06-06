@@ -1,6 +1,7 @@
 import { components } from './components.js';
 import { Slots } from '../../data/equipment-slots.js';
 import { EffectTypes } from '../effects/effects.js';
+import { RenderLayers } from '../render/render-layers.js';
 
 const SPRITES = {
   healingPotion: { col: 16, row: 16 }, // 1-indexed: col 17, row 17
@@ -31,7 +32,7 @@ export function createHealingPotion(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Healing Potion'));
-  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.healingPotion, '#07fe49ff'));
+  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.healingPotion, '#07fe49ff', '!', '#07fe49ff', RenderLayers.ITEM));
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'consumable', components.consumable(EffectTypes.HEAL, { amount: 10 }));
   if (location.type === 'map') {
@@ -44,7 +45,7 @@ export function createPotionOfPain(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Potion of Pain'));
-  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.potionOfPain, '#a31a1aff'));
+  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.potionOfPain, '#a31a1aff', '!', '#a31a1aff', RenderLayers.ITEM));
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'consumable', components.consumable(EffectTypes.DAMAGE, { amount: 5 }));
   if (location.type === 'map') {
@@ -57,7 +58,7 @@ export function createDagger(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Dagger'));
-  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.dagger, '#101010', '/', '#cccccc'));
+  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.dagger, '#101010', '/', '#cccccc', RenderLayers.ITEM));
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
   if (location.type === 'map') {
