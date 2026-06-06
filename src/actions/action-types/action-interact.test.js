@@ -75,12 +75,12 @@ describe('executeInteract — door', () => {
     });
   });
 
-  it('returns false (consumes a turn)', () => {
-    expect(executeInteract(actor, { targetEntityId: door.id }, level, registry)).toBe(false);
+  it('returns false (consumes a turn)', async () => {
+    expect(await executeInteract(actor, { targetEntityId: door.id }, level, registry)).toBe(false);
   });
 
-  it('returns false and does nothing when target not found', () => {
-    const result = executeInteract(actor, { targetEntityId: 9999 }, level, registry);
+  it('returns false and does nothing when target not found', async () => {
+    const result = await executeInteract(actor, { targetEntityId: 9999 }, level, registry);
     expect(result).toBe(false);
     expect(door.components.get('openable').isOpen).toBe(false);
   });

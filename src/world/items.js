@@ -1,7 +1,9 @@
 import { components } from './components.js';
+import { Slots } from '../../data/equipment-slots.js';
 
 const SPRITES = {
   potion: { col: 16, row: 16 }, // 1-indexed: col 17, row 17
+  dagger: { col: 19, row: 5 }, // 1-indexed: col 20, row 6
 };
 
 // Resolves item location from (x, y) for map items or entityId for contained items.
@@ -29,6 +31,19 @@ export function createPotion(registry, x, y, entityId) {
   registry.addComponent(entity, 'name', components.name('Potion'));
   registry.addComponent(entity, 'renderable', components.renderable(SPRITES.potion, '#07fe49ff'));
   registry.addComponent(entity, 'item', components.item(location));
+  if (location.type === 'map') {
+    registry.addComponent(entity, 'position', components.position(x, y));
+  }
+  return entity;
+}
+
+export function createDagger(registry, x, y, entityId) {
+  const location = resolveItemLocation(registry, x, y, entityId);
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name('Dagger'));
+  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.dagger, '#101010', '/', '#cccccc'));
+  registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));
   }

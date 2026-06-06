@@ -28,6 +28,12 @@ ROGμE is designed to be forked and modified. As soon as you fork the repository
 
 From there, you can try modifying data files, modifying existing code, or adding new features.
 
+### FAQs and How To...
+
+The `/docs/howto` directory contains lots of files with directions for making common changes to ROGμE. These are designed to be helpful to both human devs and AI coding assistants, and provide an easy way to start making the game your own.
+
+The code itself is documented with JS Doc-style comments to help with discovery and understanding.
+
 ### Dev Environment Setup
 
 You can make changes to the game by committing them directly and trying it out on GitHub Pages, but this will quickly become a chore. Setting up a development environment on your computer is easy, and will let you instantly test changes and verify everything is working before committing them for the world to see.
@@ -70,19 +76,13 @@ npm dev:fresh
 
 The dev server serves the repo root, so `index.html` at the root, `src/` modules, and `styles/` all resolve via relative paths. Any static server pointed at the repo root works (e.g. `npx serve .`).
 
-# Testing
+## Testing
 
-## Framework
+### Framework
 
 ROGμE uses Vitest with `happy-dom` for tests that need a DOM. Test files live alongside source as `*.test.js`.
 
 Run tests with `npm test` (watch mode) or `npm run test:run` (single pass).
-
-### How To...?
-
-The `docs/howto` directory contains files with directions for making specific changes to ROGμE. These are designed to be helpful to both human devs and AI coding assistants, and provide an easy way to start making the game your own.
-
-The code itself is documented with JS Doc-style comments to help with discovery and understanding.
 
 ## Credits
 

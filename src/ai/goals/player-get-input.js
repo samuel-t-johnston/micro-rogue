@@ -11,6 +11,10 @@ export const playerGetInput = {
     while (true) {
       const input = await awaitInput();
 
+      if (input.type === 'equip' || input.type === 'unequip') {
+        return { action: input };
+      }
+
       if (input.type !== 'move') continue;
 
       const { x: px, y: py } = selfState.position;

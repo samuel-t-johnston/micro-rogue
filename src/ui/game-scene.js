@@ -12,7 +12,9 @@ import { getTileType } from '../world/tile-registry.js';
 import { createEventLog } from '../engine/event-log.js';
 import { createHudWidget } from './widgets/hud.js';
 import { createMessageLogWidget } from './widgets/message-log.js';
+import { createCharacterMenuButton } from './widgets/character-menu-button.js';
 import { createDialogController } from './dialog-controller.js';
+import { createCharacterMenuController } from './character-menu-controller.js';
 
 export function createGameScene({ theme, getViewport }) {
   let level = null;
@@ -26,6 +28,17 @@ export function createGameScene({ theme, getViewport }) {
   const hudWidget = createHudWidget({ theme, getViewport });
   const messageLogWidget = createMessageLogWidget({ theme, getViewport });
   const dialogController = createDialogController({ theme, getViewport });
+  const characterMenuController = createCharacterMenuController({
+    theme,
+    getViewport,
+    getPlayer: () => player,
+    onAction: (action) => inputController?.submit(action),
+  });
+  const characterMenuButton = createCharacterMenuButton({
+    theme,
+    getViewport,
+    onOpen: () => characterMenuController.open(),
+  });
 
   function getPlayerPos() {
     return registry.getComponent(player, 'position');
@@ -34,8 +47,13 @@ export function createGameScene({ theme, getViewport }) {
   function handleInput(event) {
     if (!level || !inputController) return false;
 
+    if (characterMenuController.isOpen) {
+      return characterMenuController.handleInput(event);
+    }
+
     if (dialogController.handleInput(event)) return true;
     if (messageLogWidget.handleInput(event)) return true;
+    if (characterMenuButton.handleInput(event)) return true;
 
     if (event.type === 'pointerdown') {
       const world = renderer.screenToWorld(event.x, event.y);
@@ -108,7 +126,9 @@ export function createGameScene({ theme, getViewport }) {
       const recentLines = eventLog.getDisplayEntries(2).map(e => e.display);
       messageLogWidget.render(ctx, { recentLines });
 
+      characterMenuButton.render(ctx);
       dialogController.render(ctx);
+      characterMenuController.render(ctx);
     },
 
     screenToWorld(x, y) {
