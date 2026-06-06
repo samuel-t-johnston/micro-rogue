@@ -40,6 +40,10 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
     const body = createInventoryScreenBody({
       theme,
       getItems: () => getPlayer()?.components.get('inventory')?.items ?? [],
+      onAction: (action) => {
+        close();
+        onAction(action);
+      },
     });
     return createCharacterMenuSubScreen({
       theme, getViewport,

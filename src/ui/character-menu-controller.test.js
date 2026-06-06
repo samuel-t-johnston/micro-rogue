@@ -3,9 +3,10 @@ import { createCharacterMenuController } from './character-menu-controller.js';
 import { createCharacterMenuButton } from './widgets/character-menu-button.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
 import { components } from '../world/components.js';
-import { createDagger } from '../world/items.js';
+import { createDagger, createHealingPotion } from '../world/items.js';
 import { executeEquip } from '../actions/action-types/action-equip.js';
 import { executeUnequip } from '../actions/action-types/action-unequip.js';
+import { executeConsume } from '../actions/action-types/action-consume.js';
 import { Slots, HUMANOID_SLOTS } from '../../data/equipment-slots.js';
 
 const theme = {
@@ -137,6 +138,36 @@ describe('character menu — full equip/unequip flow', () => {
     executeUnequip(player, submitted[1], null, registry);
     expect(player.components.get('wearsEquipment').slots[Slots.WEAPON]).toBe(null);
     expect(player.components.get('inventory').items).toContain(dagger);
+  });
+
+  it('end-to-end: navigate to inventory, tap healing potion, consume action runs, HP restored, item destroyed', () => {
+    // Set up: give the player a health component and a healing potion in inventory.
+    registry.addComponent(player, 'health', components.health(8, 20));
+    const potion = createHealingPotion(registry, null, null, player.id);
+    player.components.get('inventory').items.push(potion);
+
+    controller.open();
+    const ctx = makeCtx();
+    controller.render(ctx);
+
+    // Tap Inventory card. Cards laid out left-to-right at row 1: Inventory at index 0,
+    // Equipment at index 1. With viewport 800x600, cols=5 → card width 140, gap 16,
+    // Inventory at x=16, Equipment at x=172. Inventory card center: ~86 horizontally.
+    controller.handleInput({ type: 'pointerdown', x: 86, y: 300 });
+    controller.render(ctx);
+
+    // Inventory rows are 36px tall, starting at body.y = 88. With dagger at index 0 and
+    // potion at index 1, the potion row is at y = 88 + 36 = 124, center y = 142.
+    controller.handleInput({ type: 'pointerdown', x: 200, y: 142 });
+
+    expect(submitted).toHaveLength(1);
+    expect(submitted[0]).toEqual({ type: 'consume', itemEntityId: potion.id });
+    expect(controller.isOpen).toBe(false);
+
+    executeConsume(player, submitted[0], null, registry);
+    expect(player.components.get('health').current).toBe(18);
+    expect(player.components.get('inventory').items).not.toContain(potion);
+    expect(registry.getEntity(potion.id)).toBeNull();
   });
 
   it('Escape key closes the menu from the root', () => {

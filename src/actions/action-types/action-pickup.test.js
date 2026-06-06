@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { executePickup } from './action-pickup.js';
 import { createEntityRegistry } from '../../engine/entity-component-system.js';
 import { createLevel } from '../../world/level.js';
-import { createPotion } from '../../world/items.js';
+import { createHealingPotion } from '../../world/items.js';
 
 function makeLevel() {
   const level = createLevel();
@@ -23,7 +23,7 @@ describe('executePickup', () => {
     registry.addComponent(actor, 'position', { x: 2, y: 2 });
     registry.addComponent(actor, 'inventory', { items: [] });
 
-    potion = createPotion(registry, 2, 2);
+    potion = createHealingPotion(registry, 2, 2);
     level.placeEntity(potion);
   });
 
