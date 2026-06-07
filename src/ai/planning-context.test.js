@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { applySenses, buildPlanningContext } from './planning-context.js';
+import { registerSense } from './senses/sense-registry.js';
 import { createLevel } from '../world/level.js';
 
 function makeEntity(overrides = {}) {
@@ -21,8 +22,13 @@ function makeLevel(w, h, tileId = 'floor') {
   return level;
 }
 
+// Registers a mock sense under a unique name (the senses component holds names, not
+// functions) and returns the name for use in an entity's `senses` component.
+let senseSeq = 0;
 function makeSense(visibleTiles, entities = []) {
-  return () => ({ entities, visibleTiles });
+  const name = `mock-sense-${senseSeq++}`;
+  registerSense(name, () => ({ entities, visibleTiles }));
+  return name;
 }
 
 describe('applySenses', () => {
@@ -52,8 +58,8 @@ describe('applySenses', () => {
 
   it('memory accumulates across multiple calls', () => {
     let visibleTiles = new Set(['1,0']);
-    const sense = () => ({ entities: [], visibleTiles });
-    const entity = makeEntity({ senses: [sense] });
+    registerSense('mock-accumulates', () => ({ entities: [], visibleTiles }));
+    const entity = makeEntity({ senses: ['mock-accumulates'] });
     const level = makeLevel(5, 5);
 
     applySenses(entity, level);
@@ -67,8 +73,8 @@ describe('applySenses', () => {
 
   it('visible is replaced each call, not accumulated', () => {
     let visibleTiles = new Set(['1,0']);
-    const sense = () => ({ entities: [], visibleTiles });
-    const entity = makeEntity({ senses: [sense] });
+    registerSense('mock-replaced', () => ({ entities: [], visibleTiles }));
+    const entity = makeEntity({ senses: ['mock-replaced'] });
     const level = makeLevel(5, 5);
 
     applySenses(entity, level);

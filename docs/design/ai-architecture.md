@@ -71,37 +71,52 @@ For NPC goals with independent memory lifecycles (e.g. an `investigate` goal tha
 
 ---
 
-## Goal Priority and Invalidation
+## Goal Priority and Evaluation
 
-Goals have explicit numeric priorities. The active goal is only interrupted by a **higher-priority** goal becoming valid — equal or lower priority goals do not interrupt.
+Each active entity carries an **ordered goal stack** on its `ai` component (stored as
+string keys resolved through the goal registry, so the component serializes cleanly).
+List order *is* priority: there are no separate numeric priority fields.
 
-Goals are evaluated top-down each turn. Replan fires when:
+Goals are evaluated top-down each turn. Each goal's `evaluate(context)` either returns
+`{ action }` to act, or `null` to fall through to the next goal. The first goal to
+return an action wins, and evaluation stops there. A goal that cannot or chooses not to
+act returns `null` (or, when it is the always-on fallback, produces a no-op action such
+as `wait`). Goals may also mutate shared memory as a side effect during evaluation even
+when they fall through — for example, clearing a target key whose cancel condition fired.
 
-- A higher-priority goal's condition becomes true → interrupt
-- The current goal's own conditions are no longer amenable (target lost, path blocked, etc.) → invalidate and fall through to next valid goal
-
-When a higher-priority goal resolves, the creature falls back to the lower-priority goal that was waiting intact. An interrupted investigation resumes naturally after a threat is lost, because the investigate goal and its memory were never cleared.
+Because evaluation runs fresh each turn, "interruption" is emergent rather than a
+distinct mechanism: a higher goal simply returns an action this turn that it didn't last
+turn. When it goes quiet again, evaluation falls back to the lower goal that was waiting
+intact — an interrupted investigation resumes naturally because its memory was never
+cleared.
 
 ### Example Goal Stack
 
 ```javascript
-goals: [
-  { id: 'flee',         priority: 100, condition: 'hp < 20%' },
-  { id: 'attackThreat', priority: 80,  condition: 'threatVisible' },
-  { id: 'investigate',  priority: 50,  condition: 'alertCauseExists',
-    memory: { alertCause: { pos, turn, source } },
-    decayRate: 3, minConfidence: 20 },
-  { id: 'patrol',       priority: 20,  condition: 'always' },
-]
+// player
+ai: ['player-auto-move', 'player-auto-pickup', 'player-get-input']
+
+// fodder NPC
+ai: ['wander-aimlessly']
 ```
 
-Reading a creature's goal list top to bottom tells you exactly what it takes to interrupt it — legible to the designer as well as the player.
+Reading a creature's goal stack top to bottom tells you its behavior priority — legible
+to the designer as well as the player.
+
+### Deferred: explicit priorities and invalidation
+
+The richer model — explicit numeric priorities, a current goal that is only interrupted
+by a strictly higher-priority goal, and per-goal invalidation conditions — is **not yet
+implemented**. The current order-based, re-evaluate-every-turn approach is sufficient for
+the goals built so far. Numeric priorities, sticky active goals, and decay-driven invalidation
+may be revisited when NPC goals with independent lifecycles (e.g. `investigate`) require
+them; see ADR-019 for the related memory-model decision.
 
 ---
 
 ## Squad Coordination and Barks
 
-Squad coordination is handled through the sense system rather than a parallel special-case channel. When an NPC shouts for help, calls for retreat, or a commander issues an order, this spawns a **sound entity** in the world — a bark — that propagates as a hearing event. Other NPCs with hearing in range receive it and can respond by triggering appropriate goals.
+Squad coordination may be partly handled through the sense system rather than a parallel special-case channel. When an NPC shouts for help, calls for retreat, or a commander issues an order, this spawns a **sound entity** in the world — a bark — that propagates as a hearing event. Other NPCs with hearing in range receive it and can respond by triggering appropriate goals.
 
 This means:
 - A deafened soldier doesn't hear the retreat order
@@ -124,19 +139,6 @@ Individual goals within the squad can diverge (one flanks, one suppresses) by re
 
 ---
 
-## Architectural Door: Multi-Turn Actions
-
-Not pursued immediately, but the hook to leave open is a `turnsRequired` field on actions:
-
-```javascript
-{ action: 'castRitual', turnsRequired: null }
-// null = resolves in one turn; >1 = held across turns
-```
-
-When `turnsRequired > 1`, the execution loop holds the action across turns and raises the priority threshold required to interrupt it. Nothing else in the architecture needs to change when this is revisited.
-
----
-
 ## Tile Data and the Sense Abstraction
 
 The design principle is that planners never read the world directly — only what senses report. This fully applies to entity perception (position, type, status). For tile data it is currently a known deviation: pathfinding receives the full level directly via `context.level` rather than a filtered "known map" from the sense system.
@@ -146,8 +148,5 @@ When real vision is implemented, tile visibility should be incorporated into sen
 ---
 
 ## What to Avoid
-
-- Re-evaluating goals from scratch every turn — check invalidation conditions instead
 - Storing perception directly as memory — only retain what drove a decision
-- Treating squad communication as a special system — route it through hearing
 - Putting decay on the creature — decay belongs on the owning goal (when goal-owned memory is used)

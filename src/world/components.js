@@ -4,6 +4,14 @@
 import { RenderLayers } from '../render/render-layers.js';
 
 export const components = {
+  // Ordered goal stack for an active entity. Stored as string keys resolved through
+  // src/ai/goals/goal-registry.js — never function references — so the component
+  // serializes cleanly. Order is priority: the evaluator runs goals top-down and
+  // takes the first one that produces an action.
+  ai(goalNames = []) {
+    return { goals: [...goalNames] };
+  },
+
   blocksMovement() {
     return {};
   },
@@ -77,10 +85,11 @@ export const components = {
     return { sprite, color, glyph, glyphColor, layer };
   },
 
-  // Array of sense functions: sense(entity, level, turnCount) → SenseResult[].
-  // Stored as function references — never serialized.
-  senses(fns = []) {
-    return [...fns];
+  // Ordered list of sense names resolved through src/ai/senses/sense-registry.js.
+  // Stored as string keys (not function references) so the component serializes cleanly.
+  // Each resolved sense is sense(entity, level, turnCount) → SenseResult.
+  senses(senseNames = []) {
+    return [...senseNames];
   },
 
   // Tile-level perception. visible: tiles seen this turn. memory: all ever-seen tiles → tileId.
