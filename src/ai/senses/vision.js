@@ -26,10 +26,12 @@ export function createVisionSense({ range } = {}) {
         position: { x: ePos.x, y: ePos.y },
         confidence: 100,
         turnObserved: turnCount,
+        factions: e.components.get('faction') ?? [],
         tags: {
-          // Any active NPC is treated as hostile until a faction/relationship system exists.
-          isEnemy: e.components.has('turnTaker') && !e.components.has('playerControlled'),
           isPlayer: e.components.has('playerControlled'),
+          // An actor (creature) vs. inert scenery/items — lets goals ignore floor items.
+          // Hostility is decided by all goals via the faction list above (see areHostile).
+          isActor: e.components.has('turnTaker'),
         },
       });
     }

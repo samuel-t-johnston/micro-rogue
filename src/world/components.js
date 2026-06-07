@@ -12,6 +12,21 @@ export const components = {
     return { goals: [...goalNames] };
   },
 
+  // Marks an entity as able to take the attack action. `damage` is the unarmed/base
+  // attack damage; equipment and effects add to it via attributeModifiers (see the
+  // attribute resolver in src/combat/attributes.js).
+  attacker(damage = 0) {
+    return { damage };
+  },
+
+  // Flat stat contributions a worn/held item grants its owner. Keys are attribute names
+  // (currently 'attackDamage' and 'HP') summed by the attribute resolver. Stored as data
+  // so items serialize cleanly; the resolver derives totals on demand — values are never
+  // added to or subtracted from the owner's stored stats on equip/unequip.
+  attributeModifiers(mods = {}) {
+    return { ...mods };
+  },
+
   blocksMovement() {
     return {};
   },
@@ -33,6 +48,13 @@ export const components = {
   // Kept separate from `item` so non-item things (future spells, innate abilities) can also be equipped.
   equippable(slot) {
     return { slot };
+  },
+
+  // One or more faction tags. Two entities are friendly if they share at least one tag;
+  // hostility (no shared tag) is computed by areHostile in src/combat/factions.js.
+  // A factionless entity shares nothing, so it reads as hostile to everyone.
+  faction(names = []) {
+    return [...names];
   },
 
   health(current, max) {

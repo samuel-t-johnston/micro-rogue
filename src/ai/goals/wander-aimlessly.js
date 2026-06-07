@@ -1,10 +1,5 @@
 import { rng } from '../../engine/rng.js';
-
-// 8-directional offsets, matching pathfinding and the player's diagonal adjacency.
-const ADJACENT = [
-  [-1, 0], [1, 0], [0, -1], [0, 1],
-  [-1, -1], [-1, 1], [1, -1], [1, 1],
-];
+import { passableNeighbors } from '../../world/geometry.js';
 
 // Minimal NPC goal: step to a random passable adjacent tile each turn.
 // If no adjacent tile is passable, wait (a consumed, no-op turn) rather than
@@ -13,12 +8,8 @@ const ADJACENT = [
 export const wanderAimlessly = {
   evaluate(context) {
     const { selfState, level } = context;
-    const { x, y } = selfState.position;
 
-    const passable = ADJACENT
-      .map(([dx, dy]) => ({ x: x + dx, y: y + dy }))
-      .filter(tile => level.isPassable(tile.x, tile.y));
-
+    const passable = passableNeighbors(selfState.position, level);
     if (passable.length === 0) return { action: { type: 'wait' } };
 
     const tile = rng.pick(passable);

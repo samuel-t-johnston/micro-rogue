@@ -53,6 +53,7 @@ export function buildPlanningContext({ entity, level, inputController, turnCount
     memory,
     selfState: {
       position: { x: pos.x, y: pos.y },
+      factions: entity.components.get('faction') ?? [],
     },
     perception: {
       entities: mergeSenseResults(rawResults),

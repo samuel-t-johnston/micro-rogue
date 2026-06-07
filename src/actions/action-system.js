@@ -7,6 +7,7 @@ import { executeUnequip } from './action-types/action-unequip.js';
 import { executeConsume } from './action-types/action-consume.js';
 import { executeDrop } from './action-types/action-drop.js';
 import { executeWait } from './action-types/action-wait.js';
+import { executeAttack } from './action-types/action-attack.js';
 import { buildPlanningContext } from '../ai/planning-context.js';
 import { evaluateGoals } from '../ai/goal-evaluator.js';
 import { resolveGoals } from '../ai/goals/goal-registry.js';
@@ -24,6 +25,7 @@ export function createActionSystem({ level, inputController, registry, dialogCon
     consume:      (entity, action) => executeConsume(entity, action, level, registry),
     drop:         (entity, action) => executeDrop(entity, action, level, registry),
     wait:         () => executeWait(),
+    attack:       (entity, action) => executeAttack(entity, action, level, registry),
   };
 
   async function executeAction(entity, action) {

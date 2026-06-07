@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { applyEffect, EffectTypes } from './effects.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
+import { createLevel } from '../world/level.js';
 import { components } from '../world/components.js';
 
 function makeSubject() {
@@ -52,10 +53,11 @@ describe('effectDamage', () => {
     expect(e.components.get('health').current).toBe(6);
   });
 
-  it('clamps at 0 (no negative HP until M3 death system)', () => {
-    const { e } = makeSubject();
-    applyEffect(EffectTypes.DAMAGE, e, null, { amount: 999 });
-    expect(e.components.get('health').current).toBe(0);
+  it('reduces HP to 0 and triggers death, destroying the entity', () => {
+    const { registry, e } = makeSubject();
+    const level = createLevel();
+    applyEffect(EffectTypes.DAMAGE, e, null, { amount: 999 }, level, registry);
+    expect(registry.getEntity(e.id)).toBeNull();
   });
 
   it('defaults target to user when target is null', () => {

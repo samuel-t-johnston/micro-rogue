@@ -12,9 +12,10 @@ export function megaVision(entity, level, turnCount) {
       position: { x: pos.x, y: pos.y },
       confidence: 100,
       turnObserved: turnCount,
+      factions: e.components.get('faction') ?? [],
       tags: {
-        isEnemy: e.components.has('turnTaker') && !e.components.has('playerControlled'),
         isPlayer: e.components.has('playerControlled'),
+        isActor: e.components.has('turnTaker'),
       },
     });
   }

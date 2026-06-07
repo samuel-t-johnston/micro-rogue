@@ -10,6 +10,8 @@ export async function createPlayer(registry, x, y) {
   registry.addComponent(entity, 'health', components.health(20, 20));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
   registry.addComponent(entity, 'playerControlled', components.playerControlled());
+  registry.addComponent(entity, 'attacker', components.attacker(1));
+  registry.addComponent(entity, 'faction', components.faction(['player']));
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'inventory', components.inventory());
   registry.addComponent(entity, 'wearsEquipment', components.wearsEquipment(HUMANOID_SLOTS));

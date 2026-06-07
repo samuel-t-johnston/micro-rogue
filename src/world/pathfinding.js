@@ -1,3 +1,5 @@
+import { DIRECTIONS_8, passableNeighbors } from './geometry.js';
+
 // BFS pathfinding over the level grid. Returns the full path from the step
 // after `from` to `to` as an array of {x, y}, or null if unreachable.
 // Returns [] if from === to. Supports 8-directional movement.
@@ -10,10 +12,7 @@ export function findPath(from, to, level) {
   while (queue.length > 0) {
     const { x, y, path } = queue.shift();
 
-    for (const [dx, dy] of [
-      [-1, 0], [1, 0], [0, -1], [0, 1],
-      [-1, -1], [-1, 1], [1, -1], [1, 1],
-    ]) {
+    for (const [dx, dy] of DIRECTIONS_8) {
       const nx = x + dx;
       const ny = y + dy;
       const key = `${nx},${ny}`;
@@ -31,4 +30,16 @@ export function findPath(from, to, level) {
   }
 
   return null;
+}
+
+// Returns the shortest path to any passable tile adjacent to `target`, or null if none
+// is reachable. Use this to approach a blocking entity (creatures have blocksMovement,
+// so the target's own tile is never passable and findPath to it would always fail).
+export function findPathToAdjacent(from, target, level) {
+  let best = null;
+  for (const tile of passableNeighbors(target, level)) {
+    const path = findPath(from, tile, level);
+    if (path && (best === null || path.length < best.length)) best = path;
+  }
+  return best;
 }

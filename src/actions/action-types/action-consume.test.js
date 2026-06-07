@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { executeConsume } from './action-consume.js';
 import { createEntityRegistry } from '../../engine/entity-component-system.js';
+import { createLevel } from '../../world/level.js';
 import { createHealingPotion, createPotionOfPain } from '../../world/items.js';
 import { components } from '../../world/components.js';
 
@@ -50,12 +51,13 @@ describe('executeConsume', () => {
     expect(actor.components.get('health').current).toBe(5);
   });
 
-  it('potion of pain clamps damage at 0', () => {
+  it('a lethal potion of pain kills the consumer', () => {
+    const level = createLevel();
     const pain = createPotionOfPain(registry, null, null, actor.id);
     actor.components.get('inventory').items.push(pain);
-    actor.components.get('health').current = 3;
-    executeConsume(actor, { itemEntityId: pain.id }, null, registry);
-    expect(actor.components.get('health').current).toBe(0);
+    actor.components.get('health').current = 3; // potion of pain deals 5
+    executeConsume(actor, { itemEntityId: pain.id }, level, registry);
+    expect(registry.getEntity(actor.id)).toBeNull();
   });
 
   it('returns false and does nothing when item not in inventory', () => {
