@@ -1,5 +1,6 @@
 import { createBoulder, createChest, createDoor } from '../../furniture.js';
 import { createDagger, createHealingPotion, createPotionOfPain } from '../../items.js';
+import { createGoblin, createOrc } from '../../creatures.js';
 
 // Temporary stage: places test furniture and items for development. Replace with a proper
 // population stage (see roadmap M5) once map generation matures.
@@ -20,4 +21,8 @@ export async function run(level, _stageConfig, _blackboard, _rng, registry) {
   inventory.items.push(createPotionOfPain(registry, null, null, chest.id));
   inventory.items.push(createDagger(registry, null, null, chest.id));
   level.placeEntity(chest);
+
+  // Wandering creatures in the north room (the player starts in the south room).
+  level.placeEntity(createGoblin(registry, 3, 2));
+  level.placeEntity(createOrc(registry, 8, 2));
 }

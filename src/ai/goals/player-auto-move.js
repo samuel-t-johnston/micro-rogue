@@ -1,4 +1,5 @@
 import { findPath } from '../../world/pathfinding.js';
+import { areHostile } from '../../combat/factions.js';
 
 // Delay between auto-move steps so each move is visible and the player has
 // time to tap to interrupt. Does not affect single adjacent-tile moves.
@@ -29,7 +30,9 @@ export const playerAutoMove = {
     }
 
     // Cancel: a new enemy entered vision since auto-move started
-    const visibleEnemyIds = new Set(perception.entities.filter(e => e.tags.isEnemy).map(e => e.entityId));
+    const visibleEnemyIds = new Set(perception.entities
+      .filter(e => e.tags.isActor && areHostile(selfState.factions, e.factions))
+      .map(e => e.entityId));
     const knownEnemyIds = new Set(memory.knownEnemyIds ?? []);
     const hasNewEnemy = [...visibleEnemyIds].some(id => !knownEnemyIds.has(id));
 

@@ -1,3 +1,5 @@
+import { resolveSenses } from './senses/sense-registry.js';
+
 /** When multiple senses observe the same entity, keeps the highest-confidence reading. */
 function mergeSenseResults(rawResults) {
   const byEntityId = new Map();
@@ -15,9 +17,9 @@ function mergeSenseResults(rawResults) {
 // Runs all senses for an entity and updates its tilePerception component.
 // Called by buildPlanningContext each turn and directly for initial FOV setup.
 export function applySenses(entity, level, turnCount = 0) {
-  const senses = entity.components.get('senses') ?? [];
+  const senseNames = entity.components.get('senses') ?? [];
   const tilePerception = entity.components.get('tilePerception');
-  const rawResults = senses.map(sense => sense(entity, level, turnCount));
+  const rawResults = resolveSenses(senseNames).map(sense => sense(entity, level, turnCount));
 
   const currentVisible = new Set();
   for (const result of rawResults) {
@@ -51,6 +53,7 @@ export function buildPlanningContext({ entity, level, inputController, turnCount
     memory,
     selfState: {
       position: { x: pos.x, y: pos.y },
+      factions: entity.components.get('faction') ?? [],
     },
     perception: {
       entities: mergeSenseResults(rawResults),

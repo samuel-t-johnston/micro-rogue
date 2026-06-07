@@ -61,6 +61,7 @@ export function createDagger(registry, x, y, entityId) {
   registry.addComponent(entity, 'renderable', components.renderable(SPRITES.dagger, '#101010', '/', '#cccccc', RenderLayers.ITEM));
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
+  registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ attackDamage: 1 }));
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));
   }

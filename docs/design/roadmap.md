@@ -58,10 +58,10 @@ Open questions and deferred decisions are noted inline where they land on the ro
 ## M3 — Something Wants to Kill You
 *Done when: at least one enemy type exists, pursues the player, and combat resolves.*
 
-- [ ] Active entity: `AI` component, `TurnTaker`, `health`, `combatStats`
+- [x] Active entity: `AI` component, `TurnTaker`, `health`, `combatStats`
 - [ ] Turn order: player and enemies take turns in order; dead entities removed cleanly
 - [ ] Basic AI goal stack: `attackThreat` (target visible), `patrol` (always), no GOAP yet — simple reactive behavior
-- [ ] Vision sense: shadowcasting-based, light-gated, exact position + full detail
+- [x] Vision sense: shadowcasting-based, light-gated, exact position + full detail
 - [ ] Melee combat: attack action, damage calculation, health reduction, death
 - [ ] Context-sensitive tap: tapping an enemy issues attack action
 - [ ] Combat log entries: display strings at resolution site
