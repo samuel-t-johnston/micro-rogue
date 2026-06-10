@@ -15,5 +15,11 @@ export function createEventLog() {
     return entries;
   }
 
-  return { add, getDisplayEntries, getAll };
+  // Clears the log. Used on new-game (turn counts restart) and in test setup so
+  // entries from one run/test don't leak into the next.
+  function reset() {
+    entries.length = 0;
+  }
+
+  return { add, getDisplayEntries, getAll, reset };
 }

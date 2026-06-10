@@ -1,3 +1,6 @@
+import { gameLog } from '../../engine/game-log.js';
+import { subject, conjugate, itemName } from '../../engine/log-text.js';
+
 // Removes an item from the level and places it in the actor's inventory.
 // Returns false — pickup always consumes a turn.
 export function executePickup(actor, action, level, registry) {
@@ -11,6 +14,13 @@ export function executePickup(actor, action, level, registry) {
   level.removeEntity(item);
   itemComp.location = { type: 'inventory', ownerId: actor.id };
   inventory.items.push(item);
+
+  gameLog.add({
+    actor: actor.id,
+    action: 'pickup',
+    item: item.id,
+    display: `${subject(actor)} ${conjugate(actor, 'pick up', 'picks up')} the ${itemName(item)}.`,
+  });
 
   return false;
 }

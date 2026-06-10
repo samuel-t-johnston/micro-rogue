@@ -1,4 +1,6 @@
 import { components } from '../../world/components.js';
+import { gameLog } from '../../engine/game-log.js';
+import { subject, conjugate, itemName } from '../../engine/log-text.js';
 
 // Removes an item from the actor's inventory and places it on the map at the actor's tile.
 // Returns false — drop always consumes a turn.
@@ -24,6 +26,13 @@ export function executeDrop(actor, action, level, registry) {
     registry.addComponent(item, 'position', components.position(pos.x, pos.y));
   }
   level.placeEntity(item);
+
+  gameLog.add({
+    actor: actor.id,
+    action: 'drop',
+    item: item.id,
+    display: `${subject(actor)} ${conjugate(actor, 'drop', 'drops')} the ${itemName(item)}.`,
+  });
 
   return false;
 }

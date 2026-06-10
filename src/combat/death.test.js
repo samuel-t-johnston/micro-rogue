@@ -25,15 +25,29 @@ describe('handleDeath', () => {
     expect(level.getEntitiesAt(2, 2).has(npc)).toBe(false);
   });
 
-  it('leaves the player in place (death is stubbed)', () => {
+  it('leaves the player in place and fires the level onPlayerDeath hook', () => {
     const player = registry.createEntity();
     registry.addComponent(player, 'position', components.position(1, 1));
     registry.addComponent(player, 'playerControlled', components.playerControlled());
     level.placeEntity(player);
 
+    let signalled = null;
+    level.onPlayerDeath = (entity) => { signalled = entity; };
+
     handleDeath(player, level, registry);
 
     expect(registry.getEntity(player.id)).toBe(player);
+    expect(level.entities).toContain(player);
+    expect(signalled).toBe(player);
+  });
+
+  it('does not throw on player death when no onPlayerDeath hook is set', () => {
+    const player = registry.createEntity();
+    registry.addComponent(player, 'position', components.position(1, 1));
+    registry.addComponent(player, 'playerControlled', components.playerControlled());
+    level.placeEntity(player);
+
+    expect(() => handleDeath(player, level, registry)).not.toThrow();
     expect(level.entities).toContain(player);
   });
 });

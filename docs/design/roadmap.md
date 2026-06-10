@@ -59,15 +59,15 @@ Open questions and deferred decisions are noted inline where they land on the ro
 *Done when: at least one enemy type exists, pursues the player, and combat resolves.*
 
 - [x] Active entity: `AI` component, `TurnTaker`, `health`, `combatStats`
-- [ ] Turn order: player and enemies take turns in order; dead entities removed cleanly
-- [ ] Basic AI goal stack: `attackThreat` (target visible), `patrol` (always), no GOAP yet — simple reactive behavior
+- [x] Turn order: player and enemies take turns in order; dead entities removed cleanly
+- [x] Basic AI goal stack: `attackThreat` (target visible), `patrol` (always), no GOAP yet — simple reactive behavior
 - [x] Vision sense: shadowcasting-based, light-gated, exact position + full detail
-- [ ] Melee combat: attack action, damage calculation, health reduction, death
-- [ ] Context-sensitive tap: tapping an enemy issues attack action
-- [ ] Combat log entries: display strings at resolution site
+- [x] Melee combat: attack action, damage calculation, health reduction, death
+- [x] Context-sensitive tap: tapping an enemy issues attack action
+- [x] Combat log entries: display strings at resolution site
 - [ ] Action wiggle animation: attacker lunges toward target and returns
 - [ ] Enemy death: entity removed, optional item drop
-- [ ] Player death: save deleted, death screen shown
+- [x] Player death: death screen shown
 - [ ] AI state inspector (debug): click entity → panel showing goal stack, last sense report, last action
 
 *Deferred to M4+: GOAP planner, hearing/smell senses, squad coordination. Basic reactive AI is sufficient to make the game playable and testable.*

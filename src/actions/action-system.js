@@ -11,9 +11,12 @@ import { executeAttack } from './action-types/action-attack.js';
 import { buildPlanningContext } from '../ai/planning-context.js';
 import { evaluateGoals } from '../ai/goal-evaluator.js';
 import { resolveGoals } from '../ai/goals/goal-registry.js';
+import { gameLog } from '../engine/game-log.js';
 
 // Returns Promise<boolean> — false = action consumed a turn, true = free action.
 export function createActionSystem({ level, inputController, registry, dialogController }) {
+  // Last goal each entity acted on, for emitting a debug entry only when it changes.
+  const lastGoal = new Map();
   // Action type → handler lookup. Add new action types here.
   const dispatch = {
     move:         (entity, action) => executeMove(entity, action, level),
@@ -39,7 +42,23 @@ export function createActionSystem({ level, inputController, registry, dialogCon
     const ai = entity.components.get('ai');
     if (!ai) return false;
     const context = buildPlanningContext({ entity, level, inputController, turnCount: 0 });
-    const result = await evaluateGoals(resolveGoals(ai.goals), context);
+    const result = await evaluateGoals(resolveGoals(ai.goals), context, (_goal, i) => {
+      // Debug-only entry (no `display`): record the goal driving this turn, but only
+      // when it changes, so the log shows *why* a creature's behavior shifted without
+      // an entry every single turn.
+      const newGoal = ai.goals[i];
+      const prevGoal = lastGoal.get(entity.id) ?? null;
+      if (newGoal !== prevGoal) {
+        lastGoal.set(entity.id, newGoal);
+        gameLog.add({
+          actor: entity.id,
+          actorName: entity.components.get('name'),
+          action: 'goalChange',
+          prevGoal,
+          newGoal,
+        });
+      }
+    });
     return result?.action ? await executeAction(entity, result.action) : false;
   }
 
