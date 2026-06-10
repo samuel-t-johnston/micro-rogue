@@ -39,4 +39,36 @@ describe('gameLog singleton', () => {
     gameLog.add({ display: 'y' });
     expect(gameLog.getAll()[0].turn).toBe(0); // provider reset to default
   });
+
+  it('stamps entries with seen from the visibility provider', () => {
+    gameLog.setVisibilityProvider((e) => e.actor === 1);
+    gameLog.add({ actor: 1, display: 'mine' });
+    gameLog.add({ actor: 2, display: 'theirs' });
+
+    expect(gameLog.getAll().map(e => e.seen)).toEqual([true, false]);
+  });
+
+  it('getDisplayEntries hides entries the provider marked unseen', () => {
+    gameLog.setVisibilityProvider((e) => e.actor === 1);
+    gameLog.add({ actor: 1, display: 'visible action' });
+    gameLog.add({ actor: 2, display: 'hidden action' });
+
+    expect(gameLog.getDisplayEntries(5).map(e => e.display)).toEqual(['visible action']);
+  });
+
+  it('lets the caller override the stamped seen flag', () => {
+    gameLog.setVisibilityProvider(() => false);
+    gameLog.add({ actor: 2, display: 'forced', seen: true });
+    expect(gameLog.getDisplayEntries(5).map(e => e.display)).toEqual(['forced']);
+  });
+
+  it('defaults seen to true, and reset restores the default visibility provider', () => {
+    gameLog.add({ display: 'a' });
+    expect(gameLog.getAll()[0].seen).toBe(true); // default provider
+
+    gameLog.setVisibilityProvider(() => false);
+    gameLog.reset();
+    gameLog.add({ display: 'b' });
+    expect(gameLog.getAll()[0].seen).toBe(true); // provider reset to default
+  });
 });

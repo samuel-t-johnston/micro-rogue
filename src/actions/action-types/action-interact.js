@@ -1,3 +1,6 @@
+import { gameLog } from '../../engine/game-log.js';
+import { subject, conjugate, itemName } from '../../engine/log-text.js';
+
 // Executes an interact action against an adjacent target entity.
 // Dispatches to container or door behavior based on the target's components.
 // Returns false (turn consumed) or true (free action — cancelled or nothing to do).
@@ -10,13 +13,13 @@ export async function executeInteract(actor, action, _level, registry, dialogCon
   }
 
   if (target.components.has('openable')) {
-    return executeDoorInteract(target, registry);
+    return executeDoorInteract(actor, target, registry);
   }
 
   return false;
 }
 
-function executeDoorInteract(target, registry) {
+function executeDoorInteract(actor, target, registry) {
   const openable = target.components.get('openable');
   const renderable = target.components.get('renderable');
 
@@ -32,10 +35,28 @@ function executeDoorInteract(target, registry) {
     if (renderable) renderable.sprite = openable.openSprite;
   }
 
+  // Debug-only (no `display`): records the toggle and resulting state.
+  gameLog.add({
+    actor: actor.id,
+    action: 'interact',
+    target: target.id,
+    interaction: 'door',
+    opened: openable.isOpen,
+  });
+
   return false;
 }
 
 async function executeContainerInteract(actor, target, dialogController) {
+  // Debug-only (no `display`): the interaction itself, logged whenever the player
+  // opens the container — even if it's empty or they cancel without taking anything.
+  gameLog.add({
+    actor: actor.id,
+    action: 'interact',
+    target: target.id,
+    interaction: 'container',
+  });
+
   const containerInventory = target.components.get('inventory');
   if (!containerInventory || containerInventory.items.length === 0) return true;
 
@@ -52,6 +73,15 @@ async function executeContainerInteract(actor, target, dialogController) {
     if (idx >= 0) containerInventory.items.splice(idx, 1);
     item.components.get('item').location = { type: 'inventory', ownerId: actor.id };
     actorInventory.items.push(item);
+
+    // Player-facing: each item pulled out of the container is its own pickup line.
+    gameLog.add({
+      actor: actor.id,
+      action: 'take',
+      item: item.id,
+      container: target.id,
+      display: `${subject(actor)} ${conjugate(actor, 'take', 'takes')} the ${itemName(item)}.`,
+    });
   }
 
   return false;

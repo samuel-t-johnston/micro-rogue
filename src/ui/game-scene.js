@@ -10,6 +10,7 @@ import { createPlayer } from '../world/player.js';
 import { applySenses } from '../ai/planning-context.js';
 import { getTileType } from '../world/tile-registry.js';
 import { gameLog } from '../engine/game-log.js';
+import { isEntryVisible } from '../engine/log-visibility.js';
 import { createHudWidget } from './widgets/hud.js';
 import { createMessageLogWidget } from './widgets/message-log.js';
 import { createCharacterMenuButton } from './widgets/character-menu-button.js';
@@ -50,6 +51,19 @@ export function createGameScene({ theme, getViewport, onGameOver }) {
 
   function getPlayerPos() {
     return registry.getComponent(player, 'position');
+  }
+
+  // Visibility provider for the game log (wired in enter()). Decides, at write-time,
+  // whether the player could perceive an entry — so monsters fighting behind a closed
+  // door don't leak into the message log. FOV knowledge lives only here; the policy
+  // itself is the pure isEntryVisible() helper, and log call sites stay agnostic and
+  // just pass the entity ids (`actor`/`target`) they already carry.
+  function isEntryVisibleToPlayer(entry) {
+    return isEntryVisible(entry, {
+      playerId: player?.id,
+      visibleTiles: player?.components.get('tilePerception')?.visible,
+      getPosition: (id) => registry.getEntity(id)?.components.get('position'),
+    });
   }
 
   // Wired into the level by enter(); fired from the death chokepoint when the player's
@@ -119,6 +133,7 @@ export function createGameScene({ theme, getViewport, onGameOver }) {
           invokeAction: (entity) => actionSystem.invokeAction(entity),
         });
         gameLog.setTurnProvider(() => turnManager?.playerTurnCount ?? 0);
+        gameLog.setVisibilityProvider(isEntryVisibleToPlayer);
         turnManager.start();
 
         gameLog.add({ display: 'You enter the dungeon.' });
@@ -148,7 +163,7 @@ export function createGameScene({ theme, getViewport, onGameOver }) {
       const hp = player ? registry.getComponent(player, 'health') : { current: 0, max: 0 };
       hudWidget.render(ctx, { hp, turn: turnManager?.playerTurnCount ?? 0 });
 
-      const recentLines = gameLog.getDisplayEntries(2).map(e => e.display);
+      const recentLines = gameLog.getDisplayEntries(3).map(e => e.display);
       messageLogWidget.render(ctx, { recentLines });
 
       characterMenuButton.render(ctx);

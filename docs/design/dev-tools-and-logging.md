@@ -21,6 +21,7 @@ Each entry carries both structured data (for debugging and tooling) and a pre-re
 ```javascript
 {
   turn: 412,
+  seen: true,
   actor: 'goblin-3',
   action: 'meleeAttack',
   target: 'player',
@@ -30,6 +31,8 @@ Each entry carries both structured data (for debugging and tooling) and a pre-re
 ```
 
 The `display` string is written at the point where the action resolves — where the actor's name, pronoun context ("you" vs. a named creature), and outcome details are all immediately available. Reconstructing this from structured fields later is surprisingly fiddly and produces awkward output.
+
+`turn` and `seen` are *cross-cutting* fields that leaf call sites shouldn't have to know about, so they are not passed in by the resolution site. Instead `gameLog.add` stamps them from injected providers (`setTurnProvider`, `setVisibilityProvider`) wired once at game start. A call site may still override either field by passing it explicitly — the stamped value is a default. This keeps the turn counter and FOV out of every action handler's signature, the same way `rng` and `gameConfig` are ambient.
 
 ### What to Log
 
@@ -54,6 +57,21 @@ One logical event can produce one display string, multiple strings, or none:
 - An AI goal change produces no display string — it's debug data only
 
 The `display` field is omitted on entries that have no player-visible output. The player-facing message log is simply the `display` values from the event log, filtered and rendered. No separate message system needed.
+
+### Player Visibility (`seen`)
+
+The event log is omniscient — it records the goblin and orc fighting in the sealed north room as readily as the player's own swing. But the *message log* must not be: surfacing that fight would leak state the player can only learn by opening the door. The `seen` flag bridges the two. Every entry is stamped with whether the player could perceive it, and `getDisplayEntries` shows only entries that are both player-facing (`display != null`) and perceivable (`seen !== false`). Debug views ignore `seen` and show everything.
+
+**Stamp visibility at write-time, never at read-time.** FOV is temporal. A skirmish glimpsed on turn 5 should stay in the scrollback even after the combatants leave view; a fight behind a door on turn 5 should stay hidden even after the door is opened on turn 10. Re-judging an old entry against *current* FOV gets both cases wrong. So `seen` is frozen the moment the event is logged.
+
+The policy is a pure function (`engine/log-visibility.js`) so it's testable without a renderer; the game scene supplies the lookups (player id, the player's visible-tile set, an id→position resolver). The rules, in order:
+
+1. The player's own actions, and anything happening *to* them, always surface (`actor`/`target` is the player).
+2. With no FOV data available, hide nothing.
+3. Otherwise anchor the entry to tiles and show it if **any** is currently visible. Tiles come from the entry's `actor`/`target` ids (resolved to their live positions) plus an optional explicit `pos`.
+4. An entry with no spatial anchor at all is treated as global narration and always shown ("You enter the dungeon.").
+
+**Deaths carry an explicit `pos`.** A death line is logged at the death chokepoint immediately before the entity is torn down, so resolving its tile from the registry is fragile against reordering. The death entry instead snapshots the dying entity's tile into `pos` before removal, anchoring the line to where it happened regardless of teardown order (rule 3).
 
 ### Pre-rendered vs. Template-based Strings
 

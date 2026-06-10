@@ -6,7 +6,8 @@ import { gameLog } from '../engine/game-log.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
 import { createLevel } from '../world/level.js';
 import { components } from '../world/components.js';
-import { createDagger } from '../world/items.js';
+import { createDagger, createHealingPotion } from '../world/items.js';
+import { createChest, createDoor } from '../world/furniture.js';
 import { Slots, HUMANOID_SLOTS } from '../../data/equipment-slots.js';
 import { executePickup } from './action-types/action-pickup.js';
 import { executeDrop } from './action-types/action-drop.js';
@@ -14,6 +15,7 @@ import { executeEquip } from './action-types/action-equip.js';
 import { executeUnequip } from './action-types/action-unequip.js';
 import { executeMove } from './action-types/action-move.js';
 import { executeAttack } from './action-types/action-attack.js';
+import { executeInteract } from './action-types/action-interact.js';
 
 function makeLevel() {
   const level = createLevel();
@@ -109,6 +111,63 @@ describe('action logging', () => {
       'You unequip the dagger.',
       'You equip the dagger.',
     ]);
+  });
+
+  it('logs a door interact as a debug entry with no display string', async () => {
+    const player = makePlayer(2, 2);
+    const door = createDoor(registry, 2, 3);
+    level.placeEntity(door);
+
+    await executeInteract(player, { targetEntityId: door.id }, level, registry);
+
+    const interact = gameLog.getAll().find(e => e.action === 'interact');
+    expect(interact).toMatchObject({ interaction: 'door', opened: true });
+    expect(interact.display).toBeUndefined();
+    expect(displays()).toEqual([]); // never surfaces to the player
+  });
+
+  it('logs a debug interact plus a player-facing line per item taken from a chest', async () => {
+    const player = makePlayer(2, 2);
+    const chest = createChest(registry, 2, 3);
+    const dagger = createDagger(registry, null, null, chest.id);
+    const potion = createHealingPotion(registry, null, null, chest.id);
+    chest.components.get('inventory').items.push(dagger, potion);
+    level.placeEntity(chest);
+
+    // Player confirms taking both items.
+    const dialogController = {
+      showItemList: async () => ({ confirmed: true, taken: [dagger, potion] }),
+    };
+
+    await executeInteract(player, { targetEntityId: chest.id }, level, registry, dialogController);
+
+    // The interaction itself is debug-only...
+    const interact = gameLog.getAll().find(e => e.action === 'interact');
+    expect(interact).toMatchObject({ interaction: 'container' });
+    expect(interact.display).toBeUndefined();
+
+    // ...while each item taken surfaces to the player.
+    expect(displays()).toEqual([
+      'You take the dagger.',
+      'You take the healing potion.',
+    ]);
+  });
+
+  it('logs only the debug interact when a chest dialog is cancelled', async () => {
+    const player = makePlayer(2, 2);
+    const chest = createChest(registry, 2, 3);
+    const dagger = createDagger(registry, null, null, chest.id);
+    chest.components.get('inventory').items.push(dagger);
+    level.placeEntity(chest);
+
+    const dialogController = {
+      showItemList: async () => ({ confirmed: false, taken: [] }),
+    };
+
+    await executeInteract(player, { targetEntityId: chest.id }, level, registry, dialogController);
+
+    expect(gameLog.getAll().find(e => e.action === 'interact')).toMatchObject({ interaction: 'container' });
+    expect(displays()).toEqual([]); // nothing taken → no player-facing line
   });
 
   it('logs a move as a debug entry with no display string', () => {
