@@ -5,6 +5,7 @@ import { gameConfig } from './engine/game-config.js';
 import { createSplashScene } from './ui/splash.js';
 import { createMenuScene } from './ui/game-menu.js';
 import { createGameScene } from './ui/game-scene.js';
+import { createResultsScene } from './ui/results-scene.js';
 import { createDebugOverlay } from './debug/debug-overlay.js';
 
 const canvas = document.getElementById('game');
@@ -37,6 +38,10 @@ const theme = readTheme();
 const appState = createAppStateMachine();
 const debugOverlay = gameConfig.debugEnabled ? createDebugOverlay({ getViewport }) : null;
 
+// Final game state captured at player death, handed to the Results scene. main.js owns
+// the handoff so the game scene doesn't need to know about the app-state machine.
+let lastResults = null;
+
 function handleMenuAction(id) {
   switch (id) {
     case 'new':
@@ -54,7 +59,22 @@ appState.register(AppState.MENU, () =>
   createMenuScene({ theme, getViewport, onAction: handleMenuAction })
 );
 appState.register(AppState.GAME, () =>
-  createGameScene({ theme, getViewport })
+  createGameScene({
+    theme,
+    getViewport,
+    onGameOver: (results) => {
+      lastResults = results;
+      appState.transition(AppState.RESULTS);
+    },
+  })
+);
+appState.register(AppState.RESULTS, () =>
+  createResultsScene({
+    theme,
+    getViewport,
+    getResults: () => lastResults,
+    onContinue: () => appState.transition(AppState.MENU),
+  })
 );
 
 resize();

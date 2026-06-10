@@ -9,22 +9,23 @@ import { createActionSystem } from '../actions/action-system.js';
 import { createPlayer } from '../world/player.js';
 import { applySenses } from '../ai/planning-context.js';
 import { getTileType } from '../world/tile-registry.js';
-import { createEventLog } from '../engine/event-log.js';
+import { gameLog } from '../engine/game-log.js';
 import { createHudWidget } from './widgets/hud.js';
 import { createMessageLogWidget } from './widgets/message-log.js';
 import { createCharacterMenuButton } from './widgets/character-menu-button.js';
 import { createDialogController } from './dialog-controller.js';
 import { createCharacterMenuController } from './character-menu-controller.js';
+import { createDeathPopup } from './death-popup.js';
 
-export function createGameScene({ theme, getViewport }) {
+export function createGameScene({ theme, getViewport, onGameOver }) {
   let level = null;
   let player = null;
   let turnManager = null;
   let inputController = null;
+  let gameOver = false;
 
   const registry = createEntityRegistry();
   const renderer = createRenderer({ getViewport });
-  const eventLog = createEventLog();
   const hudWidget = createHudWidget({ theme, getViewport });
   const messageLogWidget = createMessageLogWidget({ theme, getViewport });
   const dialogController = createDialogController({ theme, getViewport });
@@ -39,13 +40,32 @@ export function createGameScene({ theme, getViewport }) {
     getViewport,
     onOpen: () => characterMenuController.open(),
   });
+  const deathPopup = createDeathPopup({
+    theme,
+    getViewport,
+    onNext: () => {
+      onGameOver?.({ turns: turnManager?.playerTurnCount ?? 0, player, level });
+    },
+  });
 
   function getPlayerPos() {
     return registry.getComponent(player, 'position');
   }
 
+  // Wired into the level by enter(); fired from the death chokepoint when the player's
+  // HP hits 0. Freezes the turn loop and surfaces the death popup over the frozen scene.
+  function handlePlayerDeath() {
+    if (gameOver) return;
+    gameOver = true;
+    turnManager?.stop();
+    deathPopup.show();
+  }
+
   function handleInput(event) {
     if (!level || !inputController) return false;
+
+    // Once dead, the popup intercepts everything until "Next" is pressed.
+    if (deathPopup.isVisible) return deathPopup.handleInput(event);
 
     if (characterMenuController.isOpen) {
       return characterMenuController.handleInput(event);
@@ -74,11 +94,15 @@ export function createGameScene({ theme, getViewport }) {
   return {
     async enter() {
       try {
+        // Fresh log per run; stamp entries with the live player-turn count.
+        gameLog.reset();
+
         const [loaded] = await Promise.all([
           runPipeline(staticTestLevel, rng, registry),
           renderer.load(),
         ]);
         level = loaded;
+        level.onPlayerDeath = handlePlayerDeath;
 
         const cx = Math.floor(level.width / 2);
         const cy = Math.floor(level.height / 2);
@@ -94,9 +118,10 @@ export function createGameScene({ theme, getViewport }) {
           getActiveEntities: () => registry.getEntitiesWith('turnTaker'),
           invokeAction: (entity) => actionSystem.invokeAction(entity),
         });
+        gameLog.setTurnProvider(() => turnManager?.playerTurnCount ?? 0);
         turnManager.start();
 
-        eventLog.add({ turn: 0, display: 'You enter the dungeon.' });
+        gameLog.add({ display: 'You enter the dungeon.' });
 
         console.log('[game] Level ready:', level.width, 'x', level.height);
       } catch (err) {
@@ -123,12 +148,13 @@ export function createGameScene({ theme, getViewport }) {
       const hp = player ? registry.getComponent(player, 'health') : { current: 0, max: 0 };
       hudWidget.render(ctx, { hp, turn: turnManager?.playerTurnCount ?? 0 });
 
-      const recentLines = eventLog.getDisplayEntries(2).map(e => e.display);
+      const recentLines = gameLog.getDisplayEntries(2).map(e => e.display);
       messageLogWidget.render(ctx, { recentLines });
 
       characterMenuButton.render(ctx);
       dialogController.render(ctx);
       characterMenuController.render(ctx);
+      deathPopup.render(ctx);
     },
 
     screenToWorld(x, y) {

@@ -1,3 +1,6 @@
+import { gameLog } from '../engine/game-log.js';
+import { subject, conjugate } from '../engine/log-text.js';
+
 // Death handling, triggered from the damage chokepoint (src/effects/effect-damage.js)
 // when an entity's HP reaches 0. Centralizing here means melee and consumable damage
 // both route death through one place.
@@ -11,13 +14,25 @@ export function onDeath(entity, level, registry) {
 
 // Resolves a death: runs the onDeath hook, then removes the entity from the world.
 // The turn manager's rescan drops it from the queue automatically on the next pass.
-// Player death is stubbed — we leave the entity in place rather than removing it, until
-// a real game-over flow exists.
+//
+// Player death is special: the entity is intentionally left in place (so the corpse
+// stays visible under the death popup) and the game-over flow is delegated to the
+// level's onPlayerDeath hook, which the game scene wires up. Using the level as the
+// coordination point keeps death.js decoupled from the UI / app-state layers.
 export function handleDeath(entity, level, registry) {
   onDeath(entity, level, registry);
 
+  // Logged before any removal — destroyEntity clears the entity's components, so the
+  // name and player/non-player distinction must be read while the entity is intact.
+  gameLog.add({
+    actor: entity.id,
+    action: 'death',
+    display: `${subject(entity)} ${conjugate(entity, 'die', 'dies')}.`,
+  });
+
   if (entity.components.has('playerControlled')) {
-    // TODO: game-over flow. For now the player simply isn't removed.
+    // TODO (M4): delete the save before signalling game over.
+    level.onPlayerDeath?.(entity);
     return;
   }
 

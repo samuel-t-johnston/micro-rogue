@@ -1,3 +1,6 @@
+import { gameLog } from '../../engine/game-log.js';
+import { subject, conjugate, itemName } from '../../engine/log-text.js';
+
 // Removes the item in the given slot from the actor's equipment back into inventory.
 // Returns false — unequip always consumes a turn.
 export function executeUnequip(actor, action, _level, _registry) {
@@ -16,6 +19,13 @@ export function executeUnequip(actor, action, _level, _registry) {
   wears.slots[slot] = null;
   item.components.get('item').location = { type: 'inventory', ownerId: actor.id };
   inventory.items.push(item);
+
+  gameLog.add({
+    actor: actor.id,
+    action: 'unequip',
+    item: item.id,
+    display: `${subject(actor)} ${conjugate(actor, 'unequip', 'unequips')} the ${itemName(item)}.`,
+  });
 
   return false;
 }

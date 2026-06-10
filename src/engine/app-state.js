@@ -6,6 +6,7 @@ export const AppState = Object.freeze({
   SPLASH: 'splash',
   MENU: 'menu',
   GAME: 'game',
+  RESULTS: 'results',
 });
 
 export function createAppStateMachine() {
