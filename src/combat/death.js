@@ -24,9 +24,13 @@ export function handleDeath(entity, level, registry) {
 
   // Logged before any removal — destroyEntity clears the entity's components, so the
   // name and player/non-player distinction must be read while the entity is intact.
+  // Snapshot the tile too: the visibility provider anchors this line to where the
+  // death happened, independent of the teardown below that strips the position.
+  const pos = entity.components.get('position');
   gameLog.add({
     actor: entity.id,
     action: 'death',
+    ...(pos && { pos: { x: pos.x, y: pos.y } }),
     display: `${subject(entity)} ${conjugate(entity, 'die', 'dies')}.`,
   });
 

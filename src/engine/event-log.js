@@ -5,9 +5,11 @@ export function createEventLog() {
     entries.push(entry);
   }
 
-  // Returns up to `count` most-recent entries that have a display string.
+  // Returns up to `count` most-recent player-facing entries: those with a display
+  // string that were also perceivable when logged (`seen !== false`). Entries the
+  // visibility provider never classified (`seen` undefined) default to shown.
   function getDisplayEntries(count) {
-    const display = entries.filter(e => e.display != null);
+    const display = entries.filter(e => e.display != null && e.seen !== false);
     return display.slice(-count);
   }
 

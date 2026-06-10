@@ -1,4 +1,6 @@
 import { applyEffect } from '../../effects/effects.js';
+import { gameLog } from '../../engine/game-log.js';
+import { subject, conjugate, itemName } from '../../engine/log-text.js';
 
 // Consumes an item from the actor's inventory: applies its effect to the actor,
 // then removes the item from inventory and destroys the entity.
@@ -17,6 +19,14 @@ export function executeConsume(actor, action, level, registry) {
 
   const target = action.targetEntityId != null ? registry.getEntity(action.targetEntityId) : null;
   applyEffect(consumable.effectType, actor, target, consumable.params, level, registry);
+
+  // Log before destroying the item, while its name component is still intact.
+  gameLog.add({
+    actor: actor.id,
+    action: 'consume',
+    item: item.id,
+    display: `${subject(actor)} ${conjugate(actor, 'consume', 'consumes')} the ${itemName(item)}.`,
+  });
 
   const idx = inventory.items.indexOf(item);
   if (idx >= 0) inventory.items.splice(idx, 1);
