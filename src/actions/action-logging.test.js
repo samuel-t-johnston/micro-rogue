@@ -16,6 +16,7 @@ import { executeUnequip } from './action-types/action-unequip.js';
 import { executeMove } from './action-types/action-move.js';
 import { executeAttack } from './action-types/action-attack.js';
 import { executeInteract } from './action-types/action-interact.js';
+import { executeSelfInteract } from './action-types/action-self-interact.js';
 
 function makeLevel() {
   const level = createLevel();
@@ -150,6 +151,26 @@ describe('action logging', () => {
     expect(displays()).toEqual([
       'You take the dagger.',
       'You take the healing potion.',
+    ]);
+  });
+
+  it('logs a player-facing pickup line per item taken from the floor', async () => {
+    const player = makePlayer(2, 2);
+    const dagger = createDagger(registry, 2, 2);
+    const potion = createHealingPotion(registry, 2, 2);
+    level.placeEntity(dagger);
+    level.placeEntity(potion);
+
+    // Multiple items on the tile → floor dialog; player confirms taking both.
+    const dialogController = {
+      showItemList: async () => ({ confirmed: true, taken: [dagger, potion] }),
+    };
+
+    await executeSelfInteract(player, {}, level, registry, dialogController);
+
+    expect(displays()).toEqual([
+      'You pick up the dagger.',
+      'You pick up the healing potion.',
     ]);
   });
 

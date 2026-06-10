@@ -1,4 +1,6 @@
 import { executePickup } from './action-pickup.js';
+import { gameLog } from '../../engine/game-log.js';
+import { subject, conjugate, itemName } from '../../engine/log-text.js';
 
 // Handles a tap on the actor's own tile.
 // Returns true (free action) if nothing picked up or dialog cancelled; false (turn consumed) otherwise.
@@ -21,6 +23,15 @@ export async function executeSelfInteract(actor, _action, level, registry, dialo
     level.removeEntity(item);
     item.components.get('item').location = { type: 'inventory', ownerId: actor.id };
     inventory.items.push(item);
+
+    // Player-facing: each item lifted off the floor is its own pickup line,
+    // mirroring the single-item path's executePickup log.
+    gameLog.add({
+      actor: actor.id,
+      action: 'pickup',
+      item: item.id,
+      display: `${subject(actor)} ${conjugate(actor, 'pick up', 'picks up')} the ${itemName(item)}.`,
+    });
   }
 
   return false;
