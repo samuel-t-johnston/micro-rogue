@@ -8,8 +8,12 @@ export const components = {
   // src/ai/goals/goal-registry.js — never function references — so the component
   // serializes cleanly. Order is priority: the evaluator runs goals top-down and
   // takes the first one that produces an action.
+  //
+  // `lastGoal` is the key of the goal that last produced an action for this entity
+  // (null until it first acts). It drives the goalChange log's change detection and
+  // the debug goal inspector; being a plain key, it serializes like `goals`.
   ai(goalNames = []) {
-    return { goals: [...goalNames] };
+    return { goals: [...goalNames], lastGoal: null };
   },
 
   // Marks an entity as able to take the attack action. `damage` is the unarmed/base
