@@ -186,7 +186,17 @@ export function createGameScene({ theme, getViewport, onGameOver }) {
         x: tx,
         y: ty,
         tileName: tile.name,
-        entityNames: entities.map(e => e.components.get('name')).filter(Boolean),
+        // Per-entity so the goal inspector can attribute each stack to its owner.
+        entities: entities
+          .filter(e => e.components.get('name'))
+          .map(e => {
+            const ai = e.components.get('ai');
+            return {
+              name: e.components.get('name'),
+              goals: ai?.goals ?? null,
+              activeGoal: ai?.lastGoal ?? null,
+            };
+          }),
         passable: level.isPassable(tx, ty),
         opaque: tile.opaque || entities.some(e => e.components.has('opaque')),
       };

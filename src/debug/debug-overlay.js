@@ -60,7 +60,7 @@ export function createDebugOverlay({ getViewport }) {
 
   function drawTooltip(width, height) {
     if (!pointerInfo) return;
-    const { x, y, tileName, entityNames, passable, opaque } = pointerInfo;
+    const { x, y, tileName, entities, passable, opaque } = pointerInfo;
 
     ctx.font = '12px monospace';
 
@@ -68,7 +68,14 @@ export function createDebugOverlay({ getViewport }) {
     if (tileName) {
       lines.push(`${tileName}  pass:${passable ? '✓' : '✗'}  opq:${opaque ? '✓' : '✗'}`);
     }
-    if (entityNames?.length) lines.push(...entityNames);
+    // Each entity prints its name; entities with an AI goal stack list their goals
+    // indented below, marking the last-activated goal with `**`.
+    for (const entity of entities ?? []) {
+      lines.push(entity.name);
+      for (const goal of entity.goals ?? []) {
+        lines.push(`${goal === entity.activeGoal ? '**' : '  '} ${goal}`);
+      }
+    }
 
     const lineH = 16;
     const pad = 4;

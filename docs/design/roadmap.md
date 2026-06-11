@@ -68,7 +68,7 @@ Open questions and deferred decisions are noted inline where they land on the ro
 - [ ] Action wiggle animation: attacker lunges toward target and returns
 - [ ] Enemy death: entity removed, optional item drop
 - [x] Player death: death screen shown
-- [ ] AI state inspector (debug): click entity → panel showing goal stack, last sense report, last action
+- [ ] AI goal inspector (debug): hover an entity → tooltip lists its goal stack in priority order, with the last-activated goal marked (`**`)
 
 *Deferred to M4+: GOAP planner, hearing/smell senses, squad coordination. Basic reactive AI is sufficient to make the game playable and testable.*
 
@@ -156,4 +156,5 @@ These are explicitly out of scope until a concrete need exists:
 - **Font size preferences** — desktop only, when settings system is built out
 - **ECS component subscription system** — `level.moveEntity()` is the current explicit coordination point for positional changes (ADR-018); extract to a subscription model if multiple independent systems need to react to the same component changes
 - **Long press** - secondary action hook - e.g. radial menu with options, like interact or move on an open door.
+- **Goal condition introspection** — a side-effect-free per-goal predicate so the inspector can show met/not-met status per goal without running `evaluate()` (which mutates shared memory). Prerequisite for the full AI state inspector (M6); the M3 goal inspector marks the last-activated goal instead, which needs no introspection interface
 - **Terrain modification** - Tile override layer: `getTile(x,y)` with override-first lookup;
