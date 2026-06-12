@@ -1,4 +1,4 @@
-import { hasSave } from '../save/save-stub.js';
+import { hasSave } from '../save/save-system.js';
 import { drawText, drawButton, hitTest } from './canvas-ui.js';
 
 const ITEMS = [

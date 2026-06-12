@@ -1,6 +1,5 @@
 import { AppState, createAppStateMachine } from './engine/app-state.js';
 import { readTheme } from './engine/theme.js';
-import { rng } from './engine/rng.js';
 import { gameConfig } from './engine/game-config.js';
 import { createSplashScene } from './ui/splash.js';
 import { createMenuScene } from './ui/game-menu.js';
@@ -32,8 +31,6 @@ function getViewport() {
   return viewport;
 }
 
-rng.init(12345);
-
 const theme = readTheme();
 const appState = createAppStateMachine();
 const debugOverlay = gameConfig.debugEnabled ? createDebugOverlay({ getViewport }) : null;
@@ -42,9 +39,18 @@ const debugOverlay = gameConfig.debugEnabled ? createDebugOverlay({ getViewport 
 // the handoff so the game scene doesn't need to know about the app-state machine.
 let lastResults = null;
 
+// Whether the next GAME transition starts fresh or continues the save. Set by the menu
+// action and read by the GAME scene factory when the transition runs.
+let startMode = 'new';
+
 function handleMenuAction(id) {
   switch (id) {
     case 'new':
+      startMode = 'new';
+      appState.transition(AppState.GAME);
+      break;
+    case 'continue':
+      startMode = 'continue';
       appState.transition(AppState.GAME);
       break;
     default:
@@ -62,6 +68,7 @@ appState.register(AppState.GAME, () =>
   createGameScene({
     theme,
     getViewport,
+    startMode,
     onGameOver: (results) => {
       lastResults = results;
       appState.transition(AppState.RESULTS);

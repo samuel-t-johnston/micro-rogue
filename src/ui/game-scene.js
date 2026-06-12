@@ -1,6 +1,7 @@
 import { runPipeline } from '../world/generation/pipeline.js';
 import staticTestLevel from '../../data/pipelines/static-test-level.js';
 import { rng } from '../engine/rng.js';
+import { gameConfig } from '../engine/game-config.js';
 import { createRenderer } from '../render/renderer.js';
 import { animations } from '../render/animations.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
@@ -18,15 +19,17 @@ import { createCharacterMenuButton } from './widgets/character-menu-button.js';
 import { createDialogController } from './dialog-controller.js';
 import { createCharacterMenuController } from './character-menu-controller.js';
 import { createDeathPopup } from './death-popup.js';
+import { commitSave, loadSavedGame, clearSave } from '../save/save-system.js';
 
-export function createGameScene({ theme, getViewport, onGameOver }) {
+export function createGameScene({ theme, getViewport, onGameOver, startMode = 'new' }) {
   let level = null;
   let player = null;
   let turnManager = null;
   let inputController = null;
   let gameOver = false;
+  let visibilityHandler = null;
 
-  const registry = createEntityRegistry();
+  let registry = createEntityRegistry();
   const renderer = createRenderer({ getViewport });
   const hudWidget = createHudWidget({ theme, getViewport });
   const messageLogWidget = createMessageLogWidget({ theme, getViewport });
@@ -67,12 +70,22 @@ export function createGameScene({ theme, getViewport, onGameOver }) {
     });
   }
 
+  // Snapshots the settled game to the single save slot. Called at the player's turn-start
+  // (via the turn manager) and on tab-hide. Guarded so a dead game is never persisted and
+  // teardown can't race a write.
+  function saveGame() {
+    if (gameOver || !level || !player) return;
+    commitSave({ registry, level, player, turnCount: turnManager?.playerTurnCount ?? 0 });
+  }
+
   // Wired into the level by enter(); fired from the death chokepoint when the player's
-  // HP hits 0. Freezes the turn loop and surfaces the death popup over the frozen scene.
+  // HP hits 0. Deletes the save *before* the death screen (never persist a dead player),
+  // freezes the turn loop, and surfaces the death popup over the frozen scene.
   function handlePlayerDeath() {
     if (gameOver) return;
     gameOver = true;
     turnManager?.stop();
+    clearSave();
     deathPopup.show();
   }
 
@@ -109,36 +122,71 @@ export function createGameScene({ theme, getViewport, onGameOver }) {
   return {
     async enter() {
       try {
-        // Fresh log and animation state per run.
+        // Fresh log and animation state per run. The event log isn't persisted, so a
+        // continued game starts with an empty log too.
         gameLog.reset();
         animations.reset();
 
-        const [loaded] = await Promise.all([
-          runPipeline(staticTestLevel, rng, registry),
-          renderer.load(),
-        ]);
-        level = loaded;
-        level.onPlayerDeath = handlePlayerDeath;
+        // On 'continue', try to rehydrate the saved game; any failure (no save, too-new,
+        // migration error) falls through to a fresh game rather than dead-ending.
+        let restored = null;
+        if (startMode === 'continue') {
+          try {
+            restored = loadSavedGame();
+          } catch (err) {
+            console.error('[game] Failed to load save; starting a new game:', err);
+          }
+        }
 
-        const cx = Math.floor(level.width / 2);
-        const cy = Math.floor(level.height / 2);
-        player = await createPlayer(registry, cx, cy);
-        level.placeEntity(player);
+        let initialTurnCount = 0;
+        let enterMessage;
+        if (restored) {
+          await renderer.load();
+          registry = restored.registry;
+          level = restored.level;
+          player = restored.player;
+          initialTurnCount = restored.turnCount;
+          enterMessage = 'You return to the dungeon.';
+        } else {
+          // Fresh seed per run (gameConfig.seed null → random); recorded by the save so the
+          // run is reproducible from it. Loaded games restore their own seed instead.
+          rng.init(gameConfig.seed ?? undefined);
+          const [loaded] = await Promise.all([
+            runPipeline(staticTestLevel, rng, registry),
+            renderer.load(),
+          ]);
+          level = loaded;
+          const cx = Math.floor(level.width / 2);
+          const cy = Math.floor(level.height / 2);
+          player = await createPlayer(registry, cx, cy);
+          level.placeEntity(player);
+          enterMessage = 'You enter the dungeon.';
+        }
+
+        level.onPlayerDeath = handlePlayerDeath;
         applySenses(player, level);
 
-        renderer.setCamera(cx, cy);
+        const ppos = registry.getComponent(player, 'position');
+        renderer.setCamera(ppos.x, ppos.y);
 
         inputController = createInputController();
         const actionSystem = createActionSystem({ level, inputController, registry, dialogController });
         turnManager = createTurnManager({
           getActiveEntities: () => registry.getEntitiesWith('turnTaker'),
           invokeAction: (entity) => actionSystem.invokeAction(entity),
+          // Autosave at the player's turn-start, once the world has fully settled.
+          onTurnStart: (entity) => { if (entity.components.has('playerControlled')) saveGame(); },
+          initialTurnCount,
         });
         gameLog.setTurnProvider(() => turnManager?.playerTurnCount ?? 0);
         gameLog.setVisibilityProvider(isEntryVisibleToPlayer);
         turnManager.start();
 
-        gameLog.add({ display: 'You enter the dungeon.' });
+        // Mobile kills backgrounded pages without warning — catch the gap between turns.
+        visibilityHandler = () => { if (document.visibilityState === 'hidden') saveGame(); };
+        document.addEventListener('visibilitychange', visibilityHandler);
+
+        gameLog.add({ display: enterMessage });
 
         console.log('[game] Level ready:', level.width, 'x', level.height);
       } catch (err) {
@@ -228,6 +276,10 @@ export function createGameScene({ theme, getViewport, onGameOver }) {
     handleInput,
 
     exit() {
+      if (visibilityHandler) {
+        document.removeEventListener('visibilitychange', visibilityHandler);
+        visibilityHandler = null;
+      }
       turnManager?.stop();
       turnManager = null;
       inputController = null;
