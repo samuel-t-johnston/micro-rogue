@@ -1,6 +1,7 @@
 import { applyEffect } from '../../effects/effects.js';
 import { getAttribute, Attributes } from '../../combat/attributes.js';
 import { gameLog } from '../../engine/game-log.js';
+import { animations } from '../../render/animations.js';
 import { subject, object, conjugate } from '../../engine/log-text.js';
 
 // Deals the actor's attack damage to the target entity. The amount comes from the
@@ -13,6 +14,11 @@ export function executeAttack(actor, action, level, registry) {
   if (!target?.components.has('health')) return false;
 
   const amount = getAttribute(actor, Attributes.ATTACK_DAMAGE);
+
+  // Cosmetic lunge toward the target, captured before applyEffect (which may kill and
+  // remove the target). It's the attacker that moves, so the wiggle stands alone.
+  const targetPos = target.components.get('position');
+  if (targetPos) animations.wiggle(actor, { x: targetPos.x, y: targetPos.y });
 
   // Log the hit before applying the effect: the damage effect may route the target
   // through death (which clears its components), and we still want the target's name

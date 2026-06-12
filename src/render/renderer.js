@@ -2,6 +2,7 @@ import { getTileType } from '../world/tile-registry.js';
 import { createSpriteRenderer } from './sprite-renderer.js';
 import { gameConfig } from '../engine/game-config.js';
 import { RenderLayers } from './render-layers.js';
+import { animations } from './animations.js';
 
 export function createRenderer({ getViewport }) {
   const { tileSize } = gameConfig;
@@ -88,19 +89,58 @@ export function createRenderer({ getViewport }) {
     }
     visible.sort((a, b) => (a.renderable.layer ?? RenderLayers.DEFAULT) - (b.renderable.layer ?? RenderLayers.DEFAULT));
 
-    for (const { pos, renderable } of visible) {
+    for (const { entity, pos, renderable } of visible) {
       const { x, y } = worldToScreen(pos.x, pos.y);
-      if (!sprites.draw(ctx, renderable.sprite, x, y)) {
-        ctx.fillStyle = renderable.color ?? '#666';
-        ctx.fillRect(x, y, tileSize, tileSize);
-        if (renderable.glyph) {
-          ctx.fillStyle = renderable.glyphColor ?? '#fff';
-          ctx.font = `bold ${Math.floor(tileSize * 0.75)}px monospace`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(renderable.glyph, x + tileSize / 2, y + tileSize / 2);
-        }
+      drawRenderable(ctx, renderable, x, y, animations.transformFor(entity.id));
+    }
+  }
+
+  // Draws a renderable at screen position (x, y), optionally transformed by an
+  // animation. The fast path (transform === null) draws straight to the context;
+  // scale/alpha transforms wrap the draw in a save/restore so they don't leak.
+  function drawRenderable(ctx, renderable, x, y, transform) {
+    const px = transform ? x + transform.dx * tileSize : x;
+    const py = transform ? y + transform.dy * tileSize : y;
+    const scaled = transform && (transform.scaleX !== 1 || transform.scaleY !== 1);
+    const faded = transform && transform.alpha !== 1;
+
+    if (scaled || faded) {
+      ctx.save();
+      if (faded) ctx.globalAlpha *= transform.alpha;
+      if (scaled) {
+        // Pivot the scale around the tile center, or its bottom edge (so a death
+        // squash flattens onto the floor rather than shrinking toward the middle).
+        const ax = px + tileSize / 2;
+        const ay = transform.anchor === 'bottom' ? py + tileSize : py + tileSize / 2;
+        ctx.translate(ax, ay);
+        ctx.scale(transform.scaleX, transform.scaleY);
+        ctx.translate(-ax, -ay);
       }
+    }
+
+    if (!sprites.draw(ctx, renderable.sprite, px, py)) {
+      ctx.fillStyle = renderable.color ?? '#666';
+      ctx.fillRect(px, py, tileSize, tileSize);
+      if (renderable.glyph) {
+        ctx.fillStyle = renderable.glyphColor ?? '#fff';
+        ctx.font = `bold ${Math.floor(tileSize * 0.75)}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(renderable.glyph, px + tileSize / 2, py + tileSize / 2);
+      }
+    }
+
+    if (scaled || faded) ctx.restore();
+  }
+
+  // Draws detached animations (death smoosh, future projectiles) — visuals that own
+  // their own snapshot because no live entity backs them. Culled to visible tiles so
+  // a death you can't see doesn't flash through the fog.
+  function drawAnimations(ctx, tilePerception) {
+    for (const anim of animations.detached()) {
+      if (tilePerception && !tilePerception.visible.has(`${anim.x},${anim.y}`)) continue;
+      const { x, y } = worldToScreen(anim.x, anim.y);
+      drawRenderable(ctx, anim.renderable, x, y, animations.sampleDetached(anim));
     }
   }
 
@@ -112,6 +152,7 @@ export function createRenderer({ getViewport }) {
     getVisibleTileRange,
     drawMap,
     drawEntities,
+    drawAnimations,
     setCamera(x, y) {
       camera.x = x;
       camera.y = y;
