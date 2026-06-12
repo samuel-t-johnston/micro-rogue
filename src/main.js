@@ -73,6 +73,10 @@ appState.register(AppState.GAME, () =>
       lastResults = results;
       appState.transition(AppState.RESULTS);
     },
+    onNewGame: () => {
+      startMode = 'new';
+      appState.transition(AppState.GAME);
+    },
   })
 );
 appState.register(AppState.RESULTS, () =>
