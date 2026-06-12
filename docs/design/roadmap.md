@@ -84,10 +84,19 @@ Open questions and deferred decisions are noted inline where they land on the ro
 - [ ] `visibilitychange` handler: save on background/tab close
 - [ ] Load on startup: detect existing save, offer continue vs. new game
 - [ ] Death: delete save before showing death screen (not after)
-- [ ] Migration chain: `loadSave()` with version check, chain runner, per-step error wrapping
-- [ ] Save version 1 defined; first migration infrastructure in place (no migrations needed yet)
+- [x] Migration chain: `loadSave()` with version check, chain runner, per-step error wrapping
+- [x] Save version 1 defined; first migration infrastructure in place (no migrations needed yet)
 - [ ] Support bundle: save snapshot + event log + device info, downloadable on demand
 - [ ] Game menu shell: drill-down list, settings placeholder, new game / quit
+
+*Persistence-core note (landed): the serialize/deserialize engine, migration runner, and
+localStorage I/O live in `src/save/save-system.js` + `src/save/serialize.js`. Two adjustments to
+`save-system-design.md`, forced by the code: (1) the serialization unit is the **whole entity
+registry as one flat list** referenced by id — not `level.entities` — because items in
+chests/inventories/equipment are entities that live only in the registry; (2) the **player is
+serialized inline** like any other entity (with a top-level `playerId` pointer), not hoisted to a
+top-level `player` key. The remaining M4 items (autosave hooks, visibilitychange, continue-from-menu,
+death-delete, support bundle, in-game menu) wire this core into the running game.*
 
 *Quit behavior note: `window.close()` is blocked in regular browser tabs (it only sometimes works in standalone PWA mode), so the M0 implementation tries it silently and accepts the no-op. A future polish pass could show a brief "you can close this tab now" message for the regular-tab case.*
 

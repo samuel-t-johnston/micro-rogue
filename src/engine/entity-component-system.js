@@ -42,6 +42,30 @@ export function createEntityRegistry() {
     return [...ids].map(id => entities.get(id)).filter(Boolean);
   }
 
+  function getAllEntities() {
+    return [...entities.values()];
+  }
+
+  // Registers an empty entity shell under a specific id — used when rehydrating a save,
+  // where ids must be preserved so cross-entity references resolve. Advances nextId past
+  // the restored id so later createEntity() calls never collide with a loaded entity.
+  function createEntityWithId(id) {
+    const entity = { id, components: new Map() };
+    entities.set(id, entity);
+    if (id >= nextId) nextId = id + 1;
+    return entity;
+  }
+
+  function getNextId() {
+    return nextId;
+  }
+
+  // Restores the id counter on load. Stored explicitly (rather than derived from max id)
+  // so ids freed by destroyed entities are never handed out a second time.
+  function setNextId(n) {
+    nextId = n;
+  }
+
   function destroyEntity(entity) {
     for (const name of entity.components.keys()) {
       componentIndex.get(name)?.delete(entity.id);
@@ -58,6 +82,10 @@ export function createEntityRegistry() {
     hasComponent,
     getEntity,
     getEntitiesWith,
+    getAllEntities,
+    createEntityWithId,
+    getNextId,
+    setNextId,
     destroyEntity,
   };
 }
