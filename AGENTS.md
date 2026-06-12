@@ -89,6 +89,8 @@ noise and train you to dismiss them.
 
 Explicitly call out new functionality that is not unit tested.
 
+DO NOT INSTALL TOOLS LIKE PLAYWRIGHT TO TEST UI!
+
 ## Workflow rules
 
 - Write one failing test. Run it. Confirm it fails for the expected reason — a test that fails for the wrong reason is not a passing test, it's a bug you haven't found yet.
