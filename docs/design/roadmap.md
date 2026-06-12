@@ -86,8 +86,8 @@ Open questions and deferred decisions are noted inline where they land on the ro
 - [x] Death: delete save before showing death screen (not after)
 - [x] Migration chain: `loadSave()` with version check, chain runner, per-step error wrapping
 - [x] Save version 1 defined; first migration infrastructure in place (no migrations needed yet)
-- [ ] Support bundle: save snapshot + event log + device info, downloadable on demand
-- [ ] Game menu shell: drill-down list, settings placeholder, new game / quit
+- [x] Support bundle: save snapshot + event log + device info, downloadable on demand
+- [x] Game menu shell: drill-down list, settings placeholder, new game / quit
 
 *Persistence-core note (landed): the serialize/deserialize engine, migration runner, and
 localStorage I/O live in `src/save/save-system.js` + `src/save/serialize.js`. Two adjustments to
