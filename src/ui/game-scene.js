@@ -22,6 +22,7 @@ import { createGameMenuController } from './game-menu-controller.js';
 import { createGameMenuButton } from './widgets/game-menu-button.js';
 import { createDeathPopup } from './death-popup.js';
 import { commitSave, loadSavedGame, clearSave } from '../save/save-system.js';
+import { buildSupportBundle, downloadSupportBundle } from '../save/support-bundle.js';
 
 export function createGameScene({ theme, getViewport, onGameOver, onNewGame, startMode = 'new' }) {
   let level = null;
@@ -101,6 +102,17 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     deathPopup.show();
   }
 
+  // Diagnostic snapshot (save + event log + device info) downloaded for bug reports.
+  // Triggered by the hidden '?' key during play; a menu entry is the eventual home.
+  function generateSupportBundle() {
+    if (!level || !player) return;
+    const bundle = buildSupportBundle({
+      registry, level, player, turnCount: turnManager?.playerTurnCount ?? 0,
+    });
+    downloadSupportBundle(bundle);
+    console.log('[game] Support bundle generated');
+  }
+
   function handleInput(event) {
     if (!level || !inputController) return false;
 
@@ -124,6 +136,12 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
       const tx = Math.floor(world.x);
       const ty = Math.floor(world.y);
       inputController.submit({ type: 'move', x: tx, y: ty });
+      return true;
+    }
+
+    // Hidden diagnostic export. '?' (Shift-/) is obscure enough to avoid accidental presses.
+    if (event.type === 'keydown' && event.key === '?') {
+      generateSupportBundle();
       return true;
     }
 
