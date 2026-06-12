@@ -1,6 +1,19 @@
 # Save System Design
 Purpose: Initial save system design for ROGµE.
 
+> **As-built status (M4 persistence core).** This doc was written before any code. The persistence
+> core (`src/save/save-system.js` + `src/save/serialize.js`, `saveVersion: 1`) implements the
+> principles, versioning, and migration design below as written, with **two structural divergences**
+> the code forced — both called out inline where they apply:
+> 1. **Serialization unit is the whole entity registry as one flat top-level `entities` list,
+>    referenced by id** — not a per-level `entities` array. Items inside chests/inventories/equipment
+>    are entities that live *only* in the registry, so a per-level array would silently drop them.
+> 2. **The player is serialized inline in that list** (with a top-level `playerId` pointer), **not
+>    hoisted to a top-level `player` key.** It stays a normal entity.
+>
+> `frozenLevels`, `meta.score`, `meta.storyFlags`, and `meta.difficultySettings` are forward-looking
+> (M5+) and not part of the v1 save; they land via migrations when their features exist.
+
 ## Core Principles
 
 - **JSON throughout** — human-readable, no compression. Acceptable size for roguelike state; invaluable for development and debugging.
@@ -22,11 +35,18 @@ Purpose: Initial save system design for ROGµE.
   ],
   "savedAt": "2025-04-18T20:45:00Z",
   "meta": { ... },
-  "player": { ... },
+  "playerId": 1,
   "currentLevel": { ... },
-  "frozenLevels": [ ... ]
+  "frozenLevels": [ ... ],
+  "entities": [ { "id": 1, "components": { ... } }, ... ]
 }
 ```
+
+> **As-built:** there is no top-level `player` object. `entities` is the flat list of *every*
+> entity in the registry (player, creatures, furniture, and every item — including those nested in
+> inventories, equipment slots, and containers), each keyed by integer `id`; cross-references between
+> entities are stored as ids. `playerId` points at the player's entry. `frozenLevels` is M5+ and
+> absent from v1.
 
 ### `meta` — Top-Level Game State
 
@@ -48,11 +68,33 @@ Purpose: Initial save system design for ROGµE.
 - **`rngState`** — snapshot of the RNG's current position in its sequence at the moment of save. Re-seeding from scratch on load gives deterministic level generation but not deterministic continuation. Snapshot the state, restore it exactly.
 - **`storyFlags`** — arbitrary key/value pairs. Prefer flat boolean flags where possible; avoids schema churn.
 
-### `player` — Player Entity
+> **As-built (`meta` v1):** `{ seed, rngState, turnCount, nextEntityId }`. `rngState` is a single
+> integer (Mulberry32's `_state`), restored exactly via `rng.init(seed)` then `rng.setState(rngState)`.
+> `nextEntityId` preserves the registry's id counter so post-load spawns never collide with — or
+> reuse the freed ids of — loaded entities. `score`, `storyFlags`, and `difficultySettings` don't
+> exist in the game yet and are omitted; a future migration adds them when those features land.
 
-The player is an entity like any other (see game-architecture notes), but is serialized at the top level rather than inside a level. This allows the player to travel cleanly between levels without being serialized with either the departing or arriving level.
+### `playerId` — Player Pointer
 
-Includes full entity state: stats, inventory (with item locations as discriminated unions), equipped items, status effects, active goals.
+The player is an entity like any other (see game-architecture notes). The original design hoisted it
+to a top-level `player` key to keep it from being serialized into a departing or arriving level.
+
+> **As-built — not hoisted.** The player is serialized inline in the flat `entities` list like every
+> other entity; a top-level `playerId` records which entry it is (load also falls back to scanning
+> for the unique `playerControlled` component). The hoist solved an M5-only concern — *don't freeze
+> the player into the level it's leaving* — that doesn't arise with a single level, and it would be a
+> special case fighting the flat-registry-by-id model: hoisting the player while every other entity
+> (including the items it carries) lives in `entities` means the player's `inventory`/equipment refs
+> would point across the player/entities boundary. The invariant that makes inline serialization safe
+> at transition time is simply *the player is always on the active level* — you never freeze the level
+> an entity is standing on. Revisit if M5 makes per-level entity ownership explicit (that's what the
+> migration chain is for).
+>
+> Player state is whatever components the entity carries: `health`, `inventory` (item refs → ids),
+> `wearsEquipment` (slot refs → ids), `memory` (goal state — `autoMoveTarget`, `knownEnemyIds`), `ai`
+> (goal-key stack + `lastGoal`), `tilePerception`, position, factions, etc. Item *locations* are
+> already discriminated unions carrying ids (`{ type: 'equipped', ownerId, slot }` etc.); see
+> `src/world/components.js`.
 
 ### `currentLevel` — Active Level State
 
@@ -76,9 +118,24 @@ Includes full entity state: stats, inventory (with item locations as discriminat
 - **`blackboard`** — preserved in full. Tags may be needed for re-entry logic; don't discard them on freeze.
 - **`entities`** — all non-player entities on this level. Stationary entities with turn timers included.
 
+> **As-built (`currentLevel` v1):** `{ width, height, tiles, overrides, blackboard, entityIds }`.
+> - `tiles` is kept as the live 2D `tiles[y][x]` string array, not reshaped into a flat `baseTiles`
+>   (the reshape buys nothing at current sizes; revisit only if save size matters).
+> - `overrides` serializes the `Map` as `[["x,y", tileId], ...]` entries (the design's `tileOverrides`).
+> - The level does **not** embed entity objects. It stores `entityIds` — the ids of the entities
+>   placed on it (the player included). The entities themselves live in the top-level `entities` list.
+>   On load, each id is re-placed via `level.placeEntity()`, which rebuilds the spatial index from
+>   positions, so the index is never serialized.
+
 ### `frozenLevels` — Inactive Levels
 
 Same structure as `currentLevel`. Serialized when the player departs, deserialized on return. Enemies that follow the player through a transition travel with the player, not with the level they left.
+
+> **Forward note (M5, not in v1):** under the as-built model a frozen level is just another
+> `{ ..., entityIds }` block; the entities it owns live in the single flat top-level `entities` list
+> alongside every other level's, partitioned by which level's `entityIds` references them. The
+> "travels with the player" rule becomes a matter of which level's `entityIds` an entity is listed
+> under at save time — no entity objects move between blocks.
 
 ---
 
@@ -109,10 +166,13 @@ const migrations = [
     from: 1,
     to: 2,
     migrate(save) {
-      // e.g. rename entity.hp to entity.health
-      save.currentLevel.entities.forEach(e => {
-        e.health = e.hp;
-        delete e.hp;
+      // e.g. rename the `hp` component to `health`. Entities are the flat top-level list,
+      // each `{ id, components: { <name>: data } }`, so migrations walk `save.entities`.
+      save.entities.forEach(e => {
+        if ('hp' in e.components) {
+          e.components.health = e.components.hp;
+          delete e.components.hp;
+        }
       });
       return save;
     }
