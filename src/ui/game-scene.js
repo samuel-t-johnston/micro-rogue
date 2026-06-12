@@ -2,6 +2,7 @@ import { runPipeline } from '../world/generation/pipeline.js';
 import staticTestLevel from '../../data/pipelines/static-test-level.js';
 import { rng } from '../engine/rng.js';
 import { createRenderer } from '../render/renderer.js';
+import { animations } from '../render/animations.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
 import { createTurnManager } from '../engine/turn-manager.js';
 import { createInputController } from '../engine/input-controller.js';
@@ -108,8 +109,9 @@ export function createGameScene({ theme, getViewport, onGameOver }) {
   return {
     async enter() {
       try {
-        // Fresh log per run; stamp entries with the live player-turn count.
+        // Fresh log and animation state per run.
         gameLog.reset();
+        animations.reset();
 
         const [loaded] = await Promise.all([
           runPipeline(staticTestLevel, rng, registry),
@@ -147,18 +149,25 @@ export function createGameScene({ theme, getViewport, onGameOver }) {
     render(ctx) {
       if (!level) return;
 
+      // Advance the animation clock once per frame before anything samples it, so the
+      // camera and every sprite share a single consistent timestamp this frame.
+      animations.frame();
+
       if (player) {
-        const pos = getPlayerPos();
-        renderer.setCamera(pos.x, pos.y);
+        // Follow the player's *visual* position so the viewport tracks the sliding
+        // sprite instead of snapping to the already-updated logical tile.
+        const { x, y } = animations.visualPos(player);
+        renderer.setCamera(x, y);
       }
 
       const { width, height } = getViewport();
       ctx.fillStyle = '#111';
       ctx.fillRect(0, 0, width, height);
-      
+
       const tilePerception = player?.components.get('tilePerception');
       renderer.drawMap(ctx, level, tilePerception);
       renderer.drawEntities(ctx, level, tilePerception);
+      renderer.drawAnimations(ctx, tilePerception);
 
       const hp = player ? registry.getComponent(player, 'health') : { current: 0, max: 0 };
       hudWidget.render(ctx, { hp, turn: turnManager?.playerTurnCount ?? 0 });
@@ -224,6 +233,7 @@ export function createGameScene({ theme, getViewport, onGameOver }) {
       inputController = null;
       level = null;
       player = null;
+      animations.reset();
     },
   };
 }

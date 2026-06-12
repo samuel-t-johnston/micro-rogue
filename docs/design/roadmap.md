@@ -65,10 +65,12 @@ Open questions and deferred decisions are noted inline where they land on the ro
 - [x] Melee combat: attack action, damage calculation, health reduction, death
 - [x] Context-sensitive tap: tapping an enemy issues attack action
 - [x] Combat log entries: display strings at resolution site
-- [ ] Action wiggle animation: attacker lunges toward target and returns
-- [ ] Enemy death: entity removed, optional item drop
+- [x] Action wiggle animation: attacker lunges toward target and returns
+- [x] Movement slide animation: entities slide between tiles, 80–120ms
+- [x] Enemy death: entity removed, optional item drop
 - [x] Player death: death screen shown
-- [ ] AI goal inspector (debug): hover an entity → tooltip lists its goal stack in priority order, with the last-activated goal marked (`**`)
+- [x] AI goal inspector (debug): hover an entity → tooltip lists its goal stack in priority order, with the last-activated goal marked (`**`)
+- [x] Interruption system: player goal stack, "return control" base goal, invalidation on FOV event
 
 *Deferred to M4+: GOAP planner, hearing/smell senses, squad coordination. Basic reactive AI is sufficient to make the game playable and testable.*
 
@@ -131,11 +133,9 @@ Open questions and deferred decisions are noted inline where they land on the ro
 - [ ] Emote icons: `!` alert, `?` investigating, `💤` sleeping — reusable component
 - [ ] Message log: expandable overlay, full scrollable history
 - [ ] Status effects: HUD display, multi-effect overflow handling
-- [ ] Interruption system: player goal stack, "return control" base goal, invalidation on FOV event
 - [ ] Notification layer: compare sense results turn-over-turn, fan to log and emote system
 - [ ] Accessibility: 44×44px tap targets audit, color-not-sole-signal audit, handedness swap setting
 - [ ] Onboarding splash: dismissable, controls summary, hook for downstream content
-- [ ] Movement slide animation: entities slide between tiles, 80–120ms
 
 ---
 

@@ -1,4 +1,5 @@
 import { gameLog } from '../engine/game-log.js';
+import { animations } from '../render/animations.js';
 import { subject, conjugate } from '../engine/log-text.js';
 
 // Death handling, triggered from the damage chokepoint (src/effects/effect-damage.js)
@@ -36,10 +37,15 @@ export function handleDeath(entity, level, registry) {
 
   if (entity.components.has('playerControlled')) {
     // TODO (M4): delete the save before signalling game over.
+    // No smoosh for the player: the corpse is intentionally left in place, visible
+    // under the death popup, so fading it out would be wrong.
     level.onPlayerDeath?.(entity);
     return;
   }
 
+  // Detached smoosh: snapshots the renderable now, before teardown strips it, so the
+  // squash keeps drawing after the entity leaves the world on the next line.
+  animations.smoosh(entity);
   level.removeEntity(entity);
   registry.destroyEntity(entity);
 }
