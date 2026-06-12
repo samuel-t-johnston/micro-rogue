@@ -1,32 +1,41 @@
 import { hasSave } from '../save/save-system.js';
-import { drawText, drawButton, hitTest } from './canvas-ui.js';
+import { drawText } from './canvas-ui.js';
+import { createMenuShell } from './menu-shell.js';
+import { createActionMenu } from './action-menu.js';
+import { SETTINGS_PAGE } from './game-menu-items.js';
 
-const ITEMS = [
-  { id: 'new', label: 'New Game' },
-  { id: 'continue', label: 'Continue', requiresSave: true },
-  { id: 'settings', label: 'Settings', disabled: true },
-];
-
-const BUTTON_W = 260;
-const BUTTON_H = 56;
-const BUTTON_GAP = 16;
+// Main menu scene. The option list and Settings drill-down come from the shared menu-shell
+// (same component the in-game menu uses); the scene only adds the ROGµE branding/background.
+//
+// New Game overwrites any existing save, so it confirms first when one is present. Continue is
+// enabled only when there is a save to load. onAction('new'|'continue') is handled by main.js.
 
 export function createMenuScene({ theme, getViewport, onAction }) {
-  let hoverId = null;
+  let confirm = null; // a createActionMenu instance while confirming an overwrite
 
-  function layout() {
-    const { width, height } = getViewport();
-    const total = ITEMS.length * BUTTON_H + (ITEMS.length - 1) * BUTTON_GAP;
-    const startY = Math.round((height - total) / 2);
-    return ITEMS.map((item, i) => ({
-      ...item,
-      enabled: !item.disabled && (!item.requiresSave || hasSave()),
-      x: Math.round((width - BUTTON_W) / 2),
-      y: startY + i * (BUTTON_H + BUTTON_GAP),
-      w: BUTTON_W,
-      h: BUTTON_H,
-    }));
+  function askOverwrite() {
+    confirm = createActionMenu({
+      theme, getViewport,
+      title: 'Overwrite existing save?',
+      actions: [
+        { label: 'New Game', action: 'confirm' },
+        { label: 'Cancel', action: null },
+      ],
+      onSelect: (action) => {
+        confirm = null;
+        if (action === 'confirm') onAction?.('new');
+      },
+    });
   }
+
+  const shell = createMenuShell({
+    theme, getViewport,
+    getItems: () => [
+      { id: 'new', label: 'New Game', onSelect: () => (hasSave() ? askOverwrite() : onAction?.('new')) },
+      { id: 'continue', label: 'Continue', enabled: hasSave(), onSelect: () => onAction?.('continue') },
+      { id: 'settings', label: 'Settings', submenu: SETTINGS_PAGE },
+    ],
+  });
 
   return {
     render(ctx) {
@@ -35,41 +44,16 @@ export function createMenuScene({ theme, getViewport, onAction }) {
       ctx.fillRect(0, 0, width, height);
 
       drawText(ctx, 'ROGµE', width / 2, Math.round(height * 0.18), {
-        color: theme.text,
-        size: 48,
-        weight: '700',
-        align: 'center',
-        baseline: 'middle',
+        color: theme.text, size: 48, weight: '700', align: 'center', baseline: 'middle',
       });
 
-      for (const button of layout()) {
-        drawButton(ctx, theme, { ...button, hover: hoverId === button.id });
-      }
+      shell.render(ctx);
+      confirm?.render(ctx);
     },
 
     handleInput(event) {
-      const buttons = layout();
-      if (event.type === 'pointerdown') {
-        for (const b of buttons) {
-          if (b.enabled && hitTest(b, event.x, event.y)) {
-            onAction?.(b.id);
-            return true;
-          }
-        }
-        return false;
-      }
-      if (event.type === 'pointermove') {
-        let nextHover = null;
-        for (const b of buttons) {
-          if (b.enabled && hitTest(b, event.x, event.y)) {
-            nextHover = b.id;
-            break;
-          }
-        }
-        hoverId = nextHover;
-        return false;
-      }
-      return false;
+      if (confirm) return confirm.handleInput(event);
+      return shell.handleInput(event);
     },
   };
 }

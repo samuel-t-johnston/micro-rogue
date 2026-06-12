@@ -18,10 +18,12 @@ import { createMessageLogWidget } from './widgets/message-log.js';
 import { createCharacterMenuButton } from './widgets/character-menu-button.js';
 import { createDialogController } from './dialog-controller.js';
 import { createCharacterMenuController } from './character-menu-controller.js';
+import { createGameMenuController } from './game-menu-controller.js';
+import { createGameMenuButton } from './widgets/game-menu-button.js';
 import { createDeathPopup } from './death-popup.js';
 import { commitSave, loadSavedGame, clearSave } from '../save/save-system.js';
 
-export function createGameScene({ theme, getViewport, onGameOver, startMode = 'new' }) {
+export function createGameScene({ theme, getViewport, onGameOver, onNewGame, startMode = 'new' }) {
   let level = null;
   let player = null;
   let turnManager = null;
@@ -44,6 +46,16 @@ export function createGameScene({ theme, getViewport, onGameOver, startMode = 'n
     theme,
     getViewport,
     onOpen: () => characterMenuController.open(),
+  });
+  const gameMenuController = createGameMenuController({
+    theme,
+    getViewport,
+    onNewGame: () => onNewGame?.(),
+  });
+  const gameMenuButton = createGameMenuButton({
+    theme,
+    getViewport,
+    onOpen: () => gameMenuController.open(),
   });
   const deathPopup = createDeathPopup({
     theme,
@@ -98,10 +110,14 @@ export function createGameScene({ theme, getViewport, onGameOver, startMode = 'n
     if (characterMenuController.isOpen) {
       return characterMenuController.handleInput(event);
     }
+    if (gameMenuController.isOpen) {
+      return gameMenuController.handleInput(event);
+    }
 
     if (dialogController.handleInput(event)) return true;
     if (messageLogWidget.handleInput(event)) return true;
     if (characterMenuButton.handleInput(event)) return true;
+    if (gameMenuButton.handleInput(event)) return true;
 
     if (event.type === 'pointerdown') {
       const world = renderer.screenToWorld(event.x, event.y);
@@ -224,8 +240,10 @@ export function createGameScene({ theme, getViewport, onGameOver, startMode = 'n
       messageLogWidget.render(ctx, { recentLines });
 
       characterMenuButton.render(ctx);
+      gameMenuButton.render(ctx);
       dialogController.render(ctx);
       characterMenuController.render(ctx);
+      gameMenuController.render(ctx);
       deathPopup.render(ctx);
     },
 
