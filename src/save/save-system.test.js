@@ -21,6 +21,8 @@ import {
   clearSave,
   hasSave,
   getSaveMeta,
+  commitSave,
+  loadSavedGame,
 } from './save-system.js';
 
 // Builds a realistic game directly (the pipeline's static stage does a dynamic file:// import
@@ -190,6 +192,24 @@ describe('loadSave migration runner', () => {
       expect(err.from).toBe(SAVE_VERSION);
       expect(err.to).toBe(SAVE_VERSION + 1);
     }
+  });
+});
+
+describe('commitSave / loadSavedGame orchestration', () => {
+  it('returns null when there is no save', () => {
+    expect(loadSavedGame()).toBeNull();
+  });
+
+  it('commits a live game and loads it straight back through localStorage', async () => {
+    const { registry, level, player } = await buildGame();
+    commitSave({ registry, level, player, turnCount: 9 });
+
+    expect(hasSave()).toBe(true);
+    const restored = loadSavedGame();
+    expect(restored.turnCount).toBe(9);
+    expect(restored.player.id).toBe(player.id);
+    expect(restored.player.components.get('health')).toEqual(player.components.get('health'));
+    expect(restored.level.getTile(0, 0)).toBe(level.getTile(0, 0));
   });
 });
 

@@ -117,6 +117,21 @@ export function loadSave(raw) {
   return save;
 }
 
+// --- Orchestration: the full save / load round trip for callers ---
+
+// Snapshots a live game and writes it to the single save slot. Thin wrapper so the game
+// scene doesn't have to know the serialize-then-write sequence.
+export function commitSave({ registry, level, player, turnCount }) {
+  writeSave(serializeGame({ registry, level, player, turnCount }));
+}
+
+// Reads, migrates, and rehydrates the saved game in one step. Returns the live state
+// ({ registry, level, player, turnCount }) or null when there is no save to load.
+export function loadSavedGame() {
+  const raw = readSave();
+  return raw ? deserializeGame(loadSave(raw)) : null;
+}
+
 // --- localStorage I/O (single slot, overwritten each save) ---
 
 export function writeSave(save) {

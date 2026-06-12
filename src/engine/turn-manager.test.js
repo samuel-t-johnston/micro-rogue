@@ -111,6 +111,37 @@ describe('createTurnManager', () => {
     });
   });
 
+  describe('onTurnStart', () => {
+    it('fires before the entity acts each turn', async () => {
+      const entity = makeEntity(1);
+      const events = [];
+      const tm = createTurnManager({
+        getActiveEntities: () => [entity],
+        onTurnStart: (e) => events.push(`start:${e.id}`),
+        invokeAction: async (e) => { events.push(`act:${e.id}`); return false; },
+      });
+      tm.start();
+      await runUntil(tm, () => expect(events.filter(e => e === 'act:1').length).toBeGreaterThanOrEqual(2));
+      // Every act is immediately preceded by a start for the same entity.
+      const firstActIdx = events.indexOf('act:1');
+      expect(events[firstActIdx - 1]).toBe('start:1');
+    });
+  });
+
+  describe('initialTurnCount', () => {
+    it('seeds playerTurnCount so a loaded game resumes its turn count', async () => {
+      const player = makeEntity(1, 1, true);
+      const tm = createTurnManager({
+        getActiveEntities: () => [player],
+        invokeAction: async () => false,
+        initialTurnCount: 41,
+      });
+      expect(tm.playerTurnCount).toBe(41);
+      tm.start();
+      await runUntil(tm, () => expect(tm.playerTurnCount).toBeGreaterThanOrEqual(42));
+    });
+  });
+
   describe('playerTurnCount', () => {
     it('increments exactly once per real player action', async () => {
       const player = makeEntity(1, 1, true);

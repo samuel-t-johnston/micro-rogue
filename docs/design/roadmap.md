@@ -79,11 +79,11 @@ Open questions and deferred decisions are noted inline where they land on the ro
 ## M4 — It Can Be Saved
 *Done when: the game saves on turn-start, survives a browser close and reload, and the migration chain is in place.*
 
-- [ ] Save system: JSON to `localStorage`, full structure per save-system.md
-- [ ] Autosave on turn-start (after state is fully settled)
-- [ ] `visibilitychange` handler: save on background/tab close
-- [ ] Load on startup: detect existing save, offer continue vs. new game
-- [ ] Death: delete save before showing death screen (not after)
+- [x] Save system: JSON to `localStorage`, full structure per save-system.md
+- [x] Autosave on turn-start (after state is fully settled)
+- [x] `visibilitychange` handler: save on background/tab close
+- [x] Load on startup: detect existing save, offer continue vs. new game
+- [x] Death: delete save before showing death screen (not after)
 - [x] Migration chain: `loadSave()` with version check, chain runner, per-step error wrapping
 - [x] Save version 1 defined; first migration infrastructure in place (no migrations needed yet)
 - [ ] Support bundle: save snapshot + event log + device info, downloadable on demand

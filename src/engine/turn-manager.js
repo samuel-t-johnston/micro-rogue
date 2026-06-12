@@ -4,9 +4,13 @@
 //
 // Dependencies are injected rather than imported so the turn module can be
 // swapped without touching the action system or entity layer.
-export function createTurnManager({ getActiveEntities, invokeAction }) {
+// `onTurnStart(entity)` fires the instant before an entity acts — every other entity has
+// resolved since it last acted, so the world is fully settled. The autosave hook uses it to
+// snapshot at the player's turn-start. `initialTurnCount` seeds the player turn count when a
+// game is loaded from a save (fresh games pass 0).
+export function createTurnManager({ getActiveEntities, invokeAction, onTurnStart, initialTurnCount = 0 }) {
   const queue = [];  // ordered list of entities
-  let playerTurnCount = 0;
+  let playerTurnCount = initialTurnCount;
   let currentEntity = null;
   let running = false;
 
@@ -42,6 +46,7 @@ export function createTurnManager({ getActiveEntities, invokeAction }) {
       if (turnTaker.accumulator >= 1) {
         while (turnTaker.accumulator >= 1) {
           turnTaker.accumulator -= 1;
+          onTurnStart?.(entity);
           const free = await invokeAction(entity);
           if (free) {
             turnTaker.accumulator += 1;
