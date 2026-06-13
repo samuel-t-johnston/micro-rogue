@@ -19,15 +19,27 @@ import {
 
 // Bumped only when the save schema changes in a breaking way (see the design doc). The game
 // version is independent and tracks releases; it mirrors package.json.
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 export const GAME_VERSION = '0.0.0';
 
 const SAVE_KEY = 'rogue:save';
 
 // Append-only migration chain. Each entry: { from, to, migrate(save) -> save }. Frozen once
-// shipped — never edit a released migration. Empty at v1; the runner below is exercised by
-// tests with a stub so the infrastructure is proven before it's first needed.
-export const migrations = [];
+// shipped — never edit a released migration.
+export const migrations = [
+  {
+    from: 1,
+    to: 2,
+    // v1 stored the single gameplay stream as a flat `meta.rngState`. v2 holds a map of named
+    // persistent streams (see rng-and-determinism.md); lift the old state into `gameplay`. The
+    // stream's continuation is identical — only the envelope changed.
+    migrate(save) {
+      save.meta.streams = { gameplay: save.meta.rngState };
+      delete save.meta.rngState;
+      return save;
+    },
+  },
+];
 
 export class SaveTooNewError extends Error {
   constructor(saveVersion, currentVersion) {
@@ -58,8 +70,7 @@ export function serializeGame({ registry, level, player, turnCount }) {
     versionHistory: [{ saveVersion: SAVE_VERSION, gameVersion: GAME_VERSION, savedAt }],
     savedAt,
     meta: {
-      seed: rng.getSeed(),
-      rngState: rng.getState(),
+      ...rng.snapshot(), // { seed (master), streams: { gameplay: state, … } }
       turnCount,
       nextEntityId: registry.getNextId(),
     },
@@ -72,8 +83,7 @@ export function serializeGame({ registry, level, player, turnCount }) {
 // Rebuilds a live game state from a (migrated) save object: restores the RNG to its exact
 // position, rehydrates every entity, rebuilds the level, and resolves the player.
 export function deserializeGame(save) {
-  rng.init(save.meta.seed);
-  rng.setState(save.meta.rngState);
+  rng.restore({ seed: save.meta.seed, streams: save.meta.streams });
 
   const registry = createEntityRegistry();
   deserializeEntities(save.entities, registry);

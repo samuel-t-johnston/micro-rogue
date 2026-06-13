@@ -182,11 +182,15 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
           initialTurnCount = restored.turnCount;
           enterMessage = 'You return to the dungeon.';
         } else {
-          // Fresh seed per run (gameConfig.seed null → random); recorded by the save so the
-          // run is reproducible from it. Loaded games restore their own seed instead.
+          // Fresh master seed per run (gameConfig.seed null → random); recorded by the save so
+          // the run is reproducible from it. Loaded games restore their own seed instead.
           rng.init(gameConfig.seed ?? undefined);
+          // Generation draws from its own derived stream, independent of the gameplay stream, so
+          // play never perturbs generation (rng-and-determinism.md). Level identity is
+          // (branch, depth); the single static level uses (0, 0) until M5 adds transitions.
+          const mapgenRng = rng.deriveRng('mapgen', 0, 0);
           const [loaded] = await Promise.all([
-            runPipeline(staticTestLevel, rng, registry),
+            runPipeline(staticTestLevel, mapgenRng, registry),
             renderer.load(),
           ]);
           level = loaded;
