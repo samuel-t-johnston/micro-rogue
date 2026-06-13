@@ -17,7 +17,7 @@ Map generation is not a single algorithm — it's a sequence of discrete stages,
 
 **Blackboard** — a shared annotation layer, separate from tile data and the entity layer. Stages write tags and metadata here; downstream stages read them. Loosely couples stages without requiring them to know about each other directly.
 
-**Seed** — a value that initializes the RNG for the entire pipeline. The same seed always produces the same level, including structure, entity placement, and item rolls. Enables daily maps, shareable layouts, and reproducible bug reports.
+**Seed** — the value that initializes the RNG for one level's pipeline. It is *not* the game's master seed directly: it is **derived** from the master seed and the level's identity `(branch, depth)`, on its own stream, independent of gameplay RNG — see [rng-and-determinism.md](rng-and-determinism.md). The same master seed always produces the same level for a given `(branch, depth)`, including structure, entity placement, and item rolls. Enables daily maps, shareable layouts, and reproducible bug reports.
 
 ---
 
@@ -57,7 +57,12 @@ The exact shape is implementation detail. The principle is that stages speak in 
 
 The seed covers the full pipeline: terrain shape, room contents, creature placement, item rolls, shop inventories. Partial seeding produces levels that feel inconsistent — if the layout is fixed but loot is random, sharing a seed means nothing.
 
-Each stage receives the same seeded RNG instance and advances it as it consumes random values. Stage order must be stable for seeds to be reproducible — adding a stage or changing stage order breaks existing seeds, which is acceptable during development but worth a note when the game reaches players.
+The pipeline runs on a **per-level generation RNG**, obtained as `service.derive('mapgen', branch, depth)` ([rng-and-determinism.md](rng-and-determinism.md)) — a fresh stream whose seed is derived from the master seed and the level's identity, *separate from the gameplay stream*. Two consequences:
+
+- **Play never changes generation.** Because generation draws from its own stream, fighting, looting, or wandering between floors can't shift what the next floor generates. This is what lets seeds mean the same thing across runs with different histories.
+- **Levels generate lazily.** A level's seed is computed from `(branch, depth)`, not consumed in sequence, so any level can be generated on demand without generating the ones before it.
+
+Within a level, each stage draws from that one generation RNG and advances it as it consumes values. Stage order must be stable for seeds to be reproducible — adding a stage or changing stage order breaks existing seeds, which is acceptable during development but worth a note when the game reaches players.
 
 Player actions that mutate the map (digging, flooding via the tile override layer) diverge from the seed intentionally. The seed determines initial state; player choices produce the divergence from there. No conflict.
 
@@ -86,7 +91,7 @@ Only the current level runs. Other levels are serialized and stored when the pla
 - Tile base data and override layer state
 - All entity state, including stationary entity timers
 - The blackboard (tags may be needed for re-entry logic)
-- The seed used to generate the level (allows reconstruction if needed)
+- The derived generation seed used to build the level (allows reconstruction even if the derivation function later changes — see [rng-and-determinism.md](rng-and-determinism.md))
 
 Enemies that follow the player through stairs are not serialized with the level — they travel with the player through the transition instead.
 
