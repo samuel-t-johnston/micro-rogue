@@ -25,14 +25,23 @@ coordinator's job (see Protected Design Space).
 - **Degree is a soft target, not a hard cap.** Aiming for ~1–2 links per room, but connectivity
   wins — the occasional degree-3 junction is allowed (a hard cap of 2 would require a Hamiltonian
   path, which need not exist).
-- **Geometry / label / link are separate stages.** Only `geometry` knows it's a 3×3 grid; `label`
-  and `link` operate on any zone set + adjacency, so they're reusable for other dungeon shapes.
+- **Geometry / label / link are separate stages.** Only `room-grid-geometry` knows it's a grid (and
+  it's parameterized by `cols`/`rows`/`cellSize`); `label` and `link` operate on any zone set +
+  adjacency, so they're reusable for other dungeon shapes.
 - **Spawn and stairs are components, not level fields.** `entryPoint` marks where the player arrives;
   `transition` marks a level exit with a coordinator-fillable destination. See New Components.
 - **Affinity = weights, in the populator.** Labels carry spawn-weight multipliers (aversion = <1);
   weights live in the population stage's spawn table, not on creature entities.
 - **`stage-static` stays.** The procedural pipeline is a *new config*, not a replacement; static
   remains a valid stage (a future level 1, or reconnected when transitions exist).
+- **Irregular (polyomino) rooms are allowed (option B).** Merges can grow a zone past two cells into
+  L/T/blob shapes. The planner handles this safely; the cost is paid in carving, which must be
+  **cell-based, not rectangle-based**: carve from a zone's actual cells and open the walls between
+  same-zone cells. **Never carve a zone's bounding box** — for a non-rectangular zone the box covers
+  cells it doesn't own (deleted space or a neighbor), so a box-carve produces overlapping rooms.
+- **Deletion is connectivity-preserving.** `room-grid-geometry` only removes cells whose removal keeps
+  the survivors connected, so multiple deletes can't isolate a room or split the graph — the link
+  stage's spanning tree always has a connected graph to work with.
 
 ## Concepts & blackboard schema
 
@@ -79,12 +88,12 @@ first. The first *playable* checkpoint is step 5.
 
 | # | Slice | What it does | Reads → Writes | Tests | New / changed files | Status |
 |---|---|---|---|---|---|---|
-| 1 | `geometry` stage | 3×3 grid of 10×10 zones; delete one cell; merge two; compute adjacency | rng → `level:zones`, `level:adjacency` | unit: zone count after delete/merge, cell membership, adjacency, determinism | `stages/stage-geometry.js`, register in `pipeline.js` | Not started |
+| 1 | `room-grid-geometry` stage | Grid of rooms (params: `cols`/`rows`/`cellSize`/`deletes`/`merges`/`minZones`, default 3×3×10, 1 delete, 1 merge); connectivity-preserving deletes; merge adjacent groups into polyomino zones; compute adjacency | rng → `level:grid`, `level:zones`, `level:adjacency` | unit: zone/cell counts, rects, adjacency+connectivity across multi-delete, polyomino growth, minZones cap, params, determinism | `stages/stage-room-grid-geometry.js`, register in `pipeline.js` (type `roomGridGeometry`) | **Done** |
 | 2 | `label` stage | Label 5 random zones: stairs-up, stairs-down, treasure, item, item (geometry-agnostic) | `level:zones` → zone `labels` | unit: each label placed once on a real zone; determinism | `stages/stage-label.js` | Not started |
 | 3 | `link` stage | Random spanning tree + extra links toward a soft degree target | `level:zones`/`adjacency` → `level:links` | unit: single connected component; degree distribution; determinism | `stages/stage-link.js` | Not started |
 | 4 | Spawn/exit components | Add `transition` + `entryPoint`; `game-scene` spawns at `entryPoint`; keep static level working (inert stairs-up + entryPoint at its center) | — | unit: entryPoint selection/guard; rest visual | `components.js`, `game-scene.js`, `furniture.js`, static level / `stage-place-test-entities.js` | Not started |
-| 5 | `carve-rooms` + config + `spawn` | New procedural pipeline config; init wall grid; carve a room rect per zone (4..inner, gutters reserved); place `entryPoint` at the stairs-up room. First playable (islands, no halls) | `level:zones`/`labels` → tiles, entryPoint entity | unit: room-bounds/gutter helper; visual | `stages/stage-carve-rooms.js`, `stages/stage-spawn.js`, `data/pipelines/procedural-3x3.js`, `game-scene.js` | Not started |
-| 6 | `carve-halls` stage | Corridors in the gutters between linked rooms (1–3 segments); door entities at non-corner room edges | `level:links` + room tiles → floor tiles, door entities | unit: routing helper if separable; visual | `stages/stage-carve-halls.js` | Not started |
+| 5 | `carve-rooms` + config + `spawn` | New procedural pipeline config; init wall grid; **carve per cell** (a zone's actual cells, opening same-zone seams — never the bounding box), gutters between zones; place `entryPoint` at the stairs-up room. First playable (islands, no halls) | `level:zones`/`labels` → tiles, entryPoint entity | unit: per-cell carve / seam helper; visual | `stages/stage-carve-rooms.js`, `stages/stage-spawn.js`, `data/pipelines/procedural-3x3.js`, `game-scene.js` | Not started |
+| 6 | `carve-halls` stage | Corridors in the gutters between linked rooms (1–3 segments); door entities placed on a chosen **shared cell-edge** (handles irregular perimeters) | `level:links` + room tiles → floor tiles, door entities | unit: routing helper if separable; visual | `stages/stage-carve-halls.js` | Not started |
 | 7 | `stairs` stage | Place stairs-up/down furniture (renderable + `transition{to:null}`) at labelled rooms | `level:zones`/`labels` → entities | visual | `stages/stage-stairs.js`, `furniture.js` | Not started |
 | 8 | `populate` + items | Spawn table with affinity weights: chest (1–3) + 0–2 floor items in treasure rooms; 1–2 in item rooms; 2 orcs (weight treasure/item); 2 goblins (averse, separate rooms). Add items (armor, 2nd weapon, scroll) | `level:zones`/`labels` → entities | unit: weighted selection + room-disjointness; visual | `stages/stage-populate.js`, `items.js`, `creatures.js`, spawn-table data | Not started |
 
