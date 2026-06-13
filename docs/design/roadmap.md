@@ -111,10 +111,9 @@ death-delete, support bundle, in-game menu) wire this core into the running game
 - [ ] Finishing stage: entrance/exit placement, ambient detail (rubble, stains)
 - [ ] Level transitions: stairs, freeze current level, load or generate next
 - [ ] Frozen level serialization: full level state including blackboard, restored on return
-- [ ] Player serialized at top level, not inside a level
 - [ ] Multiple floors: at least 3, each generated independently
 
-*Open question: when to introduce procedural structure stages. Validate the pipeline with static layouts first; add procedural generation once the pipeline is stable. This belongs on M6+.*
+*Open question: when to introduce procedural structure stages. Validate the pipeline with static layouts first; add procedural generation once the pipeline is stable.*
 
 ---
 
