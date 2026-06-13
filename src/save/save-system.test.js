@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { rng } from '../engine/rng.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
 import { createLevel } from '../world/level.js';
@@ -24,6 +24,7 @@ import {
   commitSave,
   loadSavedGame,
 } from './save-system.js';
+import saveV1 from './fixtures/save-v1.json';
 
 // Builds a realistic game directly (the pipeline's static stage does a dynamic file:// import
 // that vitest's resolver mangles on Windows): a chest with contained items, creatures, map
@@ -78,7 +79,6 @@ async function buildGame() {
 }
 
 beforeEach(() => {
-  migrations.length = 0; // the real chain is empty at v1; keep it clean between tests
   localStorage.clear();
 });
 
@@ -153,6 +153,12 @@ describe('serializeGame / deserializeGame round-trip', () => {
 });
 
 describe('loadSave migration runner', () => {
+  // These tests push stub migrations; snapshot and restore the real chain around each so the
+  // shipped migrations (and other tests) are unaffected.
+  let realMigrations;
+  beforeEach(() => { realMigrations = migrations.slice(); });
+  afterEach(() => { migrations.length = 0; migrations.push(...realMigrations); });
+
   it('throws SaveTooNewError for a save from a newer schema', () => {
     expect(() => loadSave({ saveVersion: SAVE_VERSION + 1 })).toThrow(SaveTooNewError);
   });
@@ -192,6 +198,32 @@ describe('loadSave migration runner', () => {
       expect(err.from).toBe(SAVE_VERSION);
       expect(err.to).toBe(SAVE_VERSION + 1);
     }
+  });
+});
+
+describe('v1 → v2 migration (real, from a fixture)', () => {
+  it('lifts meta.rngState into meta.streams.gameplay', () => {
+    const migrated = loadSave(saveV1);
+    expect(migrated.saveVersion).toBe(2);
+    expect(migrated.meta.streams).toEqual({ gameplay: saveV1.meta.rngState });
+    expect(migrated.meta.rngState).toBeUndefined();
+    expect(migrated.meta.seed).toBe(saveV1.meta.seed);
+    expect(migrated.versionHistory).toHaveLength(2);
+    expect(migrated.versionHistory[1].saveVersion).toBe(2);
+  });
+
+  it('does not mutate the source fixture', () => {
+    loadSave(saveV1);
+    expect(saveV1.saveVersion).toBe(1);
+    expect(saveV1.meta.rngState).toBe(987654321);
+  });
+
+  it('a migrated v1 save deserializes into a live game', () => {
+    const restored = deserializeGame(loadSave(saveV1));
+    expect(restored.player.id).toBe(saveV1.playerId);
+    expect(restored.turnCount).toBe(saveV1.meta.turnCount);
+    expect(restored.player.components.get('health')).toEqual({ current: 18, max: 20 });
+    expect(rng.getMasterSeed()).toBe(saveV1.meta.seed);
   });
 });
 
