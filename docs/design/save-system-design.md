@@ -73,6 +73,14 @@ Purpose: Initial save system design for ROGµE.
 > `nextEntityId` preserves the registry's id counter so post-load spawns never collide with — or
 > reuse the freed ids of — loaded entities. `score`, `storyFlags`, and `difficultySettings` don't
 > exist in the game yet and are omitted; a future migration adds them when those features land.
+>
+> **Planned (`meta` v2, M5).** The single `rngState` becomes a map of persistent RNG streams:
+> `{ seed, streams: { gameplay: <state>, … }, turnCount, nextEntityId }`. `seed` becomes the
+> *master* seed; `gameplay` is the one persistent stream today, and map generation draws from
+> *derived* streams that are never stored here (only each level's derived seed is kept, on the
+> level). This is the engine's first real migration — **v1→v2 lifts `rngState` into
+> `streams.gameplay`** — and it ships with a fixture save at v1 and a test per [AGENTS.md](../../AGENTS.md).
+> See [rng-and-determinism.md](rng-and-determinism.md).
 
 ### `playerId` — Player Pointer
 
