@@ -3,12 +3,14 @@ import { run as runStatic } from './stages/stage-static.js';
 import { run as runPlaceTestEntities } from './stages/stage-place-test-entities.js';
 import { run as runRoomGridGeometry } from './stages/stage-room-grid-geometry.js';
 import { run as runLabel } from './stages/stage-label.js';
+import { run as runLink } from './stages/stage-link.js';
 
 const STAGES = {
   static: runStatic,
   placeTestEntities: runPlaceTestEntities,
   roomGridGeometry: runRoomGridGeometry,
   label: runLabel,
+  link: runLink,
 };
 
 export async function runPipeline(pipelineConfig, rng, registry) {
