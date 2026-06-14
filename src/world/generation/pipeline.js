@@ -13,13 +13,16 @@ const STAGES = {
   link: runLink,
 };
 
-export async function runPipeline(pipelineConfig, rng, registry) {
+// `onStageComplete(stageType, level)` (optional) fires after each stage — a debug seam for the
+// generation visualizer to snapshot the level as it evolves, without stages knowing about it.
+export async function runPipeline(pipelineConfig, rng, registry, { onStageComplete } = {}) {
   const level = createLevel();
 
   for (const stageConfig of pipelineConfig.stages) {
     const run = STAGES[stageConfig.type];
     if (!run) throw new Error(`Unknown pipeline stage type: "${stageConfig.type}"`);
     await run(level, stageConfig, level.blackboard, rng, registry);
+    onStageComplete?.(stageConfig.type, level);
   }
 
   return level;
