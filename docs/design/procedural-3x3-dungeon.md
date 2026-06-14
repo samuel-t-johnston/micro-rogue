@@ -84,18 +84,41 @@ Added to [`src/world/components.js`](../../src/world/components.js):
 ## Build plan
 
 Planning stages (1–3) are pure blackboard transforms with no game-runtime impact — build and test them
-first. The first *playable* checkpoint is step 5.
+first. The first *playable* checkpoint is step 6.
 
 | # | Slice | What it does | Reads → Writes | Tests | New / changed files | Status |
 |---|---|---|---|---|---|---|
 | 1 | `room-grid-geometry` stage | Grid of rooms (params: `cols`/`rows`/`cellSize`/`deletes`/`merges`/`minZones`, default 3×3×10, 1 delete, 1 merge); connectivity-preserving deletes; merge adjacent groups into polyomino zones; compute adjacency | rng → `level:grid`, `level:zones`, `level:adjacency` | unit: zone/cell counts, rects, adjacency+connectivity across multi-delete, polyomino growth, minZones cap, params, determinism | `stages/stage-room-grid-geometry.js`, register in `pipeline.js` (type `roomGridGeometry`) | **Done** |
 | 2 | `label` stage | Label 5 random zones: stairs-up, stairs-down, treasure, item, item (geometry-agnostic) | `level:zones` → zone `labels` | unit: each label placed once on a real zone; determinism | `stages/stage-label.js` | Not started |
 | 3 | `link` stage | Random spanning tree + extra links toward a soft degree target | `level:zones`/`adjacency` → `level:links` | unit: single connected component; degree distribution; determinism | `stages/stage-link.js` | Not started |
-| 4 | Spawn/exit components | Add `transition` + `entryPoint`; `game-scene` spawns at `entryPoint`; keep static level working (inert stairs-up + entryPoint at its center) | — | unit: entryPoint selection/guard; rest visual | `components.js`, `game-scene.js`, `furniture.js`, static level / `stage-place-test-entities.js` | Not started |
-| 5 | `carve-rooms` + config + `spawn` | New procedural pipeline config; init wall grid; **carve per cell** (a zone's actual cells, opening same-zone seams — never the bounding box), gutters between zones; place `entryPoint` at the stairs-up room. First playable (islands, no halls) | `level:zones`/`labels` → tiles, entryPoint entity | unit: per-cell carve / seam helper; visual | `stages/stage-carve-rooms.js`, `stages/stage-spawn.js`, `data/pipelines/procedural-3x3.js`, `game-scene.js` | Not started |
-| 6 | `carve-halls` stage | Corridors in the gutters between linked rooms (1–3 segments); door entities placed on a chosen **shared cell-edge** (handles irregular perimeters) | `level:links` + room tiles → floor tiles, door entities | unit: routing helper if separable; visual | `stages/stage-carve-halls.js` | Not started |
-| 7 | `stairs` stage | Place stairs-up/down furniture (renderable + `transition{to:null}`) at labelled rooms | `level:zones`/`labels` → entities | visual | `stages/stage-stairs.js`, `furniture.js` | Not started |
-| 8 | `populate` + items | Spawn table with affinity weights: chest (1–3) + 0–2 floor items in treasure rooms; 1–2 in item rooms; 2 orcs (weight treasure/item); 2 goblins (averse, separate rooms). Add items (armor, 2nd weapon, scroll) | `level:zones`/`labels` → entities | unit: weighted selection + room-disjointness; visual | `stages/stage-populate.js`, `items.js`, `creatures.js`, spawn-table data | Not started |
+| 4 | Visualization / debug tooling | Headless dev tool: plug in a pipeline (or single stage) + run count (+ optional seeds); writes a markdown report with config, timestamp, seeds, and a per-run **filmstrip** (a snapshot after each stage). Renderers: `levelToAscii` (spatial map) + a text topology view (Mermaid optional, not spatially faithful). Pipeline gains an optional `onStageComplete` hook | level/blackboard → markdown file | unit: `levelToAscii` + topology renderers (pure); tool run manually | `scripts/visualize-generation.mjs`, `src/world/generation/visualize.js`, optional hook in `pipeline.js` | Not started |
+| 5 | Spawn/exit components | Add `transition` + `entryPoint`; `game-scene` spawns at `entryPoint`; keep static level working (inert stairs-up + entryPoint at its center) | — | unit: entryPoint selection/guard; rest visual | `components.js`, `game-scene.js`, `furniture.js`, static level / `stage-place-test-entities.js` | Not started |
+| 6 | `carve-rooms` + config + `spawn` | New procedural pipeline config; init wall grid; **carve per cell** (a zone's actual cells, opening same-zone seams — never the bounding box), gutters between zones; place `entryPoint` at the stairs-up room. First playable (islands, no halls) | `level:zones`/`labels` → tiles, entryPoint entity | unit: per-cell carve / seam helper; visual | `stages/stage-carve-rooms.js`, `stages/stage-spawn.js`, `data/pipelines/procedural-3x3.js`, `game-scene.js` | Not started |
+| 7 | `carve-halls` stage | Corridors in the gutters between linked rooms (1–3 segments); door entities placed on a chosen **shared cell-edge** (handles irregular perimeters) | `level:links` + room tiles → floor tiles, door entities | unit: routing helper if separable; visual | `stages/stage-carve-halls.js` | Not started |
+| 8 | `stairs` stage | Place stairs-up/down furniture (renderable + `transition{to:null}`) at labelled rooms | `level:zones`/`labels` → entities | visual | `stages/stage-stairs.js`, `furniture.js` | Not started |
+| 9 | `populate` + items | Spawn table with affinity weights: chest (1–3) + 0–2 floor items in treasure rooms; 1–2 in item rooms; 2 orcs (weight treasure/item); 2 goblins (averse, separate rooms). Add items (armor, 2nd weapon, scroll) | `level:zones`/`labels` → entities | unit: weighted selection + room-disjointness; visual | `stages/stage-populate.js`, `items.js`, `creatures.js`, spawn-table data | Not started |
+
+### Visualization & debug tooling (step 4)
+
+A standalone, **dev-only** tool, decoupled from the running game (no canvas, no game scene — it builds
+a level headlessly, the way the save tests do). The dev supplies a pipeline config (or a single stage)
++ a run count (+ optional fixed seeds); it runs them and writes a **markdown report**:
+
+- **Header** — the pipeline/stage config + params, a timestamp, the run count, and the seeds used (so
+  any run is reproducible).
+- **Per run, a "filmstrip"** — a snapshot after *each* stage, showing the level evolve:
+  - the **spatial map** via `levelToAscii(level)` (`#` wall, `.` floor, `+` door, label letters) — text,
+    since Mermaid can't place tiles on a grid;
+  - the **topology** (zones + labels + links/adjacency) as a text edge-list, with an optional Mermaid
+    graph block (topologically faithful, not spatially).
+
+`levelToAscii` and the topology renderer are pure functions (unit-testable); the report writer + CLI
+are the tool. The pipeline gains an optional `onStageComplete(stageName, level)` hook so snapshots are
+captured without stages knowing about it.
+
+**Timing (my call):** slotted at step 4 — after the planner, so the topology view immediately validates
+`label`/`link`, and before carving, so the map view is ready to eyeball the carve stages as we build
+them (it just renders an all-wall grid until tiles exist).
 
 ## Protected design space (future coordinator)
 
