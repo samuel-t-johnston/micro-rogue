@@ -2,11 +2,13 @@ import { createLevel } from '../level.js';
 import { run as runStatic } from './stages/stage-static.js';
 import { run as runPlaceTestEntities } from './stages/stage-place-test-entities.js';
 import { run as runRoomGridGeometry } from './stages/stage-room-grid-geometry.js';
+import { run as runLabel } from './stages/stage-label.js';
 
 const STAGES = {
   static: runStatic,
   placeTestEntities: runPlaceTestEntities,
   roomGridGeometry: runRoomGridGeometry,
+  label: runLabel,
 };
 
 export async function runPipeline(pipelineConfig, rng, registry) {
