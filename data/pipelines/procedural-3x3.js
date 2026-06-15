@@ -9,6 +9,7 @@ export default {
     { type: 'label' },
     { type: 'link' },
     { type: 'carveRooms' },
+    { type: 'carveHalls' },
     { type: 'spawn' },
   ],
 };

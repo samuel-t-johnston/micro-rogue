@@ -5,6 +5,7 @@ import { run as runRoomGridGeometry } from './stages/stage-room-grid-geometry.js
 import { run as runLabel } from './stages/stage-label.js';
 import { run as runLink } from './stages/stage-link.js';
 import { run as runCarveRooms } from './stages/stage-carve-rooms.js';
+import { run as runCarveHalls } from './stages/stage-carve-halls.js';
 import { run as runSpawn } from './stages/stage-spawn.js';
 
 const STAGES = {
@@ -14,6 +15,7 @@ const STAGES = {
   label: runLabel,
   link: runLink,
   carveRooms: runCarveRooms,
+  carveHalls: runCarveHalls,
   spawn: runSpawn,
 };
 
