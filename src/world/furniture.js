@@ -13,7 +13,7 @@ export function createBoulder(registry, x, y) {
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'opaque', components.opaque());
-  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.boulder, '#888888'));
+  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.boulder, '#888888', 'O', '#a8a8a8'));
   return entity;
 }
 
@@ -22,9 +22,21 @@ export function createChest(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Chest'));
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
-  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.chest, '#8B6914'));
+  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.chest, '#8B6914', '=', '#d4af37'));
   registry.addComponent(entity, 'container', components.container());
   registry.addComponent(entity, 'inventory', components.inventory());
+  return entity;
+}
+
+// Stairs are glyph-rendered for now ('<' up, '>' down). `to` is the transition destination,
+// left null by generation; a coordinator wires it once multi-floor levels exist.
+export function createStairs(registry, x, y, direction = 'up', to = null) {
+  const up = direction === 'up';
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name(up ? 'Stairs Up' : 'Stairs Down'));
+  registry.addComponent(entity, 'position', components.position(x, y));
+  registry.addComponent(entity, 'renderable', components.renderable(null, '#888888', up ? '<' : '>', '#dddddd'));
+  registry.addComponent(entity, 'transition', components.transition(to));
   return entity;
 }
 
@@ -34,7 +46,7 @@ export function createDoor(registry, x, y) {
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'opaque', components.opaque());
-  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.doorClosed, '#8B6F47'));
+  registry.addComponent(entity, 'renderable', components.renderable(SPRITES.doorClosed, '#8B6F47', '+', '#c8a36a'));
   registry.addComponent(entity, 'openable', components.openable(SPRITES.doorClosed, SPRITES.doorOpen));
   return entity;
 }

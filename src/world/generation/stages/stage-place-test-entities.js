@@ -1,12 +1,18 @@
-import { createBoulder, createChest, createDoor } from '../../furniture.js';
+import { createBoulder, createChest, createDoor, createStairs } from '../../furniture.js';
 import { createDagger, createHealingPotion, createPotionOfPain } from '../../items.js';
 import { createGoblin, createOrc } from '../../creatures.js';
+import { components } from '../../components.js';
 
 // Temporary stage: places test furniture and items for development. Replace with a proper
 // population stage (see roadmap M5) once map generation matures.
 export async function run(level, _stageConfig, _blackboard, _rng, registry) {
   const cx = Math.floor(level.width / 2);
   const cy = Math.floor(level.height / 2);
+
+  // Inert up-stairs at the centre, doubling as the player's entry point (keeps the old start spot).
+  const stairsUp = createStairs(registry, cx, cy, 'up');
+  registry.addComponent(stairsUp, 'entryPoint', components.entryPoint());
+  level.placeEntity(stairsUp);
 
   level.placeEntity(createBoulder(registry, cx + 2, cy));
   level.placeEntity(createDoor(registry, 5, 3));

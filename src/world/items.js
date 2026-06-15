@@ -67,3 +67,45 @@ export function createDagger(registry, x, y, entityId) {
   }
   return entity;
 }
+
+// Glyph-rendered for now (no sprites yet): sword ')', armor '[', scroll '?'.
+export function createSword(registry, x, y, entityId) {
+  const location = resolveItemLocation(registry, x, y, entityId);
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name('Sword'));
+  registry.addComponent(entity, 'renderable', components.renderable(null, '#101010', ')', '#dde3ff', RenderLayers.ITEM));
+  registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
+  registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ attackDamage: 3 }));
+  if (location.type === 'map') {
+    registry.addComponent(entity, 'position', components.position(x, y));
+  }
+  return entity;
+}
+
+export function createLeatherArmor(registry, x, y, entityId) {
+  const location = resolveItemLocation(registry, x, y, entityId);
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name('Leather Armor'));
+  registry.addComponent(entity, 'renderable', components.renderable(null, '#101010', '[', '#c8a36a', RenderLayers.ITEM));
+  registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(entity, 'equippable', components.equippable(Slots.ARMOR));
+  registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ HP: 5 }));
+  if (location.type === 'map') {
+    registry.addComponent(entity, 'position', components.position(x, y));
+  }
+  return entity;
+}
+
+export function createScroll(registry, x, y, entityId) {
+  const location = resolveItemLocation(registry, x, y, entityId);
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name('Scroll of Healing'));
+  registry.addComponent(entity, 'renderable', components.renderable(null, '#101010', '?', '#e6e0c0', RenderLayers.ITEM));
+  registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(entity, 'consumable', components.consumable(EffectTypes.HEAL, { amount: 15 }));
+  if (location.type === 'map') {
+    registry.addComponent(entity, 'position', components.position(x, y));
+  }
+  return entity;
+}
