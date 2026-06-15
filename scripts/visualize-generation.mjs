@@ -24,6 +24,7 @@ const PIPELINE = {
     { type: 'carveHalls' },
     { type: 'stairs' },
     { type: 'spawn' },
+    { type: 'populate' },
   ],
 };
 

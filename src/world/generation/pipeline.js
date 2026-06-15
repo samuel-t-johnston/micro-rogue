@@ -8,6 +8,7 @@ import { run as runCarveRooms } from './stages/stage-carve-rooms.js';
 import { run as runCarveHalls } from './stages/stage-carve-halls.js';
 import { run as runStairs } from './stages/stage-stairs.js';
 import { run as runSpawn } from './stages/stage-spawn.js';
+import { run as runPopulate } from './stages/stage-populate.js';
 
 const STAGES = {
   static: runStatic,
@@ -19,6 +20,7 @@ const STAGES = {
   carveHalls: runCarveHalls,
   stairs: runStairs,
   spawn: runSpawn,
+  populate: runPopulate,
 };
 
 // `onStageComplete(stageType, level)` (optional) fires after each stage — a debug seam for the

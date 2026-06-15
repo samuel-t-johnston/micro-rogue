@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createHealingPotion, createPotionOfPain } from './items.js';
+import { createHealingPotion, createPotionOfPain, createSword, createLeatherArmor, createScroll } from './items.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
 import { EffectTypes } from '../effects/effects.js';
+import { Slots } from '../../data/equipment-slots.js';
 
 describe('createHealingPotion', () => {
   let registry, potion;
@@ -46,5 +47,28 @@ describe('createPotionOfPain', () => {
     const consumable = potion.components.get('consumable');
     expect(consumable.effectType).toBe(EffectTypes.DAMAGE);
     expect(consumable.params.amount).toBe(5);
+  });
+});
+
+describe('new items', () => {
+  let registry;
+  beforeEach(() => { registry = createEntityRegistry(); });
+
+  it('sword is a weapon with an attack bonus', () => {
+    const sword = createSword(registry, 1, 1);
+    expect(sword.components.get('equippable').slot).toBe(Slots.WEAPON);
+    expect(sword.components.get('attributeModifiers').attackDamage).toBe(3);
+  });
+
+  it('leather armor is equippable in the armor slot with an HP bonus', () => {
+    const armor = createLeatherArmor(registry, 1, 1);
+    expect(armor.components.get('equippable').slot).toBe(Slots.ARMOR);
+    expect(armor.components.get('attributeModifiers').HP).toBe(5);
+  });
+
+  it('scroll is consumable with a heal effect', () => {
+    const scroll = createScroll(registry, 1, 1);
+    expect(scroll.components.get('consumable').effectType).toBe(EffectTypes.HEAL);
+    expect(scroll.components.get('consumable').params.amount).toBe(15);
   });
 });

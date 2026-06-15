@@ -12,5 +12,6 @@ export default {
     { type: 'carveHalls' },
     { type: 'stairs' },
     { type: 'spawn' },
+    { type: 'populate' },
   ],
 };
