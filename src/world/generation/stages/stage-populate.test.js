@@ -1,11 +1,28 @@
 import { describe, it, expect } from 'vitest';
 import { run as runRoomGridGeometry } from './stage-room-grid-geometry.js';
 import { run as runLabel } from './stage-label.js';
+import { run as runLink } from './stage-link.js';
 import { run as runCarveRooms } from './stage-carve-rooms.js';
+import { run as runCarveHalls } from './stage-carve-halls.js';
+import { run as runStairs } from './stage-stairs.js';
+import { run as runSpawn } from './stage-spawn.js';
 import { run as runPopulate, weightedPick } from './stage-populate.js';
+import { roomTiles } from '../zone-tiles.js';
 import { createLevel } from '../../level.js';
 import { createEntityRegistry } from '../../../engine/entity-component-system.js';
 import { createRng } from '../../../engine/rng.js';
+
+// The whole realization+population pipeline, so corridors, doors, and stairs all exist when
+// populate runs — the conditions under which the "spawn on a door / in a hallway" bug appeared.
+function fullGenerate(seed) {
+  const level = createLevel();
+  const reg = createEntityRegistry();
+  const bb = level.blackboard;
+  for (const stage of [runRoomGridGeometry, runLabel, runLink, runCarveRooms, runCarveHalls, runStairs, runSpawn, runPopulate]) {
+    stage(level, {}, bb, createRng(seed), reg);
+  }
+  return { level, bb, reg };
+}
 
 function generate(seed = 1) {
   const level = createLevel();
@@ -89,6 +106,27 @@ describe('populate stage', () => {
       }
     }
     expect(orcLabeled).toBeGreaterThan(goblinLabeled);
+  });
+
+  it('keeps every non-door entity inside a room and never stacks blockers (full pipeline)', () => {
+    for (let seed = 1; seed <= 15; seed++) {
+      const { bb, reg } = fullGenerate(seed);
+      const roomSet = new Set();
+      for (const z of bb['level:zones']) for (const [x, y] of roomTiles(z, bb['level:rooms'])) roomSet.add(`${x},${y}`);
+
+      const blockers = [];
+      for (const e of reg.getAllEntities()) {
+        const pos = e.components.get('position');
+        if (!pos) continue;
+        // Doors live on room walls by design; everything else must sit on a real room tile —
+        // not a corridor, a door, or a wall.
+        if (!e.components.has('openable')) {
+          expect(roomSet.has(`${pos.x},${pos.y}`)).toBe(true);
+        }
+        if (e.components.has('blocksMovement')) blockers.push(`${pos.x},${pos.y}`);
+      }
+      expect(new Set(blockers).size).toBe(blockers.length); // no two blockers share a tile
+    }
   });
 
   it('is deterministic for a given seed', () => {

@@ -1,21 +1,24 @@
-// Shared helpers for placing entities inside a zone's carved room.
+// Shared helpers for placing entities inside a zone's *rooms* — the carved room rectangles only
+// (`level:rooms`), never the corridors, doors, or gutters that also sit inside a zone's cells. This
+// is what keeps spawns out of hallways and off furniture. See docs/design/procedural-3x3-dungeon.md.
 
-// All floor tiles within a zone's cells.
-export function zoneFloorTiles(level, zone, cs) {
+// All floor tiles inside a zone's room rectangle(s). Rect tiles are floor by construction, so no
+// tile check is needed; merged zones may double-count their seam overlap, which is harmless.
+export function roomTiles(zone, rooms) {
   const tiles = [];
-  for (const [gc, gr] of zone.cells) {
-    for (let y = gr * cs; y < gr * cs + cs; y++) {
-      for (let x = gc * cs; x < gc * cs + cs; x++) {
-        if (level.tiles[y]?.[x] === 'floor') tiles.push([x, y]);
-      }
+  for (const [c, r] of zone.cells) {
+    const rect = rooms[`${c},${r}`];
+    if (!rect) continue;
+    for (let y = rect.y0; y <= rect.y1; y++) {
+      for (let x = rect.x0; x <= rect.x1; x++) tiles.push([x, y]);
     }
   }
   return tiles;
 }
 
-// The zone's floor tile nearest its rect centre, or null if it has no floor.
-export function centermostFloor(level, zone, cs) {
-  const tiles = zoneFloorTiles(level, zone, cs);
+// The room tile nearest the zone's centre, or null if it has no room.
+export function centermostRoomTile(zone, rooms) {
+  const tiles = roomTiles(zone, rooms);
   if (tiles.length === 0) return null;
   const cx = zone.rect.x + zone.rect.w / 2;
   const cy = zone.rect.y + zone.rect.h / 2;

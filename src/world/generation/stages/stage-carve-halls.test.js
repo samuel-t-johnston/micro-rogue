@@ -49,10 +49,10 @@ describe('carve-halls stage', () => {
     }
   });
 
-  it('places one door per link, each on a floor tile', () => {
+  it('places two doors per link (one each side), each on a floor tile', () => {
     const { level, bb, reg } = generate(3);
     const doors = reg.getEntitiesWith('openable');
-    expect(doors).toHaveLength(bb['level:links'].length);
+    expect(doors).toHaveLength(2 * bb['level:links'].length);
     for (const d of doors) {
       const pos = d.components.get('position');
       expect(level.tiles[pos.y][pos.x]).toBe('floor');

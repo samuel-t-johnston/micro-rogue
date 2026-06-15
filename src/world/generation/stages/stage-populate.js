@@ -4,7 +4,7 @@
 import { createChest } from '../../furniture.js';
 import { createHealingPotion, createPotionOfPain, createDagger, createSword, createLeatherArmor, createScroll } from '../../items.js';
 import { createGoblin, createOrc } from '../../creatures.js';
-import { zoneFloorTiles } from '../zone-tiles.js';
+import { roomTiles } from '../zone-tiles.js';
 
 const ITEM_FACTORIES = {
   healingPotion: createHealingPotion,
@@ -49,15 +49,15 @@ export function weightedPick(rooms, weights, rng) {
 export function run(level, stageConfig = {}, blackboard, rng, registry) {
   const cfg = { ...DEFAULTS, ...stageConfig };
   const zones = blackboard['level:zones'] ?? [];
-  const cs = blackboard['level:grid']?.cellSize ?? 10;
-  const occupied = new Set(); // "x,y" of placed entities, so nothing stacks
+  const rooms = blackboard['level:rooms'] ?? {};
 
+  // Empty room tiles only — inside the room rect, and not already occupied (the spatial index
+  // tracks everything placed so far: stairs, doors, the entry point, earlier spawns). This keeps
+  // spawns out of hallways and off furniture, and stops anything from stacking.
+  const openTiles = (zone) => roomTiles(zone, rooms).filter(([x, y]) => level.getEntitiesAt(x, y).size === 0);
   const freeTile = (zone) => {
-    const tiles = zoneFloorTiles(level, zone, cs).filter(([x, y]) => !occupied.has(`${x},${y}`));
-    if (tiles.length === 0) return null;
-    const [x, y] = tiles[rng.nextInt(0, tiles.length)];
-    occupied.add(`${x},${y}`);
-    return [x, y];
+    const tiles = openTiles(zone);
+    return tiles.length ? tiles[rng.nextInt(0, tiles.length)] : null;
   };
   const dropItem = (zone) => {
     const t = freeTile(zone);
@@ -84,13 +84,15 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
     for (let i = 0; i < n; i++) dropItem(zone);
   }
 
-  // Creatures: weighted room choice; never on the player's arrival room (stairs-up).
+  // Creatures: weighted room choice; never on the player's arrival room (stairs-up), and only into
+  // rooms that still have an open tile.
   const spawnRooms = zones.filter(z => !z.labels.includes('stairs-up'));
   for (const spec of cfg.creatures) {
     const factory = CREATURE_FACTORIES[spec.type];
     const used = new Set();
     for (let i = 0; i < spec.count; i++) {
-      const candidates = spec.separate ? spawnRooms.filter(z => !used.has(z.id)) : spawnRooms;
+      const candidates = (spec.separate ? spawnRooms.filter(z => !used.has(z.id)) : spawnRooms)
+        .filter(z => openTiles(z).length > 0);
       if (candidates.length === 0) break;
       const room = weightedPick(candidates, spec.weights ?? {}, rng);
       used.add(room.id);

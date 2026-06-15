@@ -55,12 +55,30 @@ describe('carve-rooms stage', () => {
     }
   });
 
-  it('carves exactly one floor component per zone (seams open, gutters separate)', () => {
+  it('carves exactly one floor component per zone (merges joined, gutters separate)', () => {
     for (let seed = 1; seed <= 20; seed++) {
       const level = carve(seed);
       const zones = level.blackboard['level:zones'];
       expect(floorComponents(level)).toBe(zones.length);
     }
+  });
+
+  it('records a room rect per cell with at least the 2x2 minimum floor', () => {
+    const level = carve(1);
+    const rooms = level.blackboard['level:rooms'];
+    const cellCount = level.blackboard['level:zones'].reduce((n, z) => n + z.cells.length, 0);
+    expect(Object.keys(rooms)).toHaveLength(cellCount);
+    for (const r of Object.values(rooms)) {
+      expect(r.x1 - r.x0 + 1).toBeGreaterThanOrEqual(2);
+      expect(r.y1 - r.y0 + 1).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it('varies room sizes across seeds', () => {
+    const floorCount = (lvl) => lvl.tiles.flat().filter(t => t === 'floor').length;
+    const counts = new Set();
+    for (let s = 1; s <= 10; s++) counts.add(floorCount(carve(s)));
+    expect(counts.size).toBeGreaterThan(1);
   });
 
   it('is deterministic for a given seed', () => {

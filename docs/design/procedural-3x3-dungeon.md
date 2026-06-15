@@ -97,6 +97,7 @@ first. The first *playable* checkpoint is step 6.
 | 7 | `carve-halls` stage | For each link, carve a straight cut through the 2-tile gutter at a non-corner shared offset + drop one door at the opening (dog-leg/longer routing deferred with room-size variety) | `level:links` + room tiles → floor tiles, door entities | unit: **single floor component** over 20 seeds (all rooms connected), one door/link on floor, determinism; visual | `stages/stage-carve-halls.js`, `data/pipelines/procedural-3x3.js`, viz | **Done** |
 | 8 | `stairs` stage | Place up/down stairs furniture (`createStairs`, `transition{to:null}`) at the centre floor of the labelled rooms; shares `zone-tiles.js` (centermostFloor) with spawn | `level:zones`/`labels` → entities | unit: one up + one down on floor in their zones, inert transition, determinism; `zone-tiles` helper | `stages/stage-stairs.js`, `world/generation/zone-tiles.js`, `stage-spawn.js` (refactor), config+viz | **Done** |
 | 9 | `populate` + items | Treasure rooms: chest (1–2 items) + 0–1 floor items; item rooms: 1 floor item; orcs (affinity weights treasure/item) and goblins (aversion, separate rooms); never on the stairs-up room, nothing stacked (~3–5 items/level). New items: sword, leather armor, scroll | `level:zones`/`labels` → entities | unit: `weightedPick`, chest counts, creature counts/separation/on-floor/not-on-stairs-up, orc-vs-goblin affinity tendency, determinism; new-item shapes | `stages/stage-populate.js`, `items.js` | **Done** |
+| 10 | Room variety + dog-leg halls (revises 6 & 7) | carve-rooms: per-cell **random** rooms (2×2 floor min → 8×8 max) joined within a zone by grow-to-touch (no intra-zone halls); carve-halls: random non-corner opening on each room's facing wall, **door on both sides**, straight or **Z-bend** corridor through the wider gutter, collisions tolerated. Per-cell room rects recorded in `level:rooms` | `level:zones`/`links` → tiles, doors, `level:rooms` | unit: one floor component per zone (incl. merges), room-rect min size, size variety, whole-level single component, two doors/link, determinism; visual | `stage-carve-rooms.js`, `stage-carve-halls.js` | **Done** |
 
 ### Visualization & debug tooling (step 4)
 
@@ -119,6 +120,41 @@ captured without stages knowing about it.
 **Timing (my call):** slotted at step 4 — after the planner, so the topology view immediately validates
 `label`/`link`, and before carving, so the map view is ready to eyeball the carve stages as we build
 them (it just renders an all-wall grid until tiles exist).
+
+### Room variety & dog-leg halls (step 10)
+
+Revises the realization stages from steps 6–7: rooms become randomly sized/placed, and halls bend.
+
+**carve-rooms — per-cell random rooms, grown to touch within a zone.**
+- For every cell, carve a random floor rectangle: **2×2 floor min**, up to the cell interior (8×8 at
+  cellSize 10), at a random offset. Each room keeps its ≥1-tile gutter on sides facing a *different*
+  zone or the grid edge, so adjacent zones stay ≥2 tiles apart.
+- For each **same-zone seam** (two adjacent cells of one zone), join the rooms with **no corridor**:
+  1. extend both rooms' seam-facing edges to the cell boundary;
+  2. if their perpendicular extents still don't overlap, grow one/both *perpendicular* to the seam
+     (staying inside the cell interior) until they overlap by ≥1;
+  3. open the wall across the full overlap (a wide doorway).
+  Always terminates — same-zone cells share the whole perpendicular band, so an overlap is always
+  reachable in-bounds. Merged zones read as one open joined room (fat rect / L / plus), never "two
+  rooms on a thread." L/T zones (merges>1) fall out: handle each seam independently; growing a room
+  for two seams just enlarges it in two directions.
+- Record each cell's room rectangle to `level:rooms` (keyed by `"c,r"`) for the hall stage.
+
+**carve-halls — doored Z-bend corridors between linked zones.**
+- Per link, pick an adjacent cell-pair + direction. On each room's wall facing the other, pick a
+  random **non-corner** opening and place a **door on both** sides.
+- Route between the openings: straight if aligned, else a **Z-bend** (out across the wider gutter,
+  along, in). Collisions tolerated — floor-over-wall is harmless, crossing a hall merges, a clipped
+  corner just widens an opening; connectivity is unaffected.
+
+**Invariants to keep:** one floor component per zone (carve-rooms, including merges); a single floor
+component for the whole level (carve-halls); two doors per link; determinism.
+
+**Placement (stairs/spawn/populate):** these place entities only within zone **room rectangles**
+(`level:rooms`, via `roomTiles`/`centermostRoomTile`), **not** raw cell floor — otherwise corridor and
+door tiles (also `floor`, also inside a cell) get picked, landing entities in hallways or on doors.
+Populate additionally skips tiles already holding an entity (checked through the spatial index), so
+furniture/creatures never stack on stairs, doors, the entry point, or each other.
 
 ## Protected design space (future coordinator)
 
