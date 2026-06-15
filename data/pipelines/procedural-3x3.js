@@ -10,6 +10,7 @@ export default {
     { type: 'link' },
     { type: 'carveRooms' },
     { type: 'carveHalls' },
+    { type: 'stairs' },
     { type: 'spawn' },
   ],
 };
