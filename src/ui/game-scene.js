@@ -9,6 +9,7 @@ import { createTurnManager } from '../engine/turn-manager.js';
 import { createInputController } from '../engine/input-controller.js';
 import { createActionSystem } from '../actions/action-system.js';
 import { createPlayer } from '../world/player.js';
+import { resolveSpawn } from '../world/spawn.js';
 import { applySenses } from '../ai/planning-context.js';
 import { getTileType } from '../world/tile-registry.js';
 import { gameLog } from '../engine/game-log.js';
@@ -194,9 +195,9 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
             renderer.load(),
           ]);
           level = loaded;
-          const cx = Math.floor(level.width / 2);
-          const cy = Math.floor(level.height / 2);
-          player = await createPlayer(registry, cx, cy);
+          // The player is created here (not by the pipeline); place it at the level's entry point.
+          const spawn = resolveSpawn(registry, level);
+          player = await createPlayer(registry, spawn.x, spawn.y);
           level.placeEntity(player);
           enterMessage = 'You enter the dungeon.';
         }

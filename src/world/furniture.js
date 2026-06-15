@@ -28,6 +28,18 @@ export function createChest(registry, x, y) {
   return entity;
 }
 
+// Stairs are glyph-rendered for now ('<' up, '>' down). `to` is the transition destination,
+// left null by generation; a coordinator wires it once multi-floor levels exist.
+export function createStairs(registry, x, y, direction = 'up', to = null) {
+  const up = direction === 'up';
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name(up ? 'Stairs Up' : 'Stairs Down'));
+  registry.addComponent(entity, 'position', components.position(x, y));
+  registry.addComponent(entity, 'renderable', components.renderable(null, '#888888', up ? '<' : '>', '#dddddd'));
+  registry.addComponent(entity, 'transition', components.transition(to));
+  return entity;
+}
+
 export function createDoor(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Door'));

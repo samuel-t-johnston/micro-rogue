@@ -47,6 +47,14 @@ export const components = {
     return { effectType, params };
   },
 
+  // Marks an entity (which also has a position) as a place the player can arrive on this level.
+  // The game scene places the player on the entryPoint entity (see src/world/spawn.js); if several
+  // exist, one is chosen. Generation drops it (e.g. on the up-stairs); kept separate from the stairs
+  // so pit-arrivals / multi-entry levels can mark other spots. See docs/design/procedural-3x3-dungeon.md.
+  entryPoint() {
+    return {};
+  },
+
   // Marks an entity as equippable in a named slot. Slot names come from data/equipment-slots.js
   // (the Slots enum) — never bare strings — so typos crash at import time.
   // Kept separate from `item` so non-item things (future spells, innate abilities) can also be equipped.
@@ -125,6 +133,13 @@ export const components = {
       visible: new Set(),
       memory: new Map(),
     };
+  },
+
+  // Marks a furniture entity (stairs now; pits, etc. later) as a level exit. `to` is the
+  // destination — left null by generation and filled in by a coordinator once multi-floor exists
+  // (e.g. { branch, depth, entry } or a level id). See docs/design/procedural-3x3-dungeon.md.
+  transition(to = null) {
+    return { to };
   },
 
   turnTaker(speed = 1) {
