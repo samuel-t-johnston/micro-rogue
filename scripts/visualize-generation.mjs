@@ -20,6 +20,8 @@ const PIPELINE = {
     { type: 'roomGridGeometry' },
     { type: 'label' },
     { type: 'link' },
+    { type: 'carveRooms' },
+    { type: 'spawn' },
   ],
 };
 
