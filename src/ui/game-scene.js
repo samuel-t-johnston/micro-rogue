@@ -1,8 +1,8 @@
 import { runPipeline } from '../world/generation/pipeline.js';
-// Procedural dungeon while we build out M5 generation. The static test level
-// (data/pipelines/static-test-level.js) stays in the engine and gets reconnected once level
-// transitions exist; swap the import to play it.
-import proceduralLevel from '../../data/pipelines/procedural-3x3.js';
+// Random-static maze room while we build out M5 generation. Other pipelines (procedural-3x3,
+// static-test-level) stay in the engine and get reconnected once level transitions exist; swap the
+// import to play them.
+import mazeLevel from '../../data/pipelines/random-static-maze.js';
 import { rng } from '../engine/rng.js';
 import { gameConfig } from '../engine/game-config.js';
 import { createRenderer } from '../render/renderer.js';
@@ -194,7 +194,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
           // (branch, depth); the single static level uses (0, 0) until M5 adds transitions.
           const mapgenRng = rng.deriveRng('mapgen', 0, 0);
           const [loaded] = await Promise.all([
-            runPipeline(proceduralLevel, mapgenRng, registry),
+            runPipeline(mazeLevel, mapgenRng, registry),
             renderer.load(),
           ]);
           level = loaded;

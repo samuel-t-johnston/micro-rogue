@@ -42,7 +42,7 @@ Add `createX(registry, x, y)` to [`src/world/creatures.js`](../../src/world/crea
 
 ### 2. Place it on the level
 
-Call the factory and `level.placeEntity(...)`. Today this happens in a generation stage — see [`stage-place-test-entities.js`](../../src/world/generation/stages/stage-place-test-entities.js). Having a `turnTaker` is what gets it into the turn queue automatically.
+Call the factory and `level.placeEntity(...)`. This happens in a generation stage — procedurally in [`stage-populate.js`](../../src/world/generation/stages/stage-populate.js), or from a static layout's authored entities via [`stage-place-static-entities.js`](../../src/world/generation/stages/stage-place-static-entities.js). Having a `turnTaker` is what gets it into the turn queue automatically.
 
 ## Worth knowing
 
