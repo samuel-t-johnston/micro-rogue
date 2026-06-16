@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createBoulder, createDoor } from './furniture.js';
+import { createBoulder, createChest, createDoor } from './furniture.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
 
 describe('createBoulder', () => {
@@ -22,8 +22,17 @@ describe('createBoulder', () => {
     expect(boulder.components.has('opaque')).toBe(true);
   });
 
-  it('is renderable', () => {
-    expect(boulder.components.has('renderable')).toBe(true);
+  it('is renderable with a glyph', () => {
+    expect(boulder.components.get('renderable').glyph).toBe('O');
+  });
+});
+
+describe('createChest', () => {
+  it('is a container and renders with a glyph', () => {
+    const registry = createEntityRegistry();
+    const chest = createChest(registry, 1, 1);
+    expect(chest.components.has('container')).toBe(true);
+    expect(chest.components.get('renderable').glyph).toBe('=');
   });
 });
 
@@ -59,5 +68,9 @@ describe('createDoor', () => {
   it('has distinct closedSprite and openSprite', () => {
     const { closedSprite, openSprite } = door.components.get('openable');
     expect(closedSprite).not.toEqual(openSprite);
+  });
+
+  it('renders with a door glyph', () => {
+    expect(door.components.get('renderable').glyph).toBe('+');
   });
 });

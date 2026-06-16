@@ -1,5 +1,8 @@
 import { runPipeline } from '../world/generation/pipeline.js';
-import staticTestLevel from '../../data/pipelines/static-test-level.js';
+// Procedural dungeon while we build out M5 generation. The static test level
+// (data/pipelines/static-test-level.js) stays in the engine and gets reconnected once level
+// transitions exist; swap the import to play it.
+import proceduralLevel from '../../data/pipelines/procedural-3x3.js';
 import { rng } from '../engine/rng.js';
 import { gameConfig } from '../engine/game-config.js';
 import { createRenderer } from '../render/renderer.js';
@@ -9,6 +12,7 @@ import { createTurnManager } from '../engine/turn-manager.js';
 import { createInputController } from '../engine/input-controller.js';
 import { createActionSystem } from '../actions/action-system.js';
 import { createPlayer } from '../world/player.js';
+import { resolveSpawn } from '../world/spawn.js';
 import { applySenses } from '../ai/planning-context.js';
 import { getTileType } from '../world/tile-registry.js';
 import { gameLog } from '../engine/game-log.js';
@@ -190,13 +194,13 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
           // (branch, depth); the single static level uses (0, 0) until M5 adds transitions.
           const mapgenRng = rng.deriveRng('mapgen', 0, 0);
           const [loaded] = await Promise.all([
-            runPipeline(staticTestLevel, mapgenRng, registry),
+            runPipeline(proceduralLevel, mapgenRng, registry),
             renderer.load(),
           ]);
           level = loaded;
-          const cx = Math.floor(level.width / 2);
-          const cy = Math.floor(level.height / 2);
-          player = await createPlayer(registry, cx, cy);
+          // The player is created here (not by the pipeline); place it at the level's entry point.
+          const spawn = resolveSpawn(registry, level);
+          player = await createPlayer(registry, spawn.x, spawn.y);
           level.placeEntity(player);
           enterMessage = 'You enter the dungeon.';
         }
