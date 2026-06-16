@@ -1,6 +1,7 @@
 import { createLevel } from '../level.js';
 import { run as runStatic } from './stages/stage-static.js';
-import { run as runPlaceTestEntities } from './stages/stage-place-test-entities.js';
+import { run as runRandomStatic } from './stages/stage-random-static.js';
+import { run as runPlaceStaticEntities } from './stages/stage-place-static-entities.js';
 import { run as runRoomGridGeometry } from './stages/stage-room-grid-geometry.js';
 import { run as runLabel } from './stages/stage-label.js';
 import { run as runLink } from './stages/stage-link.js';
@@ -12,7 +13,8 @@ import { run as runPopulate } from './stages/stage-populate.js';
 
 const STAGES = {
   static: runStatic,
-  placeTestEntities: runPlaceTestEntities,
+  randomStatic: runRandomStatic,
+  placeStaticEntities: runPlaceStaticEntities,
   roomGridGeometry: runRoomGridGeometry,
   label: runLabel,
   link: runLink,

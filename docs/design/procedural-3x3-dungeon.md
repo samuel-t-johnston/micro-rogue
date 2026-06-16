@@ -176,7 +176,7 @@ Not building it yet, but holding these so it stays buildable:
 ## Relevant files
 
 - Pipeline runner + stage registry — [`src/world/generation/pipeline.js`](../../src/world/generation/pipeline.js)
-- Existing stages (kept) — [`stage-static.js`](../../src/world/generation/stages/stage-static.js), [`stage-place-test-entities.js`](../../src/world/generation/stages/stage-place-test-entities.js)
+- Existing stages (kept) — [`stage-static.js`](../../src/world/generation/stages/stage-static.js); static layouts place their authored entities via [`stage-place-static-entities.js`](../../src/world/generation/stages/stage-place-static-entities.js) (replaced the dev-only `stage-place-test-entities.js`)
 - Level model (tiles, blackboard, placeEntity, isPassable) — [`src/world/level.js`](../../src/world/level.js)
 - Components — [`src/world/components.js`](../../src/world/components.js)
 - Furniture / items / creatures — [`furniture.js`](../../src/world/furniture.js), [`items.js`](../../src/world/items.js), [`creatures.js`](../../src/world/creatures.js)

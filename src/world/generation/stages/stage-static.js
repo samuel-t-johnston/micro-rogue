@@ -1,21 +1,7 @@
-export async function run(level, stageConfig, _blackboard, _rng) {
-  const url = new URL(`../../../../data/maps/${stageConfig.layout}.js`, import.meta.url);
-  const mod = await import(url.href);
-  const rows = mod.tiles.trim().split('\n');
-  if (rows.length === 0) throw new Error(`Map "${stageConfig.layout}" is empty`);
-  const width = rows[0].length;
-  for (let i = 1; i < rows.length; i++) {
-    if (rows[i].length !== width) {
-      throw new Error(`Map "${stageConfig.layout}" has inconsistent row lengths (row 0: ${width}, row ${i}: ${rows[i].length})`);
-    }
-  }
-  level.height = rows.length;
-  level.width = width;
-  level.tiles = rows.map(row =>
-    [...row].map(char => {
-      const tileId = mod.legend[char];
-      if (!tileId) throw new Error(`Unknown symbol "${char}" in map "${stageConfig.layout}"`);
-      return tileId;
-    })
-  );
+// Structure stage: loads a single fixed map layout. Tiles go straight into the level; the layout's
+// authored entities are stashed on the blackboard for the place-static-entities stage to instantiate.
+import { loadStaticLayout } from '../static-layout.js';
+
+export async function run(level, stageConfig, blackboard) {
+  blackboard['static:entities'] = await loadStaticLayout(stageConfig.layout, level, stageConfig.importLayout);
 }
