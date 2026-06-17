@@ -89,6 +89,10 @@ export function deserializeEntities(serialized, registry) {
 
 export function serializeLevel(level) {
   return {
+    branch: level.branch,
+    depth: level.depth,
+    pipelineId: level.pipelineId,
+    seed: level.seed,
     width: level.width,
     height: level.height,
     tiles: level.tiles.map(row => [...row]),
@@ -101,7 +105,12 @@ export function serializeLevel(level) {
 // Rebuilds a level and re-places its member entities (which must already exist in `registry`).
 // placeEntity() rebuilds the spatial index from each entity's position, so it is never serialized.
 export function deserializeLevel(data, registry) {
-  const level = createLevel();
+  const level = createLevel({
+    branch: data.branch ?? null,
+    depth: data.depth ?? null,
+    pipelineId: data.pipelineId ?? null,
+    seed: data.seed ?? null,
+  });
   level.width = data.width;
   level.height = data.height;
   level.tiles = data.tiles.map(row => [...row]);

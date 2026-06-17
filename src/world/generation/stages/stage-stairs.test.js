@@ -31,7 +31,8 @@ describe('stairs stage', () => {
       const down = stairs.find(s => s.components.get('name') === 'Stairs Down');
       expect(up).toBeTruthy();
       expect(down).toBeTruthy();
-      expect(up.components.get('transition')).toEqual({ to: null });
+      expect(up.components.get('transition')).toEqual({ to: null, port: 'up' });
+      expect(down.components.get('transition')).toEqual({ to: null, port: 'down' });
 
       const cs = bb['level:grid'].cellSize;
       for (const [s, label] of [[up, 'stairs-up'], [down, 'stairs-down']]) {

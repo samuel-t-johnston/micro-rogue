@@ -25,6 +25,7 @@ import {
   loadSavedGame,
 } from './save-system.js';
 import saveV1 from './fixtures/save-v1.json';
+import saveV2 from './fixtures/save-v2.json';
 
 // Builds a realistic game directly (the pipeline's static stage does a dynamic file:// import
 // that vitest's resolver mangles on Windows): a chest with contained items, creatures, map
@@ -150,6 +151,23 @@ describe('serializeGame / deserializeGame round-trip', () => {
     expect(restored.registry.getNextId()).toBe(registry.getNextId());
     expect(restored.registry.getNextId()).toBeGreaterThan(maxId);
   });
+
+  it('round-trips the current node id and frozen floors (model b)', async () => {
+    const { registry, level, player } = await buildGame();
+    // A frozen floor is an opaque already-serialized blob; the save carries it through verbatim.
+    const frozenLevels = {
+      'floor-1': { level: { width: 3, height: 3, tiles: [], entityIds: [] }, entities: [] },
+    };
+    const save = serializeGame({
+      registry, level, player, turnCount: 3, currentNodeId: 'floor-2', frozenLevels,
+    });
+
+    const restored = deserializeGame(JSON.parse(JSON.stringify(save)));
+    expect(restored.currentNodeId).toBe('floor-2');
+    expect(restored.frozenLevels).toEqual(frozenLevels);
+    // The active floor's entities are the only ones in the live registry.
+    expect(restored.registry.getEntity(player.id)).not.toBeNull();
+  });
 });
 
 describe('loadSave migration runner', () => {
@@ -201,14 +219,15 @@ describe('loadSave migration runner', () => {
   });
 });
 
-describe('v1 → v2 migration (real, from a fixture)', () => {
-  it('lifts meta.rngState into meta.streams.gameplay', () => {
+describe('v1 → … migration chain (real, from a fixture)', () => {
+  it('lifts meta.rngState into meta.streams.gameplay (the v1→v2 step) and runs to current', () => {
     const migrated = loadSave(saveV1);
-    expect(migrated.saveVersion).toBe(2);
+    expect(migrated.saveVersion).toBe(SAVE_VERSION);
     expect(migrated.meta.streams).toEqual({ gameplay: saveV1.meta.rngState });
     expect(migrated.meta.rngState).toBeUndefined();
     expect(migrated.meta.seed).toBe(saveV1.meta.seed);
-    expect(migrated.versionHistory).toHaveLength(2);
+    // One history entry per migration step on top of the original.
+    expect(migrated.versionHistory).toHaveLength(SAVE_VERSION);
     expect(migrated.versionHistory[1].saveVersion).toBe(2);
   });
 
@@ -224,6 +243,24 @@ describe('v1 → v2 migration (real, from a fixture)', () => {
     expect(restored.turnCount).toBe(saveV1.meta.turnCount);
     expect(restored.player.components.get('health')).toEqual({ current: 18, max: 20 });
     expect(rng.getMasterSeed()).toBe(saveV1.meta.seed);
+  });
+});
+
+describe('v2 → v3 migration (real, from a fixture)', () => {
+  it('adds the start node id and an empty frozen-levels map', () => {
+    const migrated = loadSave(saveV2);
+    expect(migrated.saveVersion).toBe(3);
+    expect(migrated.currentNodeId).toBe('floor-1');
+    expect(migrated.frozenLevels).toEqual({});
+    // The v2 stream envelope is untouched.
+    expect(migrated.meta.streams).toEqual(saveV2.meta.streams);
+  });
+
+  it('a migrated v2 save deserializes into a live game positioned at the start floor', () => {
+    const restored = deserializeGame(loadSave(saveV2));
+    expect(restored.currentNodeId).toBe('floor-1');
+    expect(restored.frozenLevels).toEqual({});
+    expect(restored.player.id).toBe(saveV2.playerId);
   });
 });
 

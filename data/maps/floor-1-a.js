@@ -18,6 +18,8 @@ export const tiles = `\
 
 export const entities = [
   { type: 'stairsUp', x: 6, y: 4 },
+  { type: 'stairsDown', x: 6, y: 1 }, // upper room, past the door — the descent to floor 2
+
   { type: 'boulder', x: 8, y: 4 },
   { type: 'door', x: 5, y: 3 },
   { type: 'healingPotion', x: 4, y: 4 },

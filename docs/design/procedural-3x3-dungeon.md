@@ -72,10 +72,11 @@ produces stable results.
 
 Added to [`src/world/components.js`](../../src/world/components.js):
 
-- **`transition({ to = null })`** — marks a furniture entity (stairs now; pits, etc. later) as a level
-  exit. `to` is the destination — left **null** by the generator and filled in by a future
-  coordinator (`{ branch, depth, entry }` or a level id). The trigger mechanism (step-on vs tap) is
-  deferred until transitions are wired.
+- **`transition(to = null, port = null)`** — marks a furniture entity (stairs now; pits, etc. later)
+  as a level exit. **`port`** names the exit in the transit map (the stairs' direction, `'up'`/`'down'`),
+  which the dungeon runtime uses to resolve where it leads and where the player arrives. `to` is an
+  optional pre-resolved destination, left **null** in the minimal cut (the transit map resolves
+  destinations dynamically by port). Trigger is **tap-to-interact** (self-interact on the stair).
 - **`entryPoint()`** — tags the entity (with a `position`) where the player arrives.
   [`game-scene`](../../src/ui/game-scene.js) places the player via `getEntitiesWith('entryPoint')`
   instead of the level center; if more than one, pick one (and log). Normally placed on the
@@ -156,20 +157,28 @@ door tiles (also `floor`, also inside a cell) get picked, landing entities in ha
 Populate additionally skips tiles already holding an entity (checked through the spatial index), so
 furniture/creatures never stack on stairs, doors, the entry point, or each other.
 
-## Protected design space (future coordinator)
+## Protected design space (the coordinator)
 
-Not building it yet, but holding these so it stays buildable:
+> **The coordinator now exists** (M5, minimal): the **dungeon planner** — a plain-data transit map
+> plus the level manager. See [dungeon-planner.md](dungeon-planner.md). The invariants below held and
+> are now load-bearing:
 
-- **`(branch, depth)` is an input to generation, never decided by it** — the coordinator assigns it
-  and threads it into `derive('mapgen', branch, depth)`.
-- **`transition.to` stays nullable and coordinator-fillable** — the generator places unwired stairs;
-  pairing them across floors is coordinator policy.
+- **`(branch, depth)` is an input to generation, never decided by it** — the transit map assigns it
+  and the level manager threads it into `derive('mapgen', branch, depth)`. *(Holds as built.)*
+- **`transition` stays coordinator-resolvable** — the generator places unwired stairs; the transit
+  map resolves destinations by **port** (the stairs' direction, on the `transition` component), so
+  `transition.to` stays nullable in the minimal cut. *(Holds as built.)*
 - **No stage sees more than one level** — no cross-floor assumptions anywhere in the pipeline.
+  *(Holds as built.)*
 
 ## Deferred / open
 
-- Level-transition **trigger** (step-on vs tap-to-interact) — decided when transitions are wired.
-- The **coordinator** itself (multi-floor shape, branching, cross-floor stair/pit pairing).
+- ~~Level-transition **trigger** (step-on vs tap-to-interact)~~ — **decided: tap-to-interact**
+  (self-interact on a stair you're standing on), to avoid the bidirectional arrival-bounce. See
+  [dungeon-planner.md](dungeon-planner.md).
+- ~~The **coordinator** itself~~ — **built (minimal):** a linear 3-floor stack. Branching,
+  cross-floor pit pairing, named-port capability contracts, and a transit-map visualizer remain
+  future work (designed in [dungeon-planner.md](dungeon-planner.md)).
 - **Re-entry pipelines** (map-generation.md, Speculative) — simulating time on level reload.
 - A debug **zone/graph overlay** for inspecting the plan — nice-to-have for steps 1–3.
 

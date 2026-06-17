@@ -1,7 +1,16 @@
 import { getTileType } from './tile-registry.js';
 
-export function createLevel() {
+// Identity (branch, depth, pipelineId, seed) is stamped by the pipeline at generation time and
+// carried for the dungeon coordinator + cold storage: `(branch, depth)` keys the level in the
+// transit map and the mapgen RNG; `seed` is the derived generation seed (kept so a frozen level
+// can be reconstructed even if the derivation function later changes). See
+// docs/design/rng-and-determinism.md and docs/design/map-generation.md.
+export function createLevel({ branch = null, depth = null, pipelineId = null, seed = null } = {}) {
   return {
+    branch,
+    depth,
+    pipelineId,
+    seed,
     width: 0,
     height: 0,
     tiles: [],           // tiles[y][x] — tile type id string

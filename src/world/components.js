@@ -135,11 +135,13 @@ export const components = {
     };
   },
 
-  // Marks a furniture entity (stairs now; pits, etc. later) as a level exit. `to` is the
-  // destination — left null by generation and filled in by a coordinator once multi-floor exists
-  // (e.g. { branch, depth, entry } or a level id). See docs/design/procedural-3x3-dungeon.md.
-  transition(to = null) {
-    return { to };
+  // Marks a furniture entity (stairs now; pits, etc. later) as a level exit. `port` names this exit
+  // in the dungeon transit map (the stairs' direction: 'up'/'down') — it's how the dungeon runtime
+  // resolves where the exit leads and where the player arrives. `to` is an optional pre-resolved
+  // destination, left null in the minimal cut (the transit map resolves destinations dynamically by
+  // port). See docs/design/dungeon-planner.md and docs/design/procedural-3x3-dungeon.md.
+  transition(to = null, port = null) {
+    return { to, port };
   },
 
   turnTaker(speed = 1) {

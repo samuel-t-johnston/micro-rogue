@@ -19,7 +19,7 @@ import {
 
 // Bumped only when the save schema changes in a breaking way (see the design doc). The game
 // version is independent and tracks releases; it mirrors package.json.
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 export const GAME_VERSION = '0.0.0';
 
 const SAVE_KEY = 'rogue:save';
@@ -36,6 +36,19 @@ export const migrations = [
     migrate(save) {
       save.meta.streams = { gameplay: save.meta.rngState };
       delete save.meta.rngState;
+      return save;
+    },
+  },
+  {
+    from: 2,
+    to: 3,
+    // v3 adds multi-floor state: the active floor's transit-map node id and the cold-stored frozen
+    // floors. A v2 save is a single-floor game, so it becomes the dungeon's start floor with nothing
+    // frozen. The start node id is a frozen literal here — migrations must not depend on the mutable
+    // transit map (data/transit-map.js), which can change after this migration ships.
+    migrate(save) {
+      save.currentNodeId = 'floor-1';
+      save.frozenLevels = {};
       return save;
     },
   },
@@ -62,7 +75,11 @@ export class MigrationError extends Error {
 
 // Captures a complete, settled game state into a plain JSON-safe object. Callers pass the
 // live pieces explicitly; this module never reaches into game-scene closures.
-export function serializeGame({ registry, level, player, turnCount }) {
+// `currentNodeId` + `frozenLevels` come from the level manager's snapshot (the cross-floor state).
+// Under model (b) the registry holds only the active floor + the player, so `entities` is exactly
+// that; each frozen floor carries its own serialized entities inside its blob. See
+// docs/design/map-generation.md and docs/design/save-system-design.md.
+export function serializeGame({ registry, level, player, turnCount, currentNodeId = null, frozenLevels = {} }) {
   const savedAt = new Date().toISOString();
   return {
     saveVersion: SAVE_VERSION,
@@ -75,7 +92,9 @@ export function serializeGame({ registry, level, player, turnCount }) {
       nextEntityId: registry.getNextId(),
     },
     playerId: player.id,
+    currentNodeId,
     currentLevel: serializeLevel(level),
+    frozenLevels,
     entities: serializeEntities(registry),
   };
 }
@@ -97,7 +116,14 @@ export function deserializeGame(save) {
     ?? registry.getEntitiesWith('playerControlled')[0]
     ?? null;
 
-  return { registry, level, player, turnCount: save.meta.turnCount };
+  return {
+    registry,
+    level,
+    player,
+    turnCount: save.meta.turnCount,
+    currentNodeId: save.currentNodeId ?? null,
+    frozenLevels: save.frozenLevels ?? {},
+  };
 }
 
 // Runs the migration chain against raw (parsed) save data, upgrading it to the current schema.
@@ -131,8 +157,8 @@ export function loadSave(raw) {
 
 // Snapshots a live game and writes it to the single save slot. Thin wrapper so the game
 // scene doesn't have to know the serialize-then-write sequence.
-export function commitSave({ registry, level, player, turnCount }) {
-  writeSave(serializeGame({ registry, level, player, turnCount }));
+export function commitSave({ registry, level, player, turnCount, currentNodeId, frozenLevels }) {
+  writeSave(serializeGame({ registry, level, player, turnCount, currentNodeId, frozenLevels }));
 }
 
 // Reads, migrates, and rehydrates the saved game in one step. Returns the live state

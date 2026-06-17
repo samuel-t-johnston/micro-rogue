@@ -16,6 +16,17 @@ describe('runPipeline', () => {
     expect(level.tiles).toEqual([]);
   });
 
+  it('stamps level identity from the config id, the identity arg, and the rng seed', async () => {
+    const rng = createRng(7);
+    const level = await runPipeline({ id: 'procedural-3x3', stages: [] }, rng, createEntityRegistry(), {
+      identity: { branch: 2, depth: 5 },
+    });
+    expect(level.branch).toBe(2);
+    expect(level.depth).toBe(5);
+    expect(level.pipelineId).toBe('procedural-3x3');
+    expect(level.seed).toBe(rng.getSeed());
+  });
+
   it('fires onStageComplete after each stage, in order, with the level', async () => {
     const config = { stages: [{ type: 'roomGridGeometry' }, { type: 'label' }] };
     const calls = [];

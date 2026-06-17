@@ -11,6 +11,22 @@ describe('createLevel', () => {
     expect(level.entities).toEqual([]);
     expect(level.blackboard).toEqual({});
   });
+
+  it('defaults identity fields to null', () => {
+    const level = createLevel();
+    expect(level.branch).toBeNull();
+    expect(level.depth).toBeNull();
+    expect(level.pipelineId).toBeNull();
+    expect(level.seed).toBeNull();
+  });
+
+  it('stamps identity fields when provided', () => {
+    const level = createLevel({ branch: 1, depth: 2, pipelineId: 'procedural-3x3', seed: 4242 });
+    expect(level.branch).toBe(1);
+    expect(level.depth).toBe(2);
+    expect(level.pipelineId).toBe('procedural-3x3');
+    expect(level.seed).toBe(4242);
+  });
 });
 
 describe('getTile', () => {
