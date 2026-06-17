@@ -1,8 +1,3 @@
-import { runPipeline } from '../world/generation/pipeline.js';
-// Random-static maze room while we build out M5 generation. Other pipelines (procedural-3x3,
-// static-test-level) stay in the engine and get reconnected once level transitions exist; swap the
-// import to play them.
-import mazeLevel from '../../data/pipelines/random-static-maze.js';
 import { rng } from '../engine/rng.js';
 import { gameConfig } from '../engine/game-config.js';
 import { createRenderer } from '../render/renderer.js';
@@ -12,7 +7,9 @@ import { createTurnManager } from '../engine/turn-manager.js';
 import { createInputController } from '../engine/input-controller.js';
 import { createActionSystem } from '../actions/action-system.js';
 import { createPlayer } from '../world/player.js';
-import { resolveSpawn } from '../world/spawn.js';
+import { resolveArrival } from '../world/spawn.js';
+import { createLevelManager } from '../world/level-manager.js';
+import transitMap from '../../data/transit-map.js';
 import { applySenses } from '../ai/planning-context.js';
 import { getTileType } from '../world/tile-registry.js';
 import { gameLog } from '../engine/game-log.js';
@@ -31,9 +28,11 @@ import { buildSupportBundle, downloadSupportBundle } from '../save/support-bundl
 export function createGameScene({ theme, getViewport, onGameOver, onNewGame, startMode = 'new' }) {
   let level = null;
   let player = null;
+  let levelManager = null;
   let turnManager = null;
   let inputController = null;
   let gameOver = false;
+  let transitioning = false;
   let visibilityHandler = null;
 
   let registry = createEntityRegistry();
@@ -92,7 +91,11 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
   // teardown can't race a write.
   function saveGame() {
     if (gameOver || !level || !player) return;
-    commitSave({ registry, level, player, turnCount: turnManager?.playerTurnCount ?? 0 });
+    commitSave({
+      registry, level, player,
+      turnCount: turnManager?.playerTurnCount ?? 0,
+      ...levelManager.snapshot(),
+    });
   }
 
   // Wired into the level by enter(); fired from the death chokepoint when the player's
@@ -106,12 +109,75 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     deathPopup.show();
   }
 
+  // Wires the per-level runtime (senses, camera, input, action system, turn loop) onto the current
+  // `level` and starts the turn loop. Shared by the initial load and every level transition, so the
+  // two paths can't drift. `initialTurnCount` carries the player's turn count across a transition.
+  function mountLevel({ initialTurnCount = 0 } = {}) {
+    level.onPlayerDeath = handlePlayerDeath;
+    level.onTransition = requestTransition;
+    applySenses(player, level);
+
+    const ppos = registry.getComponent(player, 'position');
+    renderer.setCamera(ppos.x, ppos.y);
+
+    inputController = createInputController();
+    const actionSystem = createActionSystem({ level, inputController, registry, dialogController });
+    turnManager = createTurnManager({
+      getActiveEntities: () => registry.getEntitiesWith('turnTaker'),
+      invokeAction: (entity) => actionSystem.invokeAction(entity),
+      onTurnStart: (entity) => { if (entity.components.has('playerControlled')) saveGame(); },
+      initialTurnCount,
+    });
+    gameLog.setTurnProvider(() => turnManager?.playerTurnCount ?? 0);
+    gameLog.setVisibilityProvider(isEntryVisibleToPlayer);
+    turnManager.start();
+  }
+
+  // Wired into each level as `level.onTransition`; fired from the self-interact action when the
+  // player taps the tile they're standing on and it holds stairs. Stops the current turn loop and
+  // defers the actual swap to a macrotask so the in-flight player turn fully unwinds before the
+  // level is frozen out from under it.
+  function requestTransition(transitionEntity) {
+    if (transitioning || gameOver) return;
+    transitioning = true;
+    turnManager?.stop();
+    setTimeout(() => performTransition(transitionEntity), 0);
+  }
+
+  // Freezes the current floor, generates or thaws the destination, lands the player, and remounts
+  // the turn loop on the new floor. A no-op port (an inert/edge stair) just remounts the current
+  // floor so play resumes. Saves once the new floor is settled.
+  async function performTransition(transitionEntity) {
+    try {
+      const port = transitionEntity.components.get('transition').port;
+      const turns = turnManager?.playerTurnCount ?? 0;
+      const newLevel = await levelManager.travel(player, port);
+      if (newLevel) {
+        level = newLevel;
+        // Fog-of-war memory is keyed by tile coords and would otherwise bleed across floors. Each
+        // floor starts unexplored; mountLevel's applySenses repopulates what's visible on arrival.
+        // (Per-floor persistent memory is a deferred enhancement — see dungeon-planner.md.)
+        const tp = player.components.get('tilePerception');
+        if (tp) { tp.visible.clear(); tp.memory.clear(); }
+        gameLog.add({ display: port === 'down' ? 'You descend deeper into the dungeon.' : 'You climb the stairs.' });
+      }
+      mountLevel({ initialTurnCount: turns }); // also re-centres the camera on the player
+      saveGame();
+    } catch (err) {
+      console.error('[game] transition failed:', err);
+    } finally {
+      transitioning = false;
+    }
+  }
+
   // Diagnostic snapshot (save + event log + device info) downloaded for bug reports.
   // Triggered by the hidden '?' key during play; a menu entry is the eventual home.
   function generateSupportBundle() {
     if (!level || !player) return;
     const bundle = buildSupportBundle({
-      registry, level, player, turnCount: turnManager?.playerTurnCount ?? 0,
+      registry, level, player,
+      turnCount: turnManager?.playerTurnCount ?? 0,
+      ...levelManager.snapshot(),
     });
     downloadSupportBundle(bundle);
     console.log('[game] Support bundle generated');
@@ -184,45 +250,35 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
           level = restored.level;
           player = restored.player;
           initialTurnCount = restored.turnCount;
+          // The dungeon runtime re-takes ownership of the active floor and the frozen floors.
+          levelManager = createLevelManager({ registry, transitMap });
+          levelManager.restore({
+            currentNodeId: restored.currentNodeId,
+            level: restored.level,
+            frozenLevels: restored.frozenLevels,
+          });
           enterMessage = 'You return to the dungeon.';
         } else {
           // Fresh master seed per run (gameConfig.seed null → random); recorded by the save so
           // the run is reproducible from it. Loaded games restore their own seed instead.
           rng.init(gameConfig.seed ?? undefined);
-          // Generation draws from its own derived stream, independent of the gameplay stream, so
-          // play never perturbs generation (rng-and-determinism.md). Level identity is
-          // (branch, depth); the single static level uses (0, 0) until M5 adds transitions.
-          const mapgenRng = rng.deriveRng('mapgen', 0, 0);
-          const [loaded] = await Promise.all([
-            runPipeline(mazeLevel, mapgenRng, registry),
+          // The level manager drives the transit map: it generates the start floor (drawing from its
+          // own derived mapgen stream, independent of gameplay — rng-and-determinism.md) and reports
+          // the arrival port.
+          levelManager = createLevelManager({ registry, transitMap });
+          const [{ level: startLevel, arrivalPort }] = await Promise.all([
+            levelManager.start(),
             renderer.load(),
           ]);
-          level = loaded;
-          // The player is created here (not by the pipeline); place it at the level's entry point.
-          const spawn = resolveSpawn(registry, level);
+          level = startLevel;
+          // The player is created here (not by the pipeline); place it at the arrival point.
+          const spawn = resolveArrival(registry, level, arrivalPort);
           player = await createPlayer(registry, spawn.x, spawn.y);
           level.placeEntity(player);
           enterMessage = 'You enter the dungeon.';
         }
 
-        level.onPlayerDeath = handlePlayerDeath;
-        applySenses(player, level);
-
-        const ppos = registry.getComponent(player, 'position');
-        renderer.setCamera(ppos.x, ppos.y);
-
-        inputController = createInputController();
-        const actionSystem = createActionSystem({ level, inputController, registry, dialogController });
-        turnManager = createTurnManager({
-          getActiveEntities: () => registry.getEntitiesWith('turnTaker'),
-          invokeAction: (entity) => actionSystem.invokeAction(entity),
-          // Autosave at the player's turn-start, once the world has fully settled.
-          onTurnStart: (entity) => { if (entity.components.has('playerControlled')) saveGame(); },
-          initialTurnCount,
-        });
-        gameLog.setTurnProvider(() => turnManager?.playerTurnCount ?? 0);
-        gameLog.setVisibilityProvider(isEntryVisibleToPlayer);
-        turnManager.start();
+        mountLevel({ initialTurnCount });
 
         // Mobile kills backgrounded pages without warning — catch the gap between turns.
         visibilityHandler = () => { if (document.visibilityState === 'hidden') saveGame(); };
@@ -327,6 +383,8 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
       turnManager?.stop();
       turnManager = null;
       inputController = null;
+      levelManager = null;
+      transitioning = false;
       level = null;
       player = null;
       animations.reset();

@@ -3,6 +3,7 @@ import { executeSelfInteract } from './action-self-interact.js';
 import { createEntityRegistry } from '../../engine/entity-component-system.js';
 import { createLevel } from '../../world/level.js';
 import { createHealingPotion } from '../../world/items.js';
+import { createStairs } from '../../world/furniture.js';
 
 function makeLevel() {
   const level = createLevel();
@@ -53,5 +54,24 @@ describe('executeSelfInteract', () => {
     await executeSelfInteract(actor, {}, level, registry, dialogController);
 
     expect(level.entities).toContain(potion);
+  });
+
+  it('requests a transition (and consumes the turn) when standing on stairs', async () => {
+    const stairs = createStairs(registry, 2, 2, 'down');
+    level.placeEntity(stairs);
+    let requested = null;
+    level.onTransition = (entity) => { requested = entity; };
+
+    const result = await executeSelfInteract(actor, {}, level, registry, dialogController);
+
+    expect(result).toBe(false); // turn consumed
+    expect(requested).toBe(stairs);
+  });
+
+  it('ignores stairs when no transition handler is wired (returns free action)', async () => {
+    level.placeEntity(createStairs(registry, 2, 2, 'down'));
+    // no level.onTransition
+
+    expect(await executeSelfInteract(actor, {}, level, registry, dialogController)).toBe(true);
   });
 });

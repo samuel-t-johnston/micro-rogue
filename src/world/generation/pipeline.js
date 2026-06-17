@@ -27,8 +27,15 @@ const STAGES = {
 
 // `onStageComplete(stageType, level)` (optional) fires after each stage — a debug seam for the
 // generation visualizer to snapshot the level as it evolves, without stages knowing about it.
-export async function runPipeline(pipelineConfig, rng, registry, { onStageComplete } = {}) {
-  const level = createLevel();
+// `identity` ({ branch, depth }) stamps the level's place in the dungeon; the pipeline id and the
+// rng's derived seed are captured automatically so a frozen level carries its full identity.
+export async function runPipeline(pipelineConfig, rng, registry, { onStageComplete, identity } = {}) {
+  const level = createLevel({
+    branch: identity?.branch ?? null,
+    depth: identity?.depth ?? null,
+    pipelineId: pipelineConfig.id ?? null,
+    seed: rng?.getSeed?.() ?? null,
+  });
 
   for (const stageConfig of pipelineConfig.stages) {
     const run = STAGES[stageConfig.type];

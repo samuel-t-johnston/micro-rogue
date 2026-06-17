@@ -109,11 +109,22 @@ death-delete, support bundle, in-game menu) wire this core into the running game
 - [x] Static structure stage: loads one of N fixed layouts, selection seeded (`randomStatic`)
 - [x] Population stage: places enemies and items based on blackboard tags
 - [x] Finishing stage: entrance/exit placement, ambient detail (rubble, stains)
-- [ ] Level transitions: stairs, freeze current level, load or generate next
-- [ ] Frozen level serialization: full level state including blackboard, restored on return
-- [ ] Multiple floors: at least 3, each generated independently
+- [x] Level transitions: stairs, freeze current level, load or generate next
+- [x] Frozen level serialization: full level state including blackboard, restored on return
+- [x] Multiple floors: at least 3, each generated independently
 
 *Open question: when to introduce procedural structure stages. Validate the pipeline with static layouts first; add procedural generation once the pipeline is stable.*
+
+*Transitions/cold-storage note (landed): a **dungeon planner** ties the floors together. A plain-data
+**transit map** (`data/transit-map.js`) assigns each floor its `(branch, depth)` + pipeline and wires
+the stairs; the **level manager** (`src/world/level-manager.js`) freezes the floor you leave, thaws or
+generates the one you enter, and carries the player (with carried/equipped items) between them. The
+shipped dungeon is a linear 3-floor stack — floor 1 static, floor 2 the random-static mazes, floor 3
+the procedural 3×3 — connected by tap-to-travel stairs. Cold storage uses **model (b)**: only the
+active floor's entities live in the registry. The general connection-contract system (named-port
+capabilities, validation, branching, a transit-map visualizer) is designed in
+[dungeon-planner.md](dungeon-planner.md) but deferred. Save schema bumped v2→v3 (current node +
+frozen floors).*
 
 ---
 

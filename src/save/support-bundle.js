@@ -26,13 +26,13 @@ export function collectDeviceInfo() {
 
 // Assembles the bundle from the live game. Pure data in, JSON-safe data out — reuses
 // serializeGame for the save snapshot so the bundle and the savegame can never disagree.
-export function buildSupportBundle({ registry, level, player, turnCount }) {
+export function buildSupportBundle({ registry, level, player, turnCount, currentNodeId, frozenLevels }) {
   return {
     bundleVersion: SUPPORT_BUNDLE_VERSION,
     generatedAt: new Date().toISOString(),
     gameVersion: GAME_VERSION,
     device: collectDeviceInfo(),
-    save: serializeGame({ registry, level, player, turnCount }),
+    save: serializeGame({ registry, level, player, turnCount, currentNodeId, frozenLevels }),
     log: gameLog.getAll(),
   };
 }

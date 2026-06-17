@@ -28,15 +28,16 @@ export function createChest(registry, x, y) {
   return entity;
 }
 
-// Stairs are glyph-rendered for now ('<' up, '>' down). `to` is the transition destination,
-// left null by generation; a coordinator wires it once multi-floor levels exist.
+// Stairs are glyph-rendered for now ('<' up, '>' down). The transition's `port` is the direction
+// ('up'/'down'), which the dungeon transit map uses to resolve the destination and arrival point.
+// `to` is an optional pre-resolved destination, left null in the minimal cut.
 export function createStairs(registry, x, y, direction = 'up', to = null) {
   const up = direction === 'up';
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name(up ? 'Stairs Up' : 'Stairs Down'));
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'renderable', components.renderable(null, '#888888', up ? '<' : '>', '#dddddd'));
-  registry.addComponent(entity, 'transition', components.transition(to));
+  registry.addComponent(entity, 'transition', components.transition(to, direction));
   return entity;
 }
 

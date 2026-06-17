@@ -98,6 +98,16 @@ Only the current level runs. Other levels are serialized and stored when the pla
 
 Enemies that follow the player through stairs are not serialized with the level — they travel with the player through the transition instead.
 
+> **As-built (M5) — runtime model (b).** Only the **active** floor's entities ever live in the entity
+> registry. Freezing serializes a floor's entities out to a blob and **removes them from the
+> registry**; thawing restores them. This is what lets the registry-global turn manager and sense
+> systems keep working unchanged across floors — they always see exactly one floor + the player. The
+> level now carries its identity (`branch`, `depth`, `pipelineId`, `seed`) so a frozen blob
+> reconstructs without re-deriving. The coordinator that owns all of this — the transit map and the
+> freeze/generate/thaw travel operation — is documented in [dungeon-planner.md](dungeon-planner.md).
+> Code: [`src/world/level-manager.js`](../../src/world/level-manager.js),
+> [`src/world/dungeon/cold-storage.js`](../../src/world/dungeon/cold-storage.js).
+
 ---
 
 ## Speculative: Re-entry Pipelines

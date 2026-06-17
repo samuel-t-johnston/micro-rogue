@@ -11,10 +11,11 @@ function makeEntry(registry, x, y) {
 }
 
 describe('spawn/exit components', () => {
-  it('entryPoint is a tag; transition carries a nullable destination', () => {
+  it('entryPoint is a tag; transition carries a nullable destination and a port', () => {
     expect(components.entryPoint()).toEqual({});
-    expect(components.transition()).toEqual({ to: null });
-    expect(components.transition({ branch: 0, depth: 1 })).toEqual({ to: { branch: 0, depth: 1 } });
+    expect(components.transition()).toEqual({ to: null, port: null });
+    expect(components.transition({ branch: 0, depth: 1 }, 'down'))
+      .toEqual({ to: { branch: 0, depth: 1 }, port: 'down' });
   });
 });
 

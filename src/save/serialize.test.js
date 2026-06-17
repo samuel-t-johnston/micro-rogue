@@ -98,4 +98,20 @@ describe('level serialization', () => {
     // spatial index is rebuilt from positions, never serialized
     expect([...level2.getEntitiesAt(1, 1)]).toContain(mob2);
   });
+
+  it('round-trips level identity (branch, depth, pipelineId, seed)', () => {
+    const level = createLevel({ branch: 1, depth: 3, pipelineId: 'procedural-3x3', seed: 9999 });
+    level.width = 1;
+    level.height = 1;
+    level.tiles = [['floor']];
+
+    const ls = serializeLevel(level);
+    expect(ls).toMatchObject({ branch: 1, depth: 3, pipelineId: 'procedural-3x3', seed: 9999 });
+
+    const level2 = deserializeLevel(JSON.parse(JSON.stringify(ls)), createEntityRegistry());
+    expect(level2.branch).toBe(1);
+    expect(level2.depth).toBe(3);
+    expect(level2.pipelineId).toBe('procedural-3x3');
+    expect(level2.seed).toBe(9999);
+  });
 });

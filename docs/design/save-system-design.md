@@ -139,7 +139,19 @@ to a top-level `player` key to keep it from being serialized into a departing or
 
 Same structure as `currentLevel`. Serialized when the player departs, deserialized on return. Enemies that follow the player through a transition travel with the player, not with the level they left.
 
-> **Forward note (M5, not in v1):** under the as-built model a frozen level is just another
+> **As-built (`frozenLevels` v3, M5) — divergence from the single-flat-list model.** The forward note
+> below imagined frozen levels as `entityIds` blocks pointing into *one* shared top-level `entities`
+> list. The shipped runtime instead uses **model (b)** (see
+> [map-generation.md](map-generation.md), [dungeon-planner.md](dungeon-planner.md)): only the active
+> floor's entities live in the registry, so the top-level `entities` list is the active floor + player
+> only. Each frozen floor is a self-contained blob — `{ level: { … }, entities: [ … ] }` — carrying
+> **its own** serialized entities. `frozenLevels` is a map of `nodeId → blob`; the active floor is
+> identified by a top-level `currentNodeId`. Entity ids stay globally unique because
+> `meta.nextEntityId` is monotonic and saved, so thawing a floor re-registers its ids without
+> colliding with live ones. The save gained `currentNodeId` + `frozenLevels` in the **v2→v3**
+> migration (a v2 single-floor save becomes the start floor with nothing frozen).
+>
+> **Original forward note (superseded):** under the as-built model a frozen level is just another
 > `{ ..., entityIds }` block; the entities it owns live in the single flat top-level `entities` list
 > alongside every other level's, partitioned by which level's `entityIds` references them. The
 > "travels with the player" rule becomes a matter of which level's `entityIds` an entity is listed
