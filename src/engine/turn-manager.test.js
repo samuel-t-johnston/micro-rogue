@@ -111,6 +111,47 @@ describe('createTurnManager', () => {
     });
   });
 
+  describe('decay entities (no turnTaker)', () => {
+    // A decay-only entity rides the queue purely to age; invokeAction does the decrement/destroy.
+    const decayEntity = (id) => ({ id, components: new Map([['decay', { lifespan: 2 }]]) });
+
+    it('calls invokeAction once per pass for a queue member without a turnTaker', async () => {
+      const sound = decayEntity(1);
+      let acts = 0;
+      const tm = createTurnManager({
+        getActiveEntities: () => [sound],
+        invokeAction: async () => { acts++; return false; },
+      });
+      tm.start();
+      await runUntil(tm, () => expect(acts).toBeGreaterThanOrEqual(3));
+      expect(acts).toBeGreaterThanOrEqual(3);
+    });
+
+    it('does not count a decay entity as a player turn', async () => {
+      const sound = decayEntity(1);
+      const tm = createTurnManager({
+        getActiveEntities: () => [sound],
+        invokeAction: async () => false,
+      });
+      tm.start();
+      await runUntil(tm, () => expect(tm.currentEntity).toBe(sound));
+      expect(tm.playerTurnCount).toBe(0);
+    });
+
+    it('keeps processing turnTakers alongside a decay entity', async () => {
+      const sound = decayEntity(1);
+      const creature = makeEntity(2);
+      let creatureActs = 0;
+      const tm = createTurnManager({
+        getActiveEntities: () => [sound, creature],
+        invokeAction: async (e) => { if (e.id === 2) creatureActs++; return false; },
+      });
+      tm.start();
+      await runUntil(tm, () => expect(creatureActs).toBeGreaterThanOrEqual(3));
+      expect(creatureActs).toBeGreaterThanOrEqual(3);
+    });
+  });
+
   describe('onTurnStart', () => {
     it('fires before the entity acts each turn', async () => {
       const entity = makeEntity(1);

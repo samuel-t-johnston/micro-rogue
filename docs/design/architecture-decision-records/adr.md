@@ -246,6 +246,8 @@ Alternatives rejected: Implementing real shadowcast FOV immediately (correct but
 
 Consequences: All entities "know" everything about the world. Stealth, detection, and information asymmetry are not possible until real senses replace mega-vision. The swap is intentionally low-friction: mega-vision's output shape is the interface real senses must match.
 
+Status update (M6): real `vision` is implemented and the player, goblins, and orcs all use it — **no entity uses mega-vision anymore**. It is kept (not deleted) as a debugging tool and as a candidate sense for future very powerful creatures (perfect awareness as a deliberate stat). The low-friction swap the decision predicted held: replacing the sense required no planner changes.
+
 ---
 
 ## ADR-021: Map Tile Data Bypasses Sense Abstraction (Known Deviation)

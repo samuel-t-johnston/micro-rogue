@@ -19,7 +19,7 @@ import {
 
 // Bumped only when the save schema changes in a breaking way (see the design doc). The game
 // version is independent and tracks releases; it mirrors package.json.
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 export const GAME_VERSION = '0.0.0';
 
 const SAVE_KEY = 'rogue:save';
@@ -49,6 +49,29 @@ export const migrations = [
     migrate(save) {
       save.currentNodeId = 'floor-1';
       save.frozenLevels = {};
+      return save;
+    },
+  },
+  {
+    from: 3,
+    to: 4,
+    // v4 splits "is a creature/actor" out of the turnTaker component into a dedicated `creature`
+    // marker (senses now read isActor from it). Through v3, taking turns was synonymous with being
+    // a creature, so every turnTaker entity becomes a creature here — exactly the old semantics.
+    // Only the active floor's entities live at the top level (model b); frozen floors carry their
+    // own entity lists, so migrate those too.
+    migrate(save) {
+      const addCreatureToTurnTakers = (entities) => {
+        for (const entity of entities ?? []) {
+          if (entity.components?.turnTaker && !entity.components.creature) {
+            entity.components.creature = {};
+          }
+        }
+      };
+      addCreatureToTurnTakers(save.entities);
+      for (const floor of Object.values(save.frozenLevels ?? {})) {
+        addCreatureToTurnTakers(floor.entities);
+      }
       return save;
     },
   },

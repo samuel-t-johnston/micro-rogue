@@ -1,0 +1,90 @@
+{
+  "saveVersion": 3,
+  "gameVersion": "0.0.0",
+  "versionHistory": [
+    { "saveVersion": 3, "gameVersion": "0.0.0", "savedAt": "2026-06-14T00:00:00.000Z" }
+  ],
+  "savedAt": "2026-06-14T00:00:00.000Z",
+  "meta": {
+    "seed": 12345,
+    "streams": { "gameplay": 987654321 },
+    "turnCount": 12,
+    "nextEntityId": 5
+  },
+  "playerId": 1,
+  "currentNodeId": "floor-1",
+  "currentLevel": {
+    "branch": "main",
+    "depth": 1,
+    "pipelineId": "static",
+    "seed": 111,
+    "width": 3,
+    "height": 3,
+    "tiles": [
+      ["wall", "wall", "wall"],
+      ["wall", "floor", "wall"],
+      ["wall", "wall", "wall"]
+    ],
+    "overrides": [],
+    "blackboard": {},
+    "entityIds": [1, 2, 3]
+  },
+  "frozenLevels": {
+    "floor-2": {
+      "level": {
+        "branch": "main",
+        "depth": 2,
+        "pipelineId": "static",
+        "seed": 222,
+        "width": 1,
+        "height": 1,
+        "tiles": [["floor"]],
+        "overrides": [],
+        "blackboard": {},
+        "entityIds": [4]
+      },
+      "entities": [
+        {
+          "id": 4,
+          "components": {
+            "name": "Goblin",
+            "position": { "x": 0, "y": 0 },
+            "health": { "current": 5, "max": 5 },
+            "turnTaker": { "speed": 1, "accumulator": 0 },
+            "faction": ["goblins"]
+          }
+        }
+      ]
+    }
+  },
+  "entities": [
+    {
+      "id": 1,
+      "components": {
+        "name": "Player",
+        "position": { "x": 1, "y": 1 },
+        "playerControlled": {},
+        "turnTaker": { "speed": 1, "accumulator": 0 },
+        "health": { "current": 18, "max": 20 }
+      }
+    },
+    {
+      "id": 2,
+      "components": {
+        "name": "Orc",
+        "position": { "x": 1, "y": 1 },
+        "turnTaker": { "speed": 1, "accumulator": 0 },
+        "health": { "current": 9, "max": 9 },
+        "faction": ["orcs"]
+      }
+    },
+    {
+      "id": 3,
+      "components": {
+        "name": "Rusty Dagger",
+        "position": { "x": 1, "y": 1 },
+        "item": { "location": { "type": "map" } }
+      }
+    }
+  ]
+}

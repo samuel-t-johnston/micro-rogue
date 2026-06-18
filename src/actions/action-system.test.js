@@ -86,3 +86,42 @@ describe('invokeAction goal bookkeeping', () => {
     ]);
   });
 });
+
+describe('invokeAction decay handling', () => {
+  let registry, level, system;
+
+  beforeEach(() => {
+    gameLog.reset();
+    registry = createEntityRegistry();
+    level = makeLevel();
+    const inputController = { waitForInput: () => {}, hasPendingInput: () => false };
+    system = createActionSystem({ level, inputController, registry, dialogController: {} });
+  });
+
+  function makeSound(lifespan) {
+    const sound = registry.createEntity();
+    registry.addComponent(sound, 'position', components.position(2, 2));
+    registry.addComponent(sound, 'decay', components.decay(lifespan));
+    level.placeEntity(sound);
+    return sound;
+  }
+
+  it('decrements a decay entity\'s lifespan each turn without destroying it early', async () => {
+    const sound = makeSound(2);
+    await system.invokeAction(sound);
+    expect(sound.components.get('decay').lifespan).toBe(1);
+    expect(registry.getEntity(sound.id)).toBe(sound);
+  });
+
+  it('removes the entity from the level and registry when lifespan reaches 0', async () => {
+    const sound = makeSound(1);
+    await system.invokeAction(sound);
+    expect(registry.getEntity(sound.id)).toBeNull();
+    expect(level.entities).not.toContain(sound);
+  });
+
+  it('returns false (consumes the pass) so the turn loop advances', async () => {
+    const sound = makeSound(2);
+    expect(await system.invokeAction(sound)).toBe(false);
+  });
+});

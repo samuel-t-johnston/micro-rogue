@@ -3,7 +3,7 @@
 // is the product of its labels' weights — >1 attracts, <1 repels). See docs/design/procedural-3x3-dungeon.md.
 import { createChest } from '../../furniture.js';
 import { createHealingPotion, createPotionOfPain, createDagger, createSword, createLeatherArmor, createScroll } from '../../items.js';
-import { createGoblin, createOrc } from '../../creatures.js';
+import { createGoblin, createOrc, createOrcCommander } from '../../creatures.js';
 import { roomTiles } from '../zone-tiles.js';
 
 const ITEM_FACTORIES = {
@@ -15,7 +15,7 @@ const ITEM_FACTORIES = {
   scroll: createScroll,
 };
 const ITEM_POOL = Object.keys(ITEM_FACTORIES);
-const CREATURE_FACTORIES = { goblin: createGoblin, orc: createOrc };
+const CREATURE_FACTORIES = { goblin: createGoblin, orc: createOrc, orcCommander: createOrcCommander };
 
 // Spawn rules (overridable via stageConfig). Creature `weights` are per-label multipliers; a room's
 // pick-weight is the product over its labels (absent labels contribute 1).
@@ -23,6 +23,7 @@ const DEFAULTS = {
   treasureRoom: { chestItems: [1, 2], floorItems: [0, 1] },
   itemRoom: { floorItems: [1, 1] },
   creatures: [
+    { type: 'orcCommander', count: 1, weights: { treasure: 5, item: 2 } },           // leads the orcs
     { type: 'orc', count: 2, weights: { treasure: 5, item: 2 } },                   // affinity
     { type: 'goblin', count: 2, weights: { treasure: 0.2, item: 0.2 }, separate: true }, // aversion, distinct rooms
   ],

@@ -12,7 +12,7 @@ An entity's `senses` component is an ordered list of string keys, resolved throu
 sense(entity, level, turnCount) → SenseResult
 ```
 
-A `SenseResult` is `{ entities, visibleTiles }`, where each observed entity carries `{ entityId, position, confidence, turnObserved, factions, tags }` and `tags` includes `isActor` / `isPlayer`.
+A `SenseResult` is `{ entities, visibleTiles, sounds }`, where each observed entity carries `{ entityId, position, confidence, turnObserved, factions, tags }` and `tags` includes `isActor` / `isPlayer`. `sounds` is optional (omit it and it defaults to empty); see [Hearing and the sounds channel](#hearing-and-the-sounds-channel).
 
 [`planning-context.js`](../../src/ai/planning-context.js) runs every sense each turn, merges the results (highest confidence wins on conflict), updates the entity's `tilePerception`, and exposes the merged view as `context.perception` to goals ([ai-goals.md](ai-goals.md)). **Planners never read the world directly — only what senses report.**
 
@@ -21,14 +21,31 @@ Two senses exist:
 | Sense | Source | Behaviour |
 |---|---|---|
 | `vision` | [`vision.js`](../../src/ai/senses/vision.js) | Shadowcasting FOV; a tile blocks sight if its type is `opaque` or it holds an `opaque` entity. Full detail on what's seen. |
-| `mega-vision` | [`mega-vision.js`](../../src/ai/senses/mega-vision.js) | The complete world state — every positioned entity, no FOV or light gating. For the player and early AI work. |
+| `hearing` | [`hearing.js`](../../src/ai/senses/hearing.js) | Reports **sounds**, not entities — see below. Acuity (range) comes from the hearer's `hearing` component; a sound is audible within `range + sound.volume`. v1 uses straight-line distance (no occlusion). |
+| `mega-vision` | [`mega-vision.js`](../../src/ai/senses/mega-vision.js) | Perfect perception — the complete world state, every positioned entity, no FOV or light gating, confidence 100. **Not currently used by any entity** (the player and NPCs all use `vision`); kept as a debugging tool and a candidate sense for future very powerful creatures. |
 
 ### Current limits
 
-- Only `vision` and `mega-vision` are implemented. Hearing, smell, and darkvision are designed but not built.
+- `vision` and `hearing` are in use; `mega-vision` is implemented but unused (see the table). Smell and darkvision are designed but not built.
 - `confidence` is always `100`; the confidence-weighted reasoning the merge supports isn't exercised yet.
 - `vision` gates on tile **opacity** only — there is no light-level check yet.
 - **Tile data is a known deviation:** pathfinding reads `context.level` directly rather than a sense-filtered "known map" (tracked in ADR-021).
+
+## Hearing and the sounds channel
+
+Hearing is fundamentally unlike the sight senses: it reports **no entities and no visible tiles** — it surfaces *sounds* into the `SenseResult`'s `sounds` array, which `planning-context.js` collects into `context.perception.sounds`. A sound percept is an **imprecise lead**, never an entity sighting:
+
+```js
+{ soundId, sourceId, message, language, understood, perceivedDirection, distance, confidence, turnObserved }
+```
+
+- **`perceivedDirection`** is an 8-way compass direction (`'N'`…`'NW'`), not a position — hearing tells you roughly *where from*, not *where*.
+- **`message`** is the sound's structured semantics (e.g. `{ kind: 'enemy-report', direction: 'NW' }`) — goals act on this, never on parsed text.
+- **`understood`** is whether the hearer's `knownLanguages` decode the sound's `language` (non-verbal sounds are always understood). A goal can require `understood` before obeying; the player UI shows un-understood vocalizations as untranslated noise.
+
+Sounds are emitted as invisible, short-lived entities (`sound` + `decay` + `position`) via [`emitSound`](../../src/world/sounds.js), explicitly from actions (the `shout` action). The turn loop ages `decay` entities and destroys them — they do **not** need a `turnTaker` (and must not have `creature`, or they'd read as actors). See the [sound & hearing how-to](sound.md) for the full flow and the bark example.
+
+Propagation is straight-line range for now; walking-distance + `muffling` (walls block, doors leak) is a planned upgrade internal to `hearing.js` that doesn't touch this contract.
 
 ## Add a new sense
 
@@ -39,5 +56,5 @@ Two senses exist:
 ## Worth knowing
 
 - **Senses are the abstraction boundary.** Blinding, deafening, or confusing a creature is just disabling or corrupting a sense — no special-casing in goals.
-- **`isActor` vs `isPlayer` tags** let goals distinguish creatures from inert scenery/items (an actor has a `turnTaker`); hostility itself is decided from `factions` via `areHostile` (see [`factions.js`](../../src/combat/factions.js)).
+- **`isActor` vs `isPlayer` tags** let goals distinguish creatures from inert scenery/items (an actor has a `creature` component — kept separate from `turnTaker`, which is only about turn order); hostility itself is decided from `factions` via `areHostile` (see [`factions.js`](../../src/combat/factions.js)).
 - **Shape stability matters.** New senses must return the same `SenseResult` shape so the merge and goals need no changes.

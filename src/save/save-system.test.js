@@ -26,6 +26,7 @@ import {
 } from './save-system.js';
 import saveV1 from './fixtures/save-v1.json';
 import saveV2 from './fixtures/save-v2.json';
+import saveV3 from './fixtures/save-v3.json';
 
 // Builds a realistic game directly (the pipeline's static stage does a dynamic file:// import
 // that vitest's resolver mangles on Windows): a chest with contained items, creatures, map
@@ -249,7 +250,8 @@ describe('v1 → … migration chain (real, from a fixture)', () => {
 describe('v2 → v3 migration (real, from a fixture)', () => {
   it('adds the start node id and an empty frozen-levels map', () => {
     const migrated = loadSave(saveV2);
-    expect(migrated.saveVersion).toBe(3);
+    // loadSave runs the full chain to the current version; the v2→v3 effects still hold.
+    expect(migrated.saveVersion).toBe(SAVE_VERSION);
     expect(migrated.currentNodeId).toBe('floor-1');
     expect(migrated.frozenLevels).toEqual({});
     // The v2 stream envelope is untouched.
@@ -261,6 +263,35 @@ describe('v2 → v3 migration (real, from a fixture)', () => {
     expect(restored.currentNodeId).toBe('floor-1');
     expect(restored.frozenLevels).toEqual({});
     expect(restored.player.id).toBe(saveV2.playerId);
+  });
+});
+
+describe('v3 → v4 migration (real, from a fixture)', () => {
+  const findEntity = (entities, id) => entities.find(e => e.id === id);
+
+  it('gives every turnTaker entity a creature marker', () => {
+    const migrated = loadSave(saveV3);
+    expect(migrated.saveVersion).toBe(SAVE_VERSION);
+    // Player (id 1) and orc (id 2) are turnTakers → now creatures.
+    expect(findEntity(migrated.entities, 1).components.creature).toEqual({});
+    expect(findEntity(migrated.entities, 2).components.creature).toEqual({});
+  });
+
+  it('does not mark a non-turnTaker (a floor item) as a creature', () => {
+    const migrated = loadSave(saveV3);
+    expect(findEntity(migrated.entities, 3).components.creature).toBeUndefined();
+  });
+
+  it('also migrates turnTakers inside frozen floors', () => {
+    const migrated = loadSave(saveV3);
+    const frozenGoblin = findEntity(migrated.frozenLevels['floor-2'].entities, 4);
+    expect(frozenGoblin.components.creature).toEqual({});
+  });
+
+  it('a migrated v3 save deserializes into a live game', () => {
+    const restored = deserializeGame(loadSave(saveV3));
+    expect(restored.player.id).toBe(saveV3.playerId);
+    expect(restored.player.components.has('creature')).toBe(true);
   });
 });
 

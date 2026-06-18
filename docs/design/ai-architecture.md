@@ -19,13 +19,13 @@ The AI planner never reads the map directly — only what senses report. This me
 
 ### Sense Types
 
-**Mega-vision** — Returns the complete world state: all entities, their exact positions, and component tags. Confidence is always 100; no FOV or light gating. Used for the player and for early AI development. Designed to be swapped for a real sense with no planner changes — same `SenseResult` shape.
+**Mega-vision** — Returns the complete world state: all entities, their exact positions, and component tags. Confidence is always 100; no FOV or light gating. Originally the bootstrap sense for the player and early AI development; now that real `vision` is implemented, **nothing uses mega-vision** — it is retained as a debugging tool and a candidate sense for future very powerful creatures (perfect awareness as a stat). Same `SenseResult` shape as every other sense, so it drops onto any entity with no planner changes.
 
 **Vision** — FOV algorithm (e.g. shadowcasting) gated by per-tile light level. Full detail on observed entities: exact position, appearance, visible equipment.
 
 **Darkvision** — Same FOV algorithm, skips light check. Silhouette-level detail rather than full.
 
-**Hearing** — Event-based rather than a sweep query. Sounds are emitted into the world with position, volume, and type, then propagate (attenuated by walls and distance). Entities with hearing receive events in range. Gives approximate position and a type hint only — not exact coordinates.
+**Hearing** *(implemented)* — Sounds are emitted into the world as short-lived entities (position, volume, language, structured message), and entities with a `hearing` component perceive those within `range + volume`. Hearing reports **located noise percepts**, not entity sightings: an imprecise compass **direction**, the structured message, and whether the hearer understands its language — never exact coordinates. Percepts land in a dedicated `perception.sounds` channel, separate from entity sightings, and drive direction-based investigate/obey behaviour. (v1 propagation is straight-line; walking-distance attenuation by walls and muffling furniture is a planned internal upgrade. The exact-position variant is deliberately *not* hearing — see Echolocation in the roadmap's deferred list.)
 
 **Smell** — Persistent field model. Entities leave scent trails stored as a sparse map (`{x,y} → {sourceId, intensity, turn}`) that decay over turns. Smell-sensitive creatures can follow trails.
 
@@ -116,7 +116,9 @@ them; see ADR-019 for the related memory-model decision.
 
 ## Squad Coordination and Barks
 
-Squad coordination may be partly handled through the sense system rather than a parallel special-case channel. When an NPC shouts for help, calls for retreat, or a commander issues an order, this spawns a **sound entity** in the world — a bark — that propagates as a hearing event. Other NPCs with hearing in range receive it and can respond by triggering appropriate goals.
+Squad coordination is handled through the sense system rather than a parallel special-case channel. When an NPC shouts for help, calls for retreat, or a commander issues an order, this spawns a **sound entity** in the world — a bark — that propagates as a hearing event. Other NPCs with hearing in range receive it and can respond by triggering appropriate goals.
+
+*(Landed)* The first bark loop ships: an orc commander's `shout-enemy-report` goal emits an orcish enemy report (the `shout` action stamps it with the commander's `voice` language); regular orcs `obey-shouts`, advancing on the understood direction until vision hands off to chase/attack. A creature that doesn't share the language hears the noise but not the meaning — the player, knowing no orcish, just logs "guttural orcish shouting" — so silence/deafen/translate all fall out of the language model with no special-casing.
 
 This means:
 - A deafened soldier doesn't hear the retreat order
