@@ -31,7 +31,7 @@ export function createVisionSense({ range } = {}) {
           isPlayer: e.components.has('playerControlled'),
           // An actor (creature) vs. inert scenery/items — lets goals ignore floor items.
           // Hostility is decided by all goals via the faction list above (see areHostile).
-          isActor: e.components.has('turnTaker'),
+          isActor: e.components.has('creature'),
         },
       });
     }

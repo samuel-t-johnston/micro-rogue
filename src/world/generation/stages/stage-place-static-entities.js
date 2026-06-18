@@ -4,7 +4,7 @@
 // the player's entry point. See docs/howto/static-map-layouts.md.
 import { createStairs, createChest, createBoulder, createDoor } from '../../furniture.js';
 import { createHealingPotion, createPotionOfPain, createDagger, createSword, createLeatherArmor, createScroll } from '../../items.js';
-import { createGoblin, createOrc } from '../../creatures.js';
+import { createGoblin, createOrc, createOrcCommander } from '../../creatures.js';
 import { components } from '../../components.js';
 
 const ITEM_FACTORIES = {
@@ -27,6 +27,7 @@ const FACTORIES = {
   door: createDoor,
   goblin: createGoblin,
   orc: createOrc,
+  orcCommander: createOrcCommander,
   ...ITEM_FACTORIES,
 };
 

@@ -9,8 +9,8 @@ For the design rationale (GOAP inspiration, priority model, memory), see [ai-arc
 Every active entity — **player and NPC alike** — carries an ordered goal stack on its `ai` component, stored as string keys:
 
 ```js
-ai: ['attack-adjacent', 'flee-from-others', 'wander-aimlessly']   // a goblin
-ai: ['player-auto-move', 'player-auto-pickup', 'player-get-input'] // the player
+ai: ['attack-adjacent', 'flee-from-others', 'wander-aimlessly']            // a goblin
+ai: ['player-hear', 'player-auto-move', 'player-auto-pickup', 'player-get-input'] // the player
 ```
 
 **A goal** is an object with a single method:

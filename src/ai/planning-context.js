@@ -14,6 +14,21 @@ function mergeSenseResults(rawResults) {
   return [...byEntityId.values()];
 }
 
+/**
+ * Collects heard sounds across sense results into one list. Sounds are events, not facts to
+ * reconcile like entity sightings, so they're concatenated — deduped by the sound entity's id in
+ * case multiple hearing-type senses report the same sound.
+ */
+function mergeSounds(rawResults) {
+  const bySoundId = new Map();
+  for (const result of rawResults) {
+    for (const sound of result.sounds ?? []) {
+      if (!bySoundId.has(sound.soundId)) bySoundId.set(sound.soundId, sound);
+    }
+  }
+  return [...bySoundId.values()];
+}
+
 // Runs all senses for an entity and updates its tilePerception component.
 // Called by buildPlanningContext each turn and directly for initial FOV setup.
 export function applySenses(entity, level, turnCount = 0) {
@@ -57,6 +72,7 @@ export function buildPlanningContext({ entity, level, inputController, turnCount
     },
     perception: {
       entities: mergeSenseResults(rawResults),
+      sounds: mergeSounds(rawResults),
       visibleTiles: currentVisible,
       knownTiles: tilePerception?.memory ?? new Map(),
     },

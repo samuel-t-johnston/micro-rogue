@@ -11,6 +11,18 @@ export function chebyshevDistance(a, b) {
   return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 }
 
+// The 8-way compass direction from `from` to `to` (e.g. 'N', 'SE'), or null when they coincide.
+// Buckets the bearing into eight 45° sectors. The grid is y-down (tiles[y][x]), so a smaller y is
+// north. Used for imprecise hearing ("a shout somewhere to the NW") — not exact positions.
+const OCTANTS = ['E', 'SE', 'S', 'SW', 'W', 'NW', 'N', 'NE'];
+export function cardinalDirection(from, to) {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  if (dx === 0 && dy === 0) return null;
+  const sector = ((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8) + 8) % 8;
+  return OCTANTS[sector];
+}
+
 // The passable tiles orthogonally or diagonally adjacent to `pos`.
 export function passableNeighbors(pos, level) {
   return DIRECTIONS_8

@@ -13,6 +13,7 @@ A creature is not a class — it's an **entity built from a recipe of components
 | `health` | current / max HP |
 | `attacker` | base (unarmed) attack damage |
 | `faction` | hostility tags — see [`factions.js`](../../src/combat/factions.js) |
+| `creature` | marks it as an actor (a living thing with agency) — the source of the `isActor` sense tag goals use to tell creatures from inert scenery and floor items |
 | `turnTaker` | puts it in the turn queue at a given speed ([turn-order.md](turn-order.md)) |
 | `blocksMovement` | occupies its tile |
 | `inventory` + `wearsEquipment` | can carry and wear items ([item.md](item.md), [equipment.md](equipment.md)) |
@@ -20,6 +21,14 @@ A creature is not a class — it's an **entity built from a recipe of components
 | `senses` + `tilePerception` | perception ([ai-senses.md](ai-senses.md)) |
 | `ai` | the ordered goal stack that drives behaviour ([ai-goals.md](ai-goals.md)) |
 | `renderable` | sprite / glyph |
+
+Optional perception/communication add-ons (the orcs use all three; see `createOrc`/`createOrcCommander`):
+
+| Component | Role |
+|---|---|
+| `hearing` | hearing acuity (range); pairs with the `hearing` sense ([ai-senses.md](ai-senses.md)) |
+| `knownLanguages` | which vocalization languages this creature understands when it hears them |
+| `voice` | the language this creature shouts in — required to use the `shout` action |
 
 The **goal stack is where behaviour lives.** A goblin and an orc share the same component set; the goblin *flees* and the orc *chases* purely because their `ai` lists differ:
 
@@ -50,3 +59,4 @@ Call the factory and `level.placeEntity(...)`. This happens in a generation stag
 - **Behaviour = goal stack order.** To make a creature braver, smarter, or cowardly, reorder or swap its goals; you rarely need new code.
 - **Hostility is faction-derived.** Two entities are friendly if they share a faction tag; a factionless entity reads as hostile to everyone (see [`factions.js`](../../src/combat/factions.js)).
 - **"Monster" is just a synonym.** The codebase says *creature* (the file is `creatures.js`); there's no `monster` concept in code.
+- **`creature` vs `turnTaker` are deliberately separate.** `turnTaker` is about *action order* (anything that needs a turn — including future non-creature timed objects — can have one); `creature` is about *identity* (this is a living actor). Senses derive `isActor` from `creature` alone, so a non-creature that takes turns is never mistaken for a target.

@@ -47,6 +47,24 @@ export const components = {
     return { effectType, params };
   },
 
+  // Marks an entity as a creature (actor) — a living thing with agency, as opposed to inert
+  // scenery, items, or non-acting world objects. This is the source of the `isActor` sense tag
+  // goals use to tell creatures from floor clutter. Kept deliberately separate from `turnTaker`:
+  // taking turns is about participating in action order (a non-creature timed object could also
+  // want that), while being a creature is about identity. Overloading turnTaker for both conflated
+  // the two concepts.
+  creature() {
+    return {};
+  },
+
+  // A naturally limited lifespan, in turns. The turn loop ages a decay entity once per round
+  // (see turn-manager / action-system) and destroys it when lifespan hits 0. Used for transient
+  // world entities that age out on their own — sounds now; gas clouds, timed spell effects later.
+  // A decay entity needs no `turnTaker`: taking turns is about acting, decaying is just aging.
+  decay(lifespan) {
+    return { lifespan };
+  },
+
   // Marks an entity (which also has a position) as a place the player can arrive on this level.
   // The game scene places the player on the entryPoint entity (see src/world/spawn.js); if several
   // exist, one is chosen. Generation drops it (e.g. on the up-stairs); kept separate from the stairs
@@ -73,6 +91,14 @@ export const components = {
     return { current, max };
   },
 
+  // Hearing acuity, paired with the `hearing` sense (in the `senses` list). `range` is how far this
+  // entity hears: a sound is audible when its distance is within `range + sound.volume`. Better ears
+  // = larger range; range 0 (or a missing component) = effectively deaf. Kept as a stat component so
+  // it can be modified (buffs, deafening) independently of the sense faculty itself.
+  hearing(range = 0) {
+    return { range };
+  },
+
   inventory(items = []) {
     return { items };
   },
@@ -81,6 +107,14 @@ export const components = {
   // Map items also carry a position component; the other types do not.
   item(location) {
     return { location };
+  },
+
+  // The set of languages this entity comprehends when it perceives a vocalization (a `sound`
+  // carrying a `language`). A hearer understands a sound iff its language is in this set;
+  // un-understood sounds are still heard (direction + that something was said), just not decoded.
+  // Stored as a plain array so it serializes cleanly; the hearing sense reads it as a lookup.
+  knownLanguages(languages = []) {
+    return [...languages];
   },
 
   memory(initial = {}) {
@@ -126,6 +160,16 @@ export const components = {
     return [...senseNames];
   },
 
+  // An emitted sound, carried by an invisible, short-lived entity (paired with `position` and
+  // `decay`). `sourceId` is the emitter's entity id (a hearer ignores its own sounds; consumers
+  // tolerate a dangling id if the source has since died). `volume` extends how far it carries
+  // (audible when distance <= hearerRange + volume). `language` is the vocalization's language, or
+  // null for non-verbal noise (a clang, a scream). `message` is structured semantics the AI acts on
+  // — e.g. { kind: 'enemy-report', direction: 'NW' } — never raw text; display text is derived.
+  sound({ sourceId = null, volume = 0, language = null, message = null } = {}) {
+    return { sourceId, volume, language, message };
+  },
+
   // Tile-level perception. visible: tiles seen this turn. memory: all ever-seen tiles → tileId.
   // Goals may read memory for navigation; renderer uses both for fog-of-war display.
   tilePerception() {
@@ -146,6 +190,13 @@ export const components = {
 
   turnTaker(speed = 1) {
     return { speed, accumulator: 0 };
+  },
+
+  // The language this entity vocalizes in — the `language` stamped on `sound`s it emits via the
+  // shout action. Its presence is also what makes a creature able to shout at all, so removing it
+  // (silence) cleanly disables coordination without special-casing.
+  voice(language) {
+    return { language };
   },
 
   // An entity that wears equipment. slotNames defines the named slots available on this entity.

@@ -41,19 +41,26 @@ export function createTurnManager({ getActiveEntities, invokeAction, onTurnStart
       currentEntity = entity;
       const turnTaker = entity.components.get('turnTaker');
 
-      turnTaker.accumulator += turnTaker.speed;
+      if (turnTaker) {
+        turnTaker.accumulator += turnTaker.speed;
 
-      if (turnTaker.accumulator >= 1) {
-        while (turnTaker.accumulator >= 1) {
-          turnTaker.accumulator -= 1;
-          onTurnStart?.(entity);
-          const free = await invokeAction(entity);
-          if (free) {
-            turnTaker.accumulator += 1;
-          } else if (entity.components.has('playerControlled')) {
-            playerTurnCount++;
+        if (turnTaker.accumulator >= 1) {
+          while (turnTaker.accumulator >= 1) {
+            turnTaker.accumulator -= 1;
+            onTurnStart?.(entity);
+            const free = await invokeAction(entity);
+            if (free) {
+              turnTaker.accumulator += 1;
+            } else if (entity.components.has('playerControlled')) {
+              playerTurnCount++;
+            }
           }
         }
+      } else {
+        // A queue member without a turnTaker (e.g. a decaying sound) doesn't act on the energy
+        // model — it just gets one pass per round to age. invokeAction handles the decrement and
+        // self-destruct; no accumulator, no onTurnStart, no player-turn accounting.
+        await invokeAction(entity);
       }
 
       queue.push(entity);

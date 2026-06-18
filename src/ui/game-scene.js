@@ -123,7 +123,13 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     inputController = createInputController();
     const actionSystem = createActionSystem({ level, inputController, registry, dialogController });
     turnManager = createTurnManager({
-      getActiveEntities: () => registry.getEntitiesWith('turnTaker'),
+      // Turn-queue membership = takes turns OR decays. turnTakers act on the energy model;
+      // decay entities (sounds, etc.) ride the same queue purely to age out once per round.
+      getActiveEntities: () => {
+        const members = new Set(registry.getEntitiesWith('turnTaker'));
+        for (const e of registry.getEntitiesWith('decay')) members.add(e);
+        return [...members];
+      },
       invokeAction: (entity) => actionSystem.invokeAction(entity),
       onTurnStart: (entity) => { if (entity.components.has('playerControlled')) saveGame(); },
       initialTurnCount,

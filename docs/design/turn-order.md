@@ -11,6 +11,8 @@ Turn order uses a fractional energy accumulator model. Each entity that can act 
 
 The turn queue contains all entities with a `TurnTaker` component on the current level, plus the player. Entities are ordered by insertion time; newly added entities always go to the end.
 
+**Decay entities ride the queue too.** Transient world entities with a `decay` component but no `TurnTaker` (sounds now; gas clouds, timed effects later) are also queue members — purely to age. They don't act on the energy model: each queue pass simply decrements their lifespan and destroys them at 0 (handled in the action system, where the level/registry are in scope). So queue membership is "takes turns *or* decays"; a member without a `TurnTaker` gets one aging pass per round instead of the accumulator loop. This is deliberately separate from `creature` (the actor marker) — decaying is about aging, not acting.
+
 The queue is not authoritative about which entities exist — the entity layer is. The queue is a processing order derived from the entity layer. On each rescan, the queue is reconciled against the entity layer: entities no longer present are removed, entities newly present are added to the end with accumulator starting at 0.
 
 ---

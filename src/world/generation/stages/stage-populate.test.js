@@ -72,7 +72,7 @@ describe('populate stage', () => {
   it('spawns the configured creatures, none on the stairs-up room, none stacked', () => {
     const { level, bb, reg } = generate(2);
     const creatures = reg.getEntitiesWith('ai');
-    expect(creatures).toHaveLength(4); // 2 orcs + 2 goblins
+    expect(creatures).toHaveLength(5); // 1 orc commander + 2 orcs + 2 goblins
 
     const seen = new Set();
     for (const c of creatures) {

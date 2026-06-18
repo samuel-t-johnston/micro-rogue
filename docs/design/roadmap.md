@@ -133,13 +133,27 @@ frozen floors).*
 
 - [ ] GOAP planner: action-space search, goal priority stack, interruption on higher-priority goal
 - [ ] Goal memory: per-goal memory payload with confidence and decay
-- [ ] Hearing sense: sound entities emitted into world, propagation, approximate position result
-- [ ] Smell sense: scent trail field, decay over turns, trail-following behavior
-- [ ] Bark system: NPC shouts route through hearing, other NPCs respond via goal evaluation
+- [x] Hearing sense: sound entities emitted into world, propagation, approximate position result
+- [x] Smell sense: scent trail field, decay over turns, trail-following behavior
+- [x] Bark system: NPC shouts route through hearing, other NPCs respond via goal evaluation
 - [ ] `flee` goal: low-HP retreat behavior
 - [ ] `investigate` goal: pursue uncertain position, decay to patrol
 - [ ] `vendetta` goal: near-zero decay, triggered by being attacked
 - [ ] Full AI state inspector: confidence values, memory payload, all senses
+
+*Hearing/bark note (landed): sounds are invisible, short-lived entities (`sound` + `decay` + `position`)
+emitted explicitly by actions (the `shout` action). The turn loop ages `decay` entities one tick per
+round and destroys them — sounds need no `turnTaker` (decoupled from `creature`, the new actor
+marker). The `hearing` sense reports **located noise percepts** into `perception.sounds` (a new,
+additive SenseResult channel) — never entity sightings — carrying an imprecise compass **direction**
+(not a position), the sound's structured `message`, and whether the hearer's `knownLanguages` decode
+its `language`. Barks are just this: an orc commander's `shout-enemy-report` goal emits an orcish
+enemy report; regular orcs `obey-shouts` toward the understood direction until vision hands off to
+chase/attack; the player logs un-understood shouts as "guttural orcish shouting to the …". Two
+deferrals from the spec: the result is a **direction, not an approximate position** (deliberate — see
+the Echolocation entry under Deferred / Not Scheduled for the precise variant), and propagation is **straight-line
+range** for now — walking-distance + `muffling` (walls block, doors leak) is an internal upgrade to
+the sense that changes no contract. Save schema bumped v3→v4 (the `creature` marker).*
 
 ---
 
@@ -175,5 +189,9 @@ These are explicitly out of scope until a concrete need exists:
 - **Font size preferences** — desktop only, when settings system is built out
 - **ECS component subscription system** — `level.moveEntity()` is the current explicit coordination point for positional changes (ADR-018); extract to a subscription model if multiple independent systems need to react to the same component changes
 - **Long press** - secondary action hook - e.g. radial menu with options, like interact or move on an open door.
+- **Echolocation sense** — a precise hearing-style sense that resolves *exact* source tiles via walking-distance sound propagation (the muffling / weighted path-cost model explored during M6 hearing design). Distinct from ordinary hearing, which deliberately yields only an imprecise direction + a type/classification; echolocation would pinpoint the source. High-detail and arguably more "bat sonar" than human hearing — revisit as a special creature ability or player tool.
+- **Scent masking** — the counterplay to being a trackable scent emitter (see [scent-and-smell.md](scent-and-smell.md)): a way to suppress your own scent deposit, via a consumable (a `scentMask` status) or water terrain (a tile that washes scent). Without it, the only evasion against a scent tracker is distance and putting walls between you; this adds an active, item/terrain-driven option. Deferred from the first smell cut.
+- **Single-minded scent tracker** — a tracker that commits to one quarry's scent and resists distraction by newer/stronger scents (a remembered chosen target), versus the first cut's "follow the strongest enemy scent each turn." Makes elite hunters feel relentless and harder to shake by crossing another creature's trail.
+- **Non-faction scents** — smellable world events beyond creature factions: `blood`, food, smoke. Enables forensic cues ("fresh blood here") and luring/baiting, on the same scent-field machinery.
 - **Goal condition introspection** — a side-effect-free per-goal predicate so the inspector can show met/not-met status per goal without running `evaluate()` (which mutates shared memory). Prerequisite for the full AI state inspector (M6); the M3 goal inspector marks the last-activated goal instead, which needs no introspection interface
 - **Terrain modification** - Tile override layer: `getTile(x,y)` with override-first lookup;

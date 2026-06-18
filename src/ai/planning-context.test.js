@@ -120,4 +120,27 @@ describe('buildPlanningContext', () => {
     expect(ctx.perception.knownTiles).toBe(entity.components.get('tilePerception').memory);
     expect(ctx.perception.knownTiles.get('1,0')).toBe('floor');
   });
+
+  it('collects sounds from sense results into perception.sounds', () => {
+    registerSense('mock-hears', () => ({
+      entities: [], visibleTiles: new Set(), sounds: [{ soundId: 1, message: { kind: 'x' } }],
+    }));
+    const entity = makeEntity({ senses: ['mock-hears'] });
+    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    expect(ctx.perception.sounds).toEqual([{ soundId: 1, message: { kind: 'x' } }]);
+  });
+
+  it('dedupes a sound reported by more than one sense, by soundId', () => {
+    registerSense('mock-hears-a', () => ({ entities: [], visibleTiles: new Set(), sounds: [{ soundId: 5 }] }));
+    registerSense('mock-hears-b', () => ({ entities: [], visibleTiles: new Set(), sounds: [{ soundId: 5 }] }));
+    const entity = makeEntity({ senses: ['mock-hears-a', 'mock-hears-b'] });
+    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    expect(ctx.perception.sounds).toHaveLength(1);
+  });
+
+  it('defaults perception.sounds to empty when no sense reports sounds', () => {
+    const entity = makeEntity({ senses: [makeSense(new Set(['1,0']))] });
+    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    expect(ctx.perception.sounds).toEqual([]);
+  });
 });

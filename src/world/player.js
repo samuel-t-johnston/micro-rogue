@@ -9,6 +9,7 @@ export async function createPlayer(registry, x, y) {
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'health', components.health(20, 20));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
+  registry.addComponent(entity, 'creature', components.creature());
   registry.addComponent(entity, 'playerControlled', components.playerControlled());
   registry.addComponent(entity, 'attacker', components.attacker(1));
   registry.addComponent(entity, 'faction', components.faction(['player']));
@@ -16,9 +17,13 @@ export async function createPlayer(registry, x, y) {
   registry.addComponent(entity, 'inventory', components.inventory());
   registry.addComponent(entity, 'wearsEquipment', components.wearsEquipment(HUMANOID_SLOTS));
   registry.addComponent(entity, 'memory', components.memory());
-  registry.addComponent(entity, 'senses', components.senses(['vision']));
+  registry.addComponent(entity, 'senses', components.senses(['vision', 'hearing']));
+  registry.addComponent(entity, 'hearing', components.hearing(6));
+  // The player starts knowing no other languages — orc shouts read as untranslated noise until a
+  // language is learned (a future hook), which is exactly when the log starts decoding them.
+  registry.addComponent(entity, 'knownLanguages', components.knownLanguages([]));
   registry.addComponent(entity, 'tilePerception', components.tilePerception());
-  registry.addComponent(entity, 'ai', components.ai(['player-auto-move', 'player-auto-pickup', 'player-get-input']));
+  registry.addComponent(entity, 'ai', components.ai(['player-hear', 'player-auto-move', 'player-auto-pickup', 'player-get-input']));
   registry.addComponent(entity, 'renderable', components.renderable(null, '#0a1a0a', '@', '#00cc44'));
   return entity;
 }

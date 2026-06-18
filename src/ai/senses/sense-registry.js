@@ -1,4 +1,5 @@
 import { createVisionSense } from './vision.js';
+import { createHearingSense } from './hearing.js';
 import { megaVision } from './mega-vision.js';
 
 // Maps the string keys stored in an entity's `senses` component to sense functions.
@@ -6,8 +7,9 @@ import { megaVision } from './mega-vision.js';
 // are resolved here when perception runs. No sense currently takes per-entity options,
 // so a single shared instance per name is sufficient. Add new senses to this map.
 const senses = {
-  vision: createVisionSense(),  // FOV gated by tile opacity; full detail on what's seen
-  'mega-vision': megaVision,    // Full world state, confidence 100, no FOV/light gating
+  vision: createVisionSense(),    // FOV gated by tile opacity; full detail on what's seen
+  hearing: createHearingSense(),  // Sounds only (no entities); range from the `hearing` component
+  'mega-vision': megaVision,      // Full world state, confidence 100, no FOV/light gating
 };
 
 // Registers a sense function under a name. Lets new senses (or test doubles) be added
