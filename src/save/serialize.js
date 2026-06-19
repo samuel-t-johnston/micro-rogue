@@ -12,6 +12,7 @@
 // Keeping these as runtime types (refs, Set, Map) is the right call for gameplay hot paths;
 // the conversion lives here at the boundary rather than leaking into the gameplay systems.
 import { createLevel } from '../world/level.js';
+import { serializeScent, deserializeScent } from '../world/scent.js';
 
 // Each codec: serialize(data) -> JSON-safe; deserialize(data, getEntity) -> runtime shape.
 // getEntity(id) resolves an id back to its (already-created) entity during load.
@@ -98,6 +99,7 @@ export function serializeLevel(level) {
     tiles: level.tiles.map(row => [...row]),
     overrides: [...level.overrides],
     blackboard: structuredClone(level.blackboard),
+    scent: serializeScent(level),
     entityIds: level.entities.map(e => e.id),
   };
 }
@@ -116,6 +118,7 @@ export function deserializeLevel(data, registry) {
   level.tiles = data.tiles.map(row => [...row]);
   level.overrides = new Map(data.overrides);
   level.blackboard = structuredClone(data.blackboard);
+  level.scent = deserializeScent(data.scent, data.width, data.height);
   for (const id of data.entityIds) {
     const entity = registry.getEntity(id);
     if (entity) level.placeEntity(entity);

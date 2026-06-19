@@ -1,9 +1,12 @@
 import { computeFov } from '../../engine/fov.js';
 import { getTileType } from '../../world/tile-registry.js';
 
-export function createVisionSense({ range } = {}) {
+export function createVisionSense() {
   return function vision(entity, level, turnCount) {
     const pos = entity.components.get('position');
+    // Acuity from the `vision` component; an undefined range means unlimited sight (computeFov
+    // treats undefined as no limit), preserving the behavior of creatures with no vision component.
+    const range = entity.components.get('vision')?.range;
 
     const visibleTiles = computeFov(pos.x, pos.y, range, (x, y) => {
       const tileId = level.getTile(x, y);

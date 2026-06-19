@@ -131,14 +131,11 @@ frozen floors).*
 ## M6 — Smart Enemies
 *Done when: GOAP planner is in place, multiple sense types work, and squad coordination via barks is functional.*
 
-- [ ] GOAP planner: action-space search, goal priority stack, interruption on higher-priority goal
 - [ ] Goal memory: per-goal memory payload with confidence and decay
 - [x] Hearing sense: sound entities emitted into world, propagation, approximate position result
 - [x] Smell sense: scent trail field, decay over turns, trail-following behavior
 - [x] Bark system: NPC shouts route through hearing, other NPCs respond via goal evaluation
-- [ ] `flee` goal: low-HP retreat behavior
 - [ ] `investigate` goal: pursue uncertain position, decay to patrol
-- [ ] `vendetta` goal: near-zero decay, triggered by being attacked
 - [ ] Full AI state inspector: confidence values, memory payload, all senses
 
 *Hearing/bark note (landed): sounds are invisible, short-lived entities (`sound` + `decay` + `position`)
@@ -154,6 +151,20 @@ deferrals from the spec: the result is a **direction, not an approximate positio
 the Echolocation entry under Deferred / Not Scheduled for the precise variant), and propagation is **straight-line
 range** for now — walking-distance + `muffling` (walls block, doors leak) is an internal upgrade to
 the sense that changes no contract. Save schema bumped v3→v4 (the `creature` marker).*
+
+*Smell/scent note (landed): a per-profile **scent field** lives on the level (`level.scent`,
+`src/world/scent.js`); creatures with a `scentSource` deposit each round, and the field **diffuses +
+decays** so a moving emitter trails a fading wake and the gradient homes on where it is *now*. The
+`smell` sense reports gradient **direction + profile + intensity** into a new `perception.smells`
+channel; the `track-scent` goal climbs the gradient (sits below chase/attack — vision takes over once
+the quarry is seen), and `player-smell` logs notable scents. Diffusion runs in a new first-class
+**per-player-turn upkeep** registry (`src/engine/upkeep.js`) — ordered so scent diffuses before the
+autosave; scent is **saved** with the level (sparse). The centerpiece is that the **player is a
+trackable emitter**: `scuttlers` (a fast, weak, 3-tile-sighted swarm that replaces the goblins in the
+pillars maze) hunt the player's scent through the lattice, silent to smell but noisy to hearing.
+Smell completes a consistency pass — all three senses now read an acuity component
+(`vision`/`hearing`/`smell`). Deferred: scent masking, single-minded trackers, non-faction scents,
+doors-block-scent (see [scent-and-smell.md](scent-and-smell.md)).*
 
 ---
 
@@ -176,7 +187,6 @@ the sense that changes no contract. Save schema bumped v3→v4 (the `creature` m
 
 These are explicitly out of scope until a concrete need exists:
 
-- **Procedural map generation** — design in detail only after static pipeline is stable and playable (see M5 note)
 - **Re-entry pipelines** — simulate time passage on level reload; revisit once real re-entry scenarios exist
 - **ASCII rendering mode** — renderer interface (ADR-003) leaves the hook open; implement only if wanted
 - **Capacitor packaging** — deferred until/unless app store distribution is needed (ADR-001)
@@ -195,3 +205,5 @@ These are explicitly out of scope until a concrete need exists:
 - **Non-faction scents** — smellable world events beyond creature factions: `blood`, food, smoke. Enables forensic cues ("fresh blood here") and luring/baiting, on the same scent-field machinery.
 - **Goal condition introspection** — a side-effect-free per-goal predicate so the inspector can show met/not-met status per goal without running `evaluate()` (which mutates shared memory). Prerequisite for the full AI state inspector (M6); the M3 goal inspector marks the last-activated goal instead, which needs no introspection interface
 - **Terrain modification** - Tile override layer: `getTile(x,y)` with override-first lookup;
+- [ ] `flee` goal: low-HP retreat behavior
+- [ ] GOAP planner: action-space search, goal priority stack, interruption on higher-priority goal

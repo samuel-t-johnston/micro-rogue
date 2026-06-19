@@ -18,7 +18,7 @@ import { gameLog } from '../engine/game-log.js';
 export function createActionSystem({ level, inputController, registry, dialogController }) {
   // Action type → handler lookup. Add new action types here.
   const dispatch = {
-    move:         (entity, action) => executeMove(entity, action, level),
+    move:         (entity, action) => executeMove(entity, action, level, registry),
     interact:     (entity, action) => executeInteract(entity, action, level, registry, dialogController),
     pickup:       (entity, action) => executePickup(entity, action, level, registry),
     selfInteract: (entity, action) => executeSelfInteract(entity, action, level, registry, dialogController),

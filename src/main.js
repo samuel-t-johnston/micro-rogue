@@ -124,6 +124,8 @@ window.addEventListener('keydown', (e) => {
     if (e.key === '`') { debugOverlay.toggle(); return; }
     if (e.key === '1') { debugOverlay.toggleFov(); return; }
     if (e.key === '2') { debugOverlay.togglePassability(); return; }
+    if (e.key === '3') { debugOverlay.toggleScent(); return; }
+    if (e.key === '4') { debugOverlay.toggleSound(); return; }
   }
   appState.handleInput({ type: 'keydown', key: e.key });
 });

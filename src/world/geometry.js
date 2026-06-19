@@ -23,6 +23,12 @@ export function cardinalDirection(from, to) {
   return OCTANTS[sector];
 }
 
+// Unit step for each 8-way compass direction on the y-down grid — the inverse of cardinalDirection.
+// Used by goals that turn a perceived direction (a shouted heading, a scent gradient) into a move.
+export const DIRECTION_STEPS = {
+  N: [0, -1], NE: [1, -1], E: [1, 0], SE: [1, 1], S: [0, 1], SW: [-1, 1], W: [-1, 0], NW: [-1, -1],
+};
+
 // The passable tiles orthogonally or diagonally adjacent to `pos`.
 export function passableNeighbors(pos, level) {
   return DIRECTIONS_8

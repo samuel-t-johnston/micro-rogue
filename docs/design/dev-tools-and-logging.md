@@ -95,12 +95,13 @@ A togglable overlay (keyboard shortcut in development builds; possibly a gesture
 - Tile coordinates on hover
 - Entity IDs and current goal label rendered on the entity
 
-**Togglable sub-layers:**
-- FOV boundary (which tiles are currently visible, which are remembered, which are dark)
-- Passability grid (useful when pathfinding produces unexpected results)
-- Pathfinding visualization for a selected entity — show the path it computed this turn
-- Scent field intensity (heat map overlay for smell-sensitive creatures)
-- Light level per tile (raw value, not just the visible/dark binary)
+**Togglable sub-layers** (toggle the overlay with `` ` ``, then a number key; implemented keys noted):
+- FOV boundary — currently visible / remembered / dark tiles (`1`)
+- Passability grid — useful when pathfinding produces unexpected results (`2`)
+- Scent field heat map — each scent profile a distinct hue, alpha by intensity (`3`)
+- Sound markers — reveals the otherwise-invisible sound entities, with volume reach rings (`4`)
+- Pathfinding visualization for a selected entity — show the path it computed this turn *(not yet built)*
+- Light level per tile (raw value, not just the visible/dark binary) *(not yet built)*
 
 The overlay should be a separate canvas layer composited over the game canvas, not drawn into the main rendering pipeline. This keeps debug rendering out of the release code path entirely.
 

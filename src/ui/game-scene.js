@@ -11,6 +11,8 @@ import { resolveArrival } from '../world/spawn.js';
 import { createLevelManager } from '../world/level-manager.js';
 import transitMap from '../../data/transit-map.js';
 import { applySenses } from '../ai/planning-context.js';
+import { upkeep } from '../engine/upkeep.js';
+import { scentUpkeep, scentAt } from '../world/scent.js';
 import { getTileType } from '../world/tile-registry.js';
 import { gameLog } from '../engine/game-log.js';
 import { isEntryVisible } from '../engine/log-visibility.js';
@@ -122,6 +124,12 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
 
     inputController = createInputController();
     const actionSystem = createActionSystem({ level, inputController, registry, dialogController });
+
+    // Per-player-turn upkeep (see src/engine/upkeep.js). Order matters: scent diffuses before the
+    // autosave so a reload restores the up-to-date field. Steps read the current level from context.
+    upkeep.register('scent', (ctx) => scentUpkeep(ctx.level, ctx.registry));
+    upkeep.register('autosave', () => saveGame());
+
     turnManager = createTurnManager({
       // Turn-queue membership = takes turns OR decays. turnTakers act on the energy model;
       // decay entities (sounds, etc.) ride the same queue purely to age out once per round.
@@ -131,7 +139,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
         return [...members];
       },
       invokeAction: (entity) => actionSystem.invokeAction(entity),
-      onTurnStart: (entity) => { if (entity.components.has('playerControlled')) saveGame(); },
+      onTurnStart: (entity) => { if (entity.components.has('playerControlled')) upkeep.run({ level, registry, player }); },
       initialTurnCount,
     });
     gameLog.setTurnProvider(() => turnManager?.playerTurnCount ?? 0);
@@ -365,7 +373,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
       };
     },
 
-    // Viewport-wide data for the debug overlay's world-space layers (FOV, passability).
+    // Viewport-wide data for the debug overlay's world-space layers (FOV, passability, scent, sound).
     getDebugFrame() {
       if (!level) return null;
       const tp = player?.components.get('tilePerception');
@@ -376,6 +384,21 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
         isPassable: (x, y) => level.isPassable(x, y),
         isVisible: (x, y) => !tp || tp.visible.has(`${x},${y}`),
         isRemembered: (x, y) => tp?.memory.has(`${x},${y}`) ?? false,
+        // Non-zero scent at a tile, per profile (for the heatmap layer).
+        getScent: (x, y) => {
+          if (!level.scent) return [];
+          const cells = [];
+          for (const profile of level.scent.keys()) {
+            const intensity = scentAt(level, profile, x, y);
+            if (intensity > 0) cells.push({ profile, intensity });
+          }
+          return cells;
+        },
+        // The invisible live sound entities (for the sound layer).
+        getSounds: () => registry.getEntitiesWith('sound').map(e => {
+          const pos = e.components.get('position');
+          return { x: pos.x, y: pos.y, volume: e.components.get('sound').volume };
+        }),
       };
     },
 

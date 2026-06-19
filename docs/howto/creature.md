@@ -22,13 +22,17 @@ A creature is not a class — it's an **entity built from a recipe of components
 | `ai` | the ordered goal stack that drives behaviour ([ai-goals.md](ai-goals.md)) |
 | `renderable` | sprite / glyph |
 
-Optional perception/communication add-ons (the orcs use all three; see `createOrc`/`createOrcCommander`):
+Optional perception/communication add-ons (the orcs and the scuttler use these; see `createOrc`/`createOrcCommander`/`createScuttler`):
 
 | Component | Role |
 |---|---|
+| `vision` | sight acuity (range); pairs with the `vision` sense. Omit for unlimited sight |
 | `hearing` | hearing acuity (range); pairs with the `hearing` sense ([ai-senses.md](ai-senses.md)) |
+| `smell` | smell acuity (a detection threshold); pairs with the `smell` sense |
 | `knownLanguages` | which vocalization languages this creature understands when it hears them |
 | `voice` | the language this creature shouts in — required to use the `shout` action |
+| `scentSource` | lays a scent trail others can track ([scent-and-smell.md](../design/scent-and-smell.md)) |
+| `noisyMovement` | sometimes emits a sound when moving (vermin scrabble, clanking armor) |
 
 The **goal stack is where behaviour lives.** A goblin and an orc share the same component set; the goblin *flees* and the orc *chases* purely because their `ai` lists differ:
 

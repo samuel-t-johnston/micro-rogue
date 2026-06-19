@@ -29,7 +29,9 @@ export const entities = [
   { type: 'chest', x: 8, y: 8, contents: ['sword', 'leatherArmor'] },
   { type: 'healingPotion', x: 5, y: 5 },
   { type: 'scroll', x: 9, y: 9 },
-  { type: 'goblin', x: 3, y: 3 },
-  { type: 'goblin', x: 11, y: 3 },
-  { type: 'goblin', x: 7, y: 11 },
+  { type: 'scuttler', x: 3, y: 3 },
+  { type: 'scuttler', x: 11, y: 3 },
+  { type: 'scuttler', x: 7, y: 7 },
+  { type: 'scuttler', x: 3, y: 11 },
+  { type: 'scuttler', x: 11, y: 11 },
 ];
