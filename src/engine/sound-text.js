@@ -29,6 +29,8 @@ function describeWhat({ understood, language, message }) {
       const where = DIRECTION_WORDS[message.direction];
       return where ? `a shout: an enemy to the ${where}` : 'a shouted warning';
     }
+    case 'vermin-scrabble':
+      return 'the scrabbling of vermin';
     default:
       return 'a noise';
   }

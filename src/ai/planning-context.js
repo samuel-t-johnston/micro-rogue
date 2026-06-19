@@ -29,6 +29,18 @@ function mergeSounds(rawResults) {
   return [...bySoundId.values()];
 }
 
+/** Collects heard scents across sense results, keeping the strongest reading per profile. */
+function mergeSmells(rawResults) {
+  const byProfile = new Map();
+  for (const result of rawResults) {
+    for (const smell of result.smells ?? []) {
+      const existing = byProfile.get(smell.profile);
+      if (!existing || smell.intensity > existing.intensity) byProfile.set(smell.profile, smell);
+    }
+  }
+  return [...byProfile.values()];
+}
+
 // Runs all senses for an entity and updates its tilePerception component.
 // Called by buildPlanningContext each turn and directly for initial FOV setup.
 export function applySenses(entity, level, turnCount = 0) {
@@ -73,6 +85,7 @@ export function buildPlanningContext({ entity, level, inputController, turnCount
     perception: {
       entities: mergeSenseResults(rawResults),
       sounds: mergeSounds(rawResults),
+      smells: mergeSmells(rawResults),
       visibleTiles: currentVisible,
       knownTiles: tilePerception?.memory ?? new Map(),
     },

@@ -125,6 +125,14 @@ export const components = {
     return str;
   },
 
+  // Makes an entity sometimes announce itself when it moves: executeMove rolls `chance` against the
+  // shared RNG and, on success, emits a `sound` at the new tile carrying this `message` at `volume`.
+  // Realizes "noisy movement" (vermin scrabbling, clanking armor) — the mover may be silent to smell
+  // but loud to hearing. `message` is structured like any sound (e.g. { kind: 'vermin-scrabble' }).
+  noisyMovement({ chance = 0, volume = 0, message = null } = {}) {
+    return { chance, volume, message };
+  },
+
   opaque() {
     return {};
   },
@@ -153,11 +161,27 @@ export const components = {
     return { sprite, color, glyph, glyphColor, layer };
   },
 
+  // Marks an entity as a scent source: it deposits scent into level.scent each upkeep tick (see
+  // src/world/scent.js). `profile` is the scent's identity — for creatures it's the faction tag, so
+  // a tracker can follow hostile scent via areHostile. `intensity` is how much it lays down per tick
+  // (a stronger-smelling creature leaves a denser trail). Movement isn't required: a stationary
+  // source keeps a local cloud while a moving one trails a fading wake.
+  scentSource({ profile = null, intensity = 0 } = {}) {
+    return { profile, intensity };
+  },
+
   // Ordered list of sense names resolved through src/ai/senses/sense-registry.js.
   // Stored as string keys (not function references) so the component serializes cleanly.
   // Each resolved sense is sense(entity, level, turnCount) → SenseResult.
   senses(senseNames = []) {
     return [...senseNames];
+  },
+
+  // Smell acuity, paired with the `smell` sense. `threshold` is the minimum scent intensity this
+  // entity can detect: a keen nose has a LOW threshold (senses faint, distant scent), a dull one a
+  // high threshold (only strong/near scent). A missing component means no sense of smell at all.
+  smell(threshold = 0) {
+    return { threshold };
   },
 
   // An emitted sound, carried by an invisible, short-lived entity (paired with `position` and
@@ -190,6 +214,14 @@ export const components = {
 
   turnTaker(speed = 1) {
     return { speed, accumulator: 0 };
+  },
+
+  // Vision acuity. `range` is the FOV radius; `undefined` (the default — and the behavior of every
+  // creature predating this component) means unlimited sight. A finite range makes a creature myopic,
+  // so it must lean on other senses (hearing, smell) to track what it can't currently see. Read by
+  // the `vision` sense.
+  vision(range = undefined) {
+    return { range };
   },
 
   // The language this entity vocalizes in — the `language` stamped on `sound`s it emits via the

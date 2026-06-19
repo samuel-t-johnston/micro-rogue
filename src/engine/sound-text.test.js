@@ -23,6 +23,11 @@ describe('describeSound', () => {
     expect(line).toBe('You hear a noise to the south.');
   });
 
+  it('describes a non-verbal movement noise by its kind', () => {
+    const line = describeSound({ perceivedDirection: 'E', language: null, understood: true, message: { kind: 'vermin-scrabble' } });
+    expect(line).toBe('You hear the scrabbling of vermin to the east.');
+  });
+
   it('falls back to "nearby" when there is no direction', () => {
     const line = describeSound({ perceivedDirection: null, language: 'orcish', understood: false });
     expect(line).toBe('You hear guttural orcish shouting nearby.');

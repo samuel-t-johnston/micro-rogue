@@ -143,4 +143,27 @@ describe('buildPlanningContext', () => {
     const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
     expect(ctx.perception.sounds).toEqual([]);
   });
+
+  it('collects smells from sense results into perception.smells', () => {
+    registerSense('mock-smells', () => ({
+      entities: [], visibleTiles: new Set(), smells: [{ profile: 'orcs', intensity: 5 }],
+    }));
+    const entity = makeEntity({ senses: ['mock-smells'] });
+    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    expect(ctx.perception.smells).toEqual([{ profile: 'orcs', intensity: 5 }]);
+  });
+
+  it('keeps the strongest reading when two senses report the same scent profile', () => {
+    registerSense('mock-smell-a', () => ({ entities: [], visibleTiles: new Set(), smells: [{ profile: 'orcs', intensity: 3 }] }));
+    registerSense('mock-smell-b', () => ({ entities: [], visibleTiles: new Set(), smells: [{ profile: 'orcs', intensity: 9 }] }));
+    const entity = makeEntity({ senses: ['mock-smell-a', 'mock-smell-b'] });
+    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    expect(ctx.perception.smells).toEqual([{ profile: 'orcs', intensity: 9 }]);
+  });
+
+  it('defaults perception.smells to empty when no sense reports smells', () => {
+    const entity = makeEntity({ senses: [makeSense(new Set(['1,0']))] });
+    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    expect(ctx.perception.smells).toEqual([]);
+  });
 });

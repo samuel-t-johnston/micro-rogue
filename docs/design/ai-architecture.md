@@ -27,7 +27,7 @@ The AI planner never reads the map directly — only what senses report. This me
 
 **Hearing** *(implemented)* — Sounds are emitted into the world as short-lived entities (position, volume, language, structured message), and entities with a `hearing` component perceive those within `range + volume`. Hearing reports **located noise percepts**, not entity sightings: an imprecise compass **direction**, the structured message, and whether the hearer understands its language — never exact coordinates. Percepts land in a dedicated `perception.sounds` channel, separate from entity sightings, and drive direction-based investigate/obey behaviour. (v1 propagation is straight-line; walking-distance attenuation by walls and muffling furniture is a planned internal upgrade. The exact-position variant is deliberately *not* hearing — see Echolocation in the roadmap's deferred list.)
 
-**Smell** — Persistent field model. Entities leave scent trails stored as a sparse map (`{x,y} → {sourceId, intensity, turn}`) that decay over turns. Smell-sensitive creatures can follow trails.
+**Smell** *(implemented)* — Field model. A per-profile **scent field** lives on the level; creatures with a `scentSource` deposit each round, and the field diffuses + decays, so the gradient homes on an emitter's *current* tile with a fading trail behind a moving one. The `smell` sense reports a gradient **direction + profile + intensity** into a `perception.smells` channel — no entities, no exact position — and trackers (e.g. the eyeless-ish scuttler) climb the gradient. Diffusion runs in the per-player-turn upkeep registry and the field is saved with the level. The player is a `scentSource` too, so scent-hunters track the player *without seeing them* — the centerpiece of the feature.
 
 ### Information Quality
 
@@ -39,7 +39,7 @@ Different senses yield different quality of information:
 | Vision | Exact | Full | High | Blocked by opaque tiles and darkness |
 | Darkvision | Exact | Silhouette | Medium | Blocked by opaque tiles, ignores light |
 | Hearing | Approximate | Type hint | Low | Passes around corners, muffled by walls |
-| Smell | Trail only | ID if known | Low | Follows decay curve over turns |
+| Smell | Direction only | Profile (faction) | Low | Field gradient; homes on the emitter's current tile |
 
 An approximate position is represented as a radius of uncertainty rather than a point. The AI can still act on low-quality information — a creature that hears something can pursue a `investigate` goal toward an uncertain position without knowing exactly where the player is.
 

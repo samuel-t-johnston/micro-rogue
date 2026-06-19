@@ -4,6 +4,8 @@ export function createDebugOverlay({ getViewport }) {
   let visible = false;
   let showFov = false;
   let showPassability = false;
+  let showScent = false;
+  let showSound = false;
   let pointerX = 0;
   let pointerY = 0;
   let pointerInfo = null;
@@ -56,6 +58,54 @@ export function createDebugOverlay({ getViewport }) {
       }
     }
     ctx.stroke();
+  }
+
+  // Deterministic hue per scent profile, so the player's trail and an orc's cloud read distinctly.
+  function scentHue(profile) {
+    let h = 0;
+    for (let i = 0; i < profile.length; i++) h = (h * 31 + profile.charCodeAt(i)) >>> 0;
+    return h % 360;
+  }
+
+  // Scent heatmap: each profile tinted its hue, alpha rising with intensity; profiles blend.
+  function drawScentLayer(frame) {
+    const { worldToScreen, tileSize, bounds, getScent } = frame;
+    const { x0, x1, y0, y1 } = bounds;
+    for (let ty = y0; ty <= y1; ty++) {
+      for (let tx = x0; tx <= x1; tx++) {
+        const cells = getScent(tx, ty);
+        if (cells.length === 0) continue;
+        const { x, y } = worldToScreen(tx, ty);
+        for (const { profile, intensity } of cells) {
+          const a = Math.min(0.6, intensity / 40);
+          ctx.fillStyle = `hsla(${scentHue(profile)}, 85%, 55%, ${a})`;
+          ctx.fillRect(x, y, tileSize, tileSize);
+        }
+      }
+    }
+  }
+
+  // Reveals the otherwise-invisible sound entities: a marker at each sound's tile, a faint ring at
+  // its volume radius (the base reach, before a hearer's own range is added), and the volume.
+  function drawSoundLayer(frame) {
+    const { worldToScreen, tileSize, getSounds } = frame;
+    ctx.font = '10px monospace';
+    for (const s of getSounds()) {
+      const { x, y } = worldToScreen(s.x, s.y);
+      const cx = x + tileSize / 2;
+      const cy = y + tileSize / 2;
+      ctx.strokeStyle = 'rgba(90,200,255,0.35)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(cx, cy, s.volume * tileSize, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(90,200,255,0.9)';
+      ctx.beginPath();
+      ctx.arc(cx, cy, Math.max(3, tileSize * 0.18), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#bfeaff';
+      ctx.fillText(String(s.volume), cx + tileSize * 0.2, cy - tileSize * 0.2);
+    }
   }
 
   function drawTooltip(width, height) {
@@ -119,6 +169,14 @@ export function createDebugOverlay({ getViewport }) {
       showPassability = !showPassability;
     },
 
+    toggleScent() {
+      showScent = !showScent;
+    },
+
+    toggleSound() {
+      showSound = !showSound;
+    },
+
     setPointerPos(x, y, info) {
       pointerX = x;
       pointerY = y;
@@ -130,10 +188,13 @@ export function createDebugOverlay({ getViewport }) {
       ctx.clearRect(0, 0, width, height);
       if (!visible) return;
 
-      const frame = (showFov || showPassability) ? scene?.getDebugFrame?.() : null;
+      const anyWorldLayer = showFov || showPassability || showScent || showSound;
+      const frame = anyWorldLayer ? scene?.getDebugFrame?.() : null;
       if (frame) {
         if (showPassability) drawPassabilityLayer(frame);
+        if (showScent) drawScentLayer(frame);
         if (showFov) drawFovLayer(frame);
+        if (showSound) drawSoundLayer(frame); // markers on top
       }
 
       drawTooltip(width, height);
