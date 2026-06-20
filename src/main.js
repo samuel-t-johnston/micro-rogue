@@ -5,6 +5,7 @@ import { gameSettings } from './engine/settings.js';
 import { createSplashScene } from './ui/splash.js';
 import { createMenuScene } from './ui/game-menu.js';
 import { createGameScene } from './ui/game-scene.js';
+import { createInstructionsScene } from './ui/instructions-scene.js';
 import { createResultsScene } from './ui/results-scene.js';
 import { createDebugOverlay } from './debug/debug-overlay.js';
 
@@ -45,11 +46,18 @@ let lastResults = null;
 // action and read by the GAME scene factory when the transition runs.
 let startMode = 'new';
 
+// Starts a fresh run. Shared by the main-menu "New Game" and the in-game menu's "New Game" so both
+// route through the instructions screen (skipped when the player has opted out); either way the GAME
+// scene starts fresh because startMode is 'new'.
+function startNewGame() {
+  startMode = 'new';
+  appState.transition(gameSettings.get('skipNewGameInstructions') ? AppState.GAME : AppState.INSTRUCTIONS);
+}
+
 function handleMenuAction(id) {
   switch (id) {
     case 'new':
-      startMode = 'new';
-      appState.transition(AppState.GAME);
+      startNewGame();
       break;
     case 'continue':
       startMode = 'continue';
@@ -75,10 +83,14 @@ appState.register(AppState.GAME, () =>
       lastResults = results;
       appState.transition(AppState.RESULTS);
     },
-    onNewGame: () => {
-      startMode = 'new';
-      appState.transition(AppState.GAME);
-    },
+    onNewGame: startNewGame,
+  })
+);
+appState.register(AppState.INSTRUCTIONS, () =>
+  createInstructionsScene({
+    theme,
+    getViewport,
+    onContinue: () => appState.transition(AppState.GAME),
   })
 );
 appState.register(AppState.RESULTS, () =>

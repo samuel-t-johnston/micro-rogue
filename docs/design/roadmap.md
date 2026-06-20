@@ -174,7 +174,7 @@ doors-block-scent (see [scent-and-smell.md](scent-and-smell.md)).*
 - [x] Discrete zoom snap points: 3–4 levels, phone default closer, desktop default wider
 - [x] Message log: expandable overlay, full scrollable history
 - [x] Accessibility: 44×44px tap targets audit, color-not-sole-signal audit, handedness swap setting
-- [ ] Onboarding splash: dismissable, controls summary, hook for downstream content
+- [x] Onboarding splash: dismissable, controls summary, hook for downstream content
 - [x] Win condition - Amulet of Yendor + top stairs
 
 *Service-worker/PWA note (landed): the M0 registration stub is now a real **network-first**
@@ -202,6 +202,18 @@ scales for free. Touch starts closer (48px), desktop wider (32px); session-only,
 Pinch (ratcheted) and scroll-wheel drive it. Tap-to-move moved from `pointerdown` to **release** so
 pinch can coexist with tapping and drag-to-pan has a hook; a tap only starts when a press clears the
 whole UI widget chain. See [zoom.md](../howto/zoom.md).*
+
+---
+
+## M8 — Quality of Life
+
+- [ ] Freeze and thaw previously-seen tiles on level transition
+- [ ] Remember furniture in previously-seen tiles (fog of war)
+- [ ] Click/Tap-and-hold: contextual action menu
+- [ ] "Look at" action - outputs to log, free action
+- [ ] Fix layout bug with hall generation in level 3
+- [ ] Complete sprite and glyph sets for all visible entities
+- [ ] Config: Sprite or Glyph rendering mode
 
 ---
 

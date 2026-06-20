@@ -15,7 +15,16 @@ describe('normalizeSettings', () => {
   });
 
   it('drops unknown keys', () => {
-    expect(normalizeSettings({ handedness: 'left', bogus: 1 })).toEqual({ handedness: 'left' });
+    expect(normalizeSettings({ handedness: 'left', bogus: 1 }))
+      .toEqual({ ...DEFAULT_SETTINGS, handedness: 'left' });
+  });
+
+  it('keeps a valid skipNewGameInstructions boolean', () => {
+    expect(normalizeSettings({ skipNewGameInstructions: true }).skipNewGameInstructions).toBe(true);
+  });
+
+  it('falls back to the default for a non-boolean skipNewGameInstructions', () => {
+    expect(normalizeSettings({ skipNewGameInstructions: 'yes' }).skipNewGameInstructions).toBe(false);
   });
 });
 
@@ -37,6 +46,14 @@ describe('gameSettings store', () => {
     gameSettings.set('handedness', 'left');
     gameSettings.set('handedness', 'nonsense');
     expect(gameSettings.get('handedness')).toBe('left');
+  });
+
+  it('persists skipNewGameInstructions across a load', () => {
+    gameSettings.set('skipNewGameInstructions', true);
+    gameSettings.reset();
+    expect(gameSettings.get('skipNewGameInstructions')).toBe(false); // reset clears in-memory state
+    gameSettings.load();
+    expect(gameSettings.get('skipNewGameInstructions')).toBe(true);
   });
 
   it('falls back to defaults when the store is corrupt', () => {
