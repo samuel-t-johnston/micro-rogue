@@ -21,7 +21,7 @@ character menu. The character menu carries a comment to this effect at its head.
 
 ## Game menu
 
-High-level actions: **New Game**, **Continue**, **Settings** (a sub-page; currently a Handedness toggle).
+High-level actions: **New Game**, **Continue**, **Settings** (a sub-page of label + segmented-control rows).
 
 The list itself lives in one reusable component, [`createMenuShell`](../../src/ui/menu-shell.js) — a
 centered vertical button list that manages a page stack for drill-down. It's mounted in two places:
@@ -79,14 +79,18 @@ for in-game). Each item is either:
 
 ```js
 { id, label, enabled, onSelect }                              // an action row
-{ id, label, enabled, submenu: { title, items, placeholder } } // drills into a sub-page
+{ id, label, enabled, submenu: { title, items, placeholder } } // drills into a sub-page (action list)
+{ id, label, enabled, submenu: { title, rows } }               // drills into a settings sub-page
 ```
 
 `getItems()` is re-read every frame, so `enabled` can reflect live state (that's how Continue tracks
-`hasSave()`). A `submenu` with empty `items` renders its `placeholder` string instead. The Settings
-page is built fresh per open by [`buildSettingsPage`](../../src/ui/game-menu-items.js); its rows are
-plain `onSelect` toggles that flip a setting and rewrite their own `label` (see
-[handedness.md](handedness.md)).
+`hasSave()`). A `submenu` with empty `items` renders its `placeholder` string instead. A submenu
+carrying **`rows`** (not `items`) is a **settings page**: instead of centered buttons it renders
+label + optional description + a right-aligned **segmented control** per row, via
+[`settings-controls.js`](../../src/ui/settings-controls.js). The Settings page is built by
+[`buildSettingsPage`](../../src/ui/game-menu-items.js); each row binds to a setting with
+`get`/`set` and a list of `options` (see [handedness.md](handedness.md)). This keeps the current
+value in the control rather than baked into the label, and leaves room for explanatory text.
 
 **To the character menu** — add a card in `createCharacterMenuRoot`'s `cards` list and a matching
 sub-screen builder in the controller, following the Inventory/Equipment pair.
@@ -103,5 +107,8 @@ sub-screen builder in the controller, following the Inventory/Equipment pair.
   save" would silently discard moves, so it's deliberately not offered.
 - **New Game is guarded.** It confirms before discarding: "Overwrite existing save?" on the main
   menu (only when a save exists), "Abandon current run?" in-game (always).
-- **Settings holds the handedness toggle.** It's the first real setting; the page is the home for
-  future UI preferences (see [handedness.md](handedness.md)).
+- **Settings rows are label + segmented control**, not buttons — a separate layout mode in
+  `menu-shell` (see [`settings-controls.js`](../../src/ui/settings-controls.js)). It holds Handedness
+  and Skip-new-game-instructions today and is the home for future UI preferences; add one by
+  appending a row in [`buildSettingsPage`](../../src/ui/game-menu-items.js) (see
+  [handedness.md](handedness.md)).

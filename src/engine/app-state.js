@@ -5,6 +5,7 @@ import { LayerStack } from '../render/layers.js';
 export const AppState = Object.freeze({
   SPLASH: 'splash',
   MENU: 'menu',
+  INSTRUCTIONS: 'instructions',
   GAME: 'game',
   RESULTS: 'results',
 });

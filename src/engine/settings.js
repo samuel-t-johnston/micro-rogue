@@ -13,6 +13,10 @@ export const DEFAULT_SETTINGS = Object.freeze({
   // 'right' → primary action button bottom-right (default). 'left' → mirror the
   // corner-anchored UI horizontally for left-handed reach. See docs/howto/handedness.md.
   handedness: 'right',
+
+  // When true, the New Game instructions screen is skipped and a new run loads straight into the
+  // game. Toggled from that screen's "Do not display again" checkbox and the Settings menu.
+  skipNewGameInstructions: false,
 });
 
 // Merge a parsed object over the defaults, dropping unknown keys and invalid values. Any
@@ -21,6 +25,9 @@ export function normalizeSettings(raw) {
   const out = { ...DEFAULT_SETTINGS };
   if (raw && (raw.handedness === 'left' || raw.handedness === 'right')) {
     out.handedness = raw.handedness;
+  }
+  if (raw && typeof raw.skipNewGameInstructions === 'boolean') {
+    out.skipNewGameInstructions = raw.skipNewGameInstructions;
   }
   return out;
 }

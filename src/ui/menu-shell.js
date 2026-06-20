@@ -1,4 +1,5 @@
 import { drawText, drawButton, hitTest } from './canvas-ui.js';
+import { layoutSettingsRows, drawSettingsRows, handleSettingsRowsInput } from './settings-controls.js';
 
 // Reusable drill-down menu: a centered vertical list of buttons with optional sub-pages.
 // Used by both the main-menu scene and the in-game menu overlay so they share one list/
@@ -8,7 +9,9 @@ import { drawText, drawButton, hitTest } from './canvas-ui.js';
 // stays current). Each item is either:
 //   { id, label, enabled?, onSelect }                 — an action row
 //   { id, label, enabled?, submenu: { title, items, placeholder } } — drills into a sub-page
-// A sub-page with empty `items` renders its `placeholder` text (the Settings placeholder).
+// A sub-page with empty `items` renders its `placeholder` text. A sub-page carrying `rows` instead
+// of `items` is a settings page, rendered as label/description/segmented-control rows (see
+// settings-controls.js) rather than the centered button list.
 //
 // onClose (optional) marks "overlay mode": the shell dims the scene behind it, shows a ✕ close
 // affordance at the root, and swallows all input (modal). Without it (main-menu scene mode) the
@@ -22,9 +25,12 @@ const MARGIN = 16;
 export function createMenuShell({ theme, getViewport, getItems, onClose = null }) {
   const pages = [];          // sub-page stack; empty === root
   let hoverId = null;
+  let settingsLayout = null; // last render's settings-row geometry, reused for hit-testing
 
   const isRoot = () => pages.length === 0;
-  const currentItems = () => (isRoot() ? getItems() : pages[pages.length - 1].items);
+  const currentPage = () => (isRoot() ? null : pages[pages.length - 1]);
+  const settingsRows = () => currentPage()?.rows ?? null;
+  const currentItems = () => (isRoot() ? getItems() : pages[pages.length - 1].items ?? []);
 
   // Top-left corner button: ✕ to close at the overlay root, ‹ to go back on a sub-page.
   function cornerButton() {
@@ -48,10 +54,10 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
     }));
   }
 
-  function back() { pages.pop(); hoverId = null; }
+  function back() { pages.pop(); hoverId = null; settingsLayout = null; }
 
   return {
-    reset() { pages.length = 0; hoverId = null; },
+    reset() { pages.length = 0; hoverId = null; settingsLayout = null; },
 
     render(ctx) {
       const { width, height } = getViewport();
@@ -75,6 +81,13 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
         drawText(ctx, pages[pages.length - 1].title, width / 2, MARGIN + CORNER_BTN / 2, {
           color: theme.text, size: 22, weight: '700', align: 'center', baseline: 'middle',
         });
+      }
+
+      const rows = settingsRows();
+      if (rows) {
+        settingsLayout = layoutSettingsRows(ctx, getViewport, rows);
+        drawSettingsRows(ctx, theme, settingsLayout);
+        return;
       }
 
       const rects = buttonRects();
@@ -104,6 +117,7 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
 
       if (event.type === 'pointermove') {
         hoverId = null;
+        if (settingsRows()) return false; // segments have no hover state
         for (const r of buttonRects()) {
           if (r.item.enabled !== false && hitTest(r, event.x, event.y)) { hoverId = r.item.id; break; }
         }
@@ -116,6 +130,11 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
       if (corner && hitTest(corner, event.x, event.y)) {
         if (isRoot()) onClose(); else back();
         return true;
+      }
+
+      if (settingsRows()) {
+        if (settingsLayout && handleSettingsRowsInput(settingsLayout, event)) return true;
+        return onClose !== null; // modal in overlay mode; swallow stray taps
       }
 
       for (const r of buttonRects()) {
