@@ -182,6 +182,37 @@ describe('createTurnManager', () => {
     });
   });
 
+  describe('onTurnEnd', () => {
+    it('fires after the entity acts, carrying the action free flag', async () => {
+      const entity = makeEntity(1);
+      const events = [];
+      const tm = createTurnManager({
+        getActiveEntities: () => [entity],
+        onTurnEnd: (e, { free }) => events.push(`end:${e.id}:${free}`),
+        invokeAction: async (e) => { events.push(`act:${e.id}`); return false; },
+      });
+      tm.start();
+      await runUntil(tm, () => expect(events.filter(e => e === 'act:1').length).toBeGreaterThanOrEqual(2));
+      // Every act is immediately followed by an end for the same entity, with the free flag.
+      const firstActIdx = events.indexOf('act:1');
+      expect(events[firstActIdx + 1]).toBe('end:1:false');
+    });
+
+    it('reports free:true for a free action', async () => {
+      const entity = makeEntity(1, 1, true);
+      let call = 0;
+      const frees = [];
+      const tm = createTurnManager({
+        getActiveEntities: () => [entity],
+        onTurnEnd: (_e, { free }) => frees.push(free),
+        invokeAction: async () => call++ < 2, // first 2 free, then non-free so the loop drains and yields
+      });
+      tm.start();
+      await runUntil(tm, () => expect(frees.length).toBeGreaterThanOrEqual(4));
+      expect(frees.slice(0, 3)).toEqual([true, true, false]);
+    });
+  });
+
   describe('initialTurnCount', () => {
     it('seeds playerTurnCount so a loaded game resumes its turn count', async () => {
       const player = makeEntity(1, 1, true);

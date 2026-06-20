@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createHealingPotion, createPotionOfPain, createSword, createLeatherArmor, createScroll } from './items.js';
+import { createHealingPotion, createPotionOfPain, createSword, createLeatherArmor, createScroll, createAmulet } from './items.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
 import { EffectTypes } from '../effects/effects.js';
 import { Slots } from '../../data/equipment-slots.js';
@@ -70,5 +70,12 @@ describe('new items', () => {
     const scroll = createScroll(registry, 1, 1);
     expect(scroll.components.get('consumable').effectType).toBe(EffectTypes.HEAL);
     expect(scroll.components.get('consumable').params.amount).toBe(15);
+  });
+
+  it('amulet is a quest item with no consumable/equippable behavior', () => {
+    const amulet = createAmulet(registry, 1, 1);
+    expect(amulet.components.get('questItem').id).toBe('amulet-of-yendor');
+    expect(amulet.components.has('consumable')).toBe(false);
+    expect(amulet.components.has('equippable')).toBe(false);
   });
 });

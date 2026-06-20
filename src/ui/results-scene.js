@@ -3,28 +3,28 @@ import { drawText } from './canvas-ui.js';
 // Full-screen run-results page, shown after the player dismisses the death popup.
 // Modeled on the splash scene: a top-level AppState scene that fills the viewport.
 //
-// It is intentionally thin: getResults() hands back the final game state captured at
-// death ({ turns, player, level }), and this screen just presents it. New stat lines
-// (kills, depth, cause of death) can be added without touching the death flow.
+// It is intentionally thin: getResults() hands back the final game state captured at the end of the
+// run ({ outcome, message, turns, player, level }), and this screen just presents it. New stat lines
+// (kills, depth, cause of death) can be added without touching the end-of-run flow.
 const LINE_H = 32;
+const HEADINGS = { win: 'Victory', lose: 'Defeat' };
 
 export function createResultsScene({ theme, getViewport, getResults, onContinue }) {
-  function lines() {
-    const results = getResults?.() ?? {};
+  function lines(results) {
     return [
+      results.message || (results.outcome === 'win' ? 'You escaped the dungeon.' : 'You died in the dungeon.'),
       `Turns: ${results.turns ?? 0}`,
-      '…',
-      '…',
     ];
   }
 
   return {
     render(ctx) {
       const { width, height } = getViewport();
+      const results = getResults?.() ?? {};
       ctx.fillStyle = theme.bg;
       ctx.fillRect(0, 0, width, height);
 
-      drawText(ctx, 'Results', width / 2, Math.round(height * 0.22), {
+      drawText(ctx, HEADINGS[results.outcome] ?? 'Results', width / 2, Math.round(height * 0.22), {
         color: theme.text,
         size: 48,
         weight: '700',
@@ -32,7 +32,7 @@ export function createResultsScene({ theme, getViewport, getResults, onContinue 
         baseline: 'middle',
       });
 
-      const rows = lines();
+      const rows = lines(results);
       const startY = Math.round(height * 0.4);
       const colX = Math.round(width / 2 - 100);
       rows.forEach((line, i) => {

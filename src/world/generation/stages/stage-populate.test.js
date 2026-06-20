@@ -7,7 +7,7 @@ import { run as runCarveHalls } from './stage-carve-halls.js';
 import { run as runStairs } from './stage-stairs.js';
 import { run as runSpawn } from './stage-spawn.js';
 import { run as runPopulate, weightedPick } from './stage-populate.js';
-import { roomTiles } from '../zone-tiles.js';
+import { roomTiles, centermostRoomTile } from '../zone-tiles.js';
 import { createLevel } from '../../level.js';
 import { createEntityRegistry } from '../../../engine/entity-component-system.js';
 import { createRng } from '../../../engine/rng.js';
@@ -127,6 +127,31 @@ describe('populate stage', () => {
       }
       expect(new Set(blockers).size).toBe(blockers.length); // no two blockers share a tile
     }
+  });
+
+  it('places one Amulet of Yendor on the amulet room when the label is present', () => {
+    const level = createLevel();
+    const reg = createEntityRegistry();
+    const bb = level.blackboard;
+    const labels = ['stairs-up', 'stairs-down', 'treasure', 'item', 'item', 'amulet'];
+    runRoomGridGeometry(level, {}, bb, createRng(3));
+    runLabel(level, { labels }, bb, createRng(3));
+    runCarveRooms(level, {}, bb, createRng(3));
+    runPopulate(level, {}, bb, createRng(3), reg);
+
+    const amulets = reg.getEntitiesWith('questItem')
+      .filter(e => e.components.get('questItem').id === 'amulet-of-yendor');
+    expect(amulets).toHaveLength(1);
+
+    const amuletZone = bb['level:zones'].find(z => z.labels.includes('amulet'));
+    const tile = centermostRoomTile(amuletZone, bb['level:rooms']);
+    const pos = amulets[0].components.get('position');
+    expect([pos.x, pos.y]).toEqual(tile);
+  });
+
+  it('places no amulet when the amulet label is absent', () => {
+    const { reg } = generate(3); // default labels, no 'amulet'
+    expect(reg.getEntitiesWith('questItem')).toHaveLength(0);
   });
 
   it('is deterministic for a given seed', () => {

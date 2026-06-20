@@ -2,9 +2,9 @@
 // floor items; item rooms get floor items; creatures pick rooms by affinity weights (a room's weight
 // is the product of its labels' weights — >1 attracts, <1 repels). See docs/design/procedural-3x3-dungeon.md.
 import { createChest } from '../../furniture.js';
-import { createHealingPotion, createPotionOfPain, createDagger, createSword, createLeatherArmor, createScroll } from '../../items.js';
+import { createHealingPotion, createPotionOfPain, createDagger, createSword, createLeatherArmor, createScroll, createAmulet } from '../../items.js';
 import { createGoblin, createOrc, createOrcCommander } from '../../creatures.js';
-import { roomTiles } from '../zone-tiles.js';
+import { roomTiles, centermostRoomTile } from '../zone-tiles.js';
 
 const ITEM_FACTORIES = {
   healingPotion: createHealingPotion,
@@ -83,6 +83,16 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
   for (const zone of zones.filter(z => z.labels.includes('item'))) {
     const n = randInt(cfg.itemRoom.floorItems, rng);
     for (let i = 0; i < n; i++) dropItem(zone);
+  }
+
+  // Amulet of Yendor: the win objective. Placed on the centermost tile of the 'amulet' zone —
+  // deterministic and guaranteed (unlike a random free tile that could come up empty), since the
+  // game is unwinnable without it. Placed before creatures so it reserves its tile. Floors without
+  // the 'amulet' label (every floor but the deepest) simply skip this.
+  for (const zone of zones.filter(z => z.labels.includes('amulet'))) {
+    const t = centermostRoomTile(zone, rooms);
+    if (t) level.placeEntity(createAmulet(registry, t[0], t[1]));
+    else console.warn('[populate] amulet zone has no room; Amulet not placed');
   }
 
   // Creatures: weighted room choice; never on the player's arrival room (stairs-up), and only into

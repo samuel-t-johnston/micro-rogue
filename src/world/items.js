@@ -97,6 +97,21 @@ export function createLeatherArmor(registry, x, y, entityId) {
   return entity;
 }
 
+// The Amulet of Yendor — the classic win objective. A plain carried item: no consumable/equippable
+// behavior, just a questItem tag the win condition keys on. Glyph-rendered ('"', gold) for now.
+export function createAmulet(registry, x, y, entityId) {
+  const location = resolveItemLocation(registry, x, y, entityId);
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name('Amulet of Yendor'));
+  registry.addComponent(entity, 'renderable', components.renderable(null, '#101010', '"', '#ffd700', RenderLayers.ITEM));
+  registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(entity, 'questItem', components.questItem('amulet-of-yendor'));
+  if (location.type === 'map') {
+    registry.addComponent(entity, 'position', components.position(x, y));
+  }
+  return entity;
+}
+
 export function createScroll(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();

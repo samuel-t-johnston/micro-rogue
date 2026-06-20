@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createDeathPopup } from './death-popup.js';
+import { createOutcomePopup } from './outcome-popup.js';
 
 const theme = {
   bg: '#000', surface: '#111', primary: '#444', accent: '#888',
@@ -27,12 +27,12 @@ function makeCtx() {
 const NEXT_X = 400;
 const NEXT_Y = 340;
 
-describe('death popup', () => {
+describe('outcome popup', () => {
   let popup, nextCount;
 
   beforeEach(() => {
     nextCount = 0;
-    popup = createDeathPopup({ theme, getViewport, onNext: () => { nextCount++; } });
+    popup = createOutcomePopup({ theme, getViewport, onNext: () => { nextCount++; } });
   });
 
   it('starts hidden', () => {
@@ -40,8 +40,13 @@ describe('death popup', () => {
   });
 
   it('show() makes it visible and render() does not throw', () => {
-    popup.show();
+    popup.show('lose');
     expect(popup.isVisible).toBe(true);
+    expect(() => popup.render(makeCtx())).not.toThrow();
+  });
+
+  it('renders without throwing for a win outcome', () => {
+    popup.show('win');
     expect(() => popup.render(makeCtx())).not.toThrow();
   });
 

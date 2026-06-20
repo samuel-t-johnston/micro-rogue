@@ -6,9 +6,11 @@
 // swapped without touching the action system or entity layer.
 // `onTurnStart(entity)` fires the instant before an entity acts — every other entity has
 // resolved since it last acted, so the world is fully settled. The autosave hook uses it to
-// snapshot at the player's turn-start. `initialTurnCount` seeds the player turn count when a
-// game is loaded from a save (fresh games pass 0).
-export function createTurnManager({ getActiveEntities, invokeAction, onTurnStart, initialTurnCount = 0 }) {
+// snapshot at the player's turn-start. `onTurnEnd(entity, { free })` fires symmetrically the instant
+// after the entity's action resolves (`free` is the action's free-action flag); the win-condition
+// check rides it to evaluate at the end of each player turn. `initialTurnCount` seeds the player
+// turn count when a game is loaded from a save (fresh games pass 0).
+export function createTurnManager({ getActiveEntities, invokeAction, onTurnStart, onTurnEnd, initialTurnCount = 0 }) {
   const queue = [];  // ordered list of entities
   let playerTurnCount = initialTurnCount;
   let currentEntity = null;
@@ -55,6 +57,7 @@ export function createTurnManager({ getActiveEntities, invokeAction, onTurnStart
             } else if (entity.components.has('playerControlled')) {
               playerTurnCount++;
             }
+            onTurnEnd?.(entity, { free });
           }
         }
       } else {

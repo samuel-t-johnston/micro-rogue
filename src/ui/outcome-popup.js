@@ -1,20 +1,23 @@
 import { drawPanel, drawText, drawButton, hitTest } from './canvas-ui.js';
 
-// Small in-scene overlay shown the moment the player dies. It deliberately stays
-// compact and leaves the dungeon visible behind it, giving the player a beat to
-// register what happened before moving on to the full Results screen.
+// Small in-scene overlay shown the moment a run ends — death or victory. It deliberately stays
+// compact and leaves the dungeon visible behind it, giving the player a beat to register what
+// happened before moving on to the full Results screen.
 //
-// Lifecycle mirrors the other game-scene controllers (dialog, character menu):
-// the game scene owns one instance, toggles it with show()/hide(), and routes
-// render + input to it. onNext fires when the "Next" button is tapped.
+// Lifecycle mirrors the other game-scene controllers (dialog, character menu): the game scene owns
+// one instance, toggles it with show(outcome)/hide(), and routes render + input to it. onNext fires
+// when the "Next" button is tapped. The outcome ('lose' | 'win') selects the title.
 const PANEL_W = 320;
 const PANEL_H = 180;
 const BUTTON_W = 160;
 const BUTTON_H = 52;
 
-export function createDeathPopup({ theme, getViewport, onNext }) {
+const TITLES = { lose: 'You Died', win: 'You Escaped!' };
+
+export function createOutcomePopup({ theme, getViewport, onNext }) {
   let visible = false;
   let hover = false;
+  let outcome = 'lose';
 
   function layout() {
     const { width, height } = getViewport();
@@ -35,7 +38,7 @@ export function createDeathPopup({ theme, getViewport, onNext }) {
   return {
     get isVisible() { return visible; },
 
-    show() { visible = true; },
+    show(result = 'lose') { visible = true; outcome = result; },
     hide() { visible = false; hover = false; },
 
     render(ctx) {
@@ -49,7 +52,7 @@ export function createDeathPopup({ theme, getViewport, onNext }) {
       const { panel, button } = layout();
       drawPanel(ctx, theme, panel);
 
-      drawText(ctx, 'You Died', panel.x + panel.w / 2, panel.y + 56, {
+      drawText(ctx, TITLES[outcome] ?? TITLES.lose, panel.x + panel.w / 2, panel.y + 56, {
         color: theme.text,
         size: 36,
         weight: '700',
@@ -61,7 +64,7 @@ export function createDeathPopup({ theme, getViewport, onNext }) {
     },
 
     // Returns true while visible so it swallows all input — the dungeon behind it
-    // must not respond to taps once the player is dead.
+    // must not respond to taps once the run has ended.
     handleInput(event) {
       if (!visible) return false;
 

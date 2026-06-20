@@ -6,7 +6,9 @@ export default {
   id: 'procedural-3x3',
   stages: [
     { type: 'roomGridGeometry' },
-    { type: 'label' },
+    // Explicit label list (extends stage-label's default) so the deepest floor also reserves a room
+    // for the Amulet of Yendor — stage-populate drops it in the 'amulet'-labelled zone.
+    { type: 'label', labels: ['stairs-up', 'stairs-down', 'treasure', 'item', 'item', 'amulet'] },
     { type: 'link' },
     { type: 'carveRooms' },
     { type: 'carveHalls' },

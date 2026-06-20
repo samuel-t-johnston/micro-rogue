@@ -15,7 +15,7 @@
 // thing to hand-maintain is that list (add a line when you add a new data/maps/*.js file);
 // there is no generator and no build step.
 
-const CACHE_VERSION = 'rogue-v4';
+const CACHE_VERSION = 'rogue-v5';
 
 // The app shell — enough to boot the game offline. Everything else self-caches at runtime.
 const SHELL_ASSETS = [
