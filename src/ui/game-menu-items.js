@@ -4,23 +4,29 @@
 
 import { gameSettings } from '../engine/settings.js';
 
-function handednessLabel() {
-  return `Handedness: ${gameSettings.get('handedness') === 'left' ? 'Left' : 'Right'}`;
-}
-
-// The Settings sub-page. Built fresh each time the menu re-reads its items so labels reflect
-// current settings. The handedness row is a toggle: selecting it flips the setting (persisted
-// immediately) and rewrites its own label in place, so the change shows without leaving the
-// sub-page (menu-shell renders each item's live `label`).
+// The Settings sub-page. Returns rows (label + optional description + a segmented control), rendered
+// by settings-controls.js via menu-shell. Each row binds to gameSettings: `get` is read every frame
+// so the active segment tracks live state, and selecting a segment persists immediately via `set`.
 export function buildSettingsPage() {
-  const handedness = {
-    id: 'handedness',
-    label: handednessLabel(),
-    onSelect() {
-      const next = gameSettings.get('handedness') === 'left' ? 'right' : 'left';
-      gameSettings.set('handedness', next);
-      handedness.label = handednessLabel();
-    },
+  return {
+    title: 'Settings',
+    rows: [
+      {
+        id: 'handedness',
+        label: 'Handedness',
+        description: 'Which side of the screen the primary action button sits on.',
+        options: [{ label: 'Left', value: 'left' }, { label: 'Right', value: 'right' }],
+        get: () => gameSettings.get('handedness'),
+        set: (v) => gameSettings.set('handedness', v),
+      },
+      {
+        id: 'skipNewGameInstructions',
+        label: 'Skip new game instructions',
+        description: 'Start a new run without the welcome screen.',
+        options: [{ label: 'On', value: true }, { label: 'Off', value: false }],
+        get: () => gameSettings.get('skipNewGameInstructions'),
+        set: (v) => gameSettings.set('skipNewGameInstructions', v),
+      },
+    ],
   };
-  return { title: 'Settings', items: [handedness], placeholder: 'Nothing here yet.' };
 }

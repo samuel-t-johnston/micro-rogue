@@ -12,9 +12,12 @@ const getViewport = () => viewport;
 function makeCtx() {
   const noop = () => {};
   return new Proxy({}, {
-    get: (_, key) => (key === 'font' || key === 'fillStyle' || key === 'strokeStyle' ||
-                      key === 'lineWidth' || key === 'textAlign' || key === 'textBaseline' ||
-                      key === 'globalAlpha') ? '' : noop,
+    get: (_, key) => {
+      if (key === 'measureText') return (t) => ({ width: String(t).length * 8 });
+      return (key === 'font' || key === 'fillStyle' || key === 'strokeStyle' ||
+              key === 'lineWidth' || key === 'textAlign' || key === 'textBaseline' ||
+              key === 'globalAlpha') ? '' : noop;
+    },
     set: () => true,
   });
 }
