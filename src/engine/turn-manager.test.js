@@ -152,6 +152,19 @@ describe('createTurnManager', () => {
     });
   });
 
+  describe('actCount (per-entity clock)', () => {
+    it('increments turnTaker.actCount each turn the entity acts', async () => {
+      const entity = makeEntity(1); // helper omits actCount, so this also exercises the ?? 0 guard
+      const tm = createTurnManager({
+        getActiveEntities: () => [entity],
+        invokeAction: async () => false,
+      });
+      tm.start();
+      await runUntil(tm, () => expect(entity.components.get('turnTaker').actCount).toBeGreaterThanOrEqual(3));
+      expect(entity.components.get('turnTaker').actCount).toBeGreaterThanOrEqual(3);
+    });
+  });
+
   describe('onTurnStart', () => {
     it('fires before the entity acts each turn', async () => {
       const entity = makeEntity(1);

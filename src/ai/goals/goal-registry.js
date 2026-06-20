@@ -10,6 +10,7 @@ import { shoutEnemyReport } from './shout-enemy-report.js';
 import { obeyShouts } from './obey-shouts.js';
 import { trackScent } from './track-scent.js';
 import { playerSmell } from './player-smell.js';
+import { investigate } from './investigate.js';
 
 // Maps the string keys stored in an entity's `ai` component to goal implementations.
 // The `ai` component holds names (not function references) so it serializes cleanly;
@@ -27,6 +28,7 @@ const goals = {
   'shout-enemy-report': shoutEnemyReport,   // NPC goal: shout the direction of a newly-seen hostile
   'obey-shouts': obeyShouts,                // NPC goal: advance toward an understood shouted order
   'track-scent': trackScent,                // NPC goal: follow the strongest hostile scent gradient
+  'investigate': investigate,               // NPC goal: pursue the last place a foe was perceived
 };
 
 // Resolves an ordered list of goal names to goal objects, preserving order (= priority).

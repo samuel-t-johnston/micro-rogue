@@ -31,6 +31,8 @@ function describeWhat({ understood, language, message }) {
     }
     case 'vermin-scrabble':
       return 'the scrabbling of vermin';
+    case 'combat':
+      return 'fighting';
     default:
       return 'a noise';
   }

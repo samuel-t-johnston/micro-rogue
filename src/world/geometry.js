@@ -29,6 +29,23 @@ export const DIRECTION_STEPS = {
   N: [0, -1], NE: [1, -1], E: [1, 0], SE: [1, 1], S: [0, 1], SW: [-1, 1], W: [-1, 0], NW: [-1, -1],
 };
 
+// The farthest passable tile in `direction` from `from`, up to maxDist tiles away (or `from` itself
+// if the first step is blocked). Turns an imprecise directional lead — a heard noise, a scent
+// gradient — into a concrete tile to navigate toward.
+export function projectTile(level, from, direction, maxDist) {
+  const step = DIRECTION_STEPS[direction];
+  if (!step) return { x: from.x, y: from.y };
+  const [dx, dy] = step;
+  let target = { x: from.x, y: from.y };
+  for (let i = 1; i <= maxDist; i++) {
+    const x = from.x + dx * i;
+    const y = from.y + dy * i;
+    if (!level.isPassable(x, y)) break;
+    target = { x, y };
+  }
+  return target;
+}
+
 // The passable tiles orthogonally or diagonally adjacent to `pos`.
 export function passableNeighbors(pos, level) {
   return DIRECTIONS_8

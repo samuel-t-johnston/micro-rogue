@@ -26,7 +26,9 @@ Sounds are generated **explicitly by actions** — there's no ambient emission. 
 emitSound(registry, level, { sourceId, x, y, volume, language, message, lifespan });
 ```
 
-The built-in producer is the **`shout` action** ([`action-shout.js`](../../src/actions/action-types/action-shout.js)): it emits a sound at the actor's tile, stamped with the actor's `voice` language. No `voice` (or a silenced actor) → no sound, but the turn is still spent. A goal builds the action: `{ type: 'shout', volume, message, lifespan }`. Future noisy-movement or combat sounds emit the same way.
+The built-in producer is the **`shout` action** ([`action-shout.js`](../../src/actions/action-types/action-shout.js)): it emits a sound at the actor's tile, stamped with the actor's `voice` language. No `voice` (or a silenced actor) → no sound, but the turn is still spent. A goal builds the action: `{ type: 'shout', volume, message, lifespan }`.
+
+Two more producers emit the same way: **noisy movement** (the scuttler's scrabble — a `noisyMovement` component checked in `executeMove`) and a **combat clash** on every `attack`. Each sound also snapshots the emitter's **`sourceFactions`** at emit time, so a hearer can recognize and ignore allies — except the combat clash, emitted faction-neutral, since a fight is worth investigating whoever's swinging. (The player only logs a heard sound whose origin tile it *can't* currently see — no "you hear fighting" for a brawl in plain view.)
 
 ## Hearing a sound
 

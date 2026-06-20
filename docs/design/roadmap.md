@@ -129,14 +129,13 @@ frozen floors).*
 ---
 
 ## M6 — Smart Enemies
-*Done when: GOAP planner is in place, multiple sense types work, and squad coordination via barks is functional.*
+*Done when: Planner is in place, multiple sense types work, and squad coordination via barks is functional.*
 
-- [ ] Goal memory: per-goal memory payload with confidence and decay
+- [x] Goal memory: per-goal memory payload with confidence and decay
 - [x] Hearing sense: sound entities emitted into world, propagation, approximate position result
 - [x] Smell sense: scent trail field, decay over turns, trail-following behavior
 - [x] Bark system: NPC shouts route through hearing, other NPCs respond via goal evaluation
-- [ ] `investigate` goal: pursue uncertain position, decay to patrol
-- [ ] Full AI state inspector: confidence values, memory payload, all senses
+- [x] `investigate` goal: pursue uncertain position, decay to patrol
 
 *Hearing/bark note (landed): sounds are invisible, short-lived entities (`sound` + `decay` + `position`)
 emitted explicitly by actions (the `shout` action). The turn loop ages `decay` entities one tick per
@@ -173,11 +172,8 @@ doors-block-scent (see [scent-and-smell.md](scent-and-smell.md)).*
 
 - [ ] Service worker: offline caching of all assets
 - [ ] Discrete zoom snap points: 3–4 levels, phone default closer, desktop default wider
-- [ ] Screen overlay effects: red vignette for low HP; reduced-motion fallback; disableable
-- [ ] Emote icons: `!` alert, `?` investigating, `💤` sleeping — reusable component
 - [ ] Message log: expandable overlay, full scrollable history
 - [ ] Status effects: HUD display, multi-effect overflow handling
-- [ ] Notification layer: compare sense results turn-over-turn, fan to log and emote system
 - [ ] Accessibility: 44×44px tap targets audit, color-not-sole-signal audit, handedness swap setting
 - [ ] Onboarding splash: dismissable, controls summary, hook for downstream content
 
@@ -207,3 +203,7 @@ These are explicitly out of scope until a concrete need exists:
 - **Terrain modification** - Tile override layer: `getTile(x,y)` with override-first lookup;
 - [ ] `flee` goal: low-HP retreat behavior
 - [ ] GOAP planner: action-space search, goal priority stack, interruption on higher-priority goal
+- [ ] Full AI state inspector: confidence values, memory payload, all senses
+- [ ] Notification layer: compare sense results turn-over-turn, fan to log and emote system
+- [ ] Screen overlay effects: red vignette for low HP; reduced-motion fallback; disableable
+- [ ] Emote icons: `!` alert, `?` investigating, `💤` sleeping — reusable component

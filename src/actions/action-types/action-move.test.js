@@ -15,6 +15,7 @@ function makeLevel() {
 function makeMover(registry, level, noisy) {
   const e = registry.createEntity();
   registry.addComponent(e, 'position', components.position(2, 2));
+  registry.addComponent(e, 'faction', components.faction(['scuttlers']));
   if (noisy) registry.addComponent(e, 'noisyMovement', components.noisyMovement(noisy));
   level.placeEntity(e);
   return e;
@@ -33,7 +34,7 @@ describe('executeMove noisy movement', () => {
     const [sound] = soundsOn(level);
     expect(sound.components.get('position')).toEqual({ x: 3, y: 2 });
     expect(sound.components.get('sound')).toMatchObject({
-      sourceId: e.id, volume: 3, language: null, message: { kind: 'vermin-scrabble' },
+      sourceId: e.id, volume: 3, language: null, message: { kind: 'vermin-scrabble' }, sourceFactions: ['scuttlers'],
     });
   });
 

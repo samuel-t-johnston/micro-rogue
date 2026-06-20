@@ -41,6 +41,7 @@ export function executeMove(entity, action, level, registry) {
       volume: noisy.volume,
       language: null,
       message: noisy.message,
+      sourceFactions: entity.components.get('faction') ?? [],
     });
   }
   return false;

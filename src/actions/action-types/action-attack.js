@@ -3,6 +3,7 @@ import { getAttribute, Attributes } from '../../combat/attributes.js';
 import { gameLog } from '../../engine/game-log.js';
 import { animations } from '../../render/animations.js';
 import { subject, object, conjugate } from '../../engine/log-text.js';
+import { emitSound } from '../../world/sounds.js';
 
 // Deals the actor's attack damage to the target entity. The amount comes from the
 // attribute resolver (unarmed base + worn-weapon modifiers); damage is applied through
@@ -30,6 +31,14 @@ export function executeAttack(actor, action, level, registry) {
     damage: amount,
     display: `${subject(actor)} ${conjugate(actor, 'hit', 'hits')} ${object(target)} for ${amount} damage.`,
   });
+
+  // A clash is audible: a faction-neutral combat sound so out-of-sight creatures can hear a fight and
+  // investigate it. Source factions are left empty on purpose — a fight is worth checking regardless
+  // of who's swinging, so no hearer dismisses it as "just an ally."
+  const actorPos = actor.components.get('position');
+  if (actorPos) {
+    emitSound(registry, level, { sourceId: actor.id, x: actorPos.x, y: actorPos.y, volume: 6, message: { kind: 'combat' } });
+  }
 
   applyEffect('damage', actor, target, { amount }, level, registry);
   return false;

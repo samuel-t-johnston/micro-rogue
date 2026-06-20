@@ -64,4 +64,20 @@ describe('executeAttack', () => {
     const actor = makeActor(1);
     expect(executeAttack(actor, { targetEntityId: 999 }, level, registry)).toBe(false);
   });
+
+  it('emits a faction-neutral combat sound at the attacker\'s tile', () => {
+    const actor = makeActor(1);
+    registry.addComponent(actor, 'position', components.position(1, 1));
+    level.placeEntity(actor);
+    const target = makeTarget(5);
+
+    executeAttack(actor, { targetEntityId: target.id }, level, registry);
+
+    const sound = level.entities.find(e => e.components.has('sound'));
+    expect(sound).toBeTruthy();
+    expect(sound.components.get('position')).toEqual({ x: 1, y: 1 });
+    expect(sound.components.get('sound')).toMatchObject({
+      sourceId: actor.id, message: { kind: 'combat' }, sourceFactions: [],
+    });
+  });
 });

@@ -15,6 +15,7 @@ function makeLevel() {
 function makeActor(registry, level, { withVoice = true } = {}) {
   const actor = registry.createEntity();
   registry.addComponent(actor, 'position', components.position(2, 2));
+  registry.addComponent(actor, 'faction', components.faction(['orcs']));
   if (withVoice) registry.addComponent(actor, 'voice', components.voice('orcish'));
   level.placeEntity(actor);
   return actor;
@@ -39,6 +40,7 @@ describe('executeShout', () => {
       volume: 8,
       language: 'orcish',
       message: { kind: 'enemy-report', direction: 'NW' },
+      sourceFactions: ['orcs'],
     });
   });
 

@@ -36,6 +36,7 @@ describe('hearing sense', () => {
     expect(sounds).toHaveLength(1);
     expect(sounds[0]).toMatchObject({
       soundId: sound.id,
+      position: { x: 14, y: 10 },
       sourceId: 99,
       message: { kind: 'enemy-report', direction: 'NW' },
       perceivedDirection: 'E',
@@ -70,6 +71,12 @@ describe('hearing sense', () => {
     const bySource = Object.fromEntries(hearing(hearer, level, 0).sounds.map(s => [s.sourceId, s.understood]));
     expect(bySource[91]).toBe(true);   // orcish — known
     expect(bySource[92]).toBe(false);  // elvish — unknown
+  });
+
+  it('passes the sound\'s source factions through to the percept', () => {
+    const { registry, level, hearer } = setup({ range: 5 });
+    emitSound(registry, level, { sourceId: 91, x: 12, y: 10, volume: 0, sourceFactions: ['orcs'] });
+    expect(hearing(hearer, level, 0).sounds[0].sourceFactions).toEqual(['orcs']);
   });
 
   it('treats a non-verbal sound (no language) as understood', () => {

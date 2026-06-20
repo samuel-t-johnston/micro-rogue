@@ -167,3 +167,52 @@ describe('buildPlanningContext', () => {
     expect(ctx.perception.smells).toEqual([]);
   });
 });
+
+describe('perception memory (lastKnownEnemy)', () => {
+  const inputController = { waitForInput: () => {}, hasPendingInput: () => false };
+  const enemy = { entityId: 9, position: { x: 3, y: 0 }, factions: ['player'], tags: { isActor: true } };
+
+  it('records a seen hostile\'s exact tile when the entity remembers enemies', () => {
+    const entity = makeEntity({
+      senses: [makeSense(new Set(), [enemy])], faction: ['orcs'], memory: { remembersEnemies: true },
+    });
+    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 7 });
+    expect(ctx.memory.lastKnownEnemy).toEqual({ pos: { x: 3, y: 0 }, turn: 7, source: 'sight' });
+  });
+
+  it('does not record when the entity does not remember enemies', () => {
+    const entity = makeEntity({ senses: [makeSense(new Set(), [enemy])], faction: ['orcs'], memory: {} });
+    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 1 });
+    expect(ctx.memory.lastKnownEnemy).toBeUndefined();
+  });
+
+  it('records a non-ally noise as a projected tile when nothing is seen', () => {
+    registerSense('mock-enemy-noise', () => ({
+      entities: [], visibleTiles: new Set(),
+      sounds: [{ soundId: 1, perceivedDirection: 'E', distance: 3, sourceFactions: ['player'] }],
+    }));
+    const entity = makeEntity({ senses: ['mock-enemy-noise'], faction: ['orcs'], memory: { remembersEnemies: true } });
+    const ctx = buildPlanningContext({ entity, level: makeLevel(10, 10), inputController, turnCount: 2 });
+    expect(ctx.memory.lastKnownEnemy).toEqual({ pos: { x: 3, y: 0 }, turn: 2, source: 'hearing' });
+  });
+
+  it('ignores a noise from a confirmed ally', () => {
+    registerSense('mock-ally-noise', () => ({
+      entities: [], visibleTiles: new Set(),
+      sounds: [{ soundId: 1, perceivedDirection: 'E', distance: 3, sourceFactions: ['orcs'] }],
+    }));
+    const entity = makeEntity({ senses: ['mock-ally-noise'], faction: ['orcs'], memory: { remembersEnemies: true } });
+    const ctx = buildPlanningContext({ entity, level: makeLevel(10, 10), inputController, turnCount: 2 });
+    expect(ctx.memory.lastKnownEnemy).toBeUndefined();
+  });
+
+  it('prefers a vision sighting over a heard noise', () => {
+    registerSense('mock-see-and-hear', () => ({
+      entities: [enemy], visibleTiles: new Set(),
+      sounds: [{ soundId: 1, perceivedDirection: 'S', distance: 5, sourceFactions: ['player'] }],
+    }));
+    const entity = makeEntity({ senses: ['mock-see-and-hear'], faction: ['orcs'], memory: { remembersEnemies: true } });
+    const ctx = buildPlanningContext({ entity, level: makeLevel(10, 10), inputController, turnCount: 3 });
+    expect(ctx.memory.lastKnownEnemy.source).toBe('sight');
+  });
+});
