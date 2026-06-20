@@ -5,19 +5,29 @@ registered from `src/main.js`). This guide covers the two things you have to tou
 
 ## Deploying a new version
 
-The service worker is **network-first**: when the device is online it always fetches fresh
-files and updates the cache, so a normal deploy is picked up on the next reload without any
-action. The cache only matters offline.
-
-If you ever need to *force* every client to drop its cached copies (e.g. you removed or renamed
-assets and want stale ones gone immediately), bump the version string in `service-worker.js`:
+**Bump `CACHE_VERSION` in `service-worker.js` on every deploy.**
 
 ```js
 const CACHE_VERSION = 'rogue-v1'; // -> 'rogue-v2'
 ```
 
-On activation the worker deletes every cache whose name isn't the current version, so the old
-set is cleared within one reload.
+It does two jobs:
+
+1. The changed worker bytes are what make the browser install a new service worker. This matters
+   most on **iOS**: an installed (home-screen) PWA will otherwise sit on old code indefinitely —
+   the symptom is "Safari shows the update but the installed app doesn't, and force-quitting
+   doesn't help" (only a delete/reinstall did). Bumping the version avoids that.
+2. On `activate` the new worker deletes every cache whose name isn't the current version, clearing
+   the old asset set.
+
+When a new worker activates, `src/main.js` auto-reloads the page (guarded so it doesn't fire on
+first install) so the running app immediately picks up the fresh assets.
+
+The worker is **network-first** with revalidation: online it fetches fresh with
+`cache: 'no-cache'` (bypassing the browser's own HTTP cache, so it can't serve a stale on-device
+copy) and updates Cache Storage; offline it serves the cached copy. So even without remembering
+the bump, a normal reload gets fresh content — the bump is the belt-and-suspenders that also
+reaches installed iOS PWAs.
 
 ## Why there's no asset manifest to maintain
 
