@@ -32,7 +32,9 @@ export function createHearingSense() {
 
         sounds.push({
           soundId: e.id,
+          position: { x: sPos.x, y: sPos.y }, // the sound's origin tile (exact); the AI uses only the imprecise direction
           sourceId: snd.sourceId,
+          sourceFactions: snd.sourceFactions ?? [],
           message: snd.message,
           language: snd.language,
           // Non-verbal sounds (no language) are inherently "understood" as what they are; a

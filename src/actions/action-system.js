@@ -54,7 +54,10 @@ export function createActionSystem({ level, inputController, registry, dialogCon
     // the same path. An entity with a TurnTaker but no ai just passes its turn.
     const ai = entity.components.get('ai');
     if (!ai) return false;
-    const context = buildPlanningContext({ entity, level, inputController, turnCount: 0 });
+    const context = buildPlanningContext({
+      entity, level, inputController,
+      turnCount: entity.components.get('turnTaker')?.actCount ?? 0,
+    });
     const result = await evaluateGoals(resolveGoals(ai.goals), context, (_goal, i) => {
       // Record the goal driving this turn on the component (read by the debug goal
       // inspector). Emit a debug-only goalChange entry (no `display`) only when it

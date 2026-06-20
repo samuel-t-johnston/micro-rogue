@@ -190,8 +190,11 @@ export const components = {
   // (audible when distance <= hearerRange + volume). `language` is the vocalization's language, or
   // null for non-verbal noise (a clang, a scream). `message` is structured semantics the AI acts on
   // — e.g. { kind: 'enemy-report', direction: 'NW' } — never raw text; display text is derived.
-  sound({ sourceId = null, volume = 0, language = null, message = null } = {}) {
-    return { sourceId, volume, language, message };
+  // `sourceFactions` is a snapshot of the emitter's factions at emit time (so the sound "remembers
+  // who made it" even if that creature later moves or dies). A hearer uses it to recognize and
+  // ignore allies; empty means faction-neutral (e.g. a combat clash), which reads as worth checking.
+  sound({ sourceId = null, volume = 0, language = null, message = null, sourceFactions = [] } = {}) {
+    return { sourceId, volume, language, message, sourceFactions };
   },
 
   // Tile-level perception. visible: tiles seen this turn. memory: all ever-seen tiles → tileId.
@@ -212,8 +215,10 @@ export const components = {
     return { to, port };
   },
 
+  // accumulator: stored energy (see turn-order.md). actCount: how many turns this entity has taken,
+  // bumped by the turn manager — a per-entity clock the AI uses to age perceptions and memory.
   turnTaker(speed = 1) {
-    return { speed, accumulator: 0 };
+    return { speed, accumulator: 0, actCount: 0 };
   },
 
   // Vision acuity. `range` is the FOV radius; `undefined` (the default — and the behavior of every

@@ -31,6 +31,7 @@ describe('emitSound', () => {
       volume: 8,
       language: 'orcish',
       message: { kind: 'enemy-report', direction: 'NW' },
+      sourceFactions: [],
     });
     expect(sound.components.get('decay').lifespan).toBe(2);
     expect(level.getEntitiesAt(2, 3).has(sound)).toBe(true);
@@ -44,5 +45,11 @@ describe('emitSound', () => {
     const registry = createEntityRegistry();
     const sound = emitSound(registry, makeLevel(), { x: 0, y: 0, volume: 1, lifespan: 5 });
     expect(sound.components.get('decay').lifespan).toBe(5);
+  });
+
+  it('snapshots the emitter\'s factions onto the sound', () => {
+    const registry = createEntityRegistry();
+    const sound = emitSound(registry, makeLevel(), { x: 0, y: 0, volume: 1, sourceFactions: ['orcs'] });
+    expect(sound.components.get('sound').sourceFactions).toEqual(['orcs']);
   });
 });

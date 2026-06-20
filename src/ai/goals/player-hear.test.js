@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { playerHear } from './player-hear.js';
 import { gameLog } from '../../engine/game-log.js';
 
-function ctx(sounds, memory = {}) {
-  return { memory, perception: { sounds } };
+function ctx(sounds, memory = {}, visibleTiles = new Set()) {
+  return { memory, perception: { sounds, visibleTiles } };
 }
 
 function heardLines() {
@@ -11,7 +11,7 @@ function heardLines() {
 }
 
 const sound = (soundId, extra = {}) => ({
-  soundId, perceivedDirection: 'N', language: 'orcish', understood: false, message: {}, ...extra,
+  soundId, position: { x: 9, y: 9 }, perceivedDirection: 'N', language: 'orcish', understood: false, message: {}, ...extra,
 });
 
 describe('playerHear', () => {
@@ -45,5 +45,15 @@ describe('playerHear', () => {
     playerHear.evaluate(ctx([sound(1)], memory));
     playerHear.evaluate(ctx([], memory)); // nothing heard now
     expect(memory.heardSoundIds).toEqual([]);
+  });
+
+  it('does not log a sound whose origin tile is currently visible', () => {
+    playerHear.evaluate(ctx([sound(1)], {}, new Set(['9,9'])));
+    expect(heardLines()).toHaveLength(0);
+  });
+
+  it('logs a sound whose origin is not currently visible', () => {
+    playerHear.evaluate(ctx([sound(1)], {}, new Set(['0,0'])));
+    expect(heardLines()).toHaveLength(1);
   });
 });

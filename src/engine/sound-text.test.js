@@ -28,6 +28,11 @@ describe('describeSound', () => {
     expect(line).toBe('You hear the scrabbling of vermin to the east.');
   });
 
+  it('describes a combat clash', () => {
+    const line = describeSound({ perceivedDirection: 'N', language: null, understood: true, message: { kind: 'combat' } });
+    expect(line).toBe('You hear fighting to the north.');
+  });
+
   it('falls back to "nearby" when there is no direction', () => {
     const line = describeSound({ perceivedDirection: null, language: 'orcish', understood: false });
     expect(line).toBe('You hear guttural orcish shouting nearby.');

@@ -51,7 +51,7 @@ Sense results are merged into world-state facts each turn before planning. Where
 { position, confidence, turnObserved }
 ```
 
-This lets the AI reason about stale data — a position seen 10 turns ago is less reliable than one seen this turn.
+This lets the AI reason about stale data — a position seen 10 turns ago is less reliable than one seen this turn. *(Implemented: `turnObserved` is stamped from the perceiver's per-entity clock, `turnTaker.actCount` — the same clock memory staleness uses. It was previously always 0, so any time-based reasoning was dead until this landed.)*
 
 ---
 
@@ -65,9 +65,9 @@ Memory lives on the entity as a flat key-value store (`memory` component). All o
 
 Shared memory is the right model for the player, where goals explicitly coordinate through state: `player-get-input` writes `autoMoveTarget`; `player-auto-move` reads and eventually clears it. Goal-owned memory with cross-goal writes creates reach-in coupling that shared memory avoids.
 
-### Memory Decay (Deferred)
+### Memory Decay *(partly realized)*
 
-For NPC goals with independent memory lifecycles (e.g. an `investigate` goal that forgets a sound after N turns), a goal-owned decay model may be reintroduced. Under that model each key would have an owning goal whose decay rules apply. This is deferred until NPC goal behavior requires it.
+The first NPC goal with an independent memory lifecycle is here: `investigate` forgets a stale `lastKnownEnemy` after N of the creature's own turns. Rather than the originally-envisioned goal-owned decay model (each key with an owning goal and decay rules), it uses the **flat shared memory** plus a **per-entity turn clock** — `turnTaker.actCount`. The perception-memory hook (in `planning-context.js`) stamps `turn` when it records a lead; `investigate` compares it against the current `actCount`. The richer per-key decay-with-confidence model stays deferred until a second consumer needs independent lifecycles.
 
 ---
 

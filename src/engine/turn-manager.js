@@ -47,6 +47,7 @@ export function createTurnManager({ getActiveEntities, invokeAction, onTurnStart
         if (turnTaker.accumulator >= 1) {
           while (turnTaker.accumulator >= 1) {
             turnTaker.accumulator -= 1;
+            turnTaker.actCount = (turnTaker.actCount ?? 0) + 1; // per-entity clock; ?? guards old saves
             onTurnStart?.(entity);
             const free = await invokeAction(entity);
             if (free) {

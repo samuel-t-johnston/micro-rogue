@@ -17,6 +17,7 @@ export function executeShout(actor, action, level, registry) {
       volume: action.volume ?? 0,
       language: voice.language,
       message: action.message ?? null,
+      sourceFactions: actor.components.get('faction') ?? [],
       lifespan: action.lifespan ?? 2,
     });
   }
