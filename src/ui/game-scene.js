@@ -1,6 +1,7 @@
 import { rng } from '../engine/rng.js';
 import { gameConfig } from '../engine/game-config.js';
 import { createRenderer } from '../render/renderer.js';
+import { createZoom, defaultZoomIndex } from '../render/zoom.js';
 import { animations } from '../render/animations.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
 import { createTurnManager } from '../engine/turn-manager.js';
@@ -38,7 +39,80 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
   let visibilityHandler = null;
 
   let registry = createEntityRegistry();
-  const renderer = createRenderer({ getViewport });
+  // Touch devices (coarse pointer) start zoomed closer; mouse/desktop start wider. Session-only.
+  const coarsePointer = !!(typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)')?.matches);
+  const zoom = createZoom({ index: defaultZoomIndex(coarsePointer) });
+  const renderer = createRenderer({ getViewport, zoom });
+
+  // Map-area gesture state (release-based tap-to-move + pinch-to-zoom). UI taps never reach
+  // here — they're consumed by the widget chain in handleInput before a gesture can start.
+  const pointers = new Map(); // active map-area pointers: id -> { x, y }
+  let tapCandidate = null;    // a single press that may become a move on release
+  let pinch = null;           // { baseDist } — two-finger zoom, ratcheted per step
+  const TAP_SLOP = 12;        // px of drift that disqualifies a tap (and is the future pan hook)
+  const PINCH_STEP_RATIO = 1.25; // pinch distance change that advances one zoom level
+
+  function resetGestures() {
+    pointers.clear();
+    tapCandidate = null;
+    pinch = null;
+  }
+
+  function pinchDistance() {
+    const [a, b] = pointers.values();
+    return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0;
+  }
+
+  // A press that fell through the UI chain: one finger begins a tap candidate, a second
+  // finger turns the gesture into a pinch (and cancels the tap, so no move ever fires).
+  function onPointerDown(event) {
+    pointers.set(event.pointerId, { x: event.x, y: event.y });
+    if (pointers.size === 1) {
+      tapCandidate = { id: event.pointerId, x: event.x, y: event.y };
+    } else if (pointers.size === 2) {
+      tapCandidate = null;
+      pinch = { baseDist: pinchDistance() };
+    }
+    return true;
+  }
+
+  function onPointerMove(event) {
+    const p = pointers.get(event.pointerId);
+    if (!p) return false; // hover, or a press the UI consumed — not a tracked gesture
+    p.x = event.x;
+    p.y = event.y;
+    if (pinch && pointers.size >= 2) {
+      // Ratchet: each time the fingers spread/pinch past the step ratio, advance one level
+      // and re-baseline, so a continuous pinch walks through the discrete snap points.
+      const dist = pinchDistance();
+      if (dist >= pinch.baseDist * PINCH_STEP_RATIO) { renderer.zoomIn(); pinch.baseDist = dist; }
+      else if (dist <= pinch.baseDist / PINCH_STEP_RATIO) { renderer.zoomOut(); pinch.baseDist = dist; }
+    } else if (tapCandidate?.id === event.pointerId &&
+               Math.hypot(event.x - tapCandidate.x, event.y - tapCandidate.y) > TAP_SLOP) {
+      tapCandidate = null; // dragged too far to be a tap (drag-to-pan will attach here later)
+    }
+    return true;
+  }
+
+  // Release: a still-valid single-finger tap becomes the move action at the released tile.
+  function onPointerUp(event) {
+    const releasingTap = tapCandidate?.id === event.pointerId;
+    pointers.delete(event.pointerId);
+    if (pointers.size < 2) pinch = null;
+    if (releasingTap) {
+      tapCandidate = null;
+      const world = renderer.screenToWorld(event.x, event.y);
+      inputController.submit({ type: 'move', x: Math.floor(world.x), y: Math.floor(world.y) });
+    }
+    return true;
+  }
+
+  // Wheel up zooms in (closer), wheel down zooms out (wider).
+  function onWheel(deltaY) {
+    if (deltaY < 0) renderer.zoomIn();
+    else if (deltaY > 0) renderer.zoomOut();
+    return true;
+  }
   const hudWidget = createHudWidget({ theme, getViewport });
   const messageLogWidget = createMessageLogWidget({ theme, getViewport });
   const dialogController = createDialogController({ theme, getViewport });
@@ -123,6 +197,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     renderer.setCamera(ppos.x, ppos.y);
 
     inputController = createInputController();
+    resetGestures();
     const actionSystem = createActionSystem({ level, inputController, registry, dialogController });
 
     // Per-player-turn upkeep (see src/engine/upkeep.js). Order matters: scent diffuses before the
@@ -215,13 +290,10 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     if (characterMenuButton.handleInput(event)) return true;
     if (gameMenuButton.handleInput(event)) return true;
 
-    if (event.type === 'pointerdown') {
-      const world = renderer.screenToWorld(event.x, event.y);
-      const tx = Math.floor(world.x);
-      const ty = Math.floor(world.y);
-      inputController.submit({ type: 'move', x: tx, y: ty });
-      return true;
-    }
+    if (event.type === 'pointerdown') return onPointerDown(event);
+    if (event.type === 'pointermove') return onPointerMove(event);
+    if (event.type === 'pointerup' || event.type === 'pointercancel') return onPointerUp(event);
+    if (event.type === 'wheel') return onWheel(event.deltaY);
 
     // Hidden diagnostic export. '?' (Shift-/) is obscure enough to avoid accidental presses.
     if (event.type === 'keydown' && event.key === '?') {
@@ -412,6 +484,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
       turnManager?.stop();
       turnManager = null;
       inputController = null;
+      resetGestures();
       levelManager = null;
       transitioning = false;
       level = null;

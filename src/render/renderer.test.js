@@ -1,12 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { createRenderer } from './renderer.js';
-import { gameConfig } from '../engine/game-config.js';
+import { createZoom, ZOOM_LEVELS } from './zoom.js';
 import { createLevel } from '../world/level.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
 import { components } from '../world/components.js';
 import { RenderLayers } from './render-layers.js';
-
-const { tileSize } = gameConfig;
 
 function makeRenderer(viewportW, viewportH) {
   return createRenderer({ getViewport: () => ({ width: viewportW, height: viewportH }) });
@@ -18,12 +16,21 @@ describe('worldToScreen', () => {
     expect(r.worldToScreen(0, 0)).toEqual({ x: 160, y: 120 });
   });
 
-  it('offsets tiles by tileSize per tile unit', () => {
+  it('offsets tiles by the active tile size per tile unit', () => {
     const r = makeRenderer(320, 240);
+    const tileSize = r.tileSize;
     expect(r.worldToScreen(2, 3)).toEqual({
       x: 160 + 2 * tileSize,
       y: 120 + 3 * tileSize,
     });
+  });
+
+  it('scales the per-tile offset with the zoom level', () => {
+    const zoom = createZoom({ index: 0 }); // widest level
+    const r = createRenderer({ getViewport: () => ({ width: 320, height: 240 }), zoom });
+    expect(r.worldToScreen(2, 0).x).toBe(160 + 2 * ZOOM_LEVELS[0]);
+    zoom.zoomIn();
+    expect(r.worldToScreen(2, 0).x).toBe(160 + 2 * ZOOM_LEVELS[1]);
   });
 
   it('places the camera tile at screen center after setCamera', () => {
@@ -36,7 +43,7 @@ describe('worldToScreen', () => {
     const r = makeRenderer(320, 240);
     r.setCamera(4, 3);
     const { x } = r.worldToScreen(2, 3);
-    expect(x).toBe(160 - 2 * tileSize);
+    expect(x).toBe(160 - 2 * r.tileSize);
   });
 });
 

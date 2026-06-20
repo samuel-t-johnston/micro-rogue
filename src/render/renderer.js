@@ -1,16 +1,24 @@
 import { getTileType } from '../world/tile-registry.js';
 import { createSpriteRenderer } from './sprite-renderer.js';
-import { gameConfig } from '../engine/game-config.js';
 import { RenderLayers } from './render-layers.js';
 import { animations } from './animations.js';
+import { createZoom, ZOOM_LEVELS } from './zoom.js';
 
-export function createRenderer({ getViewport }) {
-  const { tileSize } = gameConfig;
-  const sprites = createSpriteRenderer(tileSize);
+// Sprites are sourced from the 16px sheet and scaled up to the active zoom level by an integer
+// factor, so the art stays pixel-crisp at every level (see zoom.js).
+const SPRITE_SOURCE_SIZE = 16;
+
+export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LEVELS.indexOf(32) }) }) {
+  const sprites = createSpriteRenderer(SPRITE_SOURCE_SIZE);
   const camera = { x: 0, y: 0 }; // tile coords at screen center
+
+  // The on-screen tile size in CSS px for the current zoom level. Read fresh on every call so
+  // a zoom change takes effect on the next frame without re-wiring anything.
+  const ts = () => zoom.tileSize;
 
   function worldToScreen(tileX, tileY) {
     const { width, height } = getViewport();
+    const tileSize = ts();
     return {
       x: Math.round((tileX - camera.x) * tileSize + width / 2),
       y: Math.round((tileY - camera.y) * tileSize + height / 2),
@@ -19,6 +27,7 @@ export function createRenderer({ getViewport }) {
 
   function screenToWorld(screenX, screenY) {
     const { width, height } = getViewport();
+    const tileSize = ts();
     return {
       x: (screenX - width / 2) / tileSize + camera.x,
       y: (screenY - height / 2) / tileSize + camera.y,
@@ -28,6 +37,7 @@ export function createRenderer({ getViewport }) {
   // Tile range covering the viewport, clamped to the level bounds.
   function getVisibleTileRange(level) {
     const { width, height } = getViewport();
+    const tileSize = ts();
     const halfW = width / 2;
     const halfH = height / 2;
     return {
@@ -39,6 +49,8 @@ export function createRenderer({ getViewport }) {
   }
 
   function drawMap(ctx, level, tilePerception) {
+    ctx.imageSmoothingEnabled = false; // nearest-neighbor: crisp pixels when scaling sprites
+    const tileSize = ts();
     const { x0, x1, y0, y1 } = getVisibleTileRange(level);
 
     for (let ty = y0; ty <= y1; ty++) {
@@ -57,7 +69,7 @@ export function createRenderer({ getViewport }) {
         const { x, y } = worldToScreen(tx, ty);
 
         if (!isVisible) ctx.globalAlpha = 0.4;
-        if (!sprites.draw(ctx, tile.sprite, x, y)) {
+        if (!sprites.draw(ctx, tile.sprite, x, y, tileSize)) {
           ctx.fillStyle = tile.color;
           ctx.fillRect(x, y, tileSize, tileSize);
         }
@@ -68,6 +80,7 @@ export function createRenderer({ getViewport }) {
 
   function drawEntities(ctx, level, tilePerception) {
     const { width, height } = getViewport();
+    const tileSize = ts();
     const halfW = width / 2;
     const halfH = height / 2;
     const x0 = Math.floor(camera.x - halfW / tileSize);
@@ -99,6 +112,7 @@ export function createRenderer({ getViewport }) {
   // animation. The fast path (transform === null) draws straight to the context;
   // scale/alpha transforms wrap the draw in a save/restore so they don't leak.
   function drawRenderable(ctx, renderable, x, y, transform) {
+    const tileSize = ts();
     const px = transform ? x + transform.dx * tileSize : x;
     const py = transform ? y + transform.dy * tileSize : y;
     const scaled = transform && (transform.scaleX !== 1 || transform.scaleY !== 1);
@@ -118,7 +132,7 @@ export function createRenderer({ getViewport }) {
       }
     }
 
-    if (!sprites.draw(ctx, renderable.sprite, px, py)) {
+    if (!sprites.draw(ctx, renderable.sprite, px, py, tileSize)) {
       ctx.fillStyle = renderable.color ?? '#666';
       ctx.fillRect(px, py, tileSize, tileSize);
       if (renderable.glyph) {
@@ -146,13 +160,15 @@ export function createRenderer({ getViewport }) {
 
   return {
     load: () => sprites.load(),
-    tileSize,
+    get tileSize() { return ts(); },
     worldToScreen,
     screenToWorld,
     getVisibleTileRange,
     drawMap,
     drawEntities,
     drawAnimations,
+    zoomIn: () => zoom.zoomIn(),
+    zoomOut: () => zoom.zoomOut(),
     setCamera(x, y) {
       camera.x = x;
       camera.y = y;
