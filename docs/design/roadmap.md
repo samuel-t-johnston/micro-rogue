@@ -171,7 +171,7 @@ doors-block-scent (see [scent-and-smell.md](scent-and-smell.md)).*
 *Done when: the game is complete enough for external playtesting, runs well on a real phone, and installs as a PWA.*
 
 - [x] Service worker: offline caching of all assets
-- [ ] Discrete zoom snap points: 3–4 levels, phone default closer, desktop default wider
+- [x] Discrete zoom snap points: 3–4 levels, phone default closer, desktop default wider
 - [ ] Message log: expandable overlay, full scrollable history
 - [ ] Status effects: HUD display, multi-effect overflow handling
 - [ ] Accessibility: 44×44px tap targets audit, color-not-sole-signal audit, handedness swap setting
@@ -187,6 +187,15 @@ manifest `icons` and missing `apple-touch-icon` were why iOS showed a generated 
 placeholder; the green-µ favicon art is now rendered crisp to `icons/icon-{180,192,512}.png` +
 a maskable 512, wired into the manifest and an `apple-touch-icon` link. See
 [pwa-and-offline.md](../howto/pwa-and-offline.md).*
+
+*Zoom note (landed): a discrete zoom ladder (`src/render/zoom.js`, on-screen tile sizes
+`[16, 32, 48, 64]`) replaces the fixed `gameConfig.tileSize`. Sprites now source from the **16px
+sheet** scaled by integer ×1–4 (crisp at every level); the renderer reads `zoom.tileSize` each
+frame for all geometry, so the debug overlay scales for free. Touch starts closer (48px), desktop
+wider (32px); session-only, not persisted. Pinch (ratcheted) and scroll-wheel drive it. Tap-to-move
+moved from `pointerdown` to **release** so pinch can coexist with tapping and drag-to-pan has a
+hook; a tap only starts when a press clears the whole UI widget chain. See
+[zoom.md](../howto/zoom.md).*
 
 ---
 

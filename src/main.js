@@ -112,13 +112,24 @@ function updateDebugPointer(x, y) {
 requestAnimationFrame(frame);
 
 canvas.addEventListener('pointerdown', (e) => {
-  appState.handleInput({ type: 'pointerdown', x: e.clientX, y: e.clientY });
+  appState.handleInput({ type: 'pointerdown', x: e.clientX, y: e.clientY, pointerId: e.pointerId });
   updateDebugPointer(e.clientX, e.clientY);
 });
 canvas.addEventListener('pointermove', (e) => {
-  appState.handleInput({ type: 'pointermove', x: e.clientX, y: e.clientY });
+  appState.handleInput({ type: 'pointermove', x: e.clientX, y: e.clientY, pointerId: e.pointerId });
   updateDebugPointer(e.clientX, e.clientY);
 });
+canvas.addEventListener('pointerup', (e) => {
+  appState.handleInput({ type: 'pointerup', x: e.clientX, y: e.clientY, pointerId: e.pointerId });
+});
+canvas.addEventListener('pointercancel', (e) => {
+  appState.handleInput({ type: 'pointercancel', x: e.clientX, y: e.clientY, pointerId: e.pointerId });
+});
+// Desktop zoom. preventDefault stops ctrl+wheel page zoom; the canvas already sets touch-action:none.
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  appState.handleInput({ type: 'wheel', deltaY: e.deltaY, x: e.clientX, y: e.clientY });
+}, { passive: false });
 window.addEventListener('keydown', (e) => {
   if (debugOverlay) {
     if (e.key === '`') { debugOverlay.toggle(); return; }
