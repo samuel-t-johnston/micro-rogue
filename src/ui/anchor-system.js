@@ -23,3 +23,35 @@ export function resolveAnchor(anchor, viewport) {
     default: throw new Error(`Unknown anchor: ${anchor}`);
   }
 }
+
+// Each anchor paired with its left↔right reflection. Center-column anchors map to
+// themselves (no horizontal component to flip).
+const HORIZONTAL_MIRROR = Object.freeze({
+  [Anchor.TOP_LEFT]: Anchor.TOP_RIGHT,
+  [Anchor.TOP_RIGHT]: Anchor.TOP_LEFT,
+  [Anchor.LEFT_CENTER]: Anchor.RIGHT_CENTER,
+  [Anchor.RIGHT_CENTER]: Anchor.LEFT_CENTER,
+  [Anchor.BOTTOM_LEFT]: Anchor.BOTTOM_RIGHT,
+  [Anchor.BOTTOM_RIGHT]: Anchor.BOTTOM_LEFT,
+  [Anchor.TOP_CENTER]: Anchor.TOP_CENTER,
+  [Anchor.BOTTOM_CENTER]: Anchor.BOTTOM_CENTER,
+});
+
+// Resolve a widget's *logical* anchor to a *physical* one for the given handedness. A
+// left-handed layout mirrors the corner-anchored UI across the vertical axis so the
+// primary controls fall under the other thumb; right-handed is the identity. This is the
+// one place handedness touches layout — widgets declare a logical anchor and call this.
+export function applyHandedness(anchor, handedness) {
+  if (handedness !== 'left') return anchor;
+  return HORIZONTAL_MIRROR[anchor] ?? anchor;
+}
+
+// Place a box of size w×h at an anchor, inset `margin` inward from each edge it touches;
+// a center axis centers the box on that axis. Centralizing the corner math means mirroring
+// for handedness is just mirroring the anchor — the inset direction follows automatically.
+export function placeBox(anchor, viewport, { w, h, margin = 0 }) {
+  const { x, y } = resolveAnchor(anchor, viewport);
+  const bx = x === 0 ? margin : x === viewport.width ? x - margin - w : x - w / 2;
+  const by = y === 0 ? margin : y === viewport.height ? y - margin - h : y - h / 2;
+  return { x: bx, y: by, w, h };
+}

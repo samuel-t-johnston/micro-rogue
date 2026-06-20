@@ -1,7 +1,7 @@
 import { drawText, hitTest } from '../canvas-ui.js';
 import { createActionMenu } from '../action-menu.js';
 
-const ROW_H = 40;
+const ROW_H = 44; // minimum tap target (ux-design.md accessibility)
 const SECTION_H = 28;
 const PADDING = 12;
 

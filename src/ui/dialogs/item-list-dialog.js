@@ -2,12 +2,12 @@ import { drawText, drawButton, hitTest } from '../canvas-ui.js';
 
 const DIALOG_W = 320;
 const HEADER_H = 44;
-const ROW_H = 40;
-const FOOTER_H = 60;
+const ROW_H = 44; // minimum tap target (ux-design.md accessibility)
+const FOOTER_H = 64;
 const PADDING = 16;
 const CB_SIZE = 16;
 const BTN_W = 110;
-const BTN_H = 36;
+const BTN_H = 44; // minimum tap target (ux-design.md accessibility)
 
 export function createItemListDialog({ theme, getViewport, title, items, onClose }) {
   const selected = new Set(items.map(i => i.id));

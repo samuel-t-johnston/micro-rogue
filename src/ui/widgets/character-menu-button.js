@@ -1,15 +1,18 @@
 import { drawText, hitTest } from '../canvas-ui.js';
-import { Anchor, resolveAnchor } from '../anchor-system.js';
+import { Anchor, applyHandedness, placeBox } from '../anchor-system.js';
+import { gameSettings } from '../../engine/settings.js';
 
 const BUTTON_SIZE = 44;
 const MARGIN = 12;
 
-// HUD button that opens the character menu. Mounted at the bottom-right per ux-design.md
-// (handedness swap is a future accessibility setting).
+// HUD button that opens the character menu. The primary action button: bottom-right for
+// right-handed players, mirrored to bottom-left when handedness is 'left' (ux-design.md).
+const ANCHOR = Anchor.BOTTOM_RIGHT;
+
 export function createCharacterMenuButton({ theme, getViewport, onOpen }) {
   function buttonRect() {
-    const { x, y } = resolveAnchor(Anchor.BOTTOM_RIGHT, getViewport());
-    return { x: x - MARGIN - BUTTON_SIZE, y: y - MARGIN - BUTTON_SIZE, w: BUTTON_SIZE, h: BUTTON_SIZE };
+    const anchor = applyHandedness(ANCHOR, gameSettings.get('handedness'));
+    return placeBox(anchor, getViewport(), { w: BUTTON_SIZE, h: BUTTON_SIZE, margin: MARGIN });
   }
 
   return {

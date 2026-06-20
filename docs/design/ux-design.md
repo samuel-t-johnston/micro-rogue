@@ -171,7 +171,7 @@ Animations are sparse but purposeful. All are cosmetic — game state resolves b
 
 **Touch targets** — all interactive elements meet a minimum tap target size of 44×44px.
 
-**Handedness** — character menu button defaults to bottom-right; swappable to bottom-left as a first-class setting.
+**Handedness** — a first-class setting that mirrors the corner-anchored UI horizontally for left-handed reach (the character-menu button moves bottom-right → bottom-left, and the other three corner controls swap with it). Defaults to right-handed. See [handedness.md](../howto/handedness.md).
 
 **Vignette and motion** — screen overlay vignettes are disableable in settings; reduced-motion fallback supported.
 

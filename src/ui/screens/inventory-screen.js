@@ -1,7 +1,7 @@
 import { drawText, hitTest } from '../canvas-ui.js';
 import { createActionMenu } from '../action-menu.js';
 
-const ROW_H = 36;
+const ROW_H = 44; // minimum tap target (ux-design.md accessibility)
 const PADDING = 12;
 
 // Builds the list of actions available for a given inventory item.
