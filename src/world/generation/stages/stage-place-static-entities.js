@@ -2,7 +2,7 @@
 // stashed on the blackboard (`static:entities`). Each spec is `{ type, x, y }`; `chest` also carries
 // `contents` (item type names). Placement is exact and deterministic — no RNG. `stairsUp` doubles as
 // the player's entry point. See docs/howto/static-map-layouts.md.
-import { createStairs, createChest, createBoulder, createDoor } from '../../furniture.js';
+import { createStairs, createDungeonExit, createChest, createBoulder, createDoor } from '../../furniture.js';
 import { createHealingPotion, createPotionOfPain, createDagger, createSword, createLeatherArmor, createScroll } from '../../items.js';
 import { createGoblin, createOrc, createOrcCommander, createScuttler } from '../../creatures.js';
 import { components } from '../../components.js';
@@ -23,6 +23,13 @@ const FACTORIES = {
     return stairs;
   },
   stairsDown: (registry, x, y) => createStairs(registry, x, y, 'down'),
+  // Like stairsUp, the exit doubles as the player's entry point: the player starts here (no Amulet,
+  // so no win), descends, and must return to this tile carrying the Amulet to escape.
+  dungeonExit: (registry, x, y) => {
+    const exit = createDungeonExit(registry, x, y);
+    registry.addComponent(exit, 'entryPoint', components.entryPoint());
+    return exit;
+  },
   boulder: createBoulder,
   door: createDoor,
   goblin: createGoblin,

@@ -65,6 +65,14 @@ export const components = {
     return { lifespan };
   },
 
+  // Marks a furniture entity (the surface up-stairs) as the dungeon exit — the tile the player must
+  // stand on, holding the right quest item, to win. A plain marker: win-conditions.js reads it via
+  // position, decoupled from how the exit was placed (static map or a generation stage). Multiple
+  // exits are fine — any of them satisfies the win check.
+  dungeonExit() {
+    return {};
+  },
+
   // Marks an entity (which also has a position) as a place the player can arrive on this level.
   // The game scene places the player on the entryPoint entity (see src/world/spawn.js); if several
   // exist, one is chosen. Generation drops it (e.g. on the up-stairs); kept separate from the stairs
@@ -150,6 +158,13 @@ export const components = {
 
   position(x, y) {
     return { x, y };
+  },
+
+  // Tags an item as a quest objective. `id` names the objective (e.g. 'amulet-of-yendor') so a
+  // single component serves many quest items with distinct identities, and win conditions can key on
+  // a specific one. Stored as data so it serializes cleanly; identity by id, never by display name.
+  questItem(id) {
+    return { id };
   },
 
   // sprite: { col, row } matching the sprite sheet; color: CSS fallback if sprite unavailable.

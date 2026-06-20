@@ -41,6 +41,16 @@ export function createStairs(registry, x, y, direction = 'up', to = null) {
   return entity;
 }
 
+// The dungeon exit: the surface up-stairs, where the player wins by standing with the Amulet (see
+// win-conditions.js). Rendered like normal up-stairs and carrying an 'up' transition (so tapping it
+// is the same harmless no-op remount as any top-of-dungeon stair); the dungeonExit marker is the
+// only thing that distinguishes it. Placed explicitly by whoever authors the top level.
+export function createDungeonExit(registry, x, y) {
+  const entity = createStairs(registry, x, y, 'up');
+  registry.addComponent(entity, 'dungeonExit', components.dungeonExit());
+  return entity;
+}
+
 export function createDoor(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Door'));

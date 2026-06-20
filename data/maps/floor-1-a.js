@@ -3,8 +3,10 @@ export const legend = {
   '#': 'wall',
 };
 
-// Two rooms sharing a wall, with a door at the floor opening (col 5, row 3). Player starts on the
-// up-stairs in the lower room. Entities are authored below and placed by stage-place-static-entities.
+// Two rooms sharing a wall, with a door at the floor opening (col 5, row 3). The player starts on the
+// up-stairs (the dungeon exit) in the lower room; on the return trip from below they arrive on the
+// stairs-down in the upper room and must cross back to the exit to win. Entities are authored below
+// and placed by stage-place-static-entities.
 export const tiles = `\
 ############
 #..........#
@@ -17,8 +19,8 @@ export const tiles = `\
 ############`;
 
 export const entities = [
-  { type: 'stairsUp', x: 6, y: 4 },
-  { type: 'stairsDown', x: 6, y: 1 }, // upper room, past the door — the descent to floor 2
+  { type: 'dungeonExit', x: 6, y: 4 }, // lower room: surface up-stairs — the player's start tile and the win tile
+  { type: 'stairsDown', x: 6, y: 1 }, // upper room, past the door — the descent to floor 2 (and the return-trip arrival)
 
   { type: 'boulder', x: 8, y: 4 },
   { type: 'door', x: 5, y: 3 },

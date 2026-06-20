@@ -13,6 +13,7 @@ import { createLevelManager } from '../world/level-manager.js';
 import transitMap from '../../data/transit-map.js';
 import { applySenses } from '../ai/planning-context.js';
 import { upkeep } from '../engine/upkeep.js';
+import { winConditions, escapeWithQuestItem } from '../engine/win-conditions.js';
 import { scentUpkeep, scentAt } from '../world/scent.js';
 import { getTileType } from '../world/tile-registry.js';
 import { gameLog } from '../engine/game-log.js';
@@ -24,7 +25,7 @@ import { createDialogController } from './dialog-controller.js';
 import { createCharacterMenuController } from './character-menu-controller.js';
 import { createGameMenuController } from './game-menu-controller.js';
 import { createGameMenuButton } from './widgets/game-menu-button.js';
-import { createDeathPopup } from './death-popup.js';
+import { createOutcomePopup } from './outcome-popup.js';
 import { commitSave, loadSavedGame, clearSave } from '../save/save-system.js';
 import { buildSupportBundle, downloadSupportBundle } from '../save/support-bundle.js';
 
@@ -35,6 +36,8 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
   let turnManager = null;
   let inputController = null;
   let gameOver = false;
+  let outcome = 'lose';      // 'lose' | 'win' — how the run ended, set by endGame()
+  let outcomeMessage = '';   // optional detail line carried to the Results screen
   let transitioning = false;
   let visibilityHandler = null;
 
@@ -143,11 +146,11 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     getViewport,
     onOpen: () => gameMenuController.open(),
   });
-  const deathPopup = createDeathPopup({
+  const outcomePopup = createOutcomePopup({
     theme,
     getViewport,
     onNext: () => {
-      onGameOver?.({ turns: turnManager?.playerTurnCount ?? 0, player, level });
+      onGameOver?.({ outcome, message: outcomeMessage, turns: turnManager?.playerTurnCount ?? 0, player, level });
     },
   });
 
@@ -180,15 +183,30 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     });
   }
 
-  // Wired into the level by enter(); fired from the death chokepoint when the player's
-  // HP hits 0. Deletes the save *before* the death screen (never persist a dead player),
-  // freezes the turn loop, and surfaces the death popup over the frozen scene.
-  function handlePlayerDeath() {
+  // The single end-of-run seam: both player death and victory converge here. Deletes the save (the
+  // run is over either way — never persist a finished game), freezes the turn loop, and surfaces the
+  // outcome popup over the frozen scene. `gameOver` guards against re-entry and gates autosave.
+  function endGame({ outcome: result, message = '' }) {
     if (gameOver) return;
     gameOver = true;
+    outcome = result;
+    outcomeMessage = message;
     turnManager?.stop();
     clearSave();
-    deathPopup.show();
+    outcomePopup.show(result);
+  }
+
+  // Wired into the level by mountLevel(); fired from the death chokepoint when the player's HP hits 0.
+  function handlePlayerDeath() {
+    endGame({ outcome: 'lose' });
+  }
+
+  // Wired into the turn manager as onTurnEnd; evaluates win conditions at the end of each real player
+  // turn (win state only changes on the player's own action). A hit ends the run as a victory.
+  function handleTurnEnd(entity, { free }) {
+    if (gameOver || free || !entity.components.has('playerControlled')) return;
+    const result = winConditions.run({ registry, level, player });
+    if (result) endGame(result);
   }
 
   // Wires the per-level runtime (senses, camera, input, action system, turn loop) onto the current
@@ -211,6 +229,13 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     upkeep.register('scent', (ctx) => scentUpkeep(ctx.level, ctx.registry));
     upkeep.register('autosave', () => saveGame());
 
+    // The classic victory: escape the dungeon (stand on a dungeonExit) carrying the Amulet of Yendor.
+    // Registered here so the win check is live for every floor; evaluated at each player turn-end.
+    winConditions.register('escape-with-amulet', escapeWithQuestItem(
+      'amulet-of-yendor',
+      'You escaped the dungeon with the Amulet of Yendor!',
+    ));
+
     turnManager = createTurnManager({
       // Turn-queue membership = takes turns OR decays. turnTakers act on the energy model;
       // decay entities (sounds, etc.) ride the same queue purely to age out once per round.
@@ -221,6 +246,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
       },
       invokeAction: (entity) => actionSystem.invokeAction(entity),
       onTurnStart: (entity) => { if (entity.components.has('playerControlled')) upkeep.run({ level, registry, player }); },
+      onTurnEnd: handleTurnEnd,
       initialTurnCount,
     });
     gameLog.setTurnProvider(() => turnManager?.playerTurnCount ?? 0);
@@ -282,7 +308,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     if (!level || !inputController) return false;
 
     // Once dead, the popup intercepts everything until "Next" is pressed.
-    if (deathPopup.isVisible) return deathPopup.handleInput(event);
+    if (outcomePopup.isVisible) return outcomePopup.handleInput(event);
 
     if (characterMenuController.isOpen) {
       return characterMenuController.handleInput(event);
@@ -417,7 +443,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
       dialogController.render(ctx);
       characterMenuController.render(ctx);
       gameMenuController.render(ctx);
-      deathPopup.render(ctx);
+      outcomePopup.render(ctx);
     },
 
     screenToWorld(x, y) {

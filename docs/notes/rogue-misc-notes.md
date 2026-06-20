@@ -1,3 +1,5 @@
+remember previous levels' seen tiles
+
 player hear/sound goal - should this be a goal? Can't smell/hear when auto goals active
 
 classes vs loose functions - style questions?
@@ -13,11 +15,6 @@ jsdoc comments everywhere
 
 item/furniture files in data. Components?
 
-
-turnCount is currently hardcoded to 0 (action-system.js:38). Doesn't matter for wander, but vision stamps turnObserved with it, and NPC stale-data reasoning will eventually need a real monotonic tick. The turn manager only exposes playerTurnCount. I'd leave it at 0 for now but note it as the next thing to thread when we add a pursue/investigate goal.
--> TimeSense component that tracks the entity's own turn count?
-
-
 close door when blocked?
 
 getting monsters some default equipment
@@ -32,7 +29,6 @@ pathfinding reads `context.level` directly rather than a sense-filtered "known m
 Standard formatting for aliases in howto files.
 
 "Save" button that tells the user about auto-save.
-
 
 At final milestone, evaluate all assertions in howtos and design docs. Cleanup and tighten the screws.
 GitHub community standards.

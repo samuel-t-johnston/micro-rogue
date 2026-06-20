@@ -102,8 +102,11 @@ DO NOT INSTALL TOOLS LIKE PLAYWRIGHT TO TEST UI!
 - Test names describe behavior, not implementation. "rejects movement into a wall" is good. "calls isPassable" is not.
 - Don't test private implementation details. If a test breaks during a refactor that didn't change observable behavior, the test was wrong. 
 
-# PRs
- - Code changes should be reviewed and unit tested before creating a PR.
+# PRs and Commits
+ - Always commit to a branch, not main
+ - Code changes should be reviewed and unit tested before committing.
+ - Do not include Claude-specific info like Claude session IDs in commit messages.
+ - User will create the PR.
 
 # Documentation
 - `README.md` provides the high-level overview for humans, and general goals for the project.

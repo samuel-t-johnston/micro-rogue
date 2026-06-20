@@ -173,9 +173,9 @@ doors-block-scent (see [scent-and-smell.md](scent-and-smell.md)).*
 - [x] Service worker: offline caching of all assets
 - [x] Discrete zoom snap points: 3–4 levels, phone default closer, desktop default wider
 - [x] Message log: expandable overlay, full scrollable history
-- [ ] Status effects: HUD display, multi-effect overflow handling
 - [x] Accessibility: 44×44px tap targets audit, color-not-sole-signal audit, handedness swap setting
 - [ ] Onboarding splash: dismissable, controls summary, hook for downstream content
+- [x] Win condition - Amulet of Yendor + top stairs
 
 *Service-worker/PWA note (landed): the M0 registration stub is now a real **network-first**
 service worker (`service-worker.js`) — online loads always fetch fresh and update the cache,
@@ -233,3 +233,4 @@ These are explicitly out of scope until a concrete need exists:
 - [ ] Notification layer: compare sense results turn-over-turn, fan to log and emote system
 - [ ] Screen overlay effects: red vignette for low HP; reduced-motion fallback; disableable
 - [ ] Emote icons: `!` alert, `?` investigating, `💤` sleeping — reusable component
+- [ ] Status effects: HUD display, multi-effect overflow handling
