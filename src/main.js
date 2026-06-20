@@ -142,6 +142,18 @@ window.addEventListener('keydown', (e) => {
 });
 
 if ('serviceWorker' in navigator) {
+  // When a new worker activates (after a deploy), reload so the page runs the fresh assets.
+  // Guarded to an existing controller so this never fires on the very first install, and to a
+  // one-shot flag so a single activation can't loop. This is what lets an installed PWA pick up
+  // updates without a manual delete/reinstall (notably on iOS).
+  if (navigator.serviceWorker.controller) {
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloading) return;
+      reloading = true;
+      window.location.reload();
+    });
+  }
   navigator.serviceWorker.register('./service-worker.js').catch((err) => {
     console.warn('Service worker registration failed:', err);
   });

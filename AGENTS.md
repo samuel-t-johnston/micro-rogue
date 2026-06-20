@@ -34,6 +34,8 @@ npm install
 
 No build step. Source files are served directly to the browser as ES modules. To deploy, copy the repo contents (excluding `node_modules/`) to any static host.
 
+Whenever you commit changes that impact what files the browser loads, bump the cache version in `serviceworker.js`.
+
 ## Run Instructions
 
 Local dev (live-server on `http://127.0.0.1:8000` with auto-reload):

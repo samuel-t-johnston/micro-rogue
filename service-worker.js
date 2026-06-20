@@ -1,9 +1,11 @@
 // ROGµE service worker — offline caching (roadmap M7).
 //
 // Strategy: NETWORK-FIRST for every same-origin GET. When online we always fetch
-// fresh and update the cache; when the network fails we serve the cached copy, and
-// navigations fall back to the cached app shell. Bump CACHE_VERSION on each deploy —
-// `activate` deletes every other cache, which self-heals stale assets within one reload.
+// fresh (revalidating past the browser's HTTP cache, so a stale on-device copy can't be
+// returned) and update the Cache Storage; when the network fails we serve the cached copy,
+// and navigations fall back to the cached app shell. Bump CACHE_VERSION on each deploy —
+// the changed bytes prompt the browser to install a new worker (important on iOS, which
+// otherwise leaves an installed PWA on old code), and `activate` deletes every other cache.
 //
 // Why there is no exhaustive file list: on the first online load the browser fetches the
 // entire static-import module graph (all of src/), both stylesheets, and the active sprite
@@ -13,7 +15,7 @@
 // thing to hand-maintain is that list (add a line when you add a new data/maps/*.js file);
 // there is no generator and no build step.
 
-const CACHE_VERSION = 'rogue-v1';
+const CACHE_VERSION = 'rogue-v2';
 
 // The app shell — enough to boot the game offline. Everything else self-caches at runtime.
 const SHELL_ASSETS = [
@@ -80,7 +82,9 @@ self.addEventListener('fetch', (event) => {
 async function networkFirst(request) {
   const cache = await caches.open(CACHE_VERSION);
   try {
-    const response = await fetch(request);
+    // `cache: 'no-cache'` forces revalidation with the server (cheap 304s when unchanged),
+    // so the worker never hands back a stale copy from the browser's own HTTP cache.
+    const response = await fetch(request, { cache: 'no-cache' });
     if (response.ok) cache.put(request, response.clone());
     return response;
   } catch (err) {

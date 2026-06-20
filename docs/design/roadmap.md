@@ -186,16 +186,22 @@ alternate sprite-sheet size). Bump `CACHE_VERSION` to force-evict stale caches. 
 manifest `icons` and missing `apple-touch-icon` were why iOS showed a generated white-"R"
 placeholder; the green-µ favicon art is now rendered crisp to `icons/icon-{180,192,512}.png` +
 a maskable 512, wired into the manifest and an `apple-touch-icon` link. See
-[pwa-and-offline.md](../howto/pwa-and-offline.md).*
+[pwa-and-offline.md](../howto/pwa-and-offline.md). Update-reliability hardening (after an installed
+iOS PWA stuck on old code): the worker now fetches with `cache: 'no-cache'` (revalidates past the
+browser HTTP cache so it can't serve a stale on-device copy), and `src/main.js` auto-reloads on
+`controllerchange` (guarded against the first install) so a newly-activated worker's assets take
+effect immediately. `CACHE_VERSION` must be bumped per deploy — the changed bytes are what make
+iOS install the new worker.*
 
 *Zoom note (landed): a discrete zoom ladder (`src/render/zoom.js`, on-screen tile sizes
-`[16, 32, 48, 64]`) replaces the fixed `gameConfig.tileSize`. Sprites now source from the **16px
-sheet** scaled by integer ×1–4 (crisp at every level); the renderer reads `zoom.tileSize` each
-frame for all geometry, so the debug overlay scales for free. Touch starts closer (48px), desktop
-wider (32px); session-only, not persisted. Pinch (ratcheted) and scroll-wheel drive it. Tap-to-move
-moved from `pointerdown` to **release** so pinch can coexist with tapping and drag-to-pan has a
-hook; a tap only starts when a press clears the whole UI widget chain. See
-[zoom.md](../howto/zoom.md).*
+`[16, 32, 48, 64]`) replaces the fixed `gameConfig.tileSize`. Sprites source from whichever sheet
+(16px/32px) scales crispest for the level **and device pixel ratio** (`pickSheetSize` — largest
+sheet that upscales by a whole number to `tile × dpr`), so a dpr-2 phone uses the 32px sheet at
+every level; the renderer reads `zoom.tileSize` each frame for all geometry, so the debug overlay
+scales for free. Touch starts closer (48px), desktop wider (32px); session-only, not persisted.
+Pinch (ratcheted) and scroll-wheel drive it. Tap-to-move moved from `pointerdown` to **release** so
+pinch can coexist with tapping and drag-to-pan has a hook; a tap only starts when a press clears the
+whole UI widget chain. See [zoom.md](../howto/zoom.md).*
 
 ---
 

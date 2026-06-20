@@ -4,12 +4,13 @@ import { RenderLayers } from './render-layers.js';
 import { animations } from './animations.js';
 import { createZoom, ZOOM_LEVELS } from './zoom.js';
 
-// Sprites are sourced from the 16px sheet and scaled up to the active zoom level by an integer
-// factor, so the art stays pixel-crisp at every level (see zoom.js).
-const SPRITE_SOURCE_SIZE = 16;
+// Available sprite-sheet resolutions. The sprite renderer picks the best one per draw for the
+// current zoom level and device pixel ratio, so the art stays crisp and as detailed as the
+// sheets allow at every level (see sprite-renderer.js / zoom.js).
+const SPRITE_SHEET_SIZES = [16, 32];
 
 export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LEVELS.indexOf(32) }) }) {
-  const sprites = createSpriteRenderer(SPRITE_SOURCE_SIZE);
+  const sprites = createSpriteRenderer(SPRITE_SHEET_SIZES);
   const camera = { x: 0, y: 0 }; // tile coords at screen center
 
   // The on-screen tile size in CSS px for the current zoom level. Read fresh on every call so
@@ -51,6 +52,7 @@ export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LE
   function drawMap(ctx, level, tilePerception) {
     ctx.imageSmoothingEnabled = false; // nearest-neighbor: crisp pixels when scaling sprites
     const tileSize = ts();
+    const dpr = getViewport().dpr ?? 1;
     const { x0, x1, y0, y1 } = getVisibleTileRange(level);
 
     for (let ty = y0; ty <= y1; ty++) {
@@ -69,7 +71,7 @@ export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LE
         const { x, y } = worldToScreen(tx, ty);
 
         if (!isVisible) ctx.globalAlpha = 0.4;
-        if (!sprites.draw(ctx, tile.sprite, x, y, tileSize)) {
+        if (!sprites.draw(ctx, tile.sprite, x, y, tileSize, dpr)) {
           ctx.fillStyle = tile.color;
           ctx.fillRect(x, y, tileSize, tileSize);
         }
@@ -113,6 +115,7 @@ export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LE
   // scale/alpha transforms wrap the draw in a save/restore so they don't leak.
   function drawRenderable(ctx, renderable, x, y, transform) {
     const tileSize = ts();
+    const dpr = getViewport().dpr ?? 1;
     const px = transform ? x + transform.dx * tileSize : x;
     const py = transform ? y + transform.dy * tileSize : y;
     const scaled = transform && (transform.scaleX !== 1 || transform.scaleY !== 1);
@@ -132,7 +135,7 @@ export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LE
       }
     }
 
-    if (!sprites.draw(ctx, renderable.sprite, px, py, tileSize)) {
+    if (!sprites.draw(ctx, renderable.sprite, px, py, tileSize, dpr)) {
       ctx.fillStyle = renderable.color ?? '#666';
       ctx.fillRect(px, py, tileSize, tileSize);
       if (renderable.glyph) {

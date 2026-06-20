@@ -6,8 +6,11 @@ The map view has discrete zoom levels (roadmap M7). Pinch on touch, scroll-wheel
 
 `src/render/zoom.js` owns the ladder: `ZOOM_LEVELS = [16, 32, 48, 64]` — the on-screen tile
 size in CSS px. Index 0 is the widest view; the last index is the closest. Sprites are sourced
-from the **16px sheet** and scaled by an integer factor (×1–4), so every level stays
-pixel-crisp (the renderer also sets `imageSmoothingEnabled = false`).
+from whichever sheet (`sprite-sheet-16.png` / `-32.png`) gives the crispest, most detailed
+result for the current level **and device pixel ratio** — see `pickSheetSize` in
+`sprite-renderer.js`. It picks the largest sheet that upscales to the on-screen device-pixel
+size (`tile size × dpr`) by a whole number, so e.g. a dpr-2 phone draws from the 32px sheet at
+every level. The renderer also sets `imageSmoothingEnabled = false` so scaling is nearest-neighbor.
 
 `defaultZoomIndex(isCoarsePointer)` picks the starting level: touch devices (coarse pointer)
 start closer at 48px, mouse/desktop start wider at 32px. Zoom is **session-only** — it resets
