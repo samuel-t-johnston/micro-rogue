@@ -170,12 +170,23 @@ doors-block-scent (see [scent-and-smell.md](scent-and-smell.md)).*
 ## M7 — Polish and PWA
 *Done when: the game is complete enough for external playtesting, runs well on a real phone, and installs as a PWA.*
 
-- [ ] Service worker: offline caching of all assets
+- [x] Service worker: offline caching of all assets
 - [ ] Discrete zoom snap points: 3–4 levels, phone default closer, desktop default wider
 - [ ] Message log: expandable overlay, full scrollable history
 - [ ] Status effects: HUD display, multi-effect overflow handling
 - [ ] Accessibility: 44×44px tap targets audit, color-not-sole-signal audit, handedness swap setting
 - [ ] Onboarding splash: dismissable, controls summary, hook for downstream content
+
+*Service-worker/PWA note (landed): the M0 registration stub is now a real **network-first**
+service worker (`service-worker.js`) — online loads always fetch fresh and update the cache,
+offline serves from cache, navigations fall back to the cached shell. There is **no build step
+and no generated file manifest**: the static-import module graph self-caches on first online
+load, so the only hand-maintained list is `DYNAMIC_ASSETS` (the lazily-loaded map files +
+alternate sprite-sheet size). Bump `CACHE_VERSION` to force-evict stale caches. Icons: the empty
+manifest `icons` and missing `apple-touch-icon` were why iOS showed a generated white-"R"
+placeholder; the green-µ favicon art is now rendered crisp to `icons/icon-{180,192,512}.png` +
+a maskable 512, wired into the manifest and an `apple-touch-icon` link. See
+[pwa-and-offline.md](../howto/pwa-and-offline.md).*
 
 ---
 
