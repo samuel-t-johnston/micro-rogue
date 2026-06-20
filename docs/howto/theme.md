@@ -17,6 +17,7 @@ The token set is kept deliberately small. Add a new token only when a concrete U
 | `--color-text`           | `text`          | Body text                                |
 | `--color-text-dim`       | `textDim`       | Secondary text, labels, ghost log lines  |
 | `--color-text-disabled`  | `textDisabled`  | Disabled button labels                   |
+| `--color-debug`          | `debug`         | Debug-only / unseen lines in the log overlay |
 
 ## Change a color value
 

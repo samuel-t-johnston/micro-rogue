@@ -114,7 +114,13 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     return true;
   }
   const hudWidget = createHudWidget({ theme, getViewport });
-  const messageLogWidget = createMessageLogWidget({ theme, getViewport });
+  const messageLogWidget = createMessageLogWidget({
+    theme,
+    getViewport,
+    getDisplayEntries: (count) => gameLog.getDisplayEntries(count),
+    getAllEntries: () => gameLog.getAll(),
+    isDebugEnabled: () => gameConfig.debugEnabled,
+  });
   const dialogController = createDialogController({ theme, getViewport });
   const characterMenuController = createCharacterMenuController({
     theme,
@@ -404,11 +410,10 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
       const hp = player ? registry.getComponent(player, 'health') : { current: 0, max: 0 };
       hudWidget.render(ctx, { hp, turn: turnManager?.playerTurnCount ?? 0 });
 
-      const recentLines = gameLog.getDisplayEntries(3).map(e => e.display);
-      messageLogWidget.render(ctx, { recentLines });
-
       characterMenuButton.render(ctx);
       gameMenuButton.render(ctx);
+      // Rendered after the menu buttons so the open log overlay covers them.
+      messageLogWidget.render(ctx);
       dialogController.render(ctx);
       characterMenuController.render(ctx);
       gameMenuController.render(ctx);

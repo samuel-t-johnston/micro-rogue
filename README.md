@@ -54,6 +54,8 @@ npm install
 
 There is no build step! Source files are served directly to the browser as ES modules. To deploy, copy the repo contents (excluding `node_modules/`) to any static host. Since you will already have Node installed, that's the easiest option. Use the commands below.
 
+(Note: Whenever you commit changes that impact what files the browser loads, bump the cache version in `service-worker.js`.)
+
 ## Run
 
 Local dev (live-server on `http://127.0.0.1:8000` with auto-reload):

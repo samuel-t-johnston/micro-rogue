@@ -172,7 +172,7 @@ doors-block-scent (see [scent-and-smell.md](scent-and-smell.md)).*
 
 - [x] Service worker: offline caching of all assets
 - [x] Discrete zoom snap points: 3–4 levels, phone default closer, desktop default wider
-- [ ] Message log: expandable overlay, full scrollable history
+- [x] Message log: expandable overlay, full scrollable history
 - [ ] Status effects: HUD display, multi-effect overflow handling
 - [ ] Accessibility: 44×44px tap targets audit, color-not-sole-signal audit, handedness swap setting
 - [ ] Onboarding splash: dismissable, controls summary, hook for downstream content
