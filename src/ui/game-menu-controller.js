@@ -1,6 +1,6 @@
 import { createMenuShell } from './menu-shell.js';
 import { createActionMenu } from './action-menu.js';
-import { SETTINGS_PAGE } from './game-menu-items.js';
+import { buildSettingsPage } from './game-menu-items.js';
 
 // In-game menu overlay, opened by the HUD gear button. Suppresses map input while open
 // (so turns don't advance — same mechanism as the character menu). Shares the drill-down
@@ -37,7 +37,7 @@ export function createGameMenuController({ theme, getViewport, onNewGame }) {
     getItems: () => [
       { id: 'resume', label: 'Resume', onSelect: close },
       { id: 'new', label: 'New Game', onSelect: askNewGame },
-      { id: 'settings', label: 'Settings', submenu: SETTINGS_PAGE },
+      { id: 'settings', label: 'Settings', submenu: buildSettingsPage() },
     ],
   });
 

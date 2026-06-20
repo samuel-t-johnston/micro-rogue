@@ -1,16 +1,19 @@
 import { drawText, hitTest } from '../canvas-ui.js';
-import { Anchor, resolveAnchor } from '../anchor-system.js';
+import { Anchor, applyHandedness, placeBox } from '../anchor-system.js';
+import { gameSettings } from '../../engine/settings.js';
 
 const BUTTON_SIZE = 44;
 const MARGIN = 12;
 
-// HUD button that opens the in-game game menu. Mounted top-right to stay clear of the
-// top-left HUD, the bottom-left log button, and the bottom-right character-menu button.
-// The gear reads as "system/options"; the hamburger stays with the message log.
+// HUD button that opens the in-game game menu. Mounted top-right (mirrored to top-left when
+// handedness is 'left') to stay clear of the HUD, the log button, and the character-menu
+// button — all of which mirror with it. The gear reads as "system/options".
+const ANCHOR = Anchor.TOP_RIGHT;
+
 export function createGameMenuButton({ theme, getViewport, onOpen }) {
   function buttonRect() {
-    const { x, y } = resolveAnchor(Anchor.TOP_RIGHT, getViewport());
-    return { x: x - MARGIN - BUTTON_SIZE, y: y + MARGIN, w: BUTTON_SIZE, h: BUTTON_SIZE };
+    const anchor = applyHandedness(ANCHOR, gameSettings.get('handedness'));
+    return placeBox(anchor, getViewport(), { w: BUTTON_SIZE, h: BUTTON_SIZE, margin: MARGIN });
   }
 
   return {

@@ -1,6 +1,7 @@
 import { AppState, createAppStateMachine } from './engine/app-state.js';
 import { readTheme } from './engine/theme.js';
 import { gameConfig } from './engine/game-config.js';
+import { gameSettings } from './engine/settings.js';
 import { createSplashScene } from './ui/splash.js';
 import { createMenuScene } from './ui/game-menu.js';
 import { createGameScene } from './ui/game-scene.js';
@@ -32,6 +33,7 @@ function getViewport() {
 }
 
 const theme = readTheme();
+gameSettings.load(); // restore UI preferences (handedness, …) before any scene mounts
 const appState = createAppStateMachine();
 const debugOverlay = gameConfig.debugEnabled ? createDebugOverlay({ getViewport }) : null;
 

@@ -1,5 +1,6 @@
 import { drawText, hitTest } from '../canvas-ui.js';
-import { Anchor, resolveAnchor } from '../anchor-system.js';
+import { Anchor, applyHandedness, placeBox } from '../anchor-system.js';
+import { gameSettings } from '../../engine/settings.js';
 
 const BUTTON_SIZE = 44;
 const MARGIN = 12;
@@ -96,9 +97,11 @@ export function createMessageLogWidget({ theme, getViewport, getDisplayEntries, 
   let scroll = 0;
   let drag = null;
 
+  // Bottom-left by default; mirrors to bottom-right when handedness is 'left' (the
+  // character-menu button takes the vacated corner). See docs/howto/handedness.md.
   function buttonRect() {
-    const { x, y } = resolveAnchor(Anchor.BOTTOM_LEFT, getViewport());
-    return { x: x + MARGIN, y: y - MARGIN - BUTTON_SIZE, w: BUTTON_SIZE, h: BUTTON_SIZE };
+    const anchor = applyHandedness(Anchor.BOTTOM_LEFT, gameSettings.get('handedness'));
+    return placeBox(anchor, getViewport(), { w: BUTTON_SIZE, h: BUTTON_SIZE, margin: MARGIN });
   }
 
   function panelRect() {
@@ -154,6 +157,10 @@ export function createMessageLogWidget({ theme, getViewport, getDisplayEntries, 
   function renderGhostLines(ctx) {
     const lines = getDisplayEntries(GHOST_LINE_COUNT).map(e => e.display);
     const btn = buttonRect();
+    // Align the lines to whichever edge the button sits against, so they read inward.
+    const rightSide = btn.x > getViewport().width / 2;
+    const tx = rightSide ? btn.x + btn.w : btn.x;
+    const align = rightSide ? 'right' : 'left';
     // Oldest at top, newest just above the button; alpha steps 0.35 → 0.65.
     const count = lines.length;
     lines.forEach((line, i) => {
@@ -161,7 +168,7 @@ export function createMessageLogWidget({ theme, getViewport, getDisplayEntries, 
       const ly = btn.y - (count - i) * LINE_HEIGHT - 4;
       ctx.save();
       ctx.globalAlpha = alpha;
-      drawText(ctx, line, btn.x, ly, { color: theme.textDim, size: LOG_TEXT_SIZE });
+      drawText(ctx, line, tx, ly, { color: theme.textDim, size: LOG_TEXT_SIZE, align });
       ctx.restore();
     });
   }

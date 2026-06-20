@@ -21,7 +21,7 @@ character menu. The character menu carries a comment to this effect at its head.
 
 ## Game menu
 
-High-level actions: **New Game**, **Continue**, **Settings** (a placeholder sub-page for now).
+High-level actions: **New Game**, **Continue**, **Settings** (a sub-page; currently a Handedness toggle).
 
 The list itself lives in one reusable component, [`createMenuShell`](../../src/ui/menu-shell.js) — a
 centered vertical button list that manages a page stack for drill-down. It's mounted in two places:
@@ -83,8 +83,10 @@ for in-game). Each item is either:
 ```
 
 `getItems()` is re-read every frame, so `enabled` can reflect live state (that's how Continue tracks
-`hasSave()`). A `submenu` with empty `items` renders its `placeholder` string — that's all the
-Settings page is today.
+`hasSave()`). A `submenu` with empty `items` renders its `placeholder` string instead. The Settings
+page is built fresh per open by [`buildSettingsPage`](../../src/ui/game-menu-items.js); its rows are
+plain `onSelect` toggles that flip a setting and rewrite their own `label` (see
+[handedness.md](handedness.md)).
 
 **To the character menu** — add a card in `createCharacterMenuRoot`'s `cards` list and a matching
 sub-screen builder in the controller, following the Inventory/Equipment pair.
@@ -101,4 +103,5 @@ sub-screen builder in the controller, following the Inventory/Equipment pair.
   save" would silently discard moves, so it's deliberately not offered.
 - **New Game is guarded.** It confirms before discarding: "Overwrite existing save?" on the main
   menu (only when a save exists), "Abandon current run?" in-game (always).
-- **Settings is a placeholder.** The drill-down chrome works; there are no settings to change yet.
+- **Settings holds the handedness toggle.** It's the first real setting; the page is the home for
+  future UI preferences (see [handedness.md](handedness.md)).
