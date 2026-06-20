@@ -11,6 +11,7 @@ describe('readTheme', () => {
       --color-text: #00ff41;
       --color-text-dim: #4a7a4a;
       --color-text-disabled: #1f3a1f;
+      --color-debug: #ff6b6b;
     `;
   });
 
@@ -23,6 +24,7 @@ describe('readTheme', () => {
       'text',
       'textDim',
       'textDisabled',
+      'debug',
     ]);
   });
 
@@ -35,6 +37,7 @@ describe('readTheme', () => {
     expect(theme.text).toBe('#00ff41');
     expect(theme.textDim).toBe('#4a7a4a');
     expect(theme.textDisabled).toBe('#1f3a1f');
+    expect(theme.debug).toBe('#ff6b6b');
   });
 
   it('trims whitespace from CSS values', () => {

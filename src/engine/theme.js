@@ -6,6 +6,7 @@ const TOKEN_MAP = {
   text: '--color-text',
   textDim: '--color-text-dim',
   textDisabled: '--color-text-disabled',
+  debug: '--color-debug',
 };
 
 export function readTheme(root = document.documentElement) {

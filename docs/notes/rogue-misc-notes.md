@@ -2,7 +2,7 @@ player hear/sound goal - should this be a goal? Can't smell/hear when auto goals
 
 classes vs loose functions - style questions?
 
-multi-option select: close the door, or walk through?
+contextual action menu: close the door, or walk through?
 
 UI anchor system
 
