@@ -3,6 +3,7 @@ import { executeInteract } from './action-interact.js';
 import { createEntityRegistry } from '../../engine/entity-component-system.js';
 import { createLevel } from '../../world/level.js';
 import { createDoor } from '../../world/furniture.js';
+import { gameLog } from '../../engine/game-log.js';
 
 function makeLevel() {
   const level = createLevel();
@@ -16,6 +17,7 @@ describe('executeInteract — door', () => {
   let registry, level, door, actor;
 
   beforeEach(() => {
+    gameLog.reset();
     registry = createEntityRegistry();
     level = makeLevel();
     door = createDoor(registry, 2, 2);
@@ -72,6 +74,35 @@ describe('executeInteract — door', () => {
       const { closedSprite } = door.components.get('openable');
       executeInteract(actor, { targetEntityId: door.id }, level, registry);
       expect(door.components.get('renderable').sprite).toEqual(closedSprite);
+    });
+  });
+
+  describe('closing a door blocked by an occupant', () => {
+    let occupant;
+
+    beforeEach(() => {
+      // Open the door, then put another entity on its tile.
+      executeInteract(actor, { targetEntityId: door.id }, level, registry);
+      occupant = registry.createEntity();
+      registry.addComponent(occupant, 'position', { x: 2, y: 2 });
+      registry.addComponent(occupant, 'name', 'Orc');
+      level.placeEntity(occupant);
+    });
+
+    it('leaves the door open', async () => {
+      await executeInteract(actor, { targetEntityId: door.id }, level, registry);
+      expect(door.components.get('openable').isOpen).toBe(true);
+      expect(door.components.has('blocksMovement')).toBe(false);
+    });
+
+    it('is a free action (does not consume the turn)', async () => {
+      expect(await executeInteract(actor, { targetEntityId: door.id }, level, registry)).toBe(true);
+    });
+
+    it('logs that the occupant blocks the door, named with "the"', async () => {
+      await executeInteract(actor, { targetEntityId: door.id }, level, registry);
+      const [entry] = gameLog.getDisplayEntries(1);
+      expect(entry.display).toBe('The orc blocks the door from closing.');
     });
   });
 

@@ -4,7 +4,7 @@ import { subject, conjugate, itemName } from '../../engine/log-text.js';
 // Executes an interact action against an adjacent target entity.
 // Dispatches to container or door behavior based on the target's components.
 // Returns false (turn consumed) or true (free action — cancelled or nothing to do).
-export async function executeInteract(actor, action, _level, registry, dialogController) {
+export async function executeInteract(actor, action, level, registry, dialogController) {
   const target = registry.getEntity(action.targetEntityId);
   if (!target) return false;
 
@@ -13,17 +13,34 @@ export async function executeInteract(actor, action, _level, registry, dialogCon
   }
 
   if (target.components.has('openable')) {
-    return executeDoorInteract(actor, target, registry);
+    return executeDoorInteract(actor, target, level, registry);
   }
 
   return false;
 }
 
-function executeDoorInteract(actor, target, registry) {
+function executeDoorInteract(actor, target, level, registry) {
   const openable = target.components.get('openable');
   const renderable = target.components.get('renderable');
 
   if (openable.isOpen) {
+    // An open door shares its tile with whatever stepped onto it. Closing the door on
+    // an occupant would trap them inside the wall, so refuse — as a free action — and
+    // name the blocker. Any non-door entity counts (a creature, a dropped item).
+    const blocker = doorOccupant(target, level);
+    if (blocker) {
+      const name = (blocker.components.get('name') ?? 'thing').toLowerCase();
+      gameLog.add({
+        actor: actor.id,
+        action: 'interact',
+        target: target.id,
+        interaction: 'door',
+        blockedBy: blocker.id,
+        display: `The ${name} blocks the door from closing.`,
+      });
+      return true;
+    }
+
     openable.isOpen = false;
     registry.addComponent(target, 'blocksMovement', {});
     registry.addComponent(target, 'opaque', {});
@@ -45,6 +62,16 @@ function executeDoorInteract(actor, target, registry) {
   });
 
   return false;
+}
+
+// Returns an entity sharing the door's tile, other than the door itself, or null.
+function doorOccupant(door, level) {
+  const pos = door.components.get('position');
+  if (!pos || !level) return null;
+  for (const entity of level.getEntitiesAt(pos.x, pos.y)) {
+    if (entity !== door) return entity;
+  }
+  return null;
 }
 
 async function executeContainerInteract(actor, target, dialogController) {

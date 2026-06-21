@@ -211,6 +211,7 @@ whole UI widget chain. See [zoom.md](../howto/zoom.md).*
 - [x] Remember furniture in previously-seen tiles (fog of war)
 - [x] Click/Tap-and-hold: contextual action menu
 - [x] "Look at" action - outputs to log, free action
+- [x] Prevent door close when blocked
 - [ ] Drag to pan
 - [x] Fix layout bug with hall generation in level 3
 - [ ] Complete sprite and glyph sets for all visible entities
