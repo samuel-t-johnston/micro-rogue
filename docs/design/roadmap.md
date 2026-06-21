@@ -216,6 +216,7 @@ whole UI widget chain. See [zoom.md](../howto/zoom.md).*
 - [x] Fix layout bug with hall generation in level 3
 - [ ] Complete sprite and glyph sets for all visible entities
 - [ ] Config: Sprite or Glyph (ASCII) rendering mode
+- [x] Credits page
 
 *Fog-of-war note (landed): tile memory was already per-creature on `tilePerception` (`visible` this
 turn, `memory` of ever-seen tile ids). Two additions complete the fog. (1) **Furniture memory** — a
