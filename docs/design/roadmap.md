@@ -207,13 +207,25 @@ whole UI widget chain. See [zoom.md](../howto/zoom.md).*
 
 ## M8 — Quality of Life
 
-- [ ] Freeze and thaw previously-seen tiles on level transition
-- [ ] Remember furniture in previously-seen tiles (fog of war)
+- [x] Freeze and thaw previously-seen tiles on level transition
+- [x] Remember furniture in previously-seen tiles (fog of war)
 - [ ] Click/Tap-and-hold: contextual action menu
 - [ ] "Look at" action - outputs to log, free action
 - [ ] Fix layout bug with hall generation in level 3
 - [ ] Complete sprite and glyph sets for all visible entities
-- [ ] Config: Sprite or Glyph rendering mode
+- [ ] Config: Sprite or Glyph (ASCII) rendering mode
+
+*Fog-of-war note (landed): tile memory was already per-creature on `tilePerception` (`visible` this
+turn, `memory` of ever-seen tile ids). Two additions complete the fog. (1) **Furniture memory** — a
+`persistVisible` marker on doors/chests/boulders/stairs marks an entity as rememberable; `applySenses`
+snapshots the *appearance* (renderable) of such entities on each visible tile into
+`tilePerception.rememberedEntities`, so they persist dimmed at their last-seen state (an open door
+stays open until re-seen) while live actors never ghost. The rememberable test is a component list
+(`REMEMBERABLE_COMPONENTS` in `planning-context.js`), open to whole classes later. (2) **Per-floor
+freeze/thaw** — the player isn't frozen, so `level-manager.travel()` lifts the player's remembered
+tiles + furniture into the departed floor's cold-storage record and lays the destination's back down
+(empty for a never-visited floor); `cold-storage.js` stays player-agnostic. No save-version bump: both
+are additive fields with tolerant defaults, no migration needed.*
 
 ---
 

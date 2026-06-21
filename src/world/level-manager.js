@@ -36,6 +36,25 @@ export function createLevelManager({ registry, transitMap }) {
     level.placeEntity(player);
   }
 
+  // Fog-of-war memory keyed by tile coords belongs to a floor, but it rides on the player's
+  // tilePerception (the player isn't frozen). So we lift it into the floor's frozen record on the way
+  // out and lay it back down on the way in — cold-storage stays player-agnostic; the player coupling
+  // lives only here, the layer that already carries the player between floors. Stored JSON-safe
+  // (arrays/entries) like the rest of the blob. `visible` is recomputed on arrival, so it isn't kept.
+  function extractPlayerMemory(player) {
+    const tp = player.components.get('tilePerception');
+    if (!tp) return null;
+    return { memory: [...tp.memory], rememberedEntities: [...tp.rememberedEntities] };
+  }
+
+  // Lays a floor's remembered tiles back onto the player (empty for a never-visited floor).
+  function applyPlayerMemory(player, playerMemory) {
+    const tp = player.components.get('tilePerception');
+    if (!tp) return;
+    tp.memory = new Map(playerMemory?.memory ?? []);
+    tp.rememberedEntities = new Map(playerMemory?.rememberedEntities ?? []);
+  }
+
   return {
     // Generates the dungeon's entry floor and makes it active. Returns the level plus the port the
     // player should arrive at (the caller creates the player and places it).
@@ -55,14 +74,19 @@ export function createLevelManager({ registry, transitMap }) {
 
       // The player's whole sub-graph (carried + equipped items) travels with them, never frozen.
       const excludeIds = new Set([...collectSubgraph([player])].map(e => e.id));
-      coldStorage.set(current.nodeId, freezeLevel(registry, current.level, excludeIds));
+      const frozen = freezeLevel(registry, current.level, excludeIds);
+      frozen.playerMemory = extractPlayerMemory(player); // fog of war rides into the frozen record
+      coldStorage.set(current.nodeId, frozen);
 
       let level;
       if (coldStorage.has(dest.node)) {
-        level = thawLevel(coldStorage.get(dest.node), registry);
+        const blob = coldStorage.get(dest.node);
+        level = thawLevel(blob, registry);
+        applyPlayerMemory(player, blob.playerMemory); // restore the floor's remembered tiles
         coldStorage.delete(dest.node); // active again, no longer frozen
       } else {
         level = await generate(getNode(transitMap, dest.node));
+        applyPlayerMemory(player, null); // never visited — start dark
       }
 
       arrive(player, level, dest.port);

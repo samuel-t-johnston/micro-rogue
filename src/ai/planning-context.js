@@ -2,6 +2,25 @@ import { resolveSenses } from './senses/sense-registry.js';
 import { areHostile } from '../combat/factions.js';
 import { chebyshevDistance, projectTile } from '../world/geometry.js';
 
+// An entity is remembered in the fog of war (snapshotted into tilePerception.rememberedEntities) if
+// it has any of these components. A list, not a single marker, so a whole class of entities can be
+// made rememberable later without touching this code — for now just the `persistVisible` marker.
+const REMEMBERABLE_COMPONENTS = ['persistVisible'];
+
+// Records the last-seen appearance of rememberable entities on a now-visible tile into the viewer's
+// fog-of-war memory. Replaces (never appends) so a re-seen tile reflects current reality — a changed
+// door, or no entry at all once the entity is gone.
+function rememberEntities(tilePerception, level, key, x, y) {
+  const snapshots = [];
+  for (const e of level.getEntitiesAt(x, y)) {
+    if (!REMEMBERABLE_COMPONENTS.some(c => e.components.has(c))) continue;
+    const r = e.components.get('renderable');
+    if (r) snapshots.push({ sprite: r.sprite, color: r.color, glyph: r.glyph, glyphColor: r.glyphColor, layer: r.layer });
+  }
+  if (snapshots.length > 0) tilePerception.rememberedEntities.set(key, snapshots);
+  else tilePerception.rememberedEntities.delete(key);
+}
+
 /** When multiple senses observe the same entity, keeps the highest-confidence reading. */
 function mergeSenseResults(rawResults) {
   const byEntityId = new Map();
@@ -103,6 +122,7 @@ export function applySenses(entity, level, turnCount = 0) {
       const [x, y] = key.split(',').map(Number);
       const tileId = level.getTile(x, y);
       if (tileId !== null) tilePerception.memory.set(key, tileId);
+      rememberEntities(tilePerception, level, key, x, y);
     }
   }
 

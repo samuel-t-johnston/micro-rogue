@@ -80,6 +80,32 @@ export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LE
     }
   }
 
+  // Draws fog-of-war furniture: the last-seen appearance of persistVisible entities on tiles that are
+  // remembered but not currently visible. Dimmed like remembered tiles (drawMap), and skipped for
+  // visible tiles since drawEntities draws their live entities there. See planning-context.js.
+  function drawRememberedEntities(ctx, tilePerception) {
+    if (!tilePerception) return;
+    ctx.imageSmoothingEnabled = false;
+    const tileSize = ts();
+    const { width, height } = getViewport();
+    const x0 = Math.floor(camera.x - width / 2 / tileSize);
+    const x1 = Math.ceil(camera.x + width / 2 / tileSize);
+    const y0 = Math.floor(camera.y - height / 2 / tileSize);
+    const y1 = Math.ceil(camera.y + height / 2 / tileSize);
+
+    ctx.globalAlpha = 0.4;
+    for (const [key, snapshots] of tilePerception.rememberedEntities) {
+      if (tilePerception.visible.has(key)) continue;
+      const [tx, ty] = key.split(',').map(Number);
+      if (tx < x0 || tx > x1 || ty < y0 || ty > y1) continue;
+      const { x, y } = worldToScreen(tx, ty);
+      // Lower layers (items) under higher (furniture); a copy keeps the stored order intact.
+      const ordered = [...snapshots].sort((a, b) => (a.layer ?? RenderLayers.DEFAULT) - (b.layer ?? RenderLayers.DEFAULT));
+      for (const snap of ordered) drawRenderable(ctx, snap, x, y, null);
+    }
+    ctx.globalAlpha = 1;
+  }
+
   function drawEntities(ctx, level, tilePerception) {
     const { width, height } = getViewport();
     const tileSize = ts();
@@ -168,6 +194,7 @@ export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LE
     screenToWorld,
     getVisibleTileRange,
     drawMap,
+    drawRememberedEntities,
     drawEntities,
     drawAnimations,
     zoomIn: () => zoom.zoomIn(),

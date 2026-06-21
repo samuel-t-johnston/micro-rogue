@@ -7,7 +7,7 @@ function makeEntity(overrides = {}) {
   const defaults = {
     position: { x: 0, y: 0 },
     senses: [],
-    tilePerception: { visible: new Set(), memory: new Map() },
+    tilePerception: { visible: new Set(), memory: new Map(), rememberedEntities: new Map() },
     memory: {},
   };
   const merged = { ...defaults, ...overrides };
@@ -90,6 +90,78 @@ describe('applySenses', () => {
     const entity = makeEntity({ senses: [makeSense(new Set(['1,0']))] });
     entity.components.delete('tilePerception');
     expect(() => applySenses(entity, makeLevel(5, 5))).not.toThrow();
+  });
+});
+
+describe('applySenses fog-of-war furniture', () => {
+  // Places a furniture-like entity at (x,y) with a renderable and the given marker components.
+  function placeFurniture(level, x, y, renderable, markers = ['persistVisible']) {
+    const components = new Map([['position', { x, y }], ['renderable', renderable]]);
+    for (const m of markers) components.set(m, {});
+    const entity = { id: `f-${x}-${y}`, components };
+    level.placeEntity(entity);
+    return entity;
+  }
+
+  const doorRenderable = { sprite: { col: 16, row: 22 }, color: '#8B6F47', glyph: '+', glyphColor: '#c8a36a', layer: 0 };
+
+  it('snapshots a persistVisible entity on a visible tile', () => {
+    const level = makeLevel(5, 5);
+    placeFurniture(level, 2, 3, doorRenderable);
+    const entity = makeEntity({ senses: [makeSense(new Set(['2,3']))] });
+
+    applySenses(entity, level);
+
+    const snaps = entity.components.get('tilePerception').rememberedEntities.get('2,3');
+    expect(snaps).toEqual([doorRenderable]);
+  });
+
+  it('does not snapshot entities lacking a rememberable component', () => {
+    const level = makeLevel(5, 5);
+    placeFurniture(level, 2, 3, doorRenderable, ['creature']); // an actor, not remembered
+    const entity = makeEntity({ senses: [makeSense(new Set(['2,3']))] });
+
+    applySenses(entity, level);
+
+    expect(entity.components.get('tilePerception').rememberedEntities.has('2,3')).toBe(false);
+  });
+
+  it('retains the snapshot after the tile leaves view', () => {
+    const level = makeLevel(5, 5);
+    placeFurniture(level, 2, 3, doorRenderable);
+    let visibleTiles = new Set(['2,3']);
+    registerSense('mock-fov-retain', () => ({ entities: [], visibleTiles }));
+    const entity = makeEntity({ senses: ['mock-fov-retain'] });
+
+    applySenses(entity, level);
+    visibleTiles = new Set(['0,0']); // walk away; tile 2,3 no longer visible
+    applySenses(entity, level);
+
+    expect(entity.components.get('tilePerception').rememberedEntities.get('2,3')).toEqual([doorRenderable]);
+  });
+
+  it('replaces the snapshot with the latest appearance when the tile is re-seen', () => {
+    const level = makeLevel(5, 5);
+    const door = placeFurniture(level, 2, 3, { ...doorRenderable });
+    const entity = makeEntity({ senses: [makeSense(new Set(['2,3']))] });
+
+    applySenses(entity, level);
+    door.components.get('renderable').glyph = "'"; // door opened: appearance changes
+    applySenses(entity, level);
+
+    expect(entity.components.get('tilePerception').rememberedEntities.get('2,3')[0].glyph).toBe("'");
+  });
+
+  it('clears a remembered tile when its furniture is gone on re-sighting', () => {
+    const level = makeLevel(5, 5);
+    const door = placeFurniture(level, 2, 3, doorRenderable);
+    const entity = makeEntity({ senses: [makeSense(new Set(['2,3']))] });
+
+    applySenses(entity, level);
+    level.removeEntity(door);
+    applySenses(entity, level);
+
+    expect(entity.components.get('tilePerception').rememberedEntities.has('2,3')).toBe(false);
   });
 });
 
