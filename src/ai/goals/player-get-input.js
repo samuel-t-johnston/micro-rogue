@@ -10,7 +10,7 @@ import { resolveTileActions } from '../../actions/resolve-tile-actions.js';
 // distant move → first step + memory.autoMoveTarget for subsequent turns. Loops on no-op input.
 
 // Actions the UI submits already resolved (character menu, the contextual tile menu).
-const PASS_THROUGH = new Set(['equip', 'unequip', 'consume', 'drop', 'interact', 'attack', 'selfInteract']);
+const PASS_THROUGH = new Set(['equip', 'unequip', 'consume', 'drop', 'interact', 'attack', 'selfInteract', 'lookAt']);
 
 export const playerGetInput = {
   async evaluate(context) {
@@ -38,9 +38,10 @@ export const playerGetInput = {
     while (true) {
       const input = await awaitInput();
 
-      // Raw map tap: interpret it against the tile, act on the primary (top) action.
+      // Raw map tap: interpret it against the tile, act on the primary action. Skip the always-present
+      // free 'lookAt' row — examining is menu-only, so a plain tap on a wall/empty stays a no-op.
       if (input.type === 'tap') {
-        const primary = resolveTileActions(level, selfState.position, input)[0];
+        const primary = resolveTileActions(level, selfState.position, input).find(r => r.action.type !== 'lookAt');
         if (!primary) continue;
         if (primary.action.type === 'move') {
           const move = handleMove(primary.action.x, primary.action.y);

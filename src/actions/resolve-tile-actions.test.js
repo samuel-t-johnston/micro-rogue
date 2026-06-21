@@ -14,7 +14,9 @@ function makeLevel(w = 5, h = 5) {
 }
 
 const PLAYER = { x: 2, y: 2 };
-const ids = (rows) => rows.map(r => r.id);
+// Every tile carries a trailing free 'look' row; the gameplay assertions below ignore it.
+const gameplay = (rows) => rows.filter(r => r.id !== 'look');
+const ids = (rows) => gameplay(rows).map(r => r.id);
 const resolve = (level, x, y) => resolveTileActions(level, PLAYER, { x, y });
 
 describe('resolveTileActions', () => {
@@ -33,12 +35,12 @@ describe('resolveTileActions', () => {
 
   it('offers nothing for an adjacent wall with nothing on it', () => {
     level.tiles[1][2] = 'wall';
-    expect(resolve(level, 2, 1)).toEqual([]);
+    expect(gameplay(resolve(level, 2, 1))).toEqual([]);
   });
 
   it('offers nothing for an adjacent blocking, non-interactable entity', () => {
     level.placeEntity(createBoulder(registry, 2, 1));
-    expect(resolve(level, 2, 1)).toEqual([]);
+    expect(gameplay(resolve(level, 2, 1))).toEqual([]);
   });
 
   it('attacks an adjacent creature (entity with health) as the primary action', () => {
@@ -88,7 +90,7 @@ describe('resolveTileActions', () => {
 
   it('offers nothing for a distant wall', () => {
     level.tiles[0][0] = 'wall';
-    expect(resolve(level, 0, 0)).toEqual([]);
+    expect(gameplay(resolve(level, 0, 0))).toEqual([]);
   });
 
   it('picks up a single item on the self tile, named', () => {
@@ -111,7 +113,16 @@ describe('resolveTileActions', () => {
     expect(rows[0].label).toBe('Descend');
   });
 
-  it('offers nothing on an empty self tile', () => {
-    expect(resolve(level, 2, 2)).toEqual([]);
+  it('offers nothing but Look on an empty self tile', () => {
+    expect(gameplay(resolve(level, 2, 2))).toEqual([]);
+  });
+
+  it('offers Look last on every tile, as a free action', () => {
+    level.placeEntity(createDoor(registry, 2, 1)); // a tile with gameplay actions
+    for (const [x, y] of [[3, 2], [2, 1], [0, 0], [2, 2]]) { // empty adj, door, distant, self
+      const rows = resolve(level, x, y);
+      const last = rows[rows.length - 1];
+      expect(last).toEqual({ id: 'look', label: 'Look', action: { type: 'lookAt', x, y }, free: true });
+    }
   });
 });

@@ -8,6 +8,7 @@ import { executeConsume } from './action-types/action-consume.js';
 import { executeDrop } from './action-types/action-drop.js';
 import { executeWait } from './action-types/action-wait.js';
 import { executeAttack } from './action-types/action-attack.js';
+import { executeLookAt } from './action-types/action-look.js';
 import { executeShout } from './action-types/action-shout.js';
 import { buildPlanningContext } from '../ai/planning-context.js';
 import { evaluateGoals } from '../ai/goal-evaluator.js';
@@ -28,6 +29,7 @@ export function createActionSystem({ level, inputController, registry, dialogCon
     drop:         (entity, action) => executeDrop(entity, action, level, registry),
     wait:         () => executeWait(),
     attack:       (entity, action) => executeAttack(entity, action, level, registry),
+    lookAt:       (entity, action) => executeLookAt(entity, action, level),
     shout:        (entity, action) => executeShout(entity, action, level, registry),
   };
 
