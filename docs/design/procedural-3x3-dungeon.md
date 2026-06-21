@@ -144,9 +144,12 @@ Revises the realization stages from steps 6–7: rooms become randomly sized/pla
 **carve-halls — doored Z-bend corridors between linked zones.**
 - Per link, pick an adjacent cell-pair + direction. On each room's wall facing the other, pick a
   random **non-corner** opening and place a **door on both** sides.
-- Route between the openings: straight if aligned, else a **Z-bend** (out across the wider gutter,
-  along, in). Collisions tolerated — floor-over-wall is harmless, crossing a hall merges, a clipped
-  corner just widens an opening; connectivity is unaffected.
+- Route between the openings so the along-gutter leg never hugs a room wall (that would strand a door
+  on an edge already open to the corridor): **straight** at a shared offset when the facing walls
+  overlap; else a **Z-bend** down the gutter's interior lane when the gutter is ≥3 wide; else (a 2-tile
+  gutter with no overlap) an **L-bend** off the mutually-nearest corners, which stays clear of both
+  rooms. Collisions are otherwise tolerated — floor-over-wall is harmless, crossing a hall merges, a
+  clipped corner just widens an opening; connectivity is unaffected.
 
 **Invariants to keep:** one floor component per zone (carve-rooms, including merges); a single floor
 component for the whole level (carve-halls); two doors per link; determinism.
