@@ -1,12 +1,38 @@
 // Realization stage: connects linked zones with doored corridors. For each link, picks an adjacent
-// cell-pair, a random non-corner opening on each room's facing wall, places a door on both sides, and
-// runs a corridor between them — straight if the openings line up, else a Z-bend through the gutter.
-// Collisions are tolerated (floor-over-wall is harmless; connectivity is what matters).
-// See docs/design/procedural-3x3-dungeon.md (Room variety & dog-leg halls).
+// cell-pair and routes a corridor between the rooms' facing walls, dropping a door on each side.
+// The route keeps every corridor tile a wall's-width from any room it doesn't open into:
+//   - walls overlap            → a straight cut at a shared offset;
+//   - gutter ≥ 3 (interior lane) → a Z-bend whose along-gutter leg runs the middle of the gutter;
+//   - 2-tile gutter, no overlap → an L-bend off the mutually-nearest corners (still no wall-hugging).
+// Routing the leg down a room-adjacent gutter column is the bug we avoid: it leaves a door stranded on
+// an edge that's already wide open to the corridor. Collisions are otherwise tolerated (floor-over-wall
+// is harmless; connectivity is what matters). See docs/design/procedural-3x3-dungeon.md.
 import { createDoor } from '../../furniture.js';
 
 const cellsAdjacent = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) === 1;
 const randIn = (lo, hi, rng) => lo + rng.nextInt(0, hi - lo + 1);
+
+// Plan one corridor as opening offsets + the lane for its perpendicular leg.
+//   la / lb        — the gutter lines just outside each room's facing wall (la by A, lb by B).
+//   [al,ah]/[bl,bh] — each room's facing-wall extent (perpendicular to the link).
+// Returns { pa, pb, mid }: the opening offset on A, on B, and the lane the leg runs down. The three
+// segments carveH(la,mid,pa) → carve(pa↔pb @ mid) → carveH(mid,lb,pb) degrade to a straight or L route
+// when pa==pb or mid sits on a door line, so the caller stays a single uniform three-segment carve.
+function planCorridor(la, lb, al, ah, bl, bh, rng) {
+  const lo = Math.max(al, bl), hi = Math.min(ah, bh);
+  if (lo <= hi) {                              // facing walls overlap → straight cut at a shared offset
+    const s = randIn(lo, hi, rng);
+    return { pa: s, pb: s, mid: la };
+  }
+  const innerLo = Math.min(la, lb) + 1, innerHi = Math.max(la, lb) - 1;
+  if (innerLo <= innerHi) {                    // gutter ≥ 3: an interior lane exists → Z-bend through it
+    return { pa: randIn(al, ah, rng), pb: randIn(bl, bh, rng), mid: randIn(innerLo, innerHi, rng) };
+  }
+  // 2-tile gutter and no overlap: bend off the mutually-nearest corners, leg on B's door line. The leg
+  // then stays clear of both rooms (it never extends past either nearest corner), so nothing hugs a wall.
+  const aBeforeB = ah < bl;
+  return { pa: aBeforeB ? ah : al, pb: aBeforeB ? bl : bh, mid: lb };
+}
 
 export function run(level, stageConfig, blackboard, rng, registry) {
   const zones = blackboard['level:zones'] ?? [];
@@ -34,26 +60,22 @@ export function run(level, stageConfig, blackboard, rng, registry) {
     const dir = [cb[0] - ca[0], cb[1] - ca[1]];
 
     if (dir[1] === 0) {
-      // Horizontal link: doors on facing vertical walls, Z-bends vertically through the gutter.
+      // Horizontal link: doors on facing vertical walls, the leg runs vertically through the gutter.
       const east = dir[0] > 0;
       const ax = east ? a.x1 + 1 : a.x0 - 1;
       const bx = east ? b.x0 - 1 : b.x1 + 1;
-      const ay = randIn(a.y0, a.y1, rng);
-      const by = randIn(b.y0, b.y1, rng);
-      const mid = Math.trunc((ax + bx) / 2);
+      const { pa: ay, pb: by, mid } = planCorridor(ax, bx, a.y0, a.y1, b.y0, b.y1, rng);
       carveH(ax, mid, ay);
       carveV(ay, by, mid);
       carveH(mid, bx, by);
       level.placeEntity(createDoor(registry, ax, ay));
       level.placeEntity(createDoor(registry, bx, by));
     } else {
-      // Vertical link: doors on facing horizontal walls, Z-bends horizontally through the gutter.
+      // Vertical link: doors on facing horizontal walls, the leg runs horizontally through the gutter.
       const south = dir[1] > 0;
       const ay = south ? a.y1 + 1 : a.y0 - 1;
       const by = south ? b.y0 - 1 : b.y1 + 1;
-      const ax = randIn(a.x0, a.x1, rng);
-      const bx = randIn(b.x0, b.x1, rng);
-      const mid = Math.trunc((ay + by) / 2);
+      const { pa: ax, pb: bx, mid } = planCorridor(ay, by, a.x0, a.x1, b.x0, b.x1, rng);
       carveV(ay, mid, ax);
       carveH(ax, bx, mid);
       carveV(mid, by, bx);

@@ -59,6 +59,27 @@ describe('carve-halls stage', () => {
     }
   });
 
+  it('never runs a corridor flush against a room wall (every room-edge opening is a door)', () => {
+    // A corridor tile carved alongside a room wall (no wall between) leaves a stranded door on an
+    // edge that's already wide open. The only legitimate room-edge openings are the doors, so the
+    // count of corridor tiles touching a room must equal the door count exactly.
+    for (let seed = 1; seed <= 30; seed++) {
+      const { level, bb, reg } = generate(seed);
+      const roomTiles = new Set();
+      for (const r of Object.values(bb['level:rooms'])) {
+        for (let y = r.y0; y <= r.y1; y++) for (let x = r.x0; x <= r.x1; x++) roomTiles.add(`${x},${y}`);
+      }
+      let contacts = 0;
+      for (let y = 0; y < level.height; y++) {
+        for (let x = 0; x < level.width; x++) {
+          if (level.tiles[y][x] !== 'floor' || roomTiles.has(`${x},${y}`)) continue;
+          if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => roomTiles.has(`${x + dx},${y + dy}`))) contacts++;
+        }
+      }
+      expect(contacts).toBe(reg.getEntitiesWith('openable').length);
+    }
+  });
+
   it('is deterministic for a given seed', () => {
     const a = generate(9);
     const b = generate(9);
