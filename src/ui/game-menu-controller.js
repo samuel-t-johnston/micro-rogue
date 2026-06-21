@@ -1,12 +1,12 @@
 import { createMenuShell } from './menu-shell.js';
 import { createActionMenu } from './action-menu.js';
-import { buildSettingsPage } from './game-menu-items.js';
+import { buildSettingsPage, buildCreditsPage } from './game-menu-items.js';
 
 // In-game menu overlay, opened by the HUD gear button. Suppresses map input while open
 // (so turns don't advance — same mechanism as the character menu). Shares the drill-down
 // list with the main menu via createMenuShell; only the options and chrome differ.
 //
-// Options: Resume (close), New Game (confirm → onNewGame), Settings (placeholder sub-page).
+// Options: Resume (close), New Game (confirm → onNewGame), Settings (sub-page), Credits (text page).
 // New Game routes through onNewGame, supplied by the game scene, which asks main.js to
 // transition into a fresh run.
 
@@ -38,6 +38,7 @@ export function createGameMenuController({ theme, getViewport, onNewGame }) {
       { id: 'resume', label: 'Resume', onSelect: close },
       { id: 'new', label: 'New Game', onSelect: askNewGame },
       { id: 'settings', label: 'Settings', submenu: buildSettingsPage() },
+      { id: 'credits', label: 'Credits', submenu: buildCreditsPage() },
     ],
   });
 

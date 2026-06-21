@@ -1,4 +1,4 @@
-import { drawText, drawButton, hitTest } from './canvas-ui.js';
+import { drawText, drawButton, hitTest, wrapText } from './canvas-ui.js';
 import { layoutSettingsRows, drawSettingsRows, handleSettingsRowsInput } from './settings-controls.js';
 
 // Reusable drill-down menu: a centered vertical list of buttons with optional sub-pages.
@@ -11,7 +11,8 @@ import { layoutSettingsRows, drawSettingsRows, handleSettingsRowsInput } from '.
 //   { id, label, enabled?, submenu: { title, items, placeholder } } — drills into a sub-page
 // A sub-page with empty `items` renders its `placeholder` text. A sub-page carrying `rows` instead
 // of `items` is a settings page, rendered as label/description/segmented-control rows (see
-// settings-controls.js) rather than the centered button list.
+// settings-controls.js) rather than the centered button list. A sub-page carrying `text` instead is
+// a static text page (e.g. Credits), rendered as a centered block of wrapped lines.
 //
 // onClose (optional) marks "overlay mode": the shell dims the scene behind it, shows a ✕ close
 // affordance at the root, and swallows all input (modal). Without it (main-menu scene mode) the
@@ -21,6 +22,9 @@ const BUTTON_H = 56;
 const BUTTON_GAP = 16;
 const CORNER_BTN = 44;
 const MARGIN = 16;
+const TEXT_SIZE = 18;
+const TEXT_LINE_H = 26;
+const TEXT_MAX_COL = 520;
 
 export function createMenuShell({ theme, getViewport, getItems, onClose = null }) {
   const pages = [];          // sub-page stack; empty === root
@@ -30,6 +34,7 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
   const isRoot = () => pages.length === 0;
   const currentPage = () => (isRoot() ? null : pages[pages.length - 1]);
   const settingsRows = () => currentPage()?.rows ?? null;
+  const pageText = () => currentPage()?.text ?? null;
   const currentItems = () => (isRoot() ? getItems() : pages[pages.length - 1].items ?? []);
 
   // Top-left corner button: ✕ to close at the overlay root, ‹ to go back on a sub-page.
@@ -62,7 +67,14 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
     render(ctx) {
       const { width, height } = getViewport();
 
-      if (onClose) {
+      // Sub-pages are reading surfaces (Settings descriptions, Credits) — paint them opaque so the
+      // map or main-menu branding behind them can't bleed through and hurt legibility. The root
+      // keeps its lighter treatment: a 0.55 dim in overlay mode, nothing in scene mode (the caller
+      // owns the background there).
+      if (!isRoot()) {
+        ctx.fillStyle = theme.bg;
+        ctx.fillRect(0, 0, width, height);
+      } else if (onClose) {
         ctx.fillStyle = 'rgba(0,0,0,0.55)';
         ctx.fillRect(0, 0, width, height);
       }
@@ -87,6 +99,19 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
       if (rows) {
         settingsLayout = layoutSettingsRows(ctx, getViewport, rows);
         drawSettingsRows(ctx, theme, settingsLayout);
+        return;
+      }
+
+      const text = pageText();
+      if (text != null) {
+        const colW = Math.min(width - MARGIN * 2, TEXT_MAX_COL);
+        const lines = wrapText(ctx, text, colW, { size: TEXT_SIZE });
+        const startY = Math.round((height - lines.length * TEXT_LINE_H) / 2);
+        lines.forEach((line, i) => {
+          drawText(ctx, line, width / 2, startY + i * TEXT_LINE_H, {
+            color: theme.text, size: TEXT_SIZE, align: 'center', baseline: 'top',
+          });
+        });
         return;
       }
 

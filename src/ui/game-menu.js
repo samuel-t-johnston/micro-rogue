@@ -2,7 +2,7 @@ import { hasSave } from '../save/save-system.js';
 import { drawText } from './canvas-ui.js';
 import { createMenuShell } from './menu-shell.js';
 import { createActionMenu } from './action-menu.js';
-import { buildSettingsPage } from './game-menu-items.js';
+import { buildSettingsPage, buildCreditsPage } from './game-menu-items.js';
 
 // Main menu scene. The option list and Settings drill-down come from the shared menu-shell
 // (same component the in-game menu uses); the scene only adds the ROGµE branding/background.
@@ -34,6 +34,7 @@ export function createMenuScene({ theme, getViewport, onAction }) {
       { id: 'new', label: 'New Game', onSelect: () => (hasSave() ? askOverwrite() : onAction?.('new')) },
       { id: 'continue', label: 'Continue', enabled: hasSave(), onSelect: () => onAction?.('continue') },
       { id: 'settings', label: 'Settings', submenu: buildSettingsPage() },
+      { id: 'credits', label: 'Credits', submenu: buildCreditsPage() },
     ],
   });
 

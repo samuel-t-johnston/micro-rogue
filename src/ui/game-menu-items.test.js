@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { buildSettingsPage } from './game-menu-items.js';
+import { buildSettingsPage, buildCreditsPage } from './game-menu-items.js';
 import { gameSettings } from '../engine/settings.js';
 
 const row = (id) => buildSettingsPage().rows.find(r => r.id === id);
@@ -27,5 +27,16 @@ describe('settings page', () => {
     expect(r.get()).toBe(false); // default Off
     r.set(true);
     expect(gameSettings.get('skipNewGameInstructions')).toBe(true);
+  });
+});
+
+describe('credits page', () => {
+  it('is a static text page (text, not items or rows)', () => {
+    const page = buildCreditsPage();
+    expect(page.title).toBe('Credits');
+    expect(page.items).toBeUndefined();
+    expect(page.rows).toBeUndefined();
+    expect(page.text).toContain('Code - Sam Johnston');
+    expect(page.text).toContain('Pixel Art - ELV Games, Shade, and Glionox');
   });
 });

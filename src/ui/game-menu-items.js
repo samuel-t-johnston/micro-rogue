@@ -30,3 +30,11 @@ export function buildSettingsPage() {
     ],
   };
 }
+
+// The Credits sub-page: a static text page (menu-shell renders `text` as a centered block).
+export function buildCreditsPage() {
+  return {
+    title: 'Credits',
+    text: 'Code - Sam Johnston\nPixel Art - ELV Games, Shade, and Glionox',
+  };
+}

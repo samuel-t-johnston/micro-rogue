@@ -21,7 +21,7 @@ character menu. The character menu carries a comment to this effect at its head.
 
 ## Game menu
 
-High-level actions: **New Game**, **Continue**, **Settings** (a sub-page of label + segmented-control rows).
+High-level actions: **New Game**, **Continue**, **Settings** (a sub-page of label + segmented-control rows), **Credits** (a static text sub-page).
 
 The list itself lives in one reusable component, [`createMenuShell`](../../src/ui/menu-shell.js) — a
 centered vertical button list that manages a page stack for drill-down. It's mounted in two places:
@@ -102,6 +102,7 @@ for in-game). Each item is either:
 { id, label, enabled, onSelect }                              // an action row
 { id, label, enabled, submenu: { title, items, placeholder } } // drills into a sub-page (action list)
 { id, label, enabled, submenu: { title, rows } }               // drills into a settings sub-page
+{ id, label, enabled, submenu: { title, text } }               // drills into a static text sub-page
 ```
 
 `getItems()` is re-read every frame, so `enabled` can reflect live state (that's how Continue tracks
@@ -112,6 +113,11 @@ label + optional description + a right-aligned **segmented control** per row, vi
 [`buildSettingsPage`](../../src/ui/game-menu-items.js); each row binds to a setting with
 `get`/`set` and a list of `options` (see [handedness.md](handedness.md)). This keeps the current
 value in the control rather than baked into the label, and leaves room for explanatory text.
+
+A submenu carrying **`text`** (not `items` or `rows`) is a **static text page**: the shell wraps the
+string and draws it as a centered block — used for the Credits page, built by
+[`buildCreditsPage`](../../src/ui/game-menu-items.js). The corner `‹` back arrow returns to the root,
+same as any sub-page.
 
 **To the character menu** — add a card in `createCharacterMenuRoot`'s `cards` list and a matching
 sub-screen builder in the controller, following the Inventory/Equipment pair.

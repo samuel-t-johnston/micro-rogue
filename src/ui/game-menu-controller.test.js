@@ -23,8 +23,11 @@ function makeCtx() {
 }
 
 // Layout-derived tap targets (menu-shell: BUTTON_W 260, BUTTON_H 56, GAP 16; viewport 800x600).
-// 3 items → total 200, startY 200, x-center 400. Row i center y = 200 + i*72 + 28.
-const ROW = { resume: { x: 400, y: 228 }, newGame: { x: 400, y: 300 }, settings: { x: 400, y: 372 } };
+// 4 items → total 272, startY 164, x-center 400. Row i center y = 164 + i*72 + 28.
+const ROW = {
+  resume: { x: 400, y: 192 }, newGame: { x: 400, y: 264 },
+  settings: { x: 400, y: 336 }, credits: { x: 400, y: 408 },
+};
 const CORNER = { x: 38, y: 38 }; // ✕ / ‹ corner button center
 // Confirm action-menu (2 actions, centered): button0 center (400,296), button1 (400,348).
 const CONFIRM = { ok: { x: 400, y: 296 }, cancel: { x: 400, y: 348 } };
@@ -94,6 +97,23 @@ describe('game menu controller', () => {
 
     // On the Settings placeholder page there is no Resume row, so tapping its position is inert.
     controller.render(ctx);
+    tap(ROW.resume);
+    expect(controller.isOpen).toBe(true);
+
+    // Back returns to the root, where Resume works again.
+    tap(CORNER);
+    controller.render(ctx);
+    tap(ROW.resume);
+    expect(controller.isOpen).toBe(false);
+  });
+
+  it('Credits drills into a static text page and back returns to the root', () => {
+    controller.open();
+    controller.render(ctx);
+    tap(ROW.credits);
+
+    // On the Credits text page there is no Resume row, so tapping its position is inert.
+    expect(() => controller.render(ctx)).not.toThrow();
     tap(ROW.resume);
     expect(controller.isOpen).toBe(true);
 
