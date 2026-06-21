@@ -170,7 +170,7 @@ shape at a glance and documents branches.
 | Exit/enter **capabilities** + contract **validation** | future |
 | Branching graphs, `uni` edges (pits/chutes) in real content | future (resolver supports `uni`) |
 | Transit-map **visualizer** | future |
-| Per-floor persistent fog-of-war memory (revisiting shows your old map) | future — minimal cut clears the player's tile memory on each floor change, so floors start unexplored |
+| Per-floor persistent fog-of-war memory (revisiting shows your old map) | **built** — `travel()` freezes the player's remembered tiles + furniture into the departed floor's cold-storage record and restores the destination's; a never-visited floor starts dark |
 | Re-entry pipelines (simulate time on revisit) | future — see map-generation.md |
 
 ---

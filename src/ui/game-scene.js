@@ -275,11 +275,9 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
       const newLevel = await levelManager.travel(player, port);
       if (newLevel) {
         level = newLevel;
-        // Fog-of-war memory is keyed by tile coords and would otherwise bleed across floors. Each
-        // floor starts unexplored; mountLevel's applySenses repopulates what's visible on arrival.
-        // (Per-floor persistent memory is a deferred enhancement — see dungeon-planner.md.)
-        const tp = player.components.get('tilePerception');
-        if (tp) { tp.visible.clear(); tp.memory.clear(); }
+        // Per-floor fog of war is swapped by levelManager.travel (it freezes the departed floor's
+        // remembered tiles into cold storage and restores the destination's). mountLevel's applySenses
+        // recomputes what's currently visible on arrival.
         gameLog.add({ display: port === 'down' ? 'You descend deeper into the dungeon.' : 'You climb the stairs.' });
       }
       mountLevel({ initialTurnCount: turns }); // also re-centres the camera on the player
@@ -430,6 +428,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
 
       const tilePerception = player?.components.get('tilePerception');
       renderer.drawMap(ctx, level, tilePerception);
+      renderer.drawRememberedEntities(ctx, tilePerception);
       renderer.drawEntities(ctx, level, tilePerception);
       renderer.drawAnimations(ctx, tilePerception);
 

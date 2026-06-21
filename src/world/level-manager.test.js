@@ -83,6 +83,61 @@ describe('LevelManager.travel', () => {
     expect(player.components.get('position')).toEqual({ x: down.x, y: down.y });
   });
 
+  it('restores the player tile memory when returning to a frozen floor', async () => {
+    const { registry, manager, player } = await startGame();
+    const tp = components.tilePerception();
+    tp.memory.set('1,1', 'floor');
+    tp.rememberedEntities.set('1,1', [{ glyph: '+' }]);
+    registry.addComponent(player, 'tilePerception', tp);
+
+    await manager.travel(player, 'down'); // freezes A with the player's memory of it
+    await manager.travel(player, 'up');   // thaws A — memory should come back
+
+    const restored = player.components.get('tilePerception');
+    expect(restored.memory.get('1,1')).toBe('floor');
+    expect(restored.rememberedEntities.get('1,1')).toEqual([{ glyph: '+' }]);
+  });
+
+  it('starts a freshly generated floor with empty tile memory', async () => {
+    const { registry, manager, player } = await startGame();
+    const tp = components.tilePerception();
+    tp.memory.set('1,1', 'floor');
+    registry.addComponent(player, 'tilePerception', tp);
+
+    await manager.travel(player, 'down'); // B has never been visited
+
+    expect(player.components.get('tilePerception').memory.size).toBe(0);
+    expect(player.components.get('tilePerception').rememberedEntities.size).toBe(0);
+  });
+
+  it('includes the player tile memory in the frozen floor snapshot (JSON-safe)', async () => {
+    const { registry, manager, player } = await startGame();
+    const tp = components.tilePerception();
+    tp.memory.set('2,2', 'wall');
+    registry.addComponent(player, 'tilePerception', tp);
+
+    await manager.travel(player, 'down'); // A frozen
+    const snap = manager.snapshot();
+
+    expect(snap.frozenLevels.a.playerMemory.memory).toEqual([['2,2', 'wall']]);
+  });
+
+  it('restores frozen player memory across a reload (snapshot -> restore)', async () => {
+    const { registry, manager, player } = await startGame();
+    const tp = components.tilePerception();
+    tp.memory.set('3,3', 'floor');
+    registry.addComponent(player, 'tilePerception', tp);
+    await manager.travel(player, 'down'); // A frozen
+    const saved = JSON.parse(JSON.stringify(manager.snapshot()));
+
+    // Fresh runtime restoring from the save, currently standing on B.
+    const manager2 = createLevelManager({ registry, transitMap: TEST_MAP });
+    manager2.restore({ currentNodeId: 'b', level: manager.getCurrentLevel(), frozenLevels: saved.frozenLevels });
+    await manager2.travel(player, 'up'); // thaw A from the restored blob
+
+    expect(player.components.get('tilePerception').memory.get('3,3')).toBe('floor');
+  });
+
   it('generates floors deterministically from the master seed', async () => {
     const a = await startGame(42);
     const b = await startGame(42);

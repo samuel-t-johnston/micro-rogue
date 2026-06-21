@@ -7,7 +7,7 @@
 // each gets a codec below:
 //   - inventory:      `items` holds live entity refs        -> ids
 //   - wearsEquipment: `slots[slot]` holds an entity ref|null -> id|null
-//   - tilePerception: `visible` is a Set, `memory` is a Map  -> array / entries
+//   - tilePerception: `visible` Set, `memory`/`rememberedEntities` Maps -> array / entries
 //
 // Keeping these as runtime types (refs, Set, Map) is the right call for gameplay hot paths;
 // the conversion lives here at the boundary rather than leaking into the gameplay systems.
@@ -41,10 +41,13 @@ const COMPONENT_CODECS = {
     serialize: (data) => ({
       visible: [...data.visible],
       memory: [...data.memory],
+      rememberedEntities: [...data.rememberedEntities],
     }),
     deserialize: (data) => ({
       visible: new Set(data.visible),
       memory: new Map(data.memory),
+      // `?? []` keeps pre-feature saves (no rememberedEntities) loading cleanly — no migration needed.
+      rememberedEntities: new Map(data.rememberedEntities ?? []),
     }),
   },
 };

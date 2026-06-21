@@ -156,6 +156,14 @@ export const components = {
     return {};
   },
 
+  // Marks an entity that should be remembered in the fog of war: once seen, it persists (dimmed) in
+  // the viewer's tilePerception at its last-seen appearance even after it leaves view — e.g. furniture
+  // like doors, chests, stairs. Live actors deliberately lack this so they don't ghost in the fog.
+  // See REMEMBERABLE_COMPONENTS in src/ai/planning-context.js.
+  persistVisible() {
+    return {};
+  },
+
   position(x, y) {
     return { x, y };
   },
@@ -213,11 +221,14 @@ export const components = {
   },
 
   // Tile-level perception. visible: tiles seen this turn. memory: all ever-seen tiles → tileId.
-  // Goals may read memory for navigation; renderer uses both for fog-of-war display.
+  // rememberedEntities: ever-seen tiles → array of renderable snapshots of the persistVisible
+  // entities there at last sighting (fog-of-war furniture). Goals may read memory for navigation;
+  // renderer uses all three for fog-of-war display.
   tilePerception() {
     return {
       visible: new Set(),
       memory: new Map(),
+      rememberedEntities: new Map(),
     };
   },
 

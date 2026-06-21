@@ -68,6 +68,36 @@ describe('tilePerception Set/Map codec', () => {
     expect(tp2.memory).toBeInstanceOf(Map);
     expect(tp2.memory.get('5,5')).toBe('wall');
   });
+
+  it('round-trips the rememberedEntities Map of snapshots', () => {
+    const reg = createEntityRegistry();
+    const e = reg.createEntity();
+    const tp = components.tilePerception();
+    const snap = { sprite: { col: 16, row: 22 }, color: '#8B6F47', glyph: '+', glyphColor: '#c8a36a', layer: 0 };
+    tp.rememberedEntities.set('2,3', [snap]);
+    reg.addComponent(e, 'tilePerception', tp);
+
+    const s = serializeEntities(reg)[0];
+    expect(s.components.tilePerception.rememberedEntities).toEqual([['2,3', [snap]]]);
+
+    const tp2 = rehydrate(reg).getEntity(e.id).components.get('tilePerception');
+    expect(tp2.rememberedEntities).toBeInstanceOf(Map);
+    expect(tp2.rememberedEntities.get('2,3')).toEqual([snap]);
+  });
+
+  it('defaults rememberedEntities to an empty Map for older saves that lack it', () => {
+    const reg = createEntityRegistry();
+    const e = reg.createEntity();
+    reg.addComponent(e, 'tilePerception', components.tilePerception());
+    const s = serializeEntities(reg)[0];
+    delete s.components.tilePerception.rememberedEntities; // simulate a pre-feature save
+
+    const reg2 = createEntityRegistry();
+    deserializeEntities(JSON.parse(JSON.stringify([s])), reg2);
+    const tp2 = reg2.getEntity(e.id).components.get('tilePerception');
+    expect(tp2.rememberedEntities).toBeInstanceOf(Map);
+    expect(tp2.rememberedEntities.size).toBe(0);
+  });
 });
 
 describe('level serialization', () => {
