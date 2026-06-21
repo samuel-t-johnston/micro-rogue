@@ -1,13 +1,18 @@
 # Interactable Entities
 
-*How adjacent-tap interaction works and how to add a new interactable entity type.*
+*How tile interaction works and how to add a new interactable entity type.*
 
 ## How it works
 
 Interaction is split across two layers:
 
-**Detection** — `src/ai/goals/player-get-input.js`
-When the player taps an adjacent tile, this goal inspects the entities on that tile to decide what action to issue. If it finds a recognised interactable component it returns an `interact` action; otherwise it returns a `move` action (which may be blocked silently if the tile isn't passable).
+**Detection** — `src/actions/resolve-tile-actions.js`
+`resolveTileActions` inspects a tile and returns the actions it offers, primary first. It's the single
+source of truth, shared by two callers: [`player-get-input.js`](../../src/ai/goals/player-get-input.js)
+takes element `[0]` to interpret a plain tap, and the contextual tile menu
+([`context-menu.js`](../../src/ui/context-menu.js), raised by long-press / right-click) lists them all.
+A recognised interactable component yields an `interact` action; otherwise the tile yields a `move`
+(silently blocked if it isn't passable).
 
 **Dispatch** — `src/actions/action-types/action-interact.js`
 `executeInteract` receives the `interact` action, looks up the target entity, and branches on its components to invoke the right behaviour (door toggle, container dialog, etc.).
@@ -36,13 +41,13 @@ registry.addComponent(entity, 'lockable', components.lockable());
 
 ### 3. Register it for detection
 
-In [`src/ai/goals/player-get-input.js`](../../src/ai/goals/player-get-input.js), add the component name to the `find` check in the adjacent-tap branch:
+In [`src/actions/resolve-tile-actions.js`](../../src/actions/resolve-tile-actions.js), find the entity
+in the adjacent branch and push an `interact` row for it (follow the `container` case):
 
 ```js
-const interactable = [...level.getEntitiesAt(input.x, input.y)]
-  .find(e => e.components.has('openable')
-           || e.components.has('container')
-           || e.components.has('lockable'));  // add here
+const lockable = occupants.find(e => e.components.has('lockable'));
+// …
+if (lockable) actions.push(interactRow('unlock', 'Unlock', lockable));
 ```
 
 ### 4. Add a dispatch branch
@@ -59,7 +64,8 @@ Then implement the handler as a module-private function in the same file, follow
 
 ## Worth knowing
 
-- **Detection is policy; dispatch is behaviour.** `player-get-input.js` decides *whether* to interact. `action-interact.js` decides *what that interaction does*. Keep them separate — the goal should not contain game logic.
+- **Detection is policy; dispatch is behaviour.** `resolve-tile-actions.js` decides *which* actions a tile offers (and their order); `action-interact.js` decides *what an interaction does*. Keep them separate — neither the goal nor the menu should contain interaction logic.
+- **An open door defaults to moving through it.** In the resolver an open (passable) door offers `Move here` first and `Close` second, so a plain tap walks through rather than re-closing it; a closed door still defaults to `Open`. This is why the resolver checks `openable.isOpen`, not just the component's presence.
 - **Branch order in `executeInteract` matters.** An entity could theoretically have more than one interactable component. The first matching branch wins, so put more specific checks first.
 - **Interact actions are async.** Handlers can `await` a dialog (like `executeContainerInteract` does) and the turn loop stays suspended until the promise resolves. A cancelled dialog should return `true` (free action); a completed interaction should return `false` (turn consumed).
 - **Non-blocking interactables** (entities without `blocksMovement`) will still trigger an interact action if the player taps their tile. The player won't try to move through them — the detection check runs before the move.

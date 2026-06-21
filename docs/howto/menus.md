@@ -56,6 +56,25 @@ player's [`inventory`/`wearsEquipment`](../../src/world/components.js) component
 actions (equip, drop, consume) back through the input controller. See [item.md](item.md) and
 [equipment.md](equipment.md) for the content it operates on.
 
+## Contextual tile menu
+
+A lighter-weight, in-world surface distinct from the two full-screen menus above: a small popover that
+lists the actions available on a **map tile**, raised by **long-press** (touch) or **right-click**
+(desktop). Where a plain tap acts immediately on a tile's *primary* action, the contextual menu surfaces
+*all* of them — so you can, e.g., close an open door you'd otherwise just walk through.
+
+- The rows come from [`resolveTileActions`](../../src/actions/resolve-tile-actions.js) — the same
+  resolver the tap interpreter ([`player-get-input.js`](../../src/ai/goals/player-get-input.js)) reads,
+  so the menu and a tap never disagree about what a tile offers. See [interactable-entities.md](interactable-entities.md).
+- The popover itself is [`context-menu.js`](../../src/ui/context-menu.js): point-anchored at the tap and
+  clamped to the viewport (flips left/up near an edge), modal while open (dismisses on selection,
+  tap-outside, or Escape). Selecting a row submits its action through the input controller.
+- Wiring lives in [`game-scene.js`](../../src/ui/game-scene.js): the long-press timer in the map-gesture
+  handler and the `contextmenu` event from [`main.js`](../../src/main.js) both call `openContextMenu`.
+
+Unlike the full-screen menus it isn't built on `menu-shell` — it's a transient popover, closer in spirit
+to [`action-menu.js`](../../src/ui/action-menu.js) but anchored to a point rather than centred.
+
 ## Layout & HUD buttons
 
 The four corners are claimed via [`anchor-system.js`](../../src/ui/anchor-system.js), so the buttons

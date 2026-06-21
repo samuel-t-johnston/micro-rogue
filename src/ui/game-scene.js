@@ -26,6 +26,8 @@ import { createCharacterMenuController } from './character-menu-controller.js';
 import { createGameMenuController } from './game-menu-controller.js';
 import { createGameMenuButton } from './widgets/game-menu-button.js';
 import { createOutcomePopup } from './outcome-popup.js';
+import { createContextMenu } from './context-menu.js';
+import { resolveTileActions } from '../actions/resolve-tile-actions.js';
 import { commitSave, loadSavedGame, clearSave } from '../save/save-system.js';
 import { buildSupportBundle, downloadSupportBundle } from '../save/support-bundle.js';
 
@@ -54,11 +56,40 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
   let pinch = null;           // { baseDist } — two-finger zoom, ratcheted per step
   const TAP_SLOP = 12;        // px of drift that disqualifies a tap (and is the future pan hook)
   const PINCH_STEP_RATIO = 1.25; // pinch distance change that advances one zoom level
+  const LONGPRESS_MS = 450;   // press-and-hold that raises the contextual tile menu (touch)
+  let longPressTimer = null;
+  let contextMenu = null;     // the open contextual tile menu (modal popover), or null
+
+  function clearLongPress() {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  }
 
   function resetGestures() {
     pointers.clear();
     tapCandidate = null;
     pinch = null;
+    clearLongPress();
+  }
+
+  // Raise the contextual menu for the tile under a screen point (long-press or right-click). Builds
+  // its rows from the same resolveTileActions the tap interpreter uses, so the offered actions match
+  // what a tap would do. A tile with nothing to offer opens no menu. Hands gesture state to the modal.
+  function openContextMenu(screenX, screenY) {
+    if (!level || !inputController) return;
+    const world = renderer.screenToWorld(screenX, screenY);
+    const tile = { x: Math.floor(world.x), y: Math.floor(world.y) };
+    const rows = resolveTileActions(level, getPlayerPos(), tile);
+    if (rows.length === 0) return;
+    resetGestures();
+    contextMenu = createContextMenu({
+      theme, getViewport,
+      anchor: { x: screenX, y: screenY },
+      rows,
+      onSelect: (action) => {
+        contextMenu = null;
+        if (action) inputController.submit(action);
+      },
+    });
   }
 
   function pinchDistance() {
@@ -69,11 +100,22 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
   // A press that fell through the UI chain: one finger begins a tap candidate, a second
   // finger turns the gesture into a pinch (and cancels the tap, so no move ever fires).
   function onPointerDown(event) {
+    // Ignore secondary mouse buttons (right/middle) — right-click opens the menu via 'contextmenu',
+    // so its pointerdown/up must not also start a tap-to-move. Touch presses report button 0.
+    if (event.button > 0) return true;
     pointers.set(event.pointerId, { x: event.x, y: event.y });
     if (pointers.size === 1) {
       tapCandidate = { id: event.pointerId, x: event.x, y: event.y };
+      // Hold this press still long enough and it becomes a contextual menu instead of a move.
+      const { x, y, pointerId } = event;
+      clearLongPress();
+      longPressTimer = setTimeout(() => {
+        longPressTimer = null;
+        if (tapCandidate?.id === pointerId) openContextMenu(x, y); // resetGestures() clears tapCandidate
+      }, LONGPRESS_MS);
     } else if (pointers.size === 2) {
       tapCandidate = null;
+      clearLongPress();
       pinch = { baseDist: pinchDistance() };
     }
     return true;
@@ -93,6 +135,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     } else if (tapCandidate?.id === event.pointerId &&
                Math.hypot(event.x - tapCandidate.x, event.y - tapCandidate.y) > TAP_SLOP) {
       tapCandidate = null; // dragged too far to be a tap (drag-to-pan will attach here later)
+      clearLongPress();    // …and too far to be a long-press
     }
     return true;
   }
@@ -102,10 +145,12 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     const releasingTap = tapCandidate?.id === event.pointerId;
     pointers.delete(event.pointerId);
     if (pointers.size < 2) pinch = null;
+    clearLongPress(); // released (or cancelled) before the hold elapsed — no menu
     if (releasingTap) {
       tapCandidate = null;
       const world = renderer.screenToWorld(event.x, event.y);
-      inputController.submit({ type: 'move', x: Math.floor(world.x), y: Math.floor(world.y) });
+      // A raw tile tap; the player-get-input goal interprets it (move / attack / interact / pick up).
+      inputController.submit({ type: 'tap', x: Math.floor(world.x), y: Math.floor(world.y) });
     }
     return true;
   }
@@ -308,6 +353,9 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     // Once dead, the popup intercepts everything until "Next" is pressed.
     if (outcomePopup.isVisible) return outcomePopup.handleInput(event);
 
+    // The contextual tile menu is modal while open — it swallows input and dismisses on tap-outside.
+    if (contextMenu) return contextMenu.handleInput(event);
+
     if (characterMenuController.isOpen) {
       return characterMenuController.handleInput(event);
     }
@@ -319,6 +367,9 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
     if (messageLogWidget.handleInput(event)) return true;
     if (characterMenuButton.handleInput(event)) return true;
     if (gameMenuButton.handleInput(event)) return true;
+
+    // Desktop secondary click raises the same contextual menu as a touch long-press.
+    if (event.type === 'contextmenu') { openContextMenu(event.x, event.y); return true; }
 
     if (event.type === 'pointerdown') return onPointerDown(event);
     if (event.type === 'pointermove') return onPointerMove(event);
@@ -442,6 +493,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
       dialogController.render(ctx);
       characterMenuController.render(ctx);
       gameMenuController.render(ctx);
+      contextMenu?.render(ctx);
       outcomePopup.render(ctx);
     },
 
@@ -514,6 +566,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
       turnManager?.stop();
       turnManager = null;
       inputController = null;
+      contextMenu = null;
       resetGestures();
       levelManager = null;
       transitioning = false;
