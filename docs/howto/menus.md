@@ -66,6 +66,8 @@ lists the actions available on a **map tile**, raised by **long-press** (touch) 
 - The rows come from [`resolveTileActions`](../../src/actions/resolve-tile-actions.js) — the same
   resolver the tap interpreter ([`player-get-input.js`](../../src/ai/goals/player-get-input.js)) reads,
   so the menu and a tap never disagree about what a tile offers. See [interactable-entities.md](interactable-entities.md).
+- Every tile ends with a free **Look** row (the "look at" examine action), so the menu never opens
+  empty — long-press anything to read it. A plain tap *skips* Look, so tapping a wall stays a no-op.
 - The popover itself is [`context-menu.js`](../../src/ui/context-menu.js): point-anchored at the tap and
   clamped to the viewport (flips left/up near an edge), modal while open (dismisses on selection,
   tap-outside, or Escape). Selecting a row submits its action through the input controller.

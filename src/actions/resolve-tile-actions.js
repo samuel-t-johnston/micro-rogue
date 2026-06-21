@@ -60,10 +60,7 @@ export function resolveTileActions(level, playerPos, tile) {
   if (isSelf) {
     const self = selfAction(occupants);
     if (self) actions.push(self);
-    return actions;
-  }
-
-  if (isAdjacent) {
+  } else if (isAdjacent) {
     if (creature) {
       actions.push({ id: 'attack', label: `Attack the ${nameOf(creature)}`, action: { type: 'attack', targetEntityId: creature.id }, free: false });
     }
@@ -77,10 +74,12 @@ export function resolveTileActions(level, playerPos, tile) {
     }
     if (container) actions.push(interactRow('open-container', 'Open', container));
     if (passable && !door) actions.push(moveRow());
-    return actions;
+  } else if (passable) {
+    actions.push(moveRow()); // distant tile — the goal turns this into auto-move
   }
 
-  // Distant tile: only movement (the goal turns it into auto-move). Look-at lands here later.
-  if (passable) actions.push(moveRow());
+  // Examine is offered on every tile, last (lowest priority). It's a free action and menu-only —
+  // the tap interpreter skips it — so a plain tap never examines, but the menu never opens empty.
+  actions.push({ id: 'look', label: 'Look', action: { type: 'lookAt', x, y }, free: true });
   return actions;
 }
