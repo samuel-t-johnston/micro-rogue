@@ -126,7 +126,7 @@ function updateDebugPointer(x, y) {
 requestAnimationFrame(frame);
 
 canvas.addEventListener('pointerdown', (e) => {
-  appState.handleInput({ type: 'pointerdown', x: e.clientX, y: e.clientY, pointerId: e.pointerId });
+  appState.handleInput({ type: 'pointerdown', x: e.clientX, y: e.clientY, pointerId: e.pointerId, button: e.button });
   updateDebugPointer(e.clientX, e.clientY);
 });
 canvas.addEventListener('pointermove', (e) => {
@@ -138,6 +138,11 @@ canvas.addEventListener('pointerup', (e) => {
 });
 canvas.addEventListener('pointercancel', (e) => {
   appState.handleInput({ type: 'pointercancel', x: e.clientX, y: e.clientY, pointerId: e.pointerId });
+});
+// Desktop secondary click → contextual tile menu. preventDefault suppresses the OS context menu.
+canvas.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  appState.handleInput({ type: 'contextmenu', x: e.clientX, y: e.clientY });
 });
 // Desktop zoom. preventDefault stops ctrl+wheel page zoom; the canvas already sets touch-action:none.
 canvas.addEventListener('wheel', (e) => {

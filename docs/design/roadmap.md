@@ -209,9 +209,9 @@ whole UI widget chain. See [zoom.md](../howto/zoom.md).*
 
 - [x] Freeze and thaw previously-seen tiles on level transition
 - [x] Remember furniture in previously-seen tiles (fog of war)
-- [ ] Click/Tap-and-hold: contextual action menu
+- [x] Click/Tap-and-hold: contextual action menu
 - [ ] "Look at" action - outputs to log, free action
-- [ ] Fix layout bug with hall generation in level 3
+- [x] Fix layout bug with hall generation in level 3
 - [ ] Complete sprite and glyph sets for all visible entities
 - [ ] Config: Sprite or Glyph (ASCII) rendering mode
 
