@@ -35,11 +35,28 @@ through `getDebugFrame`.
 
 A map move fires on pointer **release**, not press: a tap is a press that releases within
 `TAP_SLOP` px without a second finger landing. This is what lets pinch coexist with tapping (a
-second finger cancels the tap before any move fires) and leaves a hook for future drag-to-pan
-(a press that drifts past `TAP_SLOP` is discarded as a tap today; pan attaches there later).
+second finger cancels the tap before any move fires) and with drag-to-pan (a press that drifts
+past `TAP_SLOP` becomes a pan, never a move).
 
 A tap candidate only starts when a `pointerdown` falls through the **entire** UI widget chain
 unconsumed, so pressing a HUD button never turns into a stray map move on release.
+
+## Drag-to-pan (free-look)
+
+A one-finger drag (or left-button drag on desktop) past `TAP_SLOP` switches the camera from
+**follow** to **free-look** and pans the viewport 1:1 with the drag. The pan math is the pure
+`panCamera`/`clampCamera` in `src/render/camera-pan.js` (unit-tested); the camera centre is
+clamped to the level's tile range so the map always stays mostly on screen.
+
+The camera snaps back to the player when a **turn-finishing** player action runs
+(`handleTurnEnd` flips `cameraMode` to `'follow'`) or on a level change (`mountLevel`). Free
+actions don't snap back, so panning around and using **Look** keeps the free-look view; a move,
+attack, or interact recenters — including a tap-to-move on a tile you panned to. There is no
+manual recenter affordance yet. Free-look is view-only state and is never persisted.
+
+While panning, a second finger ends the pan and starts a pinch-zoom; the view stays where it was
+panned. The follow camera tracks the player's *visual* (sliding) position; on snap-back the
+camera jumps to that position rather than gliding.
 
 Gesture *feel* (slop, pinch ratio) is tuned by hand, not unit-tested (see AGENTS.md); the zoom
 ladder and the renderer's zoom-scaled geometry are unit-tested.

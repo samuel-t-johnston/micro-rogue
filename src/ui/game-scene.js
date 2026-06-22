@@ -1,6 +1,7 @@
 import { rng } from '../engine/rng.js';
 import { gameConfig } from '../engine/game-config.js';
 import { createRenderer } from '../render/renderer.js';
+import { panCamera } from '../render/camera-pan.js';
 import { createZoom, defaultZoomIndex } from '../render/zoom.js';
 import { animations } from '../render/animations.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
@@ -54,7 +55,11 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
   const pointers = new Map(); // active map-area pointers: id -> { x, y }
   let tapCandidate = null;    // a single press that may become a move on release
   let pinch = null;           // { baseDist } — two-finger zoom, ratcheted per step
-  const TAP_SLOP = 12;        // px of drift that disqualifies a tap (and is the future pan hook)
+  let pan = null;             // { id, lastX, lastY } — one-finger drag panning the viewport
+  // Camera follows the player ('follow') until a drag-to-pan switches to free-look ('free'); a
+  // turn-finishing player action (handleTurnEnd) or a level change (mountLevel) snaps back to follow.
+  let cameraMode = 'follow';
+  const TAP_SLOP = 12;        // px of drift that disqualifies a tap (and starts a drag-to-pan)
   const PINCH_STEP_RATIO = 1.25; // pinch distance change that advances one zoom level
   const LONGPRESS_MS = 450;   // press-and-hold that raises the contextual tile menu (touch)
   let longPressTimer = null;
@@ -68,7 +73,17 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
     pointers.clear();
     tapCandidate = null;
     pinch = null;
+    pan = null;
     clearLongPress();
+  }
+
+  // Applies a one-finger drag (screen px) to the viewport, switching to free-look. Clamped to the
+  // level so the map stays mostly on screen. See src/render/camera-pan.js.
+  function panViewport(dxScreen, dyScreen) {
+    if (!level) return;
+    cameraMode = 'free';
+    const { x, y } = panCamera(renderer.camera, dxScreen, dyScreen, renderer.tileSize, level);
+    renderer.setCamera(x, y);
   }
 
   // Raise the contextual menu for the tile under a screen point (long-press or right-click). Builds
@@ -115,6 +130,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
       }, LONGPRESS_MS);
     } else if (pointers.size === 2) {
       tapCandidate = null;
+      pan = null; // a second finger ends the drag and begins a pinch; the view stays where panned
       clearLongPress();
       pinch = { baseDist: pinchDistance() };
     }
@@ -132,10 +148,17 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
       const dist = pinchDistance();
       if (dist >= pinch.baseDist * PINCH_STEP_RATIO) { renderer.zoomIn(); pinch.baseDist = dist; }
       else if (dist <= pinch.baseDist / PINCH_STEP_RATIO) { renderer.zoomOut(); pinch.baseDist = dist; }
+    } else if (pan?.id === event.pointerId) {
+      // An in-progress drag: shift the viewport by the per-move delta and re-baseline.
+      panViewport(event.x - pan.lastX, event.y - pan.lastY);
+      pan.lastX = event.x;
+      pan.lastY = event.y;
     } else if (tapCandidate?.id === event.pointerId &&
                Math.hypot(event.x - tapCandidate.x, event.y - tapCandidate.y) > TAP_SLOP) {
-      tapCandidate = null; // dragged too far to be a tap (drag-to-pan will attach here later)
-      clearLongPress();    // …and too far to be a long-press
+      // Dragged too far to be a tap or long-press — promote it to a drag-to-pan instead.
+      pan = { id: event.pointerId, lastX: event.x, lastY: event.y };
+      tapCandidate = null;
+      clearLongPress();
     }
     return true;
   }
@@ -145,6 +168,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
     const releasingTap = tapCandidate?.id === event.pointerId;
     pointers.delete(event.pointerId);
     if (pointers.size < 2) pinch = null;
+    if (pan?.id === event.pointerId) pan = null; // drag ended; stay in free-look until the next turn
     clearLongPress(); // released (or cancelled) before the hold elapsed — no menu
     if (releasingTap) {
       tapCandidate = null;
@@ -250,6 +274,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
   // turn (win state only changes on the player's own action). A hit ends the run as a victory.
   function handleTurnEnd(entity, { free }) {
     if (gameOver || free || !entity.components.has('playerControlled')) return;
+    cameraMode = 'follow'; // a turn-finishing player action snaps the viewport back to the player
     const result = winConditions.run({ registry, level, player });
     if (result) endGame(result);
   }
@@ -263,6 +288,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
     applySenses(player, level);
 
     const ppos = registry.getComponent(player, 'position');
+    cameraMode = 'follow'; // a new floor recenters on the player, dropping any free-look pan
     renderer.setCamera(ppos.x, ppos.y);
 
     inputController = createInputController();
@@ -470,9 +496,10 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
       // camera and every sprite share a single consistent timestamp this frame.
       animations.frame();
 
-      if (player) {
+      if (player && cameraMode === 'follow') {
         // Follow the player's *visual* position so the viewport tracks the sliding
-        // sprite instead of snapping to the already-updated logical tile.
+        // sprite instead of snapping to the already-updated logical tile. In 'free'
+        // (drag-to-pan) mode the camera holds wherever the player panned it.
         const { x, y } = animations.visualPos(player);
         renderer.setCamera(x, y);
       }

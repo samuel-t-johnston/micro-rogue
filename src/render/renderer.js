@@ -204,6 +204,7 @@ export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LE
     drawAnimations,
     zoomIn: () => zoom.zoomIn(),
     zoomOut: () => zoom.zoomOut(),
+    get camera() { return { x: camera.x, y: camera.y }; },
     setCamera(x, y) {
       camera.x = x;
       camera.y = y;
