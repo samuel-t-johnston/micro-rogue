@@ -26,7 +26,7 @@ export function createHealingPotion(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Healing Potion'));
-  registry.addComponent(entity, 'renderable', components.renderable('healing-potion', '#07fe49ff', '!', '#07fe49ff', RenderLayers.ITEM));
+  registry.addComponent(entity, 'renderable', components.renderable('healing-potion', '#101010', '!', '#07fe49ff', RenderLayers.ITEM));
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'consumable', components.consumable(EffectTypes.HEAL, { amount: 10 }));
   if (location.type === 'map') {
@@ -39,7 +39,7 @@ export function createPotionOfPain(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Potion of Pain'));
-  registry.addComponent(entity, 'renderable', components.renderable('potion-of-pain', '#a31a1aff', '!', '#a31a1aff', RenderLayers.ITEM));
+  registry.addComponent(entity, 'renderable', components.renderable('potion-of-pain', '#101010', '!', '#e0352f', RenderLayers.ITEM));
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'consumable', components.consumable(EffectTypes.DAMAGE, { amount: 5 }));
   if (location.type === 'map') {

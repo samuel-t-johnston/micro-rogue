@@ -42,6 +42,9 @@ describe('entity sprites + glyphs', () => {
       const r = entity.components.get('renderable');
       expect(r.glyph, `${label} is missing a glyph`).toBeTruthy();
       expect(SPRITES[r.sprite], `${label} sprite "${r.sprite}" is not in the catalog`).toBeDefined();
+      // In glyph/ASCII mode the glyph is drawn on a fill of the same `color`; identical values make
+      // it invisible. Require the glyph color to differ from the cell color.
+      expect(r.glyphColor, `${label} glyph color matches its cell color (invisible in ASCII mode)`).not.toBe(r.color);
     });
   }
 
@@ -49,6 +52,7 @@ describe('entity sprites + glyphs', () => {
     it(`terrain ${id} has a glyph and a resolvable sprite`, () => {
       expect(tile.glyph, `terrain ${id} is missing a glyph`).toBeTruthy();
       expect(SPRITES[tile.sprite], `terrain ${id} sprite "${tile.sprite}" is not in the catalog`).toBeDefined();
+      expect(tile.glyphColor, `terrain ${id} glyph color matches its cell color (invisible in ASCII mode)`).not.toBe(tile.color);
     });
   }
 });

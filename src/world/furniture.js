@@ -6,7 +6,7 @@ export function createBoulder(registry, x, y) {
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'opaque', components.opaque());
-  registry.addComponent(entity, 'renderable', components.renderable('boulder', '#888888', 'O', '#a8a8a8'));
+  registry.addComponent(entity, 'renderable', components.renderable('boulder', '#888888', 'O', '#d8d8d8'));
   registry.addComponent(entity, 'persistVisible', components.persistVisible());
   return entity;
 }
