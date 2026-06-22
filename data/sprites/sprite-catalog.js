@@ -9,14 +9,7 @@
 // one. Only sheets actually referenced by SPRITES are loaded.
 export const SHEETS = {
   'sprite-sheet': [16, 32],
-  knight: [16],
-  potions: [16],
-  weapons: [16],
-  consumables: [16],
-  chests: [16],
-  books: [16],
-  armours: [16],
-  glionox_items_sheet: [16],
+  'ProjectUtumnoFull-DCSS': [32], // 64×95 grid of 32px sprites (DCSS variant of ProjectUtumno Full)
 };
 
 // name -> { sheet, col, row }. col/row are 0-indexed grid cells (size-agnostic: the same cell
@@ -27,13 +20,32 @@ export const SPRITES = {
   wall: { sheet: 'sprite-sheet', col: 1, row: 5 },
 
   // Items
-  'healing-potion': { sheet: 'sprite-sheet', col: 16, row: 16 },
-  'potion-of-pain': { sheet: 'sprite-sheet', col: 20, row: 16 },
-  dagger: { sheet: 'sprite-sheet', col: 19, row: 5 },
+  'healing-potion': { sheet: 'ProjectUtumnoFull-DCSS', col: 26, row: 42 },
+  'potion-of-pain': { sheet: 'ProjectUtumnoFull-DCSS', col: 10, row: 42 },
+  'amulet-of-yendor': { sheet: 'ProjectUtumnoFull-DCSS', col: 34, row: 35 },
+  'scroll-of-healing': { sheet: 'ProjectUtumnoFull-DCSS', col: 44, row: 43 },
+
+  // Equipment
+  dagger: { sheet: 'ProjectUtumnoFull-DCSS', col: 4, row: 45 },
+  'leather-armor': { sheet: 'ProjectUtumnoFull-DCSS', col: 51, row: 37 },
+  sword: { sheet: 'ProjectUtumnoFull-DCSS', col: 3, row: 46 },
 
   // Furniture
   boulder: { sheet: 'sprite-sheet', col: 16, row: 12 },
   chest: { sheet: 'sprite-sheet', col: 10, row: 23 },
   'door-closed': { sheet: 'sprite-sheet', col: 16, row: 22 },
   'door-open': { sheet: 'sprite-sheet', col: 17, row: 22 },
+
+  // Player
+  player: { sheet: 'ProjectUtumnoFull-DCSS', col: 19, row: 68 },
+
+  // Monsters
+  scuttler: { sheet: 'ProjectUtumnoFull-DCSS', col: 37, row: 63 },
+  goblin: { sheet: 'ProjectUtumnoFull-DCSS', col: 1, row: 60 },
+  orc: { sheet: 'ProjectUtumnoFull-DCSS', col: 27, row: 61 },
+  'orc-commander': { sheet: 'ProjectUtumnoFull-DCSS', col: 26, row: 61 },
+
+  // Stairs
+  'stairs-up': { sheet: 'ProjectUtumnoFull-DCSS', col: 54, row: 11 },
+  'stairs-down': { sheet: 'ProjectUtumnoFull-DCSS', col: 53, row: 11 },
 };
