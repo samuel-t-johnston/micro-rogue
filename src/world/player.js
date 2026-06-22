@@ -26,6 +26,6 @@ export async function createPlayer(registry, x, y) {
   registry.addComponent(entity, 'knownLanguages', components.knownLanguages([]));
   registry.addComponent(entity, 'tilePerception', components.tilePerception());
   registry.addComponent(entity, 'ai', components.ai(['player-hear', 'player-smell', 'player-auto-move', 'player-auto-pickup', 'player-get-input']));
-  registry.addComponent(entity, 'renderable', components.renderable(null, '#0a1a0a', '@', '#00cc44'));
+  registry.addComponent(entity, 'renderable', components.renderable('player', '#0a1a0a', '@', '#00cc44'));
   return entity;
 }

@@ -135,7 +135,8 @@ sub-screen builder in the controller, following the Inventory/Equipment pair.
 - **New Game is guarded.** It confirms before discarding: "Overwrite existing save?" on the main
   menu (only when a save exists), "Abandon current run?" in-game (always).
 - **Settings rows are label + segmented control**, not buttons — a separate layout mode in
-  `menu-shell` (see [`settings-controls.js`](../../src/ui/settings-controls.js)). It holds Handedness
-  and Skip-new-game-instructions today and is the home for future UI preferences; add one by
+  `menu-shell` (see [`settings-controls.js`](../../src/ui/settings-controls.js)). It holds Handedness,
+  Skip-new-game-instructions, and Graphics (sprite vs. ASCII rendering — see
+  [sprite-sheets.md](sprite-sheets.md)) today, and is the home for future UI preferences; add one by
   appending a row in [`buildSettingsPage`](../../src/ui/game-menu-items.js) (see
   [handedness.md](handedness.md)).

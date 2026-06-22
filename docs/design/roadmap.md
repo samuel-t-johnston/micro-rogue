@@ -214,8 +214,8 @@ whole UI widget chain. See [zoom.md](../howto/zoom.md).*
 - [x] Prevent door close when blocked
 - [ ] Drag to pan
 - [x] Fix layout bug with hall generation in level 3
-- [ ] Complete sprite and glyph sets for all visible entities
-- [ ] Config: Sprite or Glyph (ASCII) rendering mode
+- [x] Complete sprite and glyph sets for all visible entities
+- [x] Config: Sprite or Glyph (ASCII) rendering mode
 - [x] Credits page
 
 *Fog-of-war note (landed): tile memory was already per-creature on `tilePerception` (`visible` this

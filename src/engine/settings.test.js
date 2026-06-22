@@ -26,6 +26,18 @@ describe('normalizeSettings', () => {
   it('falls back to the default for a non-boolean skipNewGameInstructions', () => {
     expect(normalizeSettings({ skipNewGameInstructions: 'yes' }).skipNewGameInstructions).toBe(false);
   });
+
+  it('defaults renderMode to sprite', () => {
+    expect(normalizeSettings(null).renderMode).toBe('sprite');
+  });
+
+  it('keeps a valid renderMode value', () => {
+    expect(normalizeSettings({ renderMode: 'glyph' }).renderMode).toBe('glyph');
+  });
+
+  it('falls back to the default for an invalid renderMode value', () => {
+    expect(normalizeSettings({ renderMode: 'ascii' }).renderMode).toBe('sprite');
+  });
 });
 
 describe('gameSettings store', () => {

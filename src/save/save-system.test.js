@@ -27,6 +27,7 @@ import {
 import saveV1 from './fixtures/save-v1.json';
 import saveV2 from './fixtures/save-v2.json';
 import saveV3 from './fixtures/save-v3.json';
+import saveV4 from './fixtures/save-v4.json';
 
 // Builds a realistic game directly (the pipeline's static stage does a dynamic file:// import
 // that vitest's resolver mangles on Windows): a chest with contained items, creatures, map
@@ -292,6 +293,43 @@ describe('v3 → v4 migration (real, from a fixture)', () => {
     const restored = deserializeGame(loadSave(saveV3));
     expect(restored.player.id).toBe(saveV3.playerId);
     expect(restored.player.components.has('creature')).toBe(true);
+  });
+});
+
+describe('v4 → v5 migration (real, from a fixture)', () => {
+  const findEntity = (entities, id) => entities.find(e => e.id === id);
+
+  it('converts known sprite coordinates to catalog names', () => {
+    const migrated = loadSave(saveV4);
+    expect(migrated.saveVersion).toBe(SAVE_VERSION);
+    expect(findEntity(migrated.entities, 3).components.renderable.sprite).toBe('healing-potion');
+  });
+
+  it('converts an openable door’s closed/open sprites to names', () => {
+    const door = findEntity(loadSave(saveV4).entities, 2);
+    expect(door.components.renderable.sprite).toBe('door-closed');
+    expect(door.components.openable.closedSprite).toBe('door-closed');
+    expect(door.components.openable.openSprite).toBe('door-open');
+  });
+
+  it('leaves a glyph-only renderable (sprite null) as null', () => {
+    expect(findEntity(loadSave(saveV4).entities, 1).components.renderable.sprite).toBeNull();
+  });
+
+  it('maps an unknown coordinate to null (renderer falls back to the glyph)', () => {
+    const mystery = findEntity(loadSave(saveV4).frozenLevels['floor-2'].entities, 4);
+    expect(mystery.components.renderable.sprite).toBeNull();
+  });
+
+  it('does not mutate the source fixture', () => {
+    loadSave(saveV4);
+    expect(saveV4.entities[2].components.renderable.sprite).toEqual({ col: 16, row: 16 });
+  });
+
+  it('a migrated v4 save deserializes into a live game', () => {
+    const restored = deserializeGame(loadSave(saveV4));
+    expect(restored.player.id).toBe(saveV4.playerId);
+    expect(restored.player.components.get('renderable').sprite).toBeNull();
   });
 });
 

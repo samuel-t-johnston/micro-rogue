@@ -31,7 +31,7 @@ import { resolveTileActions } from '../actions/resolve-tile-actions.js';
 import { commitSave, loadSavedGame, clearSave } from '../save/save-system.js';
 import { buildSupportBundle, downloadSupportBundle } from '../save/support-bundle.js';
 
-export function createGameScene({ theme, getViewport, onGameOver, onNewGame, startMode = 'new' }) {
+export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onLoadFailed, startMode = 'new' }) {
   let level = null;
   let player = null;
   let levelManager = null;
@@ -398,14 +398,18 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, sta
         gameLog.reset();
         animations.reset();
 
-        // On 'continue', try to rehydrate the saved game; any failure (no save, too-new,
-        // migration error) falls through to a fresh game rather than dead-ending.
+        // On 'continue', rehydrate the saved game. A present-but-unloadable save (too-new, failed
+        // migration, corrupt) is reported to the host (onLoadFailed) so the menu can explain it,
+        // rather than silently discarding the run into a fresh game; we abort this mount and let the
+        // transition take over. loadSavedGame returns null only when there is genuinely no save.
         let restored = null;
         if (startMode === 'continue') {
           try {
             restored = loadSavedGame();
           } catch (err) {
-            console.error('[game] Failed to load save; starting a new game:', err);
+            console.error('[game] Failed to load save:', err);
+            onLoadFailed?.(err);
+            return;
           }
         }
 

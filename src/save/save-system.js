@@ -19,8 +19,24 @@ import {
 
 // Bumped only when the save schema changes in a breaking way (see the design doc). The game
 // version is independent and tracks releases; it mirrors package.json.
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 export const GAME_VERSION = '0.0.0';
+
+// Frozen at v5: the combined-sheet (col,row) sprite coordinates that shipped through v4, mapped to
+// the catalog names that replaced them (see data/sprites/sprite-catalog.js). Never edit once
+// shipped. Coordinates not listed here (e.g. entities that were glyph-only in v4, with sprite:null)
+// have no name and become null — they keep rendering as glyphs, which is correct.
+const V4_SPRITE_NAMES = {
+  '2,0': 'floor', '1,5': 'wall',
+  '16,16': 'healing-potion', '20,16': 'potion-of-pain', '19,5': 'dagger',
+  '16,12': 'boulder', '10,23': 'chest', '16,22': 'door-closed', '17,22': 'door-open',
+};
+
+// v4 sprites were inline { col, row } objects; v5 sprites are catalog name strings. Convert a single
+// reference. A name (string) or null passes through; an unknown {col,row} maps to null (the renderer
+// then falls back to the glyph). Used by the v4→v5 migration.
+const v4SpriteToName = (s) =>
+  (s && typeof s === 'object') ? (V4_SPRITE_NAMES[`${s.col},${s.row}`] ?? null) : s;
 
 const SAVE_KEY = 'rogue:save';
 
@@ -71,6 +87,33 @@ export const migrations = [
       addCreatureToTurnTakers(save.entities);
       for (const floor of Object.values(save.frozenLevels ?? {})) {
         addCreatureToTurnTakers(floor.entities);
+      }
+      return save;
+    },
+  },
+  {
+    from: 4,
+    to: 5,
+    // v5 moves sprite art into a central catalog: renderables and openable furniture reference a
+    // sprite by name instead of carrying inline { col, row } coordinates. Convert the known v4
+    // coordinates to names; unknown ones (and the old glyph-only nulls) become null and fall back to
+    // glyphs. Fog-of-war snapshots inside tilePerception aren't rewritten — the renderer tolerates an
+    // unresolved sprite and falls back, so stale remembered furniture just shows its glyph/color.
+    migrate(save) {
+      const fixSprites = (entities) => {
+        for (const entity of entities ?? []) {
+          const r = entity.components?.renderable;
+          if (r && 'sprite' in r) r.sprite = v4SpriteToName(r.sprite);
+          const o = entity.components?.openable;
+          if (o) {
+            o.closedSprite = v4SpriteToName(o.closedSprite);
+            o.openSprite = v4SpriteToName(o.openSprite);
+          }
+        }
+      };
+      fixSprites(save.entities);
+      for (const floor of Object.values(save.frozenLevels ?? {})) {
+        fixSprites(floor.entities);
       }
       return save;
     },

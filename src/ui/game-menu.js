@@ -2,6 +2,7 @@ import { hasSave } from '../save/save-system.js';
 import { drawText } from './canvas-ui.js';
 import { createMenuShell } from './menu-shell.js';
 import { createActionMenu } from './action-menu.js';
+import { createNotice } from './notice.js';
 import { buildSettingsPage, buildCreditsPage } from './game-menu-items.js';
 
 // Main menu scene. The option list and Settings drill-down come from the shared menu-shell
@@ -9,9 +10,19 @@ import { buildSettingsPage, buildCreditsPage } from './game-menu-items.js';
 //
 // New Game overwrites any existing save, so it confirms first when one is present. Continue is
 // enabled only when there is a save to load. onAction('new'|'continue') is handled by main.js.
+//
+// `notice` (optional) is a one-time message shown over the menu on entry — e.g. when a saved game
+// couldn't be carried forward after an update and was cleared. Its button starts a new game.
 
-export function createMenuScene({ theme, getViewport, onAction }) {
+export function createMenuScene({ theme, getViewport, onAction, notice = null }) {
   let confirm = null; // a createActionMenu instance while confirming an overwrite
+  let activeNotice = notice
+    ? createNotice({
+        theme, getViewport, message: notice, buttonLabel: 'New Game',
+        onConfirm: () => { activeNotice = null; onAction?.('new'); },
+        onDismiss: () => { activeNotice = null; },
+      })
+    : null;
 
   function askOverwrite() {
     confirm = createActionMenu({
@@ -50,9 +61,11 @@ export function createMenuScene({ theme, getViewport, onAction }) {
 
       shell.render(ctx);
       confirm?.render(ctx);
+      activeNotice?.render(ctx);
     },
 
     handleInput(event) {
+      if (activeNotice) return activeNotice.handleInput(event);
       if (confirm) return confirm.handleInput(event);
       return shell.handleInput(event);
     },
