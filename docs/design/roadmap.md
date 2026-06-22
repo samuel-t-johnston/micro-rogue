@@ -232,6 +232,30 @@ are additive fields with tolerant defaults, no migration needed.*
 
 ---
 
+Pre-Alpha Checklist — Alpha v0.1.0
+
+*Done when the engine supports a complete (simple) game experience; the codebase has been fully reviewed, and is a clean baseline for further expansion and new features.*
+
+- [ ] Full human code review and cleanup
+- [ ] Delete all stubs, empty dirs, unused assets
+- [ ] JS best practices
+  - modules vs classes?
+  - JS Doc comments
+  - ESLint + Prettier
+- [ ] General Design Review
+  - Unit test gaps: tests cover function/edges, avoid tests fragile to change
+  - Code smells
+  - Design for easy replacement and modification of systems. Design for easy modification of content.
+- [ ] Rearrange data modules - consider pulling out data files?
+- [ ] Review the “how-to” documents, correct mistakes, add missing info.
+- [ ] Replace/update original design docs
+- [ ] Spiff up GitHub and readme.md
+- [ ] Update version to v0.1.0
+
+*At the end of this milestone we will move into Alpha with standard version numbers: Alpha v0.1.0.*
+
+---
+
 ## Deferred / Not Scheduled
 
 These are explicitly out of scope until a concrete need exists:
