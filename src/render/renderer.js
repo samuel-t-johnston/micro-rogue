@@ -1,16 +1,30 @@
 import { getTileType } from '../world/tile-registry.js';
 import { createSpriteRenderer } from './sprite-renderer.js';
+import { SPRITES, SHEETS } from '../../data/sprites/sprite-catalog.js';
 import { RenderLayers } from './render-layers.js';
 import { animations } from './animations.js';
 import { createZoom, ZOOM_LEVELS } from './zoom.js';
+import { gameSettings } from '../engine/settings.js';
 
-// Available sprite-sheet resolutions. The sprite renderer picks the best one per draw for the
-// current zoom level and device pixel ratio, so the art stays crisp and as detailed as the
-// sheets allow at every level (see sprite-renderer.js / zoom.js).
-const SPRITE_SHEET_SIZES = [16, 32];
+// ASCII mode: skip sprites and draw glyphs. Read live so the Settings toggle takes effect next frame.
+const glyphMode = () => gameSettings.get('renderMode') === 'glyph';
+
+// Fills a tile with `color`, then draws `glyph` (if any) centered over it — the ASCII rendering and
+// the sprite-unavailable fallback, shared by terrain and entities so both look the same.
+function drawGlyphCell(ctx, { color, glyph, glyphColor }, x, y, size) {
+  ctx.fillStyle = color ?? '#666';
+  ctx.fillRect(x, y, size, size);
+  if (glyph) {
+    ctx.fillStyle = glyphColor ?? '#fff';
+    ctx.font = `bold ${Math.floor(size * 0.75)}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(glyph, x + size / 2, y + size / 2);
+  }
+}
 
 export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LEVELS.indexOf(32) }) }) {
-  const sprites = createSpriteRenderer(SPRITE_SHEET_SIZES);
+  const sprites = createSpriteRenderer({ catalog: SPRITES, sheets: SHEETS });
   const camera = { x: 0, y: 0 }; // tile coords at screen center
 
   // The on-screen tile size in CSS px for the current zoom level. Read fresh on every call so
@@ -71,9 +85,8 @@ export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LE
         const { x, y } = worldToScreen(tx, ty);
 
         if (!isVisible) ctx.globalAlpha = 0.4;
-        if (!sprites.draw(ctx, tile.sprite, x, y, tileSize, dpr)) {
-          ctx.fillStyle = tile.color;
-          ctx.fillRect(x, y, tileSize, tileSize);
+        if (glyphMode() || !sprites.draw(ctx, tile.sprite, x, y, tileSize, dpr)) {
+          drawGlyphCell(ctx, tile, x, y, tileSize);
         }
         if (!isVisible) ctx.globalAlpha = 1;
       }
@@ -161,16 +174,8 @@ export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LE
       }
     }
 
-    if (!sprites.draw(ctx, renderable.sprite, px, py, tileSize, dpr)) {
-      ctx.fillStyle = renderable.color ?? '#666';
-      ctx.fillRect(px, py, tileSize, tileSize);
-      if (renderable.glyph) {
-        ctx.fillStyle = renderable.glyphColor ?? '#fff';
-        ctx.font = `bold ${Math.floor(tileSize * 0.75)}px monospace`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(renderable.glyph, px + tileSize / 2, py + tileSize / 2);
-      }
+    if (glyphMode() || !sprites.draw(ctx, renderable.sprite, px, py, tileSize, dpr)) {
+      drawGlyphCell(ctx, renderable, px, py, tileSize);
     }
 
     if (scaled || faded) ctx.restore();

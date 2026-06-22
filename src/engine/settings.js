@@ -17,6 +17,10 @@ export const DEFAULT_SETTINGS = Object.freeze({
   // When true, the New Game instructions screen is skipped and a new run loads straight into the
   // game. Toggled from that screen's "Do not display again" checkbox and the Settings menu.
   skipNewGameInstructions: false,
+
+  // Map rendering style: 'sprite' draws sheet art (default); 'glyph' draws ASCII characters
+  // (the classic roguelike look). Read live by the renderer, so toggling takes effect next frame.
+  renderMode: 'sprite',
 });
 
 // Merge a parsed object over the defaults, dropping unknown keys and invalid values. Any
@@ -28,6 +32,9 @@ export function normalizeSettings(raw) {
   }
   if (raw && typeof raw.skipNewGameInstructions === 'boolean') {
     out.skipNewGameInstructions = raw.skipNewGameInstructions;
+  }
+  if (raw && (raw.renderMode === 'sprite' || raw.renderMode === 'glyph')) {
+    out.renderMode = raw.renderMode;
   }
   return out;
 }

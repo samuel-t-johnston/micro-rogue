@@ -8,6 +8,7 @@ import { createGameScene } from './ui/game-scene.js';
 import { createInstructionsScene } from './ui/instructions-scene.js';
 import { createResultsScene } from './ui/results-scene.js';
 import { createDebugOverlay } from './debug/debug-overlay.js';
+import { clearSave } from './save/save-system.js';
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -46,6 +47,19 @@ let lastResults = null;
 // action and read by the GAME scene factory when the transition runs.
 let startMode = 'new';
 
+// A one-time message for the next MENU mount — set when a saved game couldn't be loaded (a breaking
+// change with no migration path), consumed and cleared by the MENU factory so it shows only once.
+let pendingNotice = null;
+
+// A 'continue' whose save can't be carried forward (too-new, failed migration, corrupt). Clear the
+// unusable slot and bounce back to the menu with an explanation rather than silently starting fresh.
+// Deferred so the in-flight GAME mount unwinds before we tear it down.
+function handleSaveLoadFailed() {
+  clearSave();
+  pendingNotice = "Your saved game couldn't be carried forward after a game update, so it has been cleared.";
+  queueMicrotask(() => appState.transition(AppState.MENU));
+}
+
 // Starts a fresh run. Shared by the main-menu "New Game" and the in-game menu's "New Game" so both
 // route through the instructions screen (skipped when the player has opted out); either way the GAME
 // scene starts fresh because startMode is 'new'.
@@ -71,9 +85,11 @@ function handleMenuAction(id) {
 appState.register(AppState.SPLASH, () =>
   createSplashScene({ appState, theme, getViewport })
 );
-appState.register(AppState.MENU, () =>
-  createMenuScene({ theme, getViewport, onAction: handleMenuAction })
-);
+appState.register(AppState.MENU, () => {
+  const notice = pendingNotice;
+  pendingNotice = null; // consume: the message shows on this mount only
+  return createMenuScene({ theme, getViewport, onAction: handleMenuAction, notice });
+});
 appState.register(AppState.GAME, () =>
   createGameScene({
     theme,
@@ -84,6 +100,7 @@ appState.register(AppState.GAME, () =>
       appState.transition(AppState.RESULTS);
     },
     onNewGame: startNewGame,
+    onLoadFailed: handleSaveLoadFailed,
   })
 );
 appState.register(AppState.INSTRUCTIONS, () =>

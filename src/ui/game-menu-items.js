@@ -27,6 +27,14 @@ export function buildSettingsPage() {
         get: () => gameSettings.get('skipNewGameInstructions'),
         set: (v) => gameSettings.set('skipNewGameInstructions', v),
       },
+      {
+        id: 'renderMode',
+        label: 'Graphics',
+        description: 'Sprite art, or classic ASCII glyphs.',
+        options: [{ label: 'Sprites', value: 'sprite' }, { label: 'ASCII', value: 'glyph' }],
+        get: () => gameSettings.get('renderMode'),
+        set: (v) => gameSettings.set('renderMode', v),
+      },
     ],
   };
 }
@@ -35,6 +43,6 @@ export function buildSettingsPage() {
 export function buildCreditsPage() {
   return {
     title: 'Credits',
-    text: 'Code - Sam Johnston\nPixel Art - ELV Games, Shade, and Glionox',
+    text: '-- Code --\nSam Johnston\n\n-- Pixel Art --\nELV Games\nShade\nGlionox\nCraftPix',
   };
 }

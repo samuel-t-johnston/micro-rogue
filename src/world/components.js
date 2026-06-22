@@ -145,9 +145,9 @@ export const components = {
     return {};
   },
 
-  // This is currently used for furniture like doors. For furniture with inventories 
+  // This is currently used for furniture like doors. For furniture with inventories
   // (e.g. chests), use the container and inventory components instead.
-  // isOpen: current state. closedSprite/openSprite: { col, row } swapped on open/close.
+  // isOpen: current state. closedSprite/openSprite: sprite catalog names swapped on open/close.
   openable(closedSprite, openSprite) {
     return { isOpen: false, closedSprite, openSprite };
   },
@@ -175,8 +175,9 @@ export const components = {
     return { id };
   },
 
-  // sprite: { col, row } matching the sprite sheet; color: CSS fallback if sprite unavailable.
-  // glyph/glyphColor: optional text character drawn over the tile when no sprite is available.
+  // sprite: a catalog name (data/sprites/sprite-catalog.js), or null; color: CSS fallback if the
+  // sprite is unavailable. glyph/glyphColor: text character drawn over the tile in ASCII mode or
+  // when no sprite is available.
   // layer: z-order from src/render/render-layers.js — lower draws first. Omitting it
   // falls back to RenderLayers.DEFAULT (creatures, furniture); items override to ITEM
   // so a creature standing on a dropped item draws on top.
