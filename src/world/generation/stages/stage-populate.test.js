@@ -6,7 +6,7 @@ import { run as runCarveRooms } from './stage-carve-rooms.js';
 import { run as runCarveHalls } from './stage-carve-halls.js';
 import { run as runStairs } from './stage-stairs.js';
 import { run as runSpawn } from './stage-spawn.js';
-import { run as runPopulate, weightedPick } from './stage-populate.js';
+import { run as runPopulate, weightedPick, DEFAULTS } from './stage-populate.js';
 import { roomTiles, centermostRoomTile } from '../zone-tiles.js';
 import { createLevel } from '../../level.js';
 import { createEntityRegistry } from '../../../engine/entity-component-system.js';
@@ -73,22 +73,24 @@ describe('weightedPick', () => {
 });
 
 describe('populate stage', () => {
-  it('puts a chest with 1-3 items in each treasure room', () => {
+  it('puts a chest with the configured item count in each treasure room', () => {
     const { bb, reg } = generate(2);
+    const [minItems, maxItems] = DEFAULTS.treasureRoom.chestItems;
     const treasureZones = bb['level:zones'].filter((z) => z.labels.includes('treasure'));
     const chests = reg.getEntitiesWith('container');
     expect(chests).toHaveLength(treasureZones.length);
     for (const chest of chests) {
       const n = chest.components.get('inventory').items.length;
-      expect(n).toBeGreaterThanOrEqual(1);
-      expect(n).toBeLessThanOrEqual(2);
+      expect(n).toBeGreaterThanOrEqual(minItems);
+      expect(n).toBeLessThanOrEqual(maxItems);
     }
   });
 
   it('spawns the configured creatures, none on the stairs-up room, none stacked', () => {
     const { level, bb, reg } = generate(2);
     const creatures = reg.getEntitiesWith('ai');
-    expect(creatures).toHaveLength(5); // 1 orc commander + 2 orcs + 2 goblins
+    const expectedCount = DEFAULTS.creatures.reduce((sum, spec) => sum + spec.count, 0);
+    expect(creatures).toHaveLength(expectedCount);
 
     const seen = new Set();
     for (const c of creatures) {

@@ -46,16 +46,18 @@ describe('executeConsume', () => {
 
   it('potion of pain damages the actor', () => {
     const pain = createPotionOfPain(registry, null, null, actor.id);
+    const dmg = pain.components.get('consumable').params.amount;
     actor.components.get('inventory').items.push(pain);
+    const before = actor.components.get('health').current;
     executeConsume(actor, { itemEntityId: pain.id }, null, registry);
-    expect(actor.components.get('health').current).toBe(5);
+    expect(actor.components.get('health').current).toBe(before - dmg);
   });
 
   it('a lethal potion of pain kills the consumer', () => {
     const level = createLevel();
     const pain = createPotionOfPain(registry, null, null, actor.id);
     actor.components.get('inventory').items.push(pain);
-    actor.components.get('health').current = 3; // potion of pain deals 5
+    actor.components.get('health').current = 1; // below the pain potion's damage — lethal
     executeConsume(actor, { itemEntityId: pain.id }, level, registry);
     expect(registry.getEntity(actor.id)).toBeNull();
   });

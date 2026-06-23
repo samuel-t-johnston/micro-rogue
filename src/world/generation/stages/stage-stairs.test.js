@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { run as runRoomGridGeometry } from './stage-room-grid-geometry.js';
 import { run as runLabel } from './stage-label.js';
 import { run as runCarveRooms } from './stage-carve-rooms.js';
@@ -56,5 +56,23 @@ describe('stairs stage', () => {
         .map((p) => `${p.x},${p.y}`)
         .sort();
     expect(posOf(generate(5))).toEqual(posOf(generate(5)));
+  });
+
+  it('skips (with a warning) a stairs label that has no zone, placing the other', () => {
+    // Geometry + carve, but a label set that omits 'stairs-down' entirely.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const level = createLevel();
+    const reg = createEntityRegistry();
+    const bb = level.blackboard;
+    runRoomGridGeometry(level, {}, bb, createRng(1));
+    runLabel(level, { labels: ['stairs-up', 'room', 'room'] }, bb, createRng(1));
+    runCarveRooms(level, {}, bb, createRng(1));
+    runStairs(level, {}, bb, createRng(1), reg);
+
+    const stairs = reg.getEntitiesWith('transition');
+    expect(stairs).toHaveLength(1);
+    expect(stairs[0].components.get('name')).toBe('Stairs Up');
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 });

@@ -176,3 +176,18 @@ export function createScroll(registry, x, y, entityId) {
   }
   return entity;
 }
+
+/**
+ * Sample constructors for every item, keyed by label — one canonical instance of each placed at the
+ * origin. The source of truth for "which items exist" when enumerating content (e.g. the sprite/glyph
+ * coverage test). Add an item here when you add its factory above.
+ */
+export const ITEM_SAMPLES = {
+  'healing potion': (r) => createHealingPotion(r, 0, 0),
+  'potion of pain': (r) => createPotionOfPain(r, 0, 0),
+  dagger: (r) => createDagger(r, 0, 0),
+  sword: (r) => createSword(r, 0, 0),
+  'leather armor': (r) => createLeatherArmor(r, 0, 0),
+  amulet: (r) => createAmulet(r, 0, 0),
+  scroll: (r) => createScroll(r, 0, 0),
+};

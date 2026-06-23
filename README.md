@@ -84,7 +84,7 @@ The dev server serves the repo root, so `index.html` at the root, `src/` modules
 
 ROGμE uses Vitest with `happy-dom` for tests that need a DOM. Test files live alongside source as `*.test.js`.
 
-Run tests with `npm test` (watch mode) or `npm run test:run` (single pass).
+Run tests with `npm test` (watch mode) or `npm run test:run` (single pass). For a coverage report, run `npm run test:coverage` (single pass with a per-file text summary, via `@vitest/coverage-v8`).
 
 ### Linting & Formatting
 

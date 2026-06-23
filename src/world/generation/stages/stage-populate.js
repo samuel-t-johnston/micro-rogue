@@ -32,8 +32,9 @@ const CREATURE_FACTORIES = {
 };
 
 // Spawn rules (overridable via stageConfig). Creature `weights` are per-label multipliers; a room's
-// pick-weight is the product over its labels (absent labels contribute 1).
-const DEFAULTS = {
+// pick-weight is the product over its labels (absent labels contribute 1). Exported so tests can
+// assert against the configured roster/counts instead of duplicating the magic numbers.
+export const DEFAULTS = {
   treasureRoom: { chestItems: [1, 2], floorItems: [0, 1] },
   itemRoom: { floorItems: [1, 1] },
   creatures: [

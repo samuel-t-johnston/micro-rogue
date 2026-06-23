@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { run as runRoomGridGeometry } from './stage-room-grid-geometry.js';
 import { run as runLabel } from './stage-label.js';
 import { run as runCarveRooms } from './stage-carve-rooms.js';
@@ -41,5 +41,15 @@ describe('spawn stage', () => {
     const a = generate(5).reg.getEntitiesWith('entryPoint')[0].components.get('position');
     const b = generate(5).reg.getEntitiesWith('entryPoint')[0].components.get('position');
     expect(a).toEqual(b);
+  });
+
+  it('degrades gracefully (warns, places nothing) when there are no zones', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const level = createLevel();
+    const reg = createEntityRegistry();
+    runSpawn(level, {}, level.blackboard, createRng(1), reg);
+    expect(reg.getEntitiesWith('entryPoint')).toHaveLength(0);
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 });
