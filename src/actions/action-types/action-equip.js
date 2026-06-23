@@ -1,10 +1,11 @@
 import { gameLog } from '../../engine/game-log.js';
 import { subject, conjugate, itemName } from '../../engine/log-text.js';
 
-// Moves an equippable item from the actor's inventory into its equipment slot.
-// If the slot is already occupied, the previously equipped item is unequipped
-// back into inventory first (atomic swap).
-// Returns false — equip always consumes a turn.
+/**
+ * Moves an equippable item from the actor's inventory into its equipment slot. If the slot is
+ * already occupied, the previously equipped item is unequipped back into inventory first (atomic swap).
+ * @returns {boolean} Always `false` — equipping consumes the turn.
+ */
 export function executeEquip(actor, action, _level, _registry) {
   const item = actor.components.get('inventory')?.items.find(e => e.id === action.itemEntityId);
   if (!item) return false;

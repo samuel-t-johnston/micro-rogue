@@ -1,12 +1,14 @@
 import { drawPanel, drawText, drawButton, hitTest } from './canvas-ui.js';
 
-// Small in-scene overlay shown the moment a run ends — death or victory. It deliberately stays
-// compact and leaves the dungeon visible behind it, giving the player a beat to register what
-// happened before moving on to the full Results screen.
-//
-// Lifecycle mirrors the other game-scene controllers (dialog, character menu): the game scene owns
-// one instance, toggles it with show(outcome)/hide(), and routes render + input to it. onNext fires
-// when the "Next" button is tapped. The outcome ('lose' | 'win') selects the title.
+/**
+ * @file Small in-scene overlay shown the moment a run ends — death or victory. It deliberately stays
+ * compact and leaves the dungeon visible behind it, giving the player a beat to register what
+ * happened before moving on to the full Results screen.
+ *
+ * Lifecycle mirrors the other game-scene controllers (dialog, character menu): the game scene owns
+ * one instance, toggles it with show(outcome)/hide(), and routes render + input to it. onNext fires
+ * when the "Next" button is tapped. The outcome ('lose' | 'win') selects the title.
+ */
 const PANEL_W = 320;
 const PANEL_H = 180;
 const BUTTON_W = 160;
@@ -14,6 +16,7 @@ const BUTTON_H = 52;
 
 const TITLES = { lose: 'You Died', win: 'You Escaped!' };
 
+/** Creates the run-end outcome popup. Toggle with show('lose'|'win')/hide(); `onNext` fires on the button. */
 export function createOutcomePopup({ theme, getViewport, onNext }) {
   let visible = false;
   let hover = false;

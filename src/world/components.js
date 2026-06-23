@@ -1,8 +1,11 @@
-// Component factory functions — the single definition site for each component's shape and defaults.
-// Always create components through these functions, never as inline object literals.
-// Add new components in alphabetical order and keep them sorted.
+/**
+ * @file Component factory functions — the single definition site for each component's shape and
+ * defaults. Always create components through these functions, never as inline object literals. Add
+ * new components in alphabetical order and keep them sorted.
+ */
 import { RenderLayers } from '../render/render-layers.js';
 
+/** Registry of component factories, keyed by component name. */
 export const components = {
   // Ordered goal stack for an active entity. Stored as string keys resolved through
   // src/ai/goals/goal-registry.js — never function references — so the component

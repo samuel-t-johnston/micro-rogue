@@ -1,11 +1,13 @@
 import { DIRECTIONS_8, cardinalDirection } from './geometry.js';
 import { getTileType } from './tile-registry.js';
 
-// The scent field: per-profile scalar grids on `level.scent` (Map<profile, Float32Array>), one cell
-// per tile (index y*width + x). Creatures deposit scent; it diffuses to neighbours and decays each
-// round, so a moving emitter trails a fading wake and a stationary one keeps a local cloud. Trackers
-// climb the gradient. See docs/design/scent-and-smell.md.
-//
+/**
+ * @file The scent field: per-profile scalar grids on `level.scent` (Map<profile, Float32Array>), one
+ * cell per tile (index y*width + x). Creatures deposit scent; it diffuses to neighbours and decays
+ * each round, so a moving emitter trails a fading wake and a stationary one keeps a local cloud.
+ * Trackers climb the gradient. See docs/design/scent-and-smell.md.
+ */
+
 // Tuning knobs — all scent is a single scalar per tile per profile:
 const DECAY = 0.85;    // multiplicative fade per round
 const SPREAD = 0.20;   // fraction of a tile's value that mixes outward each round
@@ -41,14 +43,14 @@ function ensureGrid(level, profile) {
   return grid;
 }
 
-// Current intensity of `profile` scent at (x, y); 0 if no field, out of bounds, or never deposited.
+/** Current intensity of `profile` scent at (x, y); 0 if no field, out of bounds, or never deposited. */
 export function scentAt(level, profile, x, y) {
   if (!inBounds(level, x, y)) return 0;
   const grid = level.scent?.get(profile);
   return grid ? grid[index(level, x, y)] : 0;
 }
 
-// Adds `amount` of `profile` scent at (x, y), capped at MAX. No-op on a wall tile or non-positive add.
+/** Adds `amount` of `profile` scent at (x, y), capped at MAX. No-op on a wall tile or non-positive add. */
 export function depositScent(level, profile, x, y, amount) {
   if (amount <= 0 || blocksScent(level, x, y)) return;
   const grid = ensureGrid(level, profile);
@@ -56,9 +58,11 @@ export function depositScent(level, profile, x, y, amount) {
   grid[i] = Math.min(MAX, grid[i] + amount);
 }
 
-// Ages the field one round: decay + gated blur for every profile grid. Walls never hold or transmit
-// scent (their cells stay 0, and they contribute 0 to neighbours over the fixed /8 denominator, so
-// the field dissipates a little faster near walls).
+/**
+ * Ages the field one round: decay + gated blur for every profile grid. Walls never hold or transmit
+ * scent (their cells stay 0, and they contribute 0 to neighbours over the fixed /8 denominator, so
+ * the field dissipates a little faster near walls).
+ */
 export function diffuseAndDecay(level) {
   if (!level.scent) return;
   for (const [profile, grid] of level.scent) {
@@ -80,8 +84,10 @@ export function diffuseAndDecay(level) {
   }
 }
 
-// The 8-way compass direction toward the strongest `profile` scent among open neighbours, or null if
-// no neighbour beats the current tile (a local peak — we're on/at the source). Trackers step this way.
+/**
+ * The 8-way compass direction toward the strongest `profile` scent among open neighbours, or null if
+ * no neighbour beats the current tile (a local peak — we're on/at the source). Trackers step this way.
+ */
 export function gradientDir(level, profile, x, y) {
   let best = scentAt(level, profile, x, y);
   let bestDir = null;
@@ -96,9 +102,11 @@ export function gradientDir(level, profile, x, y) {
   return bestDir;
 }
 
-// One upkeep round for the active level: age the field, then each scent source re-deposits at its
-// current tile (deposit last, so a source's own tile is always the freshest). Registered as a
-// per-player-turn upkeep step (see src/engine/upkeep.js).
+/**
+ * One upkeep round for the active level: age the field, then each scent source re-deposits at its
+ * current tile (deposit last, so a source's own tile is always the freshest). Registered as a
+ * per-player-turn upkeep step (see src/engine/upkeep.js).
+ */
 export function scentUpkeep(level, registry) {
   diffuseAndDecay(level);
   for (const entity of registry.getEntitiesWith('scentSource')) {
@@ -108,8 +116,10 @@ export function scentUpkeep(level, registry) {
   }
 }
 
-// Sparse serialization for the save (only non-zero cells): { profile: { "x,y": value } }. Scent is
-// gameplay state — a reload mid-hunt must not blank the field — so it round-trips with the level.
+/**
+ * Sparse serialization for the save (only non-zero cells): `{ profile: { "x,y": value } }`. Scent is
+ * gameplay state — a reload mid-hunt must not blank the field — so it round-trips with the level.
+ */
 export function serializeScent(level) {
   const out = {};
   if (!level.scent) return out;
@@ -123,8 +133,10 @@ export function serializeScent(level) {
   return out;
 }
 
-// Rebuilds the dense per-profile grids from the sparse form. Tolerates a missing field (old saves
-// predate scent) by returning an empty map.
+/**
+ * Rebuilds the dense per-profile grids from the sparse form. Tolerates a missing field (old saves
+ * predate scent) by returning an empty map.
+ */
 export function deserializeScent(data, width, height) {
   const scent = new Map();
   for (const [profile, cells] of Object.entries(data ?? {})) {

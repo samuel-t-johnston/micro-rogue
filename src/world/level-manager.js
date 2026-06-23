@@ -1,11 +1,13 @@
-// The dungeon runtime: owns which floor is active, the cold-storage of the floors that aren't, and
-// the travel operation that moves the player between them. It is the consumer side of the transit
-// map (data/transit-map.js) — it never decides topology, it executes it.
-//
-// Model (b): only the active floor's entities live in the registry. travel() freezes the floor being
-// left (serializing its entities out and removing them), then generates or thaws the destination, so
-// the registry-global turn manager and senses always see exactly one floor + the player.
-// See docs/design/map-generation.md and docs/design/dungeon-planner.md.
+/**
+ * @file The dungeon runtime: owns which floor is active, the cold-storage of the floors that aren't,
+ * and the travel operation that moves the player between them. It is the consumer side of the transit
+ * map (data/transit-map.js) — it never decides topology, it executes it.
+ *
+ * Model (b): only the active floor's entities live in the registry. travel() freezes the floor being
+ * left (serializing its entities out and removing them), then generates or thaws the destination, so
+ * the registry-global turn manager and senses always see exactly one floor + the player.
+ * See docs/design/map-generation.md and docs/design/dungeon-planner.md.
+ */
 import { rng } from '../engine/rng.js';
 import { runPipeline } from './generation/pipeline.js';
 import { collectSubgraph } from './dungeon/subgraph.js';
@@ -14,6 +16,7 @@ import { getPipeline } from './dungeon/pipelines.js';
 import { getStart, getNode, resolveDestination } from './dungeon/transit-map.js';
 import { resolveArrival } from './spawn.js';
 
+/** Creates the dungeon runtime (see the file overview): start/travel/restore/snapshot over floors. */
 export function createLevelManager({ registry, transitMap }) {
   const coldStorage = new Map(); // nodeId -> frozen blob (the inactive floors)
   let current = null;            // { nodeId, level }

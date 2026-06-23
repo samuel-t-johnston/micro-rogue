@@ -1,16 +1,12 @@
-// The single source of truth for "what can the player do to this tile?", primary action first.
-// Shared by the tap interpreter (player-get-input takes element [0]) and the contextual menu (lists
-// them all), so the two can never drift. Pure: reads the level + a player position and returns plain
-// descriptors — it neither pathfinds nor mutates (distant-move pathfinding stays in the goal).
-//
-// Each entry: { id, label, action, free }
-//   id     — stable identifier (menu keys / tests)
-//   label  — player-facing menu text
-//   action — the concrete game action to submit; the action system dispatches these by type
-//   free   — hint that the action won't consume a turn (look-at, etc.); informational for now
-//
-// Default-action policy (element [0]) of note: an *open* door defaults to moving through it, with
-// "Close" offered second; a *closed* door defaults to opening it. See docs/design/ux-design.md.
+/**
+ * @file The single source of truth for "what can the player do to this tile?", primary action first.
+ * Shared by the tap interpreter (player-get-input takes element [0]) and the contextual menu (lists
+ * them all), so the two can never drift. Pure: reads the level + a player position and returns plain
+ * descriptors — it neither pathfinds nor mutates (distant-move pathfinding stays in the goal).
+ *
+ * Default-action policy (element [0]) of note: an *open* door defaults to moving through it, with
+ * "Close" offered second; a *closed* door defaults to opening it. See docs/design/ux-design.md.
+ */
 
 const nameOf = (e) => e.components.get('name') ?? 'thing';
 
@@ -32,6 +28,21 @@ function selfAction(occupants) {
   return null;
 }
 
+/**
+ * @typedef {Object} TileAction
+ * @property {string} id - Stable identifier (menu keys / tests).
+ * @property {string} label - Player-facing menu text.
+ * @property {object} action - The concrete game action to submit; the action system dispatches by `type`.
+ * @property {boolean} free - Hint that the action won't consume a turn (look-at, etc.); informational for now.
+ */
+
+/**
+ * Resolves the ordered list of actions available on a tile, primary action first.
+ * @param {object} level - The current level.
+ * @param {{x: number, y: number}} playerPos - The player's tile (0-indexed).
+ * @param {{x: number, y: number}} tile - The target tile (0-indexed).
+ * @returns {TileAction[]} Available actions, primary first; always ends with a free "Look".
+ */
 export function resolveTileActions(level, playerPos, tile) {
   const { x, y } = tile;
   const dx = Math.abs(x - playerPos.x);

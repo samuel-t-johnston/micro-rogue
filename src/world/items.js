@@ -3,9 +3,12 @@ import { Slots } from '../../data/equipment-slots.js';
 import { EffectTypes } from '../effects/effects.js';
 import { RenderLayers } from '../render/render-layers.js';
 
-// Resolves item location from (x, y) for map items or entityId for contained items.
-// x and y must be provided together or not at all.
-// entityId must reference an entity with either a container or inventory component.
+/**
+ * Resolves an item's `location` from (x, y) for map items or `entityId` for contained items. x and y
+ * must be provided together or not at all; `entityId` must reference an entity with a container or
+ * inventory component.
+ * @throws {Error} On an invalid combination, an unknown entity, or a host with neither component.
+ */
 export function resolveItemLocation(registry, x, y, entityId) {
   const hasX = x != null;
   const hasY = y != null;
@@ -22,6 +25,7 @@ export function resolveItemLocation(registry, x, y, entityId) {
   throw new Error(`Entity ${entityId} has neither container nor inventory component`);
 }
 
+/** Creates a Healing Potion (consumable: heal 10). */
 export function createHealingPotion(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
@@ -35,6 +39,7 @@ export function createHealingPotion(registry, x, y, entityId) {
   return entity;
 }
 
+/** Creates a Potion of Pain (consumable: damage 5 — a hostile drink). */
 export function createPotionOfPain(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
@@ -48,6 +53,7 @@ export function createPotionOfPain(registry, x, y, entityId) {
   return entity;
 }
 
+/** Creates a Dagger (weapon: +1 attack damage). */
 export function createDagger(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
@@ -62,6 +68,7 @@ export function createDagger(registry, x, y, entityId) {
   return entity;
 }
 
+/** Creates a Sword (weapon: +3 attack damage). */
 export function createSword(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
@@ -76,6 +83,7 @@ export function createSword(registry, x, y, entityId) {
   return entity;
 }
 
+/** Creates Leather Armor (armor: +5 max HP). */
 export function createLeatherArmor(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
@@ -90,8 +98,10 @@ export function createLeatherArmor(registry, x, y, entityId) {
   return entity;
 }
 
-// The Amulet of Yendor — the classic win objective. A plain carried item: no consumable/equippable
-// behavior, just a questItem tag the win condition keys on.
+/**
+ * Creates the Amulet of Yendor — the classic win objective. A plain carried item: no
+ * consumable/equippable behavior, just a questItem tag the win condition keys on.
+ */
 export function createAmulet(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
@@ -105,6 +115,7 @@ export function createAmulet(registry, x, y, entityId) {
   return entity;
 }
 
+/** Creates a Scroll of Healing (consumable: heal 15). */
 export function createScroll(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();

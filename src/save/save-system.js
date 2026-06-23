@@ -1,13 +1,15 @@
-// Save system — the persistence core (M4). Pure snapshot/restore plus the migration-chain
-// runner and thin localStorage I/O. No autosave triggers, visibilitychange handling, or UI
-// wiring lives here; those build on this foundation in a later phase.
-//
-// See docs/design/save-system-design.md. Two divergences from that doc, forced by the code:
-//   - The serialization unit is the whole entity registry as one flat list (items inside
-//     chests/inventories/equipment are entities that live only in the registry), not
-//     level.entities. See serialize.js.
-//   - The player is serialized inline like any other entity (with a top-level `playerId`
-//     pointer), not hoisted to a top-level `player` key — it stays a normal entity.
+/**
+ * @file Save system — the persistence core (M4). Pure snapshot/restore plus the migration-chain
+ * runner and thin localStorage I/O. No autosave triggers, visibilitychange handling, or UI
+ * wiring lives here; those build on this foundation in a later phase.
+ *
+ * See docs/design/save-system-design.md. Two divergences from that doc, forced by the code:
+ *   - The serialization unit is the whole entity registry as one flat list (items inside
+ *     chests/inventories/equipment are entities that live only in the registry), not
+ *     level.entities. See serialize.js.
+ *   - The player is serialized inline like any other entity (with a top-level `playerId`
+ *     pointer), not hoisted to a top-level `player` key — it stays a normal entity.
+ */
 import { rng } from '../engine/rng.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
 import {
@@ -17,9 +19,9 @@ import {
   deserializeLevel,
 } from './serialize.js';
 
-// Bumped only when the save schema changes in a breaking way (see the design doc). The game
-// version is independent and tracks releases; it mirrors package.json.
+/** Save schema version. Bumped only on a breaking schema change (see the design doc). */
 export const SAVE_VERSION = 5;
+/** Game release version; independent of SAVE_VERSION, tracks releases and mirrors package.json. */
 export const GAME_VERSION = '0.0.0';
 
 // Frozen at v5: the combined-sheet (col,row) sprite coordinates that shipped through v4, mapped to
@@ -40,8 +42,10 @@ const v4SpriteToName = (s) =>
 
 const SAVE_KEY = 'rogue:save';
 
-// Append-only migration chain. Each entry: { from, to, migrate(save) -> save }. Frozen once
-// shipped — never edit a released migration.
+/**
+ * Append-only migration chain. Each entry: `{ from, to, migrate(save) -> save }`. Frozen once
+ * shipped — never edit a released migration.
+ */
 export const migrations = [
   {
     from: 1,
@@ -120,6 +124,7 @@ export const migrations = [
   },
 ];
 
+/** Thrown by loadSave when a save's version is newer than this build supports. */
 export class SaveTooNewError extends Error {
   constructor(saveVersion, currentVersion) {
     super(`Save version ${saveVersion} is newer than supported version ${currentVersion}`);
@@ -129,6 +134,7 @@ export class SaveTooNewError extends Error {
   }
 }
 
+/** Thrown by loadSave when a migration step fails; carries the from/to versions and the cause. */
 export class MigrationError extends Error {
   constructor(from, to, cause) {
     super(`Migration from v${from} to v${to} failed: ${cause?.message ?? cause}`);
@@ -139,12 +145,14 @@ export class MigrationError extends Error {
   }
 }
 
-// Captures a complete, settled game state into a plain JSON-safe object. Callers pass the
-// live pieces explicitly; this module never reaches into game-scene closures.
-// `currentNodeId` + `frozenLevels` come from the level manager's snapshot (the cross-floor state).
-// Under model (b) the registry holds only the active floor + the player, so `entities` is exactly
-// that; each frozen floor carries its own serialized entities inside its blob. See
-// docs/design/map-generation.md and docs/design/save-system-design.md.
+/**
+ * Captures a complete, settled game state into a plain JSON-safe object. Callers pass the live
+ * pieces explicitly; this module never reaches into game-scene closures. `currentNodeId` +
+ * `frozenLevels` come from the level manager's snapshot (the cross-floor state). Under model (b) the
+ * registry holds only the active floor + the player, so `entities` is exactly that; each frozen floor
+ * carries its own serialized entities inside its blob. See docs/design/map-generation.md and
+ * docs/design/save-system-design.md.
+ */
 export function serializeGame({ registry, level, player, turnCount, currentNodeId = null, frozenLevels = {} }) {
   const savedAt = new Date().toISOString();
   return {
@@ -165,8 +173,10 @@ export function serializeGame({ registry, level, player, turnCount, currentNodeI
   };
 }
 
-// Rebuilds a live game state from a (migrated) save object: restores the RNG to its exact
-// position, rehydrates every entity, rebuilds the level, and resolves the player.
+/**
+ * Rebuilds a live game state from a (migrated) save object: restores the RNG to its exact position,
+ * rehydrates every entity, rebuilds the level, and resolves the player.
+ */
 export function deserializeGame(save) {
   rng.restore({ seed: save.meta.seed, streams: save.meta.streams });
 
@@ -192,8 +202,12 @@ export function deserializeGame(save) {
   };
 }
 
-// Runs the migration chain against raw (parsed) save data, upgrading it to the current schema.
-// Operates on a deep clone and only returns on full success — a partial migration never leaks.
+/**
+ * Runs the migration chain against raw (parsed) save data, upgrading it to the current schema.
+ * Operates on a deep clone and only returns on full success — a partial migration never leaks.
+ * @throws {SaveTooNewError} If the save is newer than this build supports.
+ * @throws {MigrationError} If a migration step throws.
+ */
 export function loadSave(raw) {
   if (raw.saveVersion > SAVE_VERSION) {
     throw new SaveTooNewError(raw.saveVersion, SAVE_VERSION);
@@ -221,14 +235,18 @@ export function loadSave(raw) {
 
 // --- Orchestration: the full save / load round trip for callers ---
 
-// Snapshots a live game and writes it to the single save slot. Thin wrapper so the game
-// scene doesn't have to know the serialize-then-write sequence.
+/**
+ * Snapshots a live game and writes it to the single save slot. Thin wrapper so the game scene
+ * doesn't have to know the serialize-then-write sequence.
+ */
 export function commitSave({ registry, level, player, turnCount, currentNodeId, frozenLevels }) {
   writeSave(serializeGame({ registry, level, player, turnCount, currentNodeId, frozenLevels }));
 }
 
-// Reads, migrates, and rehydrates the saved game in one step. Returns the live state
-// ({ registry, level, player, turnCount }) or null when there is no save to load.
+/**
+ * Reads, migrates, and rehydrates the saved game in one step. Returns the live state
+ * (`{ registry, level, player, turnCount, … }`) or null when there is no save to load.
+ */
 export function loadSavedGame() {
   const raw = readSave();
   return raw ? deserializeGame(loadSave(raw)) : null;
@@ -236,25 +254,28 @@ export function loadSavedGame() {
 
 // --- localStorage I/O (single slot, overwritten each save) ---
 
+/** Writes a save object to the single localStorage slot, overwriting any existing save. */
 export function writeSave(save) {
   localStorage.setItem(SAVE_KEY, JSON.stringify(save));
 }
 
-// Returns the raw parsed save (pre-migration) or null. Callers run loadSave() to migrate.
+/** Returns the raw parsed save (pre-migration) or null. Callers run loadSave() to migrate. */
 export function readSave() {
   const raw = localStorage.getItem(SAVE_KEY);
   return raw ? JSON.parse(raw) : null;
 }
 
+/** Deletes the saved game from the slot. */
 export function clearSave() {
   localStorage.removeItem(SAVE_KEY);
 }
 
+/** True if a saved game exists in the slot. */
 export function hasSave() {
   return localStorage.getItem(SAVE_KEY) !== null;
 }
 
-// Lightweight header for the menu ("Continue" affordance) without rehydrating the whole save.
+/** Lightweight save header for the menu ("Continue" affordance) without rehydrating the whole save. */
 export function getSaveMeta() {
   const raw = readSave();
   if (!raw) return null;

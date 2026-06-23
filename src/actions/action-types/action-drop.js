@@ -2,8 +2,10 @@ import { components } from '../../world/components.js';
 import { gameLog } from '../../engine/game-log.js';
 import { subject, conjugate, itemName } from '../../engine/log-text.js';
 
-// Removes an item from the actor's inventory and places it on the map at the actor's tile.
-// Returns false — drop always consumes a turn.
+/**
+ * Removes an item from the actor's inventory and places it on the map at the actor's tile.
+ * @returns {boolean} Always `false` — dropping consumes the turn.
+ */
 export function executeDrop(actor, action, level, registry) {
   const inventory = actor.components.get('inventory');
   if (!inventory) return false;

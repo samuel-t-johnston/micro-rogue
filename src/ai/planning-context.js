@@ -104,8 +104,13 @@ function updateEnemyMemory({ memory, selfState, perception, level, turnCount }) 
   }
 }
 
-// Runs all senses for an entity and updates its tilePerception component.
-// Called by buildPlanningContext each turn and directly for initial FOV setup.
+/**
+ * Runs all of an entity's senses and updates its `tilePerception` component (the visible set plus
+ * tile and remembered-entity memory). Called by buildPlanningContext each turn, and directly for
+ * initial FOV setup.
+ * @returns {{ rawResults: object[], currentVisible: Set<string> }} The per-sense results and the
+ *   union of all visible-tile keys.
+ */
 export function applySenses(entity, level, turnCount = 0) {
   const senseNames = entity.components.get('senses') ?? [];
   const tilePerception = entity.components.get('tilePerception');
@@ -130,8 +135,20 @@ export function applySenses(entity, level, turnCount = 0) {
 }
 
 /**
- * Runs all senses, updates tilePerception, and returns the context object
- * passed to each goal's evaluate(). Called once per entity turn.
+ * @typedef {Object} PlanningContext
+ * @property {object} memory - The entity's `memory` component (undefined for memoryless entities).
+ * @property {{ position: {x: number, y: number}, factions: string[] }} selfState - The acting entity's own state.
+ * @property {{ entities: object[], sounds: object[], smells: object[], visibleTiles: Set<string>, knownTiles: Map<string, number> }} perception - Merged, reconciled output of all the entity's senses.
+ * @property {object} level - The current level.
+ * @property {number} turnCount - The entity's per-entity action clock.
+ * @property {() => Promise<object>} awaitInput - Suspends until player input resolves (player goals only).
+ * @property {() => boolean} hasPendingInput - True if buffered player input is waiting.
+ */
+
+/**
+ * Runs all senses, updates tilePerception, and returns the context object passed to each goal's
+ * evaluate(). Called once per entity turn.
+ * @returns {PlanningContext}
  */
 export function buildPlanningContext({ entity, level, inputController, turnCount }) {
   const memory = entity.components.get('memory');

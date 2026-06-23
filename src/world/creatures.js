@@ -1,6 +1,7 @@
 import { components } from './components.js';
 import { HUMANOID_SLOTS } from '../../data/equipment-slots.js';
 
+/** Creates a Goblin: a basic melee creature that attacks adjacent foes, flees when outmatched, else wanders. */
 export function createGoblin(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Goblin'));
@@ -21,6 +22,7 @@ export function createGoblin(registry, x, y) {
   return entity;
 }
 
+/** Creates an Orc: a tougher melee creature that hears, chases, obeys orcish shouts, and investigates lost foes. */
 export function createOrc(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Orc'));
@@ -45,9 +47,11 @@ export function createOrc(registry, x, y) {
   return entity;
 }
 
-// An orc that coordinates the squad: it speaks orcish (`voice`) and, on spotting a hostile, shouts
-// the foe's direction (the `shout-enemy-report` goal sits atop its combat goals). Other orcs in
-// earshot that understand orcish obey via `obey-shouts`.
+/**
+ * Creates an Orc Commander that coordinates the squad: it speaks orcish (`voice`) and, on spotting a
+ * hostile, shouts the foe's direction (the `shout-enemy-report` goal sits atop its combat goals).
+ * Other orcs in earshot that understand orcish obey via `obey-shouts`.
+ */
 export function createOrcCommander(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Orc Commander'));
@@ -72,9 +76,11 @@ export function createOrcCommander(registry, x, y) {
   return entity;
 }
 
-// A scuttler: weak, fast vermin that swarms and hunts by scent. Its sight reaches only 3 tiles, so
-// among the pillars it constantly loses the player and falls back on tracking their scent trail. It
-// emits no scent itself, but its scuttling is noisy — movement sometimes betrays it to hearing.
+/**
+ * Creates a Scuttler: weak, fast vermin that swarms and hunts by scent. Its sight reaches only 3
+ * tiles, so among the pillars it constantly loses the player and falls back on tracking their scent
+ * trail. It emits no scent itself, but its scuttling is noisy — movement sometimes betrays it to hearing.
+ */
 export function createScuttler(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Scuttler'));

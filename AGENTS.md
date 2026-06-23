@@ -14,9 +14,9 @@ If you find contradictory information in your context, explain the contradiction
 When presenting lists, questions, or any information with section headings where you expect me to respond, number those headings. This makes it easier for us to have a dialogue by referencing those numbers.
 
 # Code Style
- - Use modern Javascript with modules and classes.
+ - Use modern Javascript with ES modules. The engine favors factory functions that return objects of closures (e.g. `createEntityRegistry`); classes are used where they fit, but most "create a system" code is a factory.
  - ES modules only, no CommonJS, no bundler.
- - Use JS Doc-style comments where applicable. Comments should be concise and make the code easier to read. Do not include comments where code is straightforward, short, and/or self-documenting via function and parameter names.
+ - Document code with JSDoc per `docs/design/jsdoc-conventions.md`. In short: comment the *why*, not the *what*; a description block on non-trivial exports; `@param`/`@returns` tags only when they say something the signature doesn't; skip trivial one-liners; treat existing (largely unreviewed) comments as suspect and fix or delete wrong ones when you touch a file.
  - All random calls go through the shared seeded RNG - `rng.js`. `Math.random()` is forbidden in source and tests.
  - Use `new URL(relativePath, import.meta.url).href` for all asset and data file paths loaded at runtime in ES modules (sprite sheets, dynamically imported map files, etc.). Absolute paths like `/assets/...` resolve to the domain root, which breaks when the game is served from a subdirectory (e.g. GitHub Pages at `github.io/repo-name/`). If you know with certainty the game will always be served from the domain root or via a bundler that rewrites imports, this isn't required — but the `import.meta.url` pattern works in all cases and costs nothing.
 

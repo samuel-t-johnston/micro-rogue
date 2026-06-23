@@ -10,6 +10,7 @@ const MARGIN = 12;
 // button — all of which mirror with it. The gear reads as "system/options".
 const ANCHOR = Anchor.TOP_RIGHT;
 
+/** Creates the game-menu (gear) HUD button. `onOpen` fires when tapped. */
 export function createGameMenuButton({ theme, getViewport, onOpen }) {
   function buttonRect() {
     const anchor = applyHandedness(ANCHOR, gameSettings.get('handedness'));

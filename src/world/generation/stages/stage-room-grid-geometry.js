@@ -1,24 +1,26 @@
-// Structure-planning stage: a grid of separated rooms (the "room grid" geometry).
-// Lays out a grid of zones, deletes some cells, merges adjacent groups into larger zones, and
-// records zone adjacency — all to the blackboard, no tiles. This is the only geometry-aware planning
-// stage; `label` and `link` consume its output and are geometry-agnostic.
-// See docs/design/procedural-3x3-dungeon.md.
-//
-// Stage parameters (from the pipeline config, all optional):
-//   cols, rows  — grid dimensions in cells (default 3 × 3)
-//   cellSize    — cell edge length in tiles (default 10)
-//   deletes     — cells to remove (default 1). Removal is connectivity-preserving: only cells whose
-//                 removal keeps the survivors orthogonally connected are eligible, so the zone graph
-//                 never splits or isolates a room. Treated as a target — stops early if none qualify.
-//   merges      — merge operations (default 1). Each fuses two adjacent groups; groups can grow into
-//                 polyomino (L/T/blob) zones. Target — stops if no adjacent groups remain.
-//   minZones    — floor on zone count for merging (default 1); merging stops before dropping below it
-//                 (e.g. set to the number of labels the labeler needs).
-//
-// Blackboard outputs:
-//   level:grid      -> { cols, rows, cellSize }
-//   level:zones     -> [{ id, cells: [[col,row],…], rect: {x,y,w,h}, labels: ['room'] }]
-//   level:adjacency -> [[idA, idB], …]   (idA < idB, deduped)
+/**
+ * @file Structure-planning stage: a grid of separated rooms (the "room grid" geometry).
+ * Lays out a grid of zones, deletes some cells, merges adjacent groups into larger zones, and
+ * records zone adjacency — all to the blackboard, no tiles. This is the only geometry-aware planning
+ * stage; `label` and `link` consume its output and are geometry-agnostic.
+ * See docs/design/procedural-3x3-dungeon.md.
+ *
+ * Stage parameters (from the pipeline config, all optional):
+ *   cols, rows  — grid dimensions in cells (default 3 × 3)
+ *   cellSize    — cell edge length in tiles (default 10)
+ *   deletes     — cells to remove (default 1). Removal is connectivity-preserving: only cells whose
+ *                 removal keeps the survivors orthogonally connected are eligible, so the zone graph
+ *                 never splits or isolates a room. Treated as a target — stops early if none qualify.
+ *   merges      — merge operations (default 1). Each fuses two adjacent groups; groups can grow into
+ *                 polyomino (L/T/blob) zones. Target — stops if no adjacent groups remain.
+ *   minZones    — floor on zone count for merging (default 1); merging stops before dropping below it
+ *                 (e.g. set to the number of labels the labeler needs).
+ *
+ * Blackboard outputs:
+ *   level:grid      -> { cols, rows, cellSize }
+ *   level:zones     -> [{ id, cells: [[col,row],…], rect: {x,y,w,h}, labels: ['room'] }]
+ *   level:adjacency -> [[idA, idB], …]   (idA < idB, deduped)
+ */
 
 const DEFAULTS = { cols: 3, rows: 3, cellSize: 10, deletes: 1, merges: 1, minZones: 1 };
 
@@ -64,6 +66,7 @@ function groupKey(cells) {
   return [minR, minC];
 }
 
+/** Runs the room-grid-geometry planning stage (see the file overview for params and outputs). */
 export function run(level, stageConfig = {}, blackboard, rng) {
   const cols = stageConfig.cols ?? DEFAULTS.cols;
   const rows = stageConfig.rows ?? DEFAULTS.rows;

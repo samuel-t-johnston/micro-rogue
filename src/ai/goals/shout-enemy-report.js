@@ -4,14 +4,17 @@ import { chebyshevDistance, cardinalDirection } from '../../world/geometry.js';
 // How loud a shouted order is — how far it carries on top of the hearer's own range.
 const SHOUT_VOLUME = 8;
 
-// Commander goal: on first sighting a hostile, shout an enemy report — a sound carrying the
-// compass direction to the foe, stamped (by the shout action) with the commander's voice language.
-// Other creatures that share the language and hear it can converge (see `obey-shouts`).
-//
-// It tracks which enemies it has already reported (in shared memory), filtered to those still in
-// sight, so it shouts once per fresh sighting and then falls through to its combat goals. An enemy
-// that leaves sight and returns is reported again. State-based (not turn-timed) because the planning
-// context carries no real turn counter and a goal below an acting one doesn't evaluate every turn.
+/**
+ * Commander goal: on first sighting a hostile, shout an enemy report — a sound carrying the compass
+ * direction to the foe, stamped (by the shout action) with the commander's voice language. Other
+ * creatures that share the language and hear it can converge (see `obey-shouts`).
+ *
+ * It tracks which enemies it has already reported (in shared memory), filtered to those still in
+ * sight, so it shouts once per fresh sighting and then falls through to its combat goals. An enemy
+ * that leaves sight and returns is reported again. State-based (tracking reported enemy ids) rather
+ * than turn-timed, because a goal below an acting one doesn't evaluate every turn, so a per-turn
+ * cooldown would fire unevenly.
+ */
 export const shoutEnemyReport = {
   evaluate(context) {
     const { memory, perception, selfState } = context;

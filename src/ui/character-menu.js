@@ -1,6 +1,7 @@
-// Character menu UI: a card grid
-// Only in-game functionality should be placed here.
-// Game settings, etc. belong in the game menu (game-menu.js).
+/**
+ * @file Character menu UI: a card grid. Only in-game functionality should be placed here; game
+ * settings, etc. belong in the game menu (game-menu.js).
+ */
 import { drawText, hitTest } from './canvas-ui.js';
 
 const HEADER_H = 56;
@@ -33,7 +34,7 @@ function drawHeader(ctx, theme, viewport, title, backGlyph) {
   });
 }
 
-// Root card grid: shows cards for Inventory and Equipment. Tap a card to navigate.
+/** Creates the root card grid (Inventory, Equipment cards). Tap a card to navigate; ✕/Escape closes. */
 export function createCharacterMenuRoot({ theme, getViewport, cards, onClose, onSelect }) {
   function layoutCards() {
     const vp = getViewport();
@@ -100,7 +101,10 @@ export function createCharacterMenuRoot({ theme, getViewport, cards, onClose, on
   };
 }
 
-// Sub-screens accept a body renderer/handler and provide consistent header + back chrome.
+/**
+ * Wraps a screen body (renderer + input handler) in the consistent header + back chrome. The body
+ * draws into the rect passed to `renderBody`/`handleBodyInput`.
+ */
 export function createCharacterMenuSubScreen({ theme, getViewport, title, renderBody, handleBodyInput, onBack }) {
   function bodyRect() {
     const vp = getViewport();

@@ -31,7 +31,12 @@ const goals = {
   'investigate': investigate,               // NPC goal: pursue the last place a foe was perceived
 };
 
-// Resolves an ordered list of goal names to goal objects, preserving order (= priority).
+/**
+ * Resolves an ordered list of goal names to goal objects, preserving order (= priority). Throws on
+ * an unknown name.
+ * @param {string[]} names
+ * @returns {object[]} The resolved goal objects (see the `Goal` typedef in goal-evaluator.js).
+ */
 export function resolveGoals(names) {
   return names.map(name => {
     const goal = goals[name];

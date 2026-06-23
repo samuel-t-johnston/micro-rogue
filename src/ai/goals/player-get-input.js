@@ -2,16 +2,17 @@ import { findPath } from '../../world/pathfinding.js';
 import { areHostile } from '../../combat/factions.js';
 import { resolveTileActions } from '../../actions/resolve-tile-actions.js';
 
-// Waits for player input and turns it into an action.
-// A raw map `tap` is interpreted against the tile via resolveTileActions (attack / open / move / pick
-// up / …) — the same resolver the contextual menu lists from, so taps and the menu never disagree.
-// An explicit `move` (the menu's "Move here") routes straight to movement, never re-read as an attack.
-// Already-resolved UI actions (equip, interact, …) pass straight through. Adjacent move → immediate;
-// distant move → first step + memory.autoMoveTarget for subsequent turns. Loops on no-op input.
-
 // Actions the UI submits already resolved (character menu, the contextual tile menu).
 const PASS_THROUGH = new Set(['equip', 'unequip', 'consume', 'drop', 'interact', 'attack', 'selfInteract', 'lookAt']);
 
+/**
+ * Player goal: waits for player input and turns it into an action. A raw map `tap` is interpreted
+ * against the tile via resolveTileActions (attack / open / move / pick up / …) — the same resolver
+ * the contextual menu lists from, so taps and the menu never disagree. An explicit `move` (the menu's
+ * "Move here") routes straight to movement, never re-read as an attack. Already-resolved UI actions
+ * (equip, interact, …) pass straight through. Adjacent move → immediate; distant move → first step
+ * plus `memory.autoMoveTarget` for subsequent turns. Loops on no-op input.
+ */
 export const playerGetInput = {
   async evaluate(context) {
     const { memory, selfState, level, awaitInput, perception } = context;

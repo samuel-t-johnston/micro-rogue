@@ -1,16 +1,18 @@
-// Linking stage (geometry-agnostic): chooses which adjacent zones are actually connected.
-// Builds a random spanning tree over the adjacency graph — so the dungeon is one connected
-// whole by construction — then adds occasional extra links for loops, keeping most zones near a
-// soft degree target. Links are always a subset of adjacency, so halls stay local.
-// See docs/design/procedural-3x3-dungeon.md.
-//
-// Stage parameters (optional):
-//   extraLinkChance — probability of adding each eligible non-tree adjacency edge (default 0.2)
-//   maxExtraDegree  — only add an extra link if BOTH endpoints are below this degree (default 2).
-//                     The spanning tree may still push a junction past it — connectivity wins.
-//
-// Reads:  level:zones, level:adjacency
-// Writes: level:links -> [{ id, a, b }]   (a < b, ordered)
+/**
+ * @file Linking stage (geometry-agnostic): chooses which adjacent zones are actually connected.
+ * Builds a random spanning tree over the adjacency graph — so the dungeon is one connected
+ * whole by construction — then adds occasional extra links for loops, keeping most zones near a
+ * soft degree target. Links are always a subset of adjacency, so halls stay local.
+ * See docs/design/procedural-3x3-dungeon.md.
+ *
+ * Stage parameters (optional):
+ *   extraLinkChance — probability of adding each eligible non-tree adjacency edge (default 0.2)
+ *   maxExtraDegree  — only add an extra link if BOTH endpoints are below this degree (default 2).
+ *                     The spanning tree may still push a junction past it — connectivity wins.
+ *
+ * Reads:  level:zones, level:adjacency
+ * Writes: level:links -> [{ id, a, b }]   (a < b, ordered)
+ */
 
 function shuffle(arr, rng) {
   const out = [...arr];
@@ -21,6 +23,7 @@ function shuffle(arr, rng) {
   return out;
 }
 
+/** Runs the linking stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard, rng) {
   const extraLinkChance = stageConfig.extraLinkChance ?? 0.2;
   const maxExtraDegree = stageConfig.maxExtraDegree ?? 2;

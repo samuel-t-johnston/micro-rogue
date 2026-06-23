@@ -1,20 +1,22 @@
-// Small grid-geometry helpers shared across pathfinding and AI goals.
+/** @file Small grid-geometry helpers shared across pathfinding and AI goals. */
 
-// 8-directional neighbor offsets (orthogonal first, then diagonals).
+/** 8-directional neighbor offsets (orthogonal first, then diagonals). */
 export const DIRECTIONS_8 = [
   [-1, 0], [1, 0], [0, -1], [0, 1],
   [-1, -1], [-1, 1], [1, -1], [1, 1],
 ];
 
-// Chebyshev (chessboard) distance — the number of 8-directional steps between two tiles.
+/** Chebyshev (chessboard) distance — the number of 8-directional steps between two tiles. */
 export function chebyshevDistance(a, b) {
   return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 }
 
-// The 8-way compass direction from `from` to `to` (e.g. 'N', 'SE'), or null when they coincide.
-// Buckets the bearing into eight 45° sectors. The grid is y-down (tiles[y][x]), so a smaller y is
-// north. Used for imprecise hearing ("a shout somewhere to the NW") — not exact positions.
 const OCTANTS = ['E', 'SE', 'S', 'SW', 'W', 'NW', 'N', 'NE'];
+/**
+ * The 8-way compass direction from `from` to `to` (e.g. 'N', 'SE'), or null when they coincide.
+ * Buckets the bearing into eight 45° sectors. The grid is y-down (tiles[y][x]), so a smaller y is
+ * north. Used for imprecise hearing ("a shout somewhere to the NW") — not exact positions.
+ */
 export function cardinalDirection(from, to) {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -23,15 +25,19 @@ export function cardinalDirection(from, to) {
   return OCTANTS[sector];
 }
 
-// Unit step for each 8-way compass direction on the y-down grid — the inverse of cardinalDirection.
-// Used by goals that turn a perceived direction (a shouted heading, a scent gradient) into a move.
+/**
+ * Unit step for each 8-way compass direction on the y-down grid — the inverse of cardinalDirection.
+ * Used by goals that turn a perceived direction (a shouted heading, a scent gradient) into a move.
+ */
 export const DIRECTION_STEPS = {
   N: [0, -1], NE: [1, -1], E: [1, 0], SE: [1, 1], S: [0, 1], SW: [-1, 1], W: [-1, 0], NW: [-1, -1],
 };
 
-// The farthest passable tile in `direction` from `from`, up to maxDist tiles away (or `from` itself
-// if the first step is blocked). Turns an imprecise directional lead — a heard noise, a scent
-// gradient — into a concrete tile to navigate toward.
+/**
+ * The farthest passable tile in `direction` from `from`, up to maxDist tiles away (or `from` itself
+ * if the first step is blocked). Turns an imprecise directional lead — a heard noise, a scent
+ * gradient — into a concrete tile to navigate toward.
+ */
 export function projectTile(level, from, direction, maxDist) {
   const step = DIRECTION_STEPS[direction];
   if (!step) return { x: from.x, y: from.y };
@@ -46,7 +52,7 @@ export function projectTile(level, from, direction, maxDist) {
   return target;
 }
 
-// The passable tiles orthogonally or diagonally adjacent to `pos`.
+/** The passable tiles orthogonally or diagonally adjacent to `pos`. */
 export function passableNeighbors(pos, level) {
   return DIRECTIONS_8
     .map(([dx, dy]) => ({ x: pos.x + dx, y: pos.y + dy }))

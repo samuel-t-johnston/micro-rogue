@@ -2,9 +2,11 @@ import { areHostile } from '../../combat/factions.js';
 import { chebyshevDistance } from '../../world/geometry.js';
 import { findPathToAdjacent } from '../../world/pathfinding.js';
 
-// Moves toward the nearest hostile actor. Steps one tile along the shortest path to a
-// tile adjacent to the target (the target's own tile blocks movement, so we approach it).
-// Returns null when already adjacent or when no hostile is perceived / no route exists.
+/**
+ * NPC goal: moves toward the nearest hostile actor. Steps one tile along the shortest path to a tile
+ * adjacent to the target (the target's own tile blocks movement, so we approach it). Returns null
+ * when already adjacent, or when no hostile is perceived / no route exists.
+ */
 export const chaseOthers = {
   evaluate(context) {
     const { selfState, perception, level } = context;

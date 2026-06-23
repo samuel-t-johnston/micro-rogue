@@ -23,6 +23,11 @@ function drawGlyphCell(ctx, { color, glyph, glyphColor }, x, y, size) {
   }
 }
 
+/**
+ * Creates the world renderer: owns the camera (tile coords at screen center) and zoom, and exposes
+ * the draw passes (map, remembered entities, live entities, detached animations) plus coordinate
+ * conversions and camera/zoom controls. Honors the `renderMode` setting (sprite vs glyph) live.
+ */
 export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LEVELS.indexOf(32) }) }) {
   const sprites = createSpriteRenderer({ catalog: SPRITES, sheets: SHEETS });
   const camera = { x: 0, y: 0 }; // tile coords at screen center

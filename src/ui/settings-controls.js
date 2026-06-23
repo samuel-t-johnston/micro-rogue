@@ -1,13 +1,15 @@
 import { drawText, drawSegmentedControl, segmentRects, wrapText, hitTest } from './canvas-ui.js';
 
-// Renders the Settings sub-page as a vertical list of rows, each a left-aligned label with an
-// optional wrapped description below it and a right-aligned segmented control beneath that (the
-// layout chosen in the settings rework). Distinct from menu-shell's centered action buttons:
-// settings are label + value, not buttons, and need room for explanatory text.
-//
-// A row is { id, label, description?, options: [{label, value}], get(): value, set(value) }.
-// `get` is read every frame so the highlighted segment always reflects live state; segment taps
-// call `set`. Bound to a store (gameSettings) by the row's author — this module stays store-agnostic.
+/**
+ * @file Renders the Settings sub-page as a vertical list of rows, each a left-aligned label with an
+ * optional wrapped description below it and a right-aligned segmented control beneath that (the
+ * layout chosen in the settings rework). Distinct from menu-shell's centered action buttons:
+ * settings are label + value, not buttons, and need room for explanatory text.
+ *
+ * A row is { id, label, description?, options: [{label, value}], get(): value, set(value) }.
+ * `get` is read every frame so the highlighted segment always reflects live state; segment taps
+ * call `set`. Bound to a store (gameSettings) by the row's author — this module stays store-agnostic.
+ */
 const MARGIN = 16;
 const MAX_COL = 520;          // cap the column on desktop; phones use near-full width
 const TOP = MARGIN + 44 + 28; // below the corner button / title header
@@ -21,8 +23,10 @@ const CONTROL_GAP = 10;
 const CONTROL_H = 44;         // meets the 44px tap-target floor
 const SEG_W = 64;             // per-segment width
 
-// Computes per-row geometry. Needs `ctx` to measure/wrap descriptions, so the caller drives it from
-// render and reuses the result for hit-testing (geometry depends on the wrapped text height).
+/**
+ * Computes per-row geometry. Needs `ctx` to measure/wrap descriptions, so the caller drives it from
+ * render and reuses the result for hit-testing (geometry depends on the wrapped text height).
+ */
 export function layoutSettingsRows(ctx, getViewport, rows) {
   const { width } = getViewport();
   const colW = Math.min(width - MARGIN * 2, MAX_COL);
@@ -47,6 +51,7 @@ export function layoutSettingsRows(ctx, getViewport, rows) {
   });
 }
 
+/** Draws the settings rows from a layout produced by `layoutSettingsRows`. */
 export function drawSettingsRows(ctx, theme, layout) {
   for (const r of layout) {
     drawText(ctx, r.row.label, r.colX, r.labelY, {
@@ -65,8 +70,10 @@ export function drawSettingsRows(ctx, theme, layout) {
   }
 }
 
-// Applies a pointerdown to a previously-computed layout: if it landed on a segment, calls that row's
-// set() with the segment's value and returns true. Pure over the layout, so it's unit-testable.
+/**
+ * Applies a pointerdown to a previously-computed layout: if it landed on a segment, calls that row's
+ * set() with the segment's value and returns true. Pure over the layout, so it's unit-testable.
+ */
 export function handleSettingsRowsInput(layout, event) {
   if (event.type !== 'pointerdown') return false;
   for (const r of layout) {

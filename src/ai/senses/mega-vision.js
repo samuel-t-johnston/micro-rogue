@@ -1,6 +1,8 @@
-// Sense that reveals the full world state — all entities and their positions.
-// Confidence is always 100; no FOV or light gating. visibleTiles is empty
-// because mega-vision bypasses tile-level perception entirely.
+/**
+ * Sense that reveals the full world state — all entities and their positions. Confidence is always
+ * 100; no FOV or light gating. visibleTiles is empty because mega-vision bypasses tile-level
+ * perception entirely.
+ */
 export function megaVision(entity, level, turnCount) {
   const entities = [];
   for (const e of level.entities) {

@@ -1,3 +1,8 @@
+/**
+ * Creates the event log — an append-only buffer of game events. Entries with a `display`
+ * string are player-facing; the rest are debug/AI-trace records. A `seen` flag marks
+ * whether a display entry was perceivable when logged.
+ */
 export function createEventLog() {
   const entries = [];
 

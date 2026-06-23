@@ -3,8 +3,10 @@ import { animations } from '../../render/animations.js';
 import { emitSound } from '../../world/sounds.js';
 import { rng } from '../../engine/rng.js';
 
-// Validates and executes a move to (action.x, action.y).
-// Returns false (action consumed a turn) or true (free action — not used here).
+/**
+ * Validates and executes a move to (action.x, action.y) (0-indexed tile coordinates).
+ * @returns {boolean} Always `false` — the move consumes a turn (the free-action path is unused here).
+ */
 export function executeMove(entity, action, level, registry) {
   if (!level.isPassable(action.x, action.y)) return false;
 

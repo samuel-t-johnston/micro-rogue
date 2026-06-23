@@ -1,9 +1,10 @@
 import { areHostile } from '../../combat/factions.js';
 import { chebyshevDistance } from '../../world/geometry.js';
 
-// Attacks a hostile actor in an adjacent tile.
-// Hostile = an actor (creature) that shares no faction with us. Among adjacent hostiles,
-// targets the first one found.
+/**
+ * NPC goal: attacks a hostile actor in an adjacent tile. Hostile = an actor (creature) that shares
+ * no faction with us. Among adjacent hostiles, targets the first one found.
+ */
 export const attackAdjacent = {
   evaluate(context) {
     const { selfState, perception } = context;

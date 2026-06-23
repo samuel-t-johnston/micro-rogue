@@ -1,3 +1,7 @@
+/**
+ * A stack of UI layers (scenes, dialogs, menus). Rendering walks bottom-to-top; input is offered
+ * top-to-bottom and stops at the first layer that returns true from `handleInput` (modal behavior).
+ */
 export class LayerStack {
   constructor() {
     this._layers = [];

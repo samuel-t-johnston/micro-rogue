@@ -1,14 +1,18 @@
-// Support bundle: a downloadable diagnostic snapshot for bug reports — the live save state,
-// the full event log, and device info, in one JSON file. Generated on demand (currently a
-// hidden '?' keypress during play; a menu entry is the eventual home).
+/**
+ * @file Support bundle: a downloadable diagnostic snapshot for bug reports — the live save state,
+ * the full event log, and device info, in one JSON file. Generated on demand (currently a
+ * hidden '?' keypress during play; a menu entry is the eventual home).
+ */
 import { serializeGame, GAME_VERSION } from './save-system.js';
 import { gameLog } from '../engine/game-log.js';
 
-// Bumped if the bundle's own envelope shape changes (independent of saveVersion/gameVersion).
+/** Bundle envelope version. Bumped if the bundle's own shape changes (independent of save/game version). */
 export const SUPPORT_BUNDLE_VERSION = 1;
 
-// Best-effort device/environment readout. Reads globals defensively so it can't throw in a
-// headless context (and degrades to nulls rather than failing the whole bundle).
+/**
+ * Best-effort device/environment readout. Reads globals defensively so it can't throw in a headless
+ * context (and degrades to nulls rather than failing the whole bundle).
+ */
 export function collectDeviceInfo() {
   const nav = typeof navigator !== 'undefined' ? navigator : {};
   const win = typeof window !== 'undefined' ? window : {};
@@ -24,8 +28,10 @@ export function collectDeviceInfo() {
   };
 }
 
-// Assembles the bundle from the live game. Pure data in, JSON-safe data out — reuses
-// serializeGame for the save snapshot so the bundle and the savegame can never disagree.
+/**
+ * Assembles the bundle from the live game. Pure data in, JSON-safe data out — reuses serializeGame
+ * for the save snapshot so the bundle and the savegame can never disagree.
+ */
 export function buildSupportBundle({ registry, level, player, turnCount, currentNodeId, frozenLevels }) {
   return {
     bundleVersion: SUPPORT_BUNDLE_VERSION,
@@ -37,8 +43,10 @@ export function buildSupportBundle({ registry, level, player, turnCount, current
   };
 }
 
-// Triggers a browser download of the bundle as pretty-printed JSON. DOM side effect; the
-// colons in the ISO timestamp are swapped out so the filename is valid on every platform.
+/**
+ * Triggers a browser download of the bundle as pretty-printed JSON. DOM side effect; the colons in
+ * the ISO timestamp are swapped out so the filename is valid on every platform.
+ */
 export function downloadSupportBundle(bundle) {
   const json = JSON.stringify(bundle, null, 2);
   const blob = new Blob([json], { type: 'application/json' });

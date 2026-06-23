@@ -15,7 +15,13 @@ import { evaluateGoals } from '../ai/goal-evaluator.js';
 import { resolveGoals } from '../ai/goals/goal-registry.js';
 import { gameLog } from '../engine/game-log.js';
 
-// Returns Promise<boolean> — false = action consumed a turn, true = free action.
+/**
+ * Creates the action system: a type→handler dispatch table plus the per-entity `invokeAction`
+ * the turn manager calls each turn (it runs goal planning, then executes the chosen action).
+ * Register new action types in the `dispatch` table.
+ * @returns {{ invokeAction: (entity: object) => Promise<boolean> }} `invokeAction` resolves
+ *   `false` if the action consumed the turn, `true` for a free action.
+ */
 export function createActionSystem({ level, inputController, registry, dialogController }) {
   // Action type → handler lookup. Add new action types here.
   const dispatch = {

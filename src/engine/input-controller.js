@@ -1,8 +1,9 @@
-// Bridges player input events to the async turn loop.
-// The turn loop calls waitForInput() and suspends. When the player acts
-// (tap, keypress, etc.), submit(action) resolves the pending promise.
-// Inputs submitted while no one is waiting are buffered (one slot) so that
-// taps during auto-move are not silently dropped.
+/**
+ * Creates the input controller that bridges player input events to the async turn loop.
+ * The turn loop calls `waitForInput()` and suspends; when the player acts (tap, keypress,
+ * etc.), `submit(action)` resolves the pending promise. Inputs submitted while no one is
+ * waiting are buffered (one slot) so taps during auto-move aren't silently dropped.
+ */
 export function createInputController() {
   let resolvePending = null;
   let pending = null;

@@ -1,9 +1,12 @@
 import { gameLog } from '../../engine/game-log.js';
 import { subject, conjugate, itemName } from '../../engine/log-text.js';
 
-// Executes an interact action against an adjacent target entity.
-// Dispatches to container or door behavior based on the target's components.
-// Returns false (turn consumed) or true (free action — cancelled or nothing to do).
+/**
+ * Executes an interact action against an adjacent target entity, dispatching to container or door
+ * behavior based on the target's components.
+ * @returns {Promise<boolean>} `false` if the turn was consumed, `true` for a free action
+ *   (cancelled, blocked, or nothing to do).
+ */
 export async function executeInteract(actor, action, level, registry, dialogController) {
   const target = registry.getEntity(action.targetEntityId);
   if (!target) return false;

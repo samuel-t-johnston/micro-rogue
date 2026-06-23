@@ -1,6 +1,12 @@
-// Symmetric shadowcasting — Albert Ford's algorithm.
-// Returns a Set<"x,y"> of all tiles visible from (ox, oy).
-// isOpaque(x, y) should return true for out-of-bounds coordinates.
+/**
+ * Symmetric shadowcasting (Albert Ford's algorithm): the set of tiles visible from (ox, oy).
+ * Coordinates are 0-indexed tile coordinates (origin top-left).
+ * @param {number} ox - Origin x.
+ * @param {number} oy - Origin y.
+ * @param {number} [maxRange] - Max view distance; unlimited if omitted.
+ * @param {(x: number, y: number) => boolean} isOpaque - True if a tile blocks sight; must return true for out-of-bounds coordinates.
+ * @returns {Set<string>} Visible tile keys as "x,y" strings, always including the origin.
+ */
 export function computeFov(ox, oy, maxRange, isOpaque) {
   const visible = new Set();
   visible.add(`${ox},${oy}`);

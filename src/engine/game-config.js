@@ -1,3 +1,4 @@
+/** Global game configuration. Edited in source, not at runtime. */
 export const gameConfig = {
   // Set false before shipping to players — disables all debug tooling at zero runtime cost.
   debugEnabled: true,

@@ -1,8 +1,10 @@
 import { components } from './components.js';
 import { HUMANOID_SLOTS } from '../../data/equipment-slots.js';
 
-// Creates and returns the player entity. Async so that a character creation
-// UI can be introduced here later without changing the call site in game-scene.
+/**
+ * Creates and returns the player entity. Async so that a character creation UI can be introduced here
+ * later without changing the call site in game-scene.
+ */
 export async function createPlayer(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Player'));

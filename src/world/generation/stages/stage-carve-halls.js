@@ -1,12 +1,14 @@
-// Realization stage: connects linked zones with doored corridors. For each link, picks an adjacent
-// cell-pair and routes a corridor between the rooms' facing walls, dropping a door on each side.
-// The route keeps every corridor tile a wall's-width from any room it doesn't open into:
-//   - walls overlap            → a straight cut at a shared offset;
-//   - gutter ≥ 3 (interior lane) → a Z-bend whose along-gutter leg runs the middle of the gutter;
-//   - 2-tile gutter, no overlap → an L-bend off the mutually-nearest corners (still no wall-hugging).
-// Routing the leg down a room-adjacent gutter column is the bug we avoid: it leaves a door stranded on
-// an edge that's already wide open to the corridor. Collisions are otherwise tolerated (floor-over-wall
-// is harmless; connectivity is what matters). See docs/design/procedural-3x3-dungeon.md.
+/**
+ * @file Realization stage: connects linked zones with doored corridors. For each link, picks an
+ * adjacent cell-pair and routes a corridor between the rooms' facing walls, dropping a door on each
+ * side. The route keeps every corridor tile a wall's-width from any room it doesn't open into:
+ *   - walls overlap            → a straight cut at a shared offset;
+ *   - gutter ≥ 3 (interior lane) → a Z-bend whose along-gutter leg runs the middle of the gutter;
+ *   - 2-tile gutter, no overlap → an L-bend off the mutually-nearest corners (still no wall-hugging).
+ * Routing the leg down a room-adjacent gutter column is the bug we avoid: it leaves a door stranded on
+ * an edge that's already wide open to the corridor. Collisions are otherwise tolerated (floor-over-wall
+ * is harmless; connectivity is what matters). See docs/design/procedural-3x3-dungeon.md.
+ */
 import { createDoor } from '../../furniture.js';
 
 const cellsAdjacent = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) === 1;
@@ -34,6 +36,7 @@ function planCorridor(la, lb, al, ah, bl, bh, rng) {
   return { pa: aBeforeB ? ah : al, pb: aBeforeB ? bl : bh, mid: lb };
 }
 
+/** Runs the carve-halls realization stage (see the file overview). */
 export function run(level, stageConfig, blackboard, rng, registry) {
   const zones = blackboard['level:zones'] ?? [];
   const links = blackboard['level:links'] ?? [];

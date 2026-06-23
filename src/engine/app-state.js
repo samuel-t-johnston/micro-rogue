@@ -1,5 +1,8 @@
-// Manages top-level scene transitions. Each state maps to a scene factory; on
-// transition the current scene stack is torn down and the new scene is pushed.
+/**
+ * @file Manages top-level scene transitions. Each state maps to a scene factory; on
+ * transition the current scene stack is torn down and the new scene is pushed.
+ */
+
 import { LayerStack } from '../render/layers.js';
 
 export const AppState = Object.freeze({
@@ -10,6 +13,11 @@ export const AppState = Object.freeze({
   RESULTS: 'results',
 });
 
+/**
+ * Creates the top-level scene state machine. Register a scene factory per `AppState`;
+ * each `transition` tears down the live layer stack (calling `exit` on each layer) and
+ * pushes a freshly built scene.
+ */
 export function createAppStateMachine() {
   const scenes = new Map();
   const layers = new LayerStack();

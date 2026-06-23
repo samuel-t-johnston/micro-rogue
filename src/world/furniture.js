@@ -1,5 +1,6 @@
 import { components } from './components.js';
 
+/** Creates a Boulder: an opaque, immovable obstacle (remembered in fog of war). */
 export function createBoulder(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Boulder'));
@@ -11,6 +12,7 @@ export function createBoulder(registry, x, y) {
   return entity;
 }
 
+/** Creates a Chest: an openable container holding items (remembered in fog of war). */
 export function createChest(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Chest'));
@@ -23,9 +25,11 @@ export function createChest(registry, x, y) {
   return entity;
 }
 
-// The transition's `port` is the direction ('up'/'down'), which the dungeon transit map uses to
-// resolve the destination and arrival point. `to` is an optional pre-resolved destination, left null
-// in the minimal cut.
+/**
+ * Creates a Stairs furniture (a level transition). The `port` is the direction ('up'/'down'), which
+ * the dungeon transit map uses to resolve the destination and arrival point. `to` is an optional
+ * pre-resolved destination, left null in the minimal cut.
+ */
 export function createStairs(registry, x, y, direction = 'up', to = null) {
   const up = direction === 'up';
   const entity = registry.createEntity();
@@ -37,16 +41,19 @@ export function createStairs(registry, x, y, direction = 'up', to = null) {
   return entity;
 }
 
-// The dungeon exit: the surface up-stairs, where the player wins by standing with the Amulet (see
-// win-conditions.js). Rendered like normal up-stairs and carrying an 'up' transition (so tapping it
-// is the same harmless no-op remount as any top-of-dungeon stair); the dungeonExit marker is the
-// only thing that distinguishes it. Placed explicitly by whoever authors the top level.
+/**
+ * Creates the dungeon exit: the surface up-stairs, where the player wins by standing with the Amulet
+ * (see win-conditions.js). Rendered like normal up-stairs and carrying an 'up' transition (so tapping
+ * it is the same harmless no-op remount as any top-of-dungeon stair); the dungeonExit marker is the
+ * only thing that distinguishes it. Placed explicitly by whoever authors the top level.
+ */
 export function createDungeonExit(registry, x, y) {
   const entity = createStairs(registry, x, y, 'up');
   registry.addComponent(entity, 'dungeonExit', components.dungeonExit());
   return entity;
 }
 
+/** Creates a Door: openable, opaque, blocking furniture (remembered in fog of war). */
 export function createDoor(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Door'));

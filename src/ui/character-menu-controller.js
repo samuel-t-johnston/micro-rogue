@@ -2,10 +2,12 @@ import { createCharacterMenuRoot, createCharacterMenuSubScreen } from './charact
 import { createInventoryScreenBody } from './screens/inventory-screen.js';
 import { createEquipmentScreenBody } from './screens/equipment-screen.js';
 
-// Full-screen character menu overlay. Suppresses map input while open.
-// onAction is invoked with a game action (e.g. equip/unequip) that the caller
-// routes through the input controller. After an action is submitted the menu closes,
-// since open-during-turn-resolution behavior isn't designed yet.
+/**
+ * Creates the full-screen character menu overlay (a root card grid drilling into Inventory and
+ * Equipment sub-screens). Suppresses map input while open. `onAction` is invoked with a game action
+ * (e.g. equip/unequip) that the caller routes through the input controller; submitting an action
+ * closes the menu, since open-during-turn-resolution behavior isn't designed yet.
+ */
 export function createCharacterMenuController({ theme, getViewport, getPlayer, onAction }) {
   let screen = null;
 

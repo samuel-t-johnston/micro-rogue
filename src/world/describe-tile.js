@@ -1,13 +1,15 @@
-// Builds the player-facing sentence for the "look at" action: what the viewer knows about a tile,
-// tiered by fog-of-war. Pure (no logging) so it's unit-testable; action-look.js does the logging.
-//
-//   currently visible → full truth: "You see an Orc and an open door."
-//   remembered (seen, now in fog) → terrain + remembered furniture only: "You remember a door there."
-//   never seen → "You can't see there."
-//
-// Creatures and items aren't remembered (they move / get taken), so the remembered tier names only
-// persistVisible furniture — read from the live entities, which for static furniture still stand where
-// they were last seen. Terrain in the remembered tier comes from the snapshot in `memory`.
+/**
+ * @file Builds the player-facing sentence for the "look at" action: what the viewer knows about a
+ * tile, tiered by fog-of-war. Pure (no logging) so it's unit-testable; action-look.js does the logging.
+ *
+ *   currently visible → full truth: "You see an Orc and an open door."
+ *   remembered (seen, now in fog) → terrain + remembered furniture only: "You remember a door there."
+ *   never seen → "You can't see there."
+ *
+ * Creatures and items aren't remembered (they move / get taken), so the remembered tier names only
+ * persistVisible furniture — read from the live entities, which for static furniture still stand where
+ * they were last seen. Terrain in the remembered tier comes from the snapshot in `memory`.
+ */
 import { getTileType } from './tile-registry.js';
 
 const VOWELS = new Set(['a', 'e', 'i', 'o', 'u']);
@@ -41,6 +43,10 @@ function terrainPhrase(tileId) {
   return name === 'floor' ? 'the floor' : withArticle(name);
 }
 
+/**
+ * Returns the player-facing "look at" sentence for `tile` from `viewer`'s perspective, tiered by
+ * fog-of-war (visible / remembered / unseen). See the file overview.
+ */
 export function describeTile(level, viewer, tile) {
   const { x, y } = tile;
   const key = `${x},${y}`;

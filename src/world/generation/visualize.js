@@ -1,6 +1,8 @@
-// Pure renderers for inspecting generation output — used by the dev visualizer
-// (scripts/visualize-generation.mjs) and unit tests. No DOM, no game runtime.
-// See docs/design/procedural-3x3-dungeon.md (Visualization & debug tooling).
+/**
+ * @file Pure renderers for inspecting generation output — used by the dev visualizer
+ * (scripts/visualize-generation.mjs) and unit tests. No DOM, no game runtime.
+ * See docs/design/procedural-3x3-dungeon.md (Visualization & debug tooling).
+ */
 import { getTileType } from '../tile-registry.js';
 
 function tileChar(id) {
@@ -8,8 +10,10 @@ function tileChar(id) {
   try { return getTileType(id).symbol ?? '?'; } catch { return '?'; }
 }
 
-// The level's tile grid as text (`#` wall, `.` floor, etc.), with entity glyphs overlaid where they
-// have one. Returns a placeholder until a carve stage has produced tiles.
+/**
+ * The level's tile grid as text (`#` wall, `.` floor, etc.), with entity glyphs overlaid where they
+ * have one. Returns a placeholder until a carve stage has produced tiles.
+ */
 export function levelToAscii(level) {
   if (!level || !level.width || !level.height || !level.tiles?.length) {
     return '(no tiles carved yet)';
@@ -28,7 +32,7 @@ export function levelToAscii(level) {
   return grid.map(row => row.join('')).join('\n');
 }
 
-// The planning graph as a text summary: zones (with labels/cells/rect), links, and raw adjacency.
+/** The planning graph as a text summary: zones (with labels/cells/rect), links, and raw adjacency. */
 export function zonesToText(blackboard) {
   const zones = blackboard['level:zones'] ?? [];
   const links = blackboard['level:links'] ?? [];
@@ -44,8 +48,10 @@ export function zonesToText(blackboard) {
   return lines.join('\n');
 }
 
-// The planning graph as a Mermaid flowchart: links solid, adjacency-without-a-link dashed.
-// Topologically faithful, not spatially — Mermaid auto-lays-out nodes (see the design doc).
+/**
+ * The planning graph as a Mermaid flowchart: links solid, adjacency-without-a-link dashed.
+ * Topologically faithful, not spatially — Mermaid auto-lays-out nodes (see the design doc).
+ */
 export function zonesToMermaid(blackboard) {
   const zones = blackboard['level:zones'] ?? [];
   const links = blackboard['level:links'] ?? [];

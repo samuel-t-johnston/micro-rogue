@@ -1,11 +1,13 @@
 import { drawText, drawButton, drawCheckbox, hitTest, wrapText } from './canvas-ui.js';
 import { gameSettings } from '../engine/settings.js';
 
-// The New Game instructions screen: shown after "New Game" (unless skipped) and before the level
-// loads, to orient first-time players. A top-level AppState scene like splash/results. The "Do not
-// display again" checkbox writes the `skipNewGameInstructions` setting immediately (the same setting
-// the Settings menu toggles), so the two stay in sync. `showCheckbox` lets this scene be reused as a
-// plain help page later without the opt-out.
+/**
+ * @file The New Game instructions screen: shown after "New Game" (unless skipped) and before the
+ * level loads, to orient first-time players. A top-level AppState scene like splash/results. The "Do
+ * not display again" checkbox writes the `skipNewGameInstructions` setting immediately (the same
+ * setting the Settings menu toggles), so the two stay in sync. `showCheckbox` lets this scene be
+ * reused as a plain help page later without the opt-out.
+ */
 const HEADING = 'Welcome to ROGµE!';
 
 const BODY = `ROGµE is a web-native, mobile-friendly game engine for traditional roguelikes.
@@ -25,6 +27,7 @@ const ROW_H = 44;          // checkbox row hit height — meets the 44px tap-tar
 const BUTTON_W = 240;
 const BUTTON_H = 56;
 
+/** Creates the New Game instructions scene (see the file overview). `onContinue` starts the run. */
 export function createInstructionsScene({ theme, getViewport, onContinue, showCheckbox = true }) {
   let hover = false;
   let skip = gameSettings.get('skipNewGameInstructions');

@@ -5,6 +5,7 @@ import { gameSettings } from '../../engine/settings.js';
 const MARGIN = 12;
 const ANCHOR = Anchor.TOP_LEFT;
 
+/** Creates the HUD widget: HP and turn count, anchored top-left (mirrored for left-handedness). */
 export function createHudWidget({ theme, getViewport }) {
   return {
     render(ctx, state) {

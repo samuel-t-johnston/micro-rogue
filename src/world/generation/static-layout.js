@@ -1,7 +1,9 @@
-// Shared loader for static map layouts. Imports a map module by name and parses its `tiles`/`legend`
-// into the level's tile grid, returning its authored `entities` list (instantiated later by the
-// place-static-entities stage). Used by both the `static` and `randomStatic` structure stages.
-// See docs/howto/static-map-layouts.md.
+/**
+ * @file Shared loader for static map layouts. Imports a map module by name and parses its
+ * `tiles`/`legend` into the level's tile grid, returning its authored `entities` list (instantiated
+ * later by the place-static-entities stage). Used by both the `static` and `randomStatic` structure
+ * stages. See docs/howto/static-map-layouts.md.
+ */
 
 // Default module importer: resolves the map file relative to this module's URL (GitHub Pages-safe).
 // Injectable so callers (tests, alternate sources) can supply modules without the dynamic import.
@@ -10,11 +12,12 @@ function importMapModule(layoutName) {
   return import(url.href);
 }
 
+/** Loads a static layout module by name and parses it into `level`; returns its authored entities. */
 export async function loadStaticLayout(layoutName, level, importLayout = importMapModule) {
   return parseLayout(await importLayout(layoutName), layoutName, level);
 }
 
-// Pure parse: validates the tile string and writes it into the level. Returns the layout's entities.
+/** Pure parse: validates the tile string and writes it into the level. Returns the layout's entities. */
 export function parseLayout(mod, layoutName, level) {
   const rows = mod.tiles.trim().split('\n');
   if (rows.length === 0) throw new Error(`Map "${layoutName}" is empty`);

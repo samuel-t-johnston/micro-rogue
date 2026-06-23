@@ -1,8 +1,8 @@
-// Automatically picks up a single item when the player lands on its tile.
-// Guards:
-//   - skips if there is buffered player input
-//   - skips if the player hasn't moved since the last time this goal ran
-//     (prevents repeated firing while standing still on an item tile)
+/**
+ * Player goal: automatically picks up a single item when the player lands on its tile. Skips if
+ * there is buffered player input, or if the player hasn't moved since the last time this goal ran
+ * (which prevents repeated firing while standing still on an item tile).
+ */
 export const playerAutoPickup = {
   evaluate(context) {
     const { selfState, level, memory, hasPendingInput } = context;
