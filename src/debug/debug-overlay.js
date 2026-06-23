@@ -1,3 +1,8 @@
+/**
+ * Creates the debug overlay: a full-viewport canvas that draws toggleable diagnostic layers
+ * (passability, FOV, scent heatmap, sound markers) plus a pointer tooltip showing tile and entity
+ * details. Layers read from a per-frame snapshot the game scene supplies via `getDebugFrame()`.
+ */
 export function createDebugOverlay({ getViewport }) {
   const canvas = document.getElementById('debug');
   const ctx = canvas.getContext('2d');

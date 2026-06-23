@@ -1,8 +1,10 @@
 import { handleDeath } from '../combat/death.js';
 
-// Reduces HP on the target, clamping at 0. When HP reaches 0 the entity dies — death is
-// handled here so all damage sources (melee, hostile potions) route through one place.
-// target defaults to user when omitted (e.g. drinking a hostile potion).
+/**
+ * Reduces HP on the target, clamping at 0. When HP reaches 0 the entity dies — death is handled here
+ * so all damage sources (melee, hostile potions) route through one place. Target defaults to user
+ * when omitted (e.g. drinking a hostile potion).
+ */
 export function effectDamage(user, target, params, level, registry) {
   const subject = target ?? user;
   const health = subject.components.get('health');
