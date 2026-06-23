@@ -12,15 +12,20 @@ import { buildSettingsPage, buildCreditsPage } from './game-menu-items.js';
  * into a fresh run.
  */
 
+/** Creates the in-game menu overlay controller (see the file overview). */
 export function createGameMenuController({ theme, getViewport, onNewGame }) {
   let open = false;
   let confirm = null; // a createActionMenu instance while confirming New Game
 
-  function close() { open = false; confirm = null; }
+  function close() {
+    open = false;
+    confirm = null;
+  }
 
   function askNewGame() {
     confirm = createActionMenu({
-      theme, getViewport,
+      theme,
+      getViewport,
       title: 'Abandon current run?',
       actions: [
         { label: 'New Game', action: 'confirm' },
@@ -28,13 +33,17 @@ export function createGameMenuController({ theme, getViewport, onNewGame }) {
       ],
       onSelect: (action) => {
         confirm = null;
-        if (action === 'confirm') { close(); onNewGame?.(); }
+        if (action === 'confirm') {
+          close();
+          onNewGame?.();
+        }
       },
     });
   }
 
   const shell = createMenuShell({
-    theme, getViewport,
+    theme,
+    getViewport,
     onClose: close,
     getItems: () => [
       { id: 'resume', label: 'Resume', onSelect: close },
@@ -45,9 +54,15 @@ export function createGameMenuController({ theme, getViewport, onNewGame }) {
   });
 
   return {
-    get isOpen() { return open; },
+    get isOpen() {
+      return open;
+    },
 
-    open() { open = true; confirm = null; shell.reset(); },
+    open() {
+      open = true;
+      confirm = null;
+      shell.reset();
+    },
     close,
 
     render(ctx) {

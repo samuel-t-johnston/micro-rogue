@@ -55,15 +55,21 @@ describe('drawEntities — layer ordering', () => {
     const fills = [];
     return {
       _fills: fills,
-      set fillStyle(v) { this._lastFill = v; },
-      get fillStyle() { return this._lastFill; },
+      set fillStyle(v) {
+        this._lastFill = v;
+      },
+      get fillStyle() {
+        return this._lastFill;
+      },
       set strokeStyle(_) {},
       set lineWidth(_) {},
       set font(_) {},
       set textAlign(_) {},
       set textBaseline(_) {},
       set globalAlpha(_) {},
-      fillRect(x, y, w, h) { fills.push({ x, y, w, h, color: this._lastFill }); },
+      fillRect(x, y, w, h) {
+        fills.push({ x, y, w, h, color: this._lastFill });
+      },
       fillText() {},
     };
   }
@@ -71,7 +77,11 @@ describe('drawEntities — layer ordering', () => {
   function entityAt(registry, name, x, y, layer) {
     const e = registry.createEntity();
     registry.addComponent(e, 'position', components.position(x, y));
-    registry.addComponent(e, 'renderable', components.renderable(null, name, undefined, undefined, layer));
+    registry.addComponent(
+      e,
+      'renderable',
+      components.renderable(null, name, undefined, undefined, layer),
+    );
     return e;
   }
 
@@ -96,7 +106,7 @@ describe('drawEntities — layer ordering', () => {
     const ctx = makeRecordingCtx();
     r.drawEntities(ctx, level, null);
 
-    expect(ctx._fills.map(f => f.color)).toEqual(['item', 'creature']);
+    expect(ctx._fills.map((f) => f.color)).toEqual(['item', 'creature']);
   });
 
   it('defaults to DEFAULT layer when renderable.layer is undefined', () => {
@@ -113,7 +123,7 @@ describe('drawEntities — layer ordering', () => {
     const ctx = makeRecordingCtx();
     r.drawEntities(ctx, level, null);
 
-    expect(ctx._fills.map(f => f.color)).toEqual(['item', 'no-layer']);
+    expect(ctx._fills.map((f) => f.color)).toEqual(['item', 'no-layer']);
   });
 
   it('preserves insertion order for entities at the same layer (stable sort)', () => {
@@ -127,7 +137,7 @@ describe('drawEntities — layer ordering', () => {
     const ctx = makeRecordingCtx();
     r.drawEntities(ctx, level, null);
 
-    expect(ctx._fills.map(f => f.color)).toEqual(['a', 'b']);
+    expect(ctx._fills.map((f) => f.color)).toEqual(['a', 'b']);
   });
 });
 
@@ -143,7 +153,12 @@ describe('screenToWorld', () => {
   it('is the inverse of worldToScreen for integer tile coordinates', () => {
     const r = makeRenderer(640, 480);
     r.setCamera(6, 5);
-    for (const [tx, ty] of [[0, 0], [3, 2], [11, 9], [6, 5]]) {
+    for (const [tx, ty] of [
+      [0, 0],
+      [3, 2],
+      [11, 9],
+      [6, 5],
+    ]) {
       const screen = r.worldToScreen(tx, ty);
       const world = r.screenToWorld(screen.x, screen.y);
       expect(world.x).toBeCloseTo(tx);

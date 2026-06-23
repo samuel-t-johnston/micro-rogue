@@ -2,22 +2,36 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createNotice } from './notice.js';
 
 const theme = {
-  bg: '#000', surface: '#111', primary: '#444', accent: '#888',
-  text: '#fff', textDim: '#aaa', textDisabled: '#666',
+  bg: '#000',
+  surface: '#111',
+  primary: '#444',
+  accent: '#888',
+  text: '#fff',
+  textDim: '#aaa',
+  textDisabled: '#666',
 };
 const getViewport = () => ({ width: 400, height: 600 });
 
 // Mock 2D context: measureText drives wrapText, the rest are no-op setters.
 function makeCtx() {
   const noop = () => {};
-  return new Proxy({}, {
-    get: (_, key) => {
-      if (key === 'measureText') return (t) => ({ width: String(t).length * 8 });
-      return (key === 'font' || key === 'fillStyle' || key === 'strokeStyle' ||
-              key === 'lineWidth' || key === 'textAlign' || key === 'textBaseline') ? '' : noop;
+  return new Proxy(
+    {},
+    {
+      get: (_, key) => {
+        if (key === 'measureText') return (t) => ({ width: String(t).length * 8 });
+        return key === 'font' ||
+          key === 'fillStyle' ||
+          key === 'strokeStyle' ||
+          key === 'lineWidth' ||
+          key === 'textAlign' ||
+          key === 'textBaseline'
+          ? ''
+          : noop;
+      },
+      set: () => true,
     },
-    set: () => true,
-  });
+  );
 }
 
 // Layout for a one-line message at viewport 400×600 (notice.js constants: PANEL_W 320, PADDING 20,
@@ -32,7 +46,14 @@ describe('notice', () => {
   beforeEach(() => {
     onConfirm = vi.fn();
     onDismiss = vi.fn();
-    notice = createNotice({ theme, getViewport, message: 'Save cleared.', buttonLabel: 'New Game', onConfirm, onDismiss });
+    notice = createNotice({
+      theme,
+      getViewport,
+      message: 'Save cleared.',
+      buttonLabel: 'New Game',
+      onConfirm,
+      onDismiss,
+    });
     ctx = makeCtx();
     notice.render(ctx); // populate the button rect for hit-testing
   });

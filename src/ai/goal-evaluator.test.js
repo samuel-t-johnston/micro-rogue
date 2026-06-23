@@ -23,7 +23,9 @@ describe('evaluateGoals', () => {
 
   it('does not call onSelect when nothing activates', async () => {
     let called = false;
-    await evaluateGoals([pass, pass], {}, () => { called = true; });
+    await evaluateGoals([pass, pass], {}, () => {
+      called = true;
+    });
     expect(called).toBe(false);
   });
 });

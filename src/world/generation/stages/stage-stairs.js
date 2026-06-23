@@ -11,11 +11,20 @@ export function run(level, stageConfig, blackboard, rng, registry) {
   const zones = blackboard['level:zones'] ?? [];
   const rooms = blackboard['level:rooms'] ?? {};
 
-  for (const [label, dir] of [['stairs-up', 'up'], ['stairs-down', 'down']]) {
-    const zone = zones.find(z => z.labels.includes(label));
-    if (!zone) { console.warn(`[stairs] no ${label} zone; skipping`); continue; }
+  for (const [label, dir] of [
+    ['stairs-up', 'up'],
+    ['stairs-down', 'down'],
+  ]) {
+    const zone = zones.find((z) => z.labels.includes(label));
+    if (!zone) {
+      console.warn(`[stairs] no ${label} zone; skipping`);
+      continue;
+    }
     const tile = centermostRoomTile(zone, rooms);
-    if (!tile) { console.warn(`[stairs] ${label} zone has no room; skipping`); continue; }
+    if (!tile) {
+      console.warn(`[stairs] ${label} zone has no room; skipping`);
+      continue;
+    }
     level.placeEntity(createStairs(registry, tile[0], tile[1], dir));
   }
 }

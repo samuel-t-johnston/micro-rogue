@@ -13,7 +13,10 @@ describe('levelToAscii', () => {
       ['wall', 'wall', 'wall'],
     ];
     level.entities.push({
-      components: new Map([['position', { x: 1, y: 1 }], ['renderable', { glyph: '@' }]]),
+      components: new Map([
+        ['position', { x: 1, y: 1 }],
+        ['renderable', { glyph: '@' }],
+      ]),
     });
     expect(levelToAscii(level)).toBe('###\n#@#\n###');
   });
@@ -26,7 +29,14 @@ describe('levelToAscii', () => {
 describe('zonesToText', () => {
   it('summarizes zones, links, and adjacency', () => {
     const text = zonesToText({
-      'level:zones': [{ id: 0, cells: [[0, 0]], rect: { x: 0, y: 0, w: 10, h: 10 }, labels: ['room', 'stairs-up'] }],
+      'level:zones': [
+        {
+          id: 0,
+          cells: [[0, 0]],
+          rect: { x: 0, y: 0, w: 10, h: 10 },
+          labels: ['room', 'stairs-up'],
+        },
+      ],
       'level:links': [{ id: 0, a: 0, b: 1 }],
       'level:adjacency': [[0, 1]],
     });
@@ -46,11 +56,14 @@ describe('zonesToMermaid', () => {
         { id: 2, labels: ['room'] },
       ],
       'level:links': [{ id: 0, a: 0, b: 1 }],
-      'level:adjacency': [[0, 1], [1, 2]],
+      'level:adjacency': [
+        [0, 1],
+        [1, 2],
+      ],
     });
     expect(mermaid).toContain('flowchart TD');
     expect(mermaid).toContain('z0["0 · stairs-up"]');
-    expect(mermaid).toContain('z0 --- z1');   // the link, solid
-    expect(mermaid).toContain('z1 -.- z2');   // adjacency without a link, dashed
+    expect(mermaid).toContain('z0 --- z1'); // the link, solid
+    expect(mermaid).toContain('z1 -.- z2'); // adjacency without a link, dashed
   });
 });

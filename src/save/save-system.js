@@ -29,16 +29,22 @@ export const GAME_VERSION = '0.0.0';
 // shipped. Coordinates not listed here (e.g. entities that were glyph-only in v4, with sprite:null)
 // have no name and become null — they keep rendering as glyphs, which is correct.
 const V4_SPRITE_NAMES = {
-  '2,0': 'floor', '1,5': 'wall',
-  '16,16': 'healing-potion', '20,16': 'potion-of-pain', '19,5': 'dagger',
-  '16,12': 'boulder', '10,23': 'chest', '16,22': 'door-closed', '17,22': 'door-open',
+  '2,0': 'floor',
+  '1,5': 'wall',
+  '16,16': 'healing-potion',
+  '20,16': 'potion-of-pain',
+  '19,5': 'dagger',
+  '16,12': 'boulder',
+  '10,23': 'chest',
+  '16,22': 'door-closed',
+  '17,22': 'door-open',
 };
 
 // v4 sprites were inline { col, row } objects; v5 sprites are catalog name strings. Convert a single
 // reference. A name (string) or null passes through; an unknown {col,row} maps to null (the renderer
 // then falls back to the glyph). Used by the v4→v5 migration.
 const v4SpriteToName = (s) =>
-  (s && typeof s === 'object') ? (V4_SPRITE_NAMES[`${s.col},${s.row}`] ?? null) : s;
+  s && typeof s === 'object' ? (V4_SPRITE_NAMES[`${s.col},${s.row}`] ?? null) : s;
 
 const SAVE_KEY = 'rogue:save';
 
@@ -153,7 +159,14 @@ export class MigrationError extends Error {
  * carries its own serialized entities inside its blob. See docs/design/map-generation.md and
  * docs/design/save-system-design.md.
  */
-export function serializeGame({ registry, level, player, turnCount, currentNodeId = null, frozenLevels = {} }) {
+export function serializeGame({
+  registry,
+  level,
+  player,
+  turnCount,
+  currentNodeId = null,
+  frozenLevels = {},
+}) {
   const savedAt = new Date().toISOString();
   return {
     saveVersion: SAVE_VERSION,
@@ -188,9 +201,8 @@ export function deserializeGame(save) {
 
   const level = deserializeLevel(save.currentLevel, registry);
 
-  const player = registry.getEntity(save.playerId)
-    ?? registry.getEntitiesWith('playerControlled')[0]
-    ?? null;
+  const player =
+    registry.getEntity(save.playerId) ?? registry.getEntitiesWith('playerControlled')[0] ?? null;
 
   return {
     registry,
@@ -215,7 +227,7 @@ export function loadSave(raw) {
 
   let save = structuredClone(raw);
 
-  const applicable = migrations.filter(m => m.from >= save.saveVersion);
+  const applicable = migrations.filter((m) => m.from >= save.saveVersion);
   for (const migration of applicable) {
     try {
       save = migration.migrate(save);

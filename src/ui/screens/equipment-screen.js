@@ -11,7 +11,13 @@ const PADDING = 12;
  * equipped slots. (Drop is intentionally not offered here; equipped items must be unequipped first,
  * then dropped from the inventory screen.)
  */
-export function createEquipmentScreenBody({ theme, getViewport, getSlots, getEquippableInventory, onAction }) {
+export function createEquipmentScreenBody({
+  theme,
+  getViewport,
+  getSlots,
+  getEquippableInventory,
+  onAction,
+}) {
   // activeRow identifies the highlighted row across re-renders. For equipped slots we use
   // the slot name; for inventory items we use the item entity.
   let activeRow = null;
@@ -39,7 +45,7 @@ export function createEquipmentScreenBody({ theme, getViewport, getSlots, getEqu
 
   function rowRects(body) {
     let y = body.y;
-    return rows().map(r => {
+    return rows().map((r) => {
       const h = r.kind === 'section' ? SECTION_H : ROW_H;
       const rect = { x: body.x, y, w: body.w, h, row: r };
       y += h;
@@ -50,14 +56,16 @@ export function createEquipmentScreenBody({ theme, getViewport, getSlots, getEqu
   function isRowActive(r) {
     if (!activeRow) return false;
     if (r.kind === 'slot' && activeRow.kind === 'slot') return r.slotName === activeRow.slotName;
-    if (r.kind === 'equippable' && activeRow.kind === 'equippable') return r.item === activeRow.item;
+    if (r.kind === 'equippable' && activeRow.kind === 'equippable')
+      return r.item === activeRow.item;
     return false;
   }
 
   function openSlotMenu(slotName, item) {
     activeRow = { kind: 'slot', slotName };
     menu = createActionMenu({
-      theme, getViewport,
+      theme,
+      getViewport,
       title: `${item.components.get('name') ?? 'Item'} — Actions`,
       actions: [
         { label: 'Unequip', action: { type: 'unequip', slot: slotName } },
@@ -74,7 +82,8 @@ export function createEquipmentScreenBody({ theme, getViewport, getSlots, getEqu
   function openEquippableMenu(item) {
     activeRow = { kind: 'equippable', item };
     menu = createActionMenu({
-      theme, getViewport,
+      theme,
+      getViewport,
       title: `${item.components.get('name') ?? 'Item'} — Actions`,
       actions: [
         { label: 'Equip', action: { type: 'equip', itemEntityId: item.id } },
@@ -95,7 +104,10 @@ export function createEquipmentScreenBody({ theme, getViewport, getSlots, getEqu
 
         if (r.kind === 'section') {
           drawText(ctx, r.label, rect.x + PADDING, rect.y + rect.h - 6, {
-            color: theme.textDim, size: 12, weight: '600', baseline: 'alphabetic',
+            color: theme.textDim,
+            size: 12,
+            weight: '600',
+            baseline: 'alphabetic',
           });
           ctx.fillStyle = theme.primary;
           ctx.fillRect(rect.x, rect.y + rect.h - 1, rect.w, 1);
@@ -104,7 +116,10 @@ export function createEquipmentScreenBody({ theme, getViewport, getSlots, getEqu
 
         if (r.kind === 'empty') {
           drawText(ctx, '(none)', rect.x + body.w / 2, rect.y + rect.h / 2, {
-            color: theme.textDim, size: 13, align: 'center', baseline: 'middle',
+            color: theme.textDim,
+            size: 13,
+            align: 'center',
+            baseline: 'middle',
           });
           continue;
         }
@@ -120,20 +135,28 @@ export function createEquipmentScreenBody({ theme, getViewport, getSlots, getEqu
           const slotLabel = r.slotName.toUpperCase();
           const itemLabel = r.item ? (r.item.components.get('name') ?? 'Unknown') : '—';
           drawText(ctx, slotLabel, rect.x + PADDING, rect.y + rect.h / 2, {
-            color: dimColor, size: 12, weight: '600', baseline: 'middle',
+            color: dimColor,
+            size: 12,
+            weight: '600',
+            baseline: 'middle',
           });
           drawText(ctx, itemLabel, rect.x + PADDING + 80, rect.y + rect.h / 2, {
             color: r.item ? labelColor : dimColor,
-            size: 14, baseline: 'middle',
+            size: 14,
+            baseline: 'middle',
           });
         } else if (r.kind === 'equippable') {
           const name = r.item.components.get('name') ?? 'Unknown';
           const slot = r.item.components.get('equippable').slot;
           drawText(ctx, name, rect.x + PADDING, rect.y + rect.h / 2, {
-            color: labelColor, size: 14, baseline: 'middle',
+            color: labelColor,
+            size: 14,
+            baseline: 'middle',
           });
           drawText(ctx, `(${slot})`, rect.x + PADDING + 140, rect.y + rect.h / 2, {
-            color: dimColor, size: 12, baseline: 'middle',
+            color: dimColor,
+            size: 12,
+            baseline: 'middle',
           });
         }
       }

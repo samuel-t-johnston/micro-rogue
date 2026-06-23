@@ -4,7 +4,7 @@ import { createSmellSense } from './smell.js';
 import { megaVision } from './mega-vision.js';
 
 /**
- * @typedef {Object} SenseResult
+ * @typedef {object} SenseResult
  * @property {object[]} [entities] - Observed entities: `{ entityId, position, confidence, turnObserved, factions, tags }`.
  * @property {Set<string>} [visibleTiles] - "x,y" keys of tiles the sense reveals (vision-type senses).
  * @property {object[]} [sounds] - Heard sound percepts (hearing-type senses).
@@ -26,10 +26,10 @@ import { megaVision } from './mega-vision.js';
 // are resolved here when perception runs. No sense currently takes per-entity options,
 // so a single shared instance per name is sufficient. Add new senses to this map.
 const senses = {
-  vision: createVisionSense(),    // FOV gated by tile opacity; range from the `vision` component
-  hearing: createHearingSense(),  // Sounds only (no entities); range from the `hearing` component
-  smell: createSmellSense(),      // Scents only (no entities); threshold from the `smell` component
-  'mega-vision': megaVision,      // Full world state, confidence 100, no FOV/light gating
+  vision: createVisionSense(), // FOV gated by tile opacity; range from the `vision` component
+  hearing: createHearingSense(), // Sounds only (no entities); range from the `hearing` component
+  smell: createSmellSense(), // Scents only (no entities); threshold from the `smell` component
+  'mega-vision': megaVision, // Full world state, confidence 100, no FOV/light gating
 };
 
 /**
@@ -48,7 +48,7 @@ export function registerSense(name, sense) {
  * @returns {Sense[]}
  */
 export function resolveSenses(names) {
-  return names.map(name => {
+  return names.map((name) => {
     const sense = senses[name];
     if (!sense) throw new Error(`Unknown sense: "${name}"`);
     return sense;

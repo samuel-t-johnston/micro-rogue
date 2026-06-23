@@ -16,10 +16,10 @@ export function createLevel({ branch = null, depth = null, pipelineId = null, se
     seed,
     width: 0,
     height: 0,
-    tiles: [],           // tiles[y][x] — tile type id string
+    tiles: [], // tiles[y][x] — tile type id string
     overrides: new Map(), // "x,y" -> tile type id string
     blackboard: {},
-    entities: [],        // all entities currently on this level
+    entities: [], // all entities currently on this level
     spatialIndex: new Map(), // "x,y" -> Set<entity>
 
     getTile(x, y) {

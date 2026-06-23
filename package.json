@@ -11,13 +11,23 @@
     "dev:fresh": "npm run dev:kill && npm run dev",
     "test": "vitest",
     "test:run": "vitest run",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "visualize": "node scripts/visualize-generation.mjs",
     "sprite:preview": "node scripts/sprite-preview.mjs"
   },
   "devDependencies": {
-    "happy-dom": "^15.11.7",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsdoc": "^63.0.7",
+    "globals": "^17.7.0",
+    "happy-dom": "^20.10.6",
     "kill-port": "^2.0.1",
     "live-server": "^1.2.2",
-    "vitest": "^2.1.8"
+    "prettier": "^3.8.4",
+    "vitest": "^4.1.9"
   }
 }

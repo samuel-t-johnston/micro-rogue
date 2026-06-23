@@ -7,7 +7,7 @@ import { subject, conjugate, itemName } from '../../engine/log-text.js';
  * @returns {boolean} Always `false` — equipping consumes the turn.
  */
 export function executeEquip(actor, action, _level, _registry) {
-  const item = actor.components.get('inventory')?.items.find(e => e.id === action.itemEntityId);
+  const item = actor.components.get('inventory')?.items.find((e) => e.id === action.itemEntityId);
   if (!item) return false;
 
   const equippable = item.components.get('equippable');

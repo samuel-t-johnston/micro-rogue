@@ -15,7 +15,7 @@ const BTN_H = 44; // minimum tap target (ux-design.md accessibility)
  * `{ confirmed, taken }` — Cancel/Escape yields `{ confirmed: false, taken: [] }`.
  */
 export function createItemListDialog({ theme, getViewport, title, items, onClose }) {
-  const selected = new Set(items.map(i => i.id));
+  const selected = new Set(items.map((i) => i.id));
 
   function layout() {
     const { width, height } = getViewport();
@@ -133,7 +133,7 @@ export function createItemListDialog({ theme, getViewport, title, items, onClose
 
         const tb = takeBtn(dlgX, dlgY, dialogH);
         if (tb.enabled && hitTest(tb, event.x, event.y)) {
-          onClose({ confirmed: true, taken: items.filter(i => selected.has(i.id)) });
+          onClose({ confirmed: true, taken: items.filter((i) => selected.has(i.id)) });
           return true;
         }
 

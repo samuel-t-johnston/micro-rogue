@@ -21,8 +21,9 @@ export function resolveSpawn(registry, level) {
  * is found. The level's entities must already be placed in `registry`.
  */
 export function resolveArrival(registry, level, port) {
-  const match = registry.getEntitiesWith('transition')
-    .find(e => e.components.get('transition')?.port === port);
+  const match = registry
+    .getEntitiesWith('transition')
+    .find((e) => e.components.get('transition')?.port === port);
   const pos = match?.components.get('position');
   if (pos) return { x: pos.x, y: pos.y };
   console.warn(`[spawn] no transition with port "${port}"; falling back to entry point`);

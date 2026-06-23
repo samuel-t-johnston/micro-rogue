@@ -13,9 +13,16 @@ const REMEMBERABLE_COMPONENTS = ['persistVisible'];
 function rememberEntities(tilePerception, level, key, x, y) {
   const snapshots = [];
   for (const e of level.getEntitiesAt(x, y)) {
-    if (!REMEMBERABLE_COMPONENTS.some(c => e.components.has(c))) continue;
+    if (!REMEMBERABLE_COMPONENTS.some((c) => e.components.has(c))) continue;
     const r = e.components.get('renderable');
-    if (r) snapshots.push({ sprite: r.sprite, color: r.color, glyph: r.glyph, glyphColor: r.glyphColor, layer: r.layer });
+    if (r)
+      snapshots.push({
+        sprite: r.sprite,
+        color: r.color,
+        glyph: r.glyph,
+        glyphColor: r.glyphColor,
+        layer: r.layer,
+      });
   }
   if (snapshots.length > 0) tilePerception.rememberedEntities.set(key, snapshots);
   else tilePerception.rememberedEntities.delete(key);
@@ -65,7 +72,11 @@ function mergeSmells(rawResults) {
 // A source is a "confirmed ally" only if its factions are known AND share a tag with the hearer.
 // Unknown/empty factions read as NOT an ally — i.e. worth investigating.
 function isConfirmedAlly(selfFactions, sourceFactions) {
-  return Array.isArray(sourceFactions) && sourceFactions.length > 0 && !areHostile(selfFactions, sourceFactions);
+  return (
+    Array.isArray(sourceFactions) &&
+    sourceFactions.length > 0 &&
+    !areHostile(selfFactions, sourceFactions)
+  );
 }
 
 // Selective perception→memory. For entities opted in via `memory.remembersEnemies`, records where a
@@ -78,21 +89,27 @@ function updateEnemyMemory({ memory, selfState, perception, level, turnCount }) 
   if (!memory?.remembersEnemies) return;
 
   // 1. Vision — the nearest hostile actor's exact tile.
-  const seen = perception.entities.filter(o => o.tags.isActor && areHostile(selfState.factions, o.factions));
+  const seen = perception.entities.filter(
+    (o) => o.tags.isActor && areHostile(selfState.factions, o.factions),
+  );
   if (seen.length > 0) {
     let nearest = seen[0];
     let best = chebyshevDistance(selfState.position, nearest.position);
     for (const o of seen) {
       const d = chebyshevDistance(selfState.position, o.position);
-      if (d < best) { nearest = o; best = d; }
+      if (d < best) {
+        nearest = o;
+        best = d;
+      }
     }
     memory.lastKnownEnemy = { pos: { ...nearest.position }, turn: turnCount, source: 'sight' };
     return;
   }
 
   // 2. Hearing — the nearest non-ally noise, turned into a tile in the heard direction.
-  const heard = (perception.sounds ?? []).filter(s =>
-    s.perceivedDirection && !isConfirmedAlly(selfState.factions, s.sourceFactions));
+  const heard = (perception.sounds ?? []).filter(
+    (s) => s.perceivedDirection && !isConfirmedAlly(selfState.factions, s.sourceFactions),
+  );
   if (heard.length > 0) {
     let nearest = heard[0];
     for (const s of heard) if (s.distance < nearest.distance) nearest = s;
@@ -114,7 +131,7 @@ function updateEnemyMemory({ memory, selfState, perception, level, turnCount }) 
 export function applySenses(entity, level, turnCount = 0) {
   const senseNames = entity.components.get('senses') ?? [];
   const tilePerception = entity.components.get('tilePerception');
-  const rawResults = resolveSenses(senseNames).map(sense => sense(entity, level, turnCount));
+  const rawResults = resolveSenses(senseNames).map((sense) => sense(entity, level, turnCount));
 
   const currentVisible = new Set();
   for (const result of rawResults) {
@@ -135,7 +152,7 @@ export function applySenses(entity, level, turnCount = 0) {
 }
 
 /**
- * @typedef {Object} PlanningContext
+ * @typedef {object} PlanningContext
  * @property {object} memory - The entity's `memory` component (undefined for memoryless entities).
  * @property {{ position: {x: number, y: number}, factions: string[] }} selfState - The acting entity's own state.
  * @property {{ entities: object[], sounds: object[], smells: object[], visibleTiles: Set<string>, knownTiles: Map<string, number> }} perception - Merged, reconciled output of all the entity's senses.

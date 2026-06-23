@@ -2,8 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { createMenuShell } from './menu-shell.js';
 
 const theme = {
-  bg: '#000', surface: '#111', primary: '#444', accent: '#888',
-  text: '#fff', textDim: '#aaa', textDisabled: '#666',
+  bg: '#000',
+  surface: '#111',
+  primary: '#444',
+  accent: '#888',
+  text: '#fff',
+  textDim: '#aaa',
+  textDisabled: '#666',
 };
 const getViewport = () => ({ width: 800, height: 600 });
 
@@ -18,9 +23,11 @@ const ROW1 = { x: 400, y: 336 };
 
 describe('menu shell', () => {
   it('ignores taps on a disabled item but fires enabled ones', () => {
-    let aCalls = 0, bCalls = 0;
+    let aCalls = 0,
+      bCalls = 0;
     const shell = createMenuShell({
-      theme, getViewport,
+      theme,
+      getViewport,
       getItems: () => [
         { id: 'a', label: 'A', enabled: false, onSelect: () => aCalls++ },
         { id: 'b', label: 'B', onSelect: () => bCalls++ },
@@ -39,7 +46,8 @@ describe('menu shell', () => {
     let enabled = false;
     let calls = 0;
     const shell = createMenuShell({
-      theme, getViewport,
+      theme,
+      getViewport,
       getItems: () => [
         { id: 'a', label: 'A', enabled, onSelect: () => calls++ },
         { id: 'b', label: 'B', onSelect: () => {} },
@@ -58,7 +66,8 @@ describe('menu shell', () => {
 
   it('scene mode (no onClose) lets stray taps pass through; nothing consumed', () => {
     const shell = createMenuShell({
-      theme, getViewport,
+      theme,
+      getViewport,
       getItems: () => [{ id: 'a', label: 'A', onSelect: () => {} }],
     });
     shell.render(makeCtx());

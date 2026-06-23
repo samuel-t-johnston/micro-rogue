@@ -45,7 +45,7 @@ export function nextLogView(current, debugEnabled) {
 
 /** Expanded view: player-facing display strings, all in the normal text color. */
 export function visibleLogLines(displayEntries) {
-  return displayEntries.map(e => ({ text: e.display, debug: false }));
+  return displayEntries.map((e) => ({ text: e.display, debug: false }));
 }
 
 /**
@@ -56,7 +56,7 @@ export function visibleLogLines(displayEntries) {
  * brace stays on screen when a long line is clipped). The braces echo the `{}` mode icon.
  */
 export function debugLogLines(allEntries) {
-  return allEntries.map(e => {
+  return allEntries.map((e) => {
     const debug = !(e.display != null && e.seen !== false);
     const line = formatDebugEntry(e);
     return { text: debug ? `{${line}}` : line, debug };
@@ -69,12 +69,13 @@ export function debugLogLines(allEntries) {
  * shown via the prefix, so they're skipped here).
  */
 export function formatDebugEntry(e) {
-  const body = e.display != null
-    ? e.display
-    : Object.entries(e)
-        .filter(([k, v]) => k !== 'turn' && k !== 'seen' && k !== 'display' && v != null)
-        .map(([k, v]) => `${k}=${v}`)
-        .join(' ');
+  const body =
+    e.display != null
+      ? e.display
+      : Object.entries(e)
+          .filter(([k, v]) => k !== 'turn' && k !== 'seen' && k !== 'display' && v != null)
+          .map(([k, v]) => `${k}=${v}`)
+          .join(' ');
   return `T${e.turn ?? 0} ${body}`;
 }
 
@@ -85,15 +86,19 @@ export function clampScroll(scroll, contentH, viewportH) {
 }
 
 /**
- * Bottom-left message log: a few ghost lines plus an icon when closed; a scrollable
- * modal overlay when open. Tapping the icon cycles the view state; the overlay's [✕],
- * a closing tap, or Escape dismisses it.
- *
- * @param {() => Array} getDisplayEntries - player-facing entries (display + seen).
- * @param {() => Array} getAllEntries - every event-log entry (debug view).
- * @param {() => boolean} isDebugEnabled - whether the debug step is reachable.
+ * Bottom-left message log: a few ghost lines plus an icon when closed; a scrollable modal overlay
+ * when open. Tapping the icon cycles the view state; the overlay's [✕], a closing tap, or Escape
+ * dismisses it. The injected accessors supply player-facing entries (`getDisplayEntries`), every
+ * event-log entry for the debug view (`getAllEntries`), and whether the debug step is reachable
+ * (`isDebugEnabled`).
  */
-export function createMessageLogWidget({ theme, getViewport, getDisplayEntries, getAllEntries, isDebugEnabled }) {
+export function createMessageLogWidget({
+  theme,
+  getViewport,
+  getDisplayEntries,
+  getAllEntries,
+  isDebugEnabled,
+}) {
   let viewState = LogViewState.GHOST;
   let scroll = 0;
   let drag = null;
@@ -156,7 +161,7 @@ export function createMessageLogWidget({ theme, getViewport, getDisplayEntries, 
   }
 
   function renderGhostLines(ctx) {
-    const lines = getDisplayEntries(GHOST_LINE_COUNT).map(e => e.display);
+    const lines = getDisplayEntries(GHOST_LINE_COUNT).map((e) => e.display);
     const btn = buttonRect();
     // Align the lines to whichever edge the button sits against, so they read inward.
     const rightSide = btn.x > getViewport().width / 2;
@@ -165,7 +170,7 @@ export function createMessageLogWidget({ theme, getViewport, getDisplayEntries, 
     // Oldest at top, newest just above the button; alpha steps 0.35 → 0.65.
     const count = lines.length;
     lines.forEach((line, i) => {
-      const alpha = count === 1 ? 0.65 : 0.35 + (i / (count - 1)) * 0.30;
+      const alpha = count === 1 ? 0.65 : 0.35 + (i / (count - 1)) * 0.3;
       const ly = btn.y - (count - i) * LINE_HEIGHT - 4;
       ctx.save();
       ctx.globalAlpha = alpha;
@@ -188,12 +193,19 @@ export function createMessageLogWidget({ theme, getViewport, getDisplayEntries, 
 
     const title = viewState === LogViewState.DEBUG ? 'Log — Debug' : 'Log';
     drawText(ctx, title, p.x + PANEL_PAD, p.y + HEADER_H / 2, {
-      color: theme.text, size: 16, weight: '700', baseline: 'middle',
+      color: theme.text,
+      size: 16,
+      weight: '700',
+      baseline: 'middle',
     });
 
     const x = closeRect();
     drawText(ctx, '✕', x.x + x.w / 2, x.y + x.h / 2, {
-      color: theme.text, size: 20, weight: '600', align: 'center', baseline: 'middle',
+      color: theme.text,
+      size: 20,
+      weight: '600',
+      align: 'center',
+      baseline: 'middle',
     });
 
     ctx.fillStyle = theme.primary;
@@ -203,7 +215,10 @@ export function createMessageLogWidget({ theme, getViewport, getDisplayEntries, 
     const lines = currentLines();
 
     if (lines.length === 0) {
-      drawText(ctx, 'No messages yet.', body.x, body.y, { color: theme.textDim, size: ROW_TEXT_SIZE });
+      drawText(ctx, 'No messages yet.', body.x, body.y, {
+        color: theme.textDim,
+        size: ROW_TEXT_SIZE,
+      });
       return;
     }
 
@@ -228,7 +243,10 @@ export function createMessageLogWidget({ theme, getViewport, getDisplayEntries, 
     ctx.fillStyle = theme.surface;
     ctx.fillRect(btn.x, btn.y, btn.w, btn.h);
     drawText(ctx, STATE_ICON[viewState], btn.x + btn.w / 2, btn.y + btn.h / 2, {
-      color: theme.textDim, size: 18, align: 'center', baseline: 'middle',
+      color: theme.textDim,
+      size: 18,
+      align: 'center',
+      baseline: 'middle',
     });
   }
 
@@ -259,12 +277,19 @@ export function createMessageLogWidget({ theme, getViewport, getDisplayEntries, 
           scroll = clampScroll(scroll + event.deltaY, contentHeight(), bodyRect().h);
           return true;
         case 'pointerdown':
-          if (hitTest(buttonRect(), event.x, event.y)) { advance(); return true; }
-          if (hitTest(closeRect(), event.x, event.y)) { close(); return true; }
+          if (hitTest(buttonRect(), event.x, event.y)) {
+            advance();
+            return true;
+          }
+          if (hitTest(closeRect(), event.x, event.y)) {
+            close();
+            return true;
+          }
           drag = { y: event.y, scroll };
           return true;
         case 'pointermove':
-          if (drag) scroll = clampScroll(drag.scroll + (drag.y - event.y), contentHeight(), bodyRect().h);
+          if (drag)
+            scroll = clampScroll(drag.scroll + (drag.y - event.y), contentHeight(), bodyRect().h);
           return true;
         case 'pointerup':
         case 'pointercancel':

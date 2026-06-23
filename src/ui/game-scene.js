@@ -42,41 +42,53 @@ import { buildSupportBundle, downloadSupportBundle } from '../save/support-bundl
  * Creates the in-game scene (see the file overview). `startMode` is 'new' or 'continue'; the host
  * callbacks (onGameOver, onNewGame, onLoadFailed) bridge to main.js / app-state transitions.
  */
-export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onLoadFailed, startMode = 'new' }) {
+export function createGameScene({
+  theme,
+  getViewport,
+  onGameOver,
+  onNewGame,
+  onLoadFailed,
+  startMode = 'new',
+}) {
   let level = null;
   let player = null;
   let levelManager = null;
   let turnManager = null;
   let inputController = null;
   let gameOver = false;
-  let outcome = 'lose';      // 'lose' | 'win' — how the run ended, set by endGame()
-  let outcomeMessage = '';   // optional detail line carried to the Results screen
+  let outcome = 'lose'; // 'lose' | 'win' — how the run ended, set by endGame()
+  let outcomeMessage = ''; // optional detail line carried to the Results screen
   let transitioning = false;
   let visibilityHandler = null;
 
   let registry = createEntityRegistry();
   // Touch devices (coarse pointer) start zoomed closer; mouse/desktop start wider. Session-only.
-  const coarsePointer = !!(typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)')?.matches);
+  const coarsePointer = !!(
+    typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)')?.matches
+  );
   const zoom = createZoom({ index: defaultZoomIndex(coarsePointer) });
   const renderer = createRenderer({ getViewport, zoom });
 
   // Map-area gesture state (release-based tap-to-move + pinch-to-zoom). UI taps never reach
   // here — they're consumed by the widget chain in handleInput before a gesture can start.
   const pointers = new Map(); // active map-area pointers: id -> { x, y }
-  let tapCandidate = null;    // a single press that may become a move on release
-  let pinch = null;           // { baseDist } — two-finger zoom, ratcheted per step
-  let pan = null;             // { id, lastX, lastY } — one-finger drag panning the viewport
+  let tapCandidate = null; // a single press that may become a move on release
+  let pinch = null; // { baseDist } — two-finger zoom, ratcheted per step
+  let pan = null; // { id, lastX, lastY } — one-finger drag panning the viewport
   // Camera follows the player ('follow') until a drag-to-pan switches to free-look ('free'); a
   // turn-finishing player action (handleTurnEnd) or a level change (mountLevel) snaps back to follow.
   let cameraMode = 'follow';
-  const TAP_SLOP = 12;        // px of drift that disqualifies a tap (and starts a drag-to-pan)
+  const TAP_SLOP = 12; // px of drift that disqualifies a tap (and starts a drag-to-pan)
   const PINCH_STEP_RATIO = 1.25; // pinch distance change that advances one zoom level
-  const LONGPRESS_MS = 450;   // press-and-hold that raises the contextual tile menu (touch)
+  const LONGPRESS_MS = 450; // press-and-hold that raises the contextual tile menu (touch)
   let longPressTimer = null;
-  let contextMenu = null;     // the open contextual tile menu (modal popover), or null
+  let contextMenu = null; // the open contextual tile menu (modal popover), or null
 
   function clearLongPress() {
-    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
   }
 
   function resetGestures() {
@@ -107,7 +119,8 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
     if (rows.length === 0) return;
     resetGestures();
     contextMenu = createContextMenu({
-      theme, getViewport,
+      theme,
+      getViewport,
       anchor: { x: screenX, y: screenY },
       rows,
       onSelect: (action) => {
@@ -156,15 +169,22 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
       // Ratchet: each time the fingers spread/pinch past the step ratio, advance one level
       // and re-baseline, so a continuous pinch walks through the discrete snap points.
       const dist = pinchDistance();
-      if (dist >= pinch.baseDist * PINCH_STEP_RATIO) { renderer.zoomIn(); pinch.baseDist = dist; }
-      else if (dist <= pinch.baseDist / PINCH_STEP_RATIO) { renderer.zoomOut(); pinch.baseDist = dist; }
+      if (dist >= pinch.baseDist * PINCH_STEP_RATIO) {
+        renderer.zoomIn();
+        pinch.baseDist = dist;
+      } else if (dist <= pinch.baseDist / PINCH_STEP_RATIO) {
+        renderer.zoomOut();
+        pinch.baseDist = dist;
+      }
     } else if (pan?.id === event.pointerId) {
       // An in-progress drag: shift the viewport by the per-move delta and re-baseline.
       panViewport(event.x - pan.lastX, event.y - pan.lastY);
       pan.lastX = event.x;
       pan.lastY = event.y;
-    } else if (tapCandidate?.id === event.pointerId &&
-               Math.hypot(event.x - tapCandidate.x, event.y - tapCandidate.y) > TAP_SLOP) {
+    } else if (
+      tapCandidate?.id === event.pointerId &&
+      Math.hypot(event.x - tapCandidate.x, event.y - tapCandidate.y) > TAP_SLOP
+    ) {
       // Dragged too far to be a tap or long-press — promote it to a drag-to-pan instead.
       pan = { id: event.pointerId, lastX: event.x, lastY: event.y };
       tapCandidate = null;
@@ -229,7 +249,13 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
     theme,
     getViewport,
     onNext: () => {
-      onGameOver?.({ outcome, message: outcomeMessage, turns: turnManager?.playerTurnCount ?? 0, player, level });
+      onGameOver?.({
+        outcome,
+        message: outcomeMessage,
+        turns: turnManager?.playerTurnCount ?? 0,
+        player,
+        level,
+      });
     },
   });
 
@@ -256,7 +282,9 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
   function saveGame() {
     if (gameOver || !level || !player) return;
     commitSave({
-      registry, level, player,
+      registry,
+      level,
+      player,
       turnCount: turnManager?.playerTurnCount ?? 0,
       ...levelManager.snapshot(),
     });
@@ -312,10 +340,10 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
 
     // The classic victory: escape the dungeon (stand on a dungeonExit) carrying the Amulet of Yendor.
     // Registered here so the win check is live for every floor; evaluated at each player turn-end.
-    winConditions.register('escape-with-amulet', escapeWithQuestItem(
-      'amulet-of-yendor',
-      'You escaped the dungeon with the Amulet of Yendor!',
-    ));
+    winConditions.register(
+      'escape-with-amulet',
+      escapeWithQuestItem('amulet-of-yendor', 'You escaped the dungeon with the Amulet of Yendor!'),
+    );
 
     turnManager = createTurnManager({
       // Turn-queue membership = takes turns OR decays. turnTakers act on the energy model;
@@ -326,7 +354,9 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
         return [...members];
       },
       invokeAction: (entity) => actionSystem.invokeAction(entity),
-      onTurnStart: (entity) => { if (entity.components.has('playerControlled')) upkeep.run({ level, registry, player }); },
+      onTurnStart: (entity) => {
+        if (entity.components.has('playerControlled')) upkeep.run({ level, registry, player });
+      },
       onTurnEnd: handleTurnEnd,
       initialTurnCount,
     });
@@ -359,7 +389,10 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
         // Per-floor fog of war is swapped by levelManager.travel (it freezes the departed floor's
         // remembered tiles into cold storage and restores the destination's). mountLevel's applySenses
         // recomputes what's currently visible on arrival.
-        gameLog.add({ display: port === 'down' ? 'You descend deeper into the dungeon.' : 'You climb the stairs.' });
+        gameLog.add({
+          display:
+            port === 'down' ? 'You descend deeper into the dungeon.' : 'You climb the stairs.',
+        });
       }
       mountLevel({ initialTurnCount: turns }); // also re-centres the camera on the player
       saveGame();
@@ -375,7 +408,9 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
   function generateSupportBundle() {
     if (!level || !player) return;
     const bundle = buildSupportBundle({
-      registry, level, player,
+      registry,
+      level,
+      player,
       turnCount: turnManager?.playerTurnCount ?? 0,
       ...levelManager.snapshot(),
     });
@@ -405,7 +440,10 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
     if (gameMenuButton.handleInput(event)) return true;
 
     // Desktop secondary click raises the same contextual menu as a touch long-press.
-    if (event.type === 'contextmenu') { openContextMenu(event.x, event.y); return true; }
+    if (event.type === 'contextmenu') {
+      openContextMenu(event.x, event.y);
+      return true;
+    }
 
     if (event.type === 'pointerdown') return onPointerDown(event);
     if (event.type === 'pointermove') return onPointerMove(event);
@@ -488,7 +526,9 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
         mountLevel({ initialTurnCount });
 
         // Mobile kills backgrounded pages without warning — catch the gap between turns.
-        visibilityHandler = () => { if (document.visibilityState === 'hidden') saveGame(); };
+        visibilityHandler = () => {
+          if (document.visibilityState === 'hidden') saveGame();
+        };
         document.addEventListener('visibilitychange', visibilityHandler);
 
         gameLog.add({ display: enterMessage });
@@ -554,8 +594,8 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
         tileName: tile.name,
         // Per-entity so the goal inspector can attribute each stack to its owner.
         entities: entities
-          .filter(e => e.components.get('name'))
-          .map(e => {
+          .filter((e) => e.components.get('name'))
+          .map((e) => {
             const ai = e.components.get('ai');
             return {
               name: e.components.get('name'),
@@ -564,7 +604,7 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
             };
           }),
         passable: level.isPassable(tx, ty),
-        opaque: tile.opaque || entities.some(e => e.components.has('opaque')),
+        opaque: tile.opaque || entities.some((e) => e.components.has('opaque')),
       };
     },
 
@@ -590,10 +630,11 @@ export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onL
           return cells;
         },
         // The invisible live sound entities (for the sound layer).
-        getSounds: () => registry.getEntitiesWith('sound').map(e => {
-          const pos = e.components.get('position');
-          return { x: pos.x, y: pos.y, volume: e.components.get('sound').volume };
-        }),
+        getSounds: () =>
+          registry.getEntitiesWith('sound').map((e) => {
+            const pos = e.components.get('position');
+            return { x: pos.x, y: pos.y, volume: e.components.get('sound').volume };
+          }),
       };
     },
 

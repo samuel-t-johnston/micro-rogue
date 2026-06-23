@@ -1,0 +1,12 @@
+# Dependencies & lockfiles
+node_modules/
+package-lock.json
+
+# Generated / binary assets
+assets/
+icons/
+sprite-previews/
+favicon.ico
+
+# Prose docs have intentional formatting — format code, not markdown
+**/*.md

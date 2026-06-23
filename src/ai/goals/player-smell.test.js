@@ -7,7 +7,10 @@ function ctx(smells, memory = {}, factions = ['player']) {
 }
 
 function smelledLines() {
-  return gameLog.getAll().filter(e => e.action === 'smell').map(e => e.display);
+  return gameLog
+    .getAll()
+    .filter((e) => e.action === 'smell')
+    .map((e) => e.display);
 }
 
 const smell = (profile, direction = 'N') => ({ profile, direction, intensity: 10 });
@@ -24,7 +27,7 @@ describe('playerSmell', () => {
     expect(smelledLines()).toEqual(['You smell the stench of orcs to the north.']);
   });
 
-  it('does not log the player\'s own scent profile', () => {
+  it("does not log the player's own scent profile", () => {
     playerSmell.evaluate(ctx([smell('player')]));
     expect(smelledLines()).toHaveLength(0);
   });

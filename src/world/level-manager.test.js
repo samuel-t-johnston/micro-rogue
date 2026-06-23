@@ -35,8 +35,9 @@ async function startGame(seed = 1) {
 }
 
 const stairPos = (registry, port) =>
-  registry.getEntitiesWith('transition')
-    .find(e => e.components.get('transition').port === port)
+  registry
+    .getEntitiesWith('transition')
+    .find((e) => e.components.get('transition').port === port)
     ?.components.get('position');
 
 describe('LevelManager.travel', () => {
@@ -91,7 +92,7 @@ describe('LevelManager.travel', () => {
     registry.addComponent(player, 'tilePerception', tp);
 
     await manager.travel(player, 'down'); // freezes A with the player's memory of it
-    await manager.travel(player, 'up');   // thaws A — memory should come back
+    await manager.travel(player, 'up'); // thaws A — memory should come back
 
     const restored = player.components.get('tilePerception');
     expect(restored.memory.get('1,1')).toBe('floor');
@@ -132,7 +133,11 @@ describe('LevelManager.travel', () => {
 
     // Fresh runtime restoring from the save, currently standing on B.
     const manager2 = createLevelManager({ registry, transitMap: TEST_MAP });
-    manager2.restore({ currentNodeId: 'b', level: manager.getCurrentLevel(), frozenLevels: saved.frozenLevels });
+    manager2.restore({
+      currentNodeId: 'b',
+      level: manager.getCurrentLevel(),
+      frozenLevels: saved.frozenLevels,
+    });
     await manager2.travel(player, 'up'); // thaw A from the restored blob
 
     expect(player.components.get('tilePerception').memory.get('3,3')).toBe('floor');

@@ -13,7 +13,9 @@ const conditions = new Map(); // name -> fn(context)
 /** Ordered registry of win-condition checks; `run` returns the first non-null result. */
 export const winConditions = {
   // Registers (or replaces, by name) a condition. Insertion order is evaluation order.
-  register(name, fn) { conditions.set(name, fn); },
+  register(name, fn) {
+    conditions.set(name, fn);
+  },
 
   // Runs each condition in order, returning the first non-null result (the run is over), else null.
   run(context) {
@@ -25,7 +27,9 @@ export const winConditions = {
   },
 
   // Clears all conditions (new game / test isolation).
-  reset() { conditions.clear(); },
+  reset() {
+    conditions.clear();
+  },
 };
 
 /**
@@ -39,11 +43,13 @@ export const winConditions = {
 export function escapeWithQuestItem(questItemId, message) {
   return ({ level, player }) => {
     const items = player.components.get('inventory')?.items ?? [];
-    if (!items.some(it => it.components.get('questItem')?.id === questItemId)) return null;
+    if (!items.some((it) => it.components.get('questItem')?.id === questItemId)) return null;
 
     const pos = player.components.get('position');
     if (!pos) return null;
-    const onExit = [...level.getEntitiesAt(pos.x, pos.y)].some(e => e.components.has('dungeonExit'));
+    const onExit = [...level.getEntitiesAt(pos.x, pos.y)].some((e) =>
+      e.components.has('dungeonExit'),
+    );
     return onExit ? { outcome: 'win', message } : null;
   };
 }

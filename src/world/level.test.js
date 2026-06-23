@@ -37,7 +37,7 @@ describe('getTile', () => {
     level.width = 3;
     level.height = 2;
     level.tiles = [
-      ['wall',  'floor', 'wall'],
+      ['wall', 'floor', 'wall'],
       ['floor', 'floor', 'floor'],
     ];
   });
@@ -173,9 +173,9 @@ describe('isPassable', () => {
     level.width = 3;
     level.height = 3;
     level.tiles = [
-      ['wall',  'floor', 'wall'],
+      ['wall', 'floor', 'wall'],
       ['floor', 'floor', 'floor'],
-      ['wall',  'floor', 'wall'],
+      ['wall', 'floor', 'wall'],
     ];
   });
 

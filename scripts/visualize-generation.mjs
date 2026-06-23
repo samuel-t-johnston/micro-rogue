@@ -36,31 +36,44 @@ const seeds = Array.from({ length: runs }, (_, i) => baseSeed + i);
 async function snapshotRun(seed) {
   const frames = [];
   await runPipeline(PIPELINE, createRng(seed), createEntityRegistry(), {
-    onStageComplete: (stage, level) => frames.push({
-      stage,
-      topology: zonesToText(level.blackboard),
-      mermaid: zonesToMermaid(level.blackboard),
-      ascii: levelToAscii(level),
-    }),
+    onStageComplete: (stage, level) =>
+      frames.push({
+        stage,
+        topology: zonesToText(level.blackboard),
+        mermaid: zonesToMermaid(level.blackboard),
+        ascii: levelToAscii(level),
+      }),
   });
   return frames;
 }
 
 function frameMd(f) {
   return [
-    `### after \`${f.stage}\``, '',
-    '```', f.topology, '```', '',
-    '```mermaid', f.mermaid, '```', '',
-    '_map:_', '```', f.ascii, '```',
+    `### after \`${f.stage}\``,
+    '',
+    '```',
+    f.topology,
+    '```',
+    '',
+    '```mermaid',
+    f.mermaid,
+    '```',
+    '',
+    '_map:_',
+    '```',
+    f.ascii,
+    '```',
   ].join('\n');
 }
 
 const parts = [
-  '# Generation report', '',
+  '# Generation report',
+  '',
   `- Generated: ${new Date().toISOString()}`,
   `- Pipeline: \`${JSON.stringify(PIPELINE.stages)}\``,
   `- Runs: ${runs}`,
-  `- Seeds: ${seeds.join(', ')}`, '',
+  `- Seeds: ${seeds.join(', ')}`,
+  '',
 ];
 
 for (const seed of seeds) {

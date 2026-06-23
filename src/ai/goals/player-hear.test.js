@@ -7,11 +7,20 @@ function ctx(sounds, memory = {}, visibleTiles = new Set()) {
 }
 
 function heardLines() {
-  return gameLog.getAll().filter(e => e.action === 'hear').map(e => e.display);
+  return gameLog
+    .getAll()
+    .filter((e) => e.action === 'hear')
+    .map((e) => e.display);
 }
 
 const sound = (soundId, extra = {}) => ({
-  soundId, position: { x: 9, y: 9 }, perceivedDirection: 'N', language: 'orcish', understood: false, message: {}, ...extra,
+  soundId,
+  position: { x: 9, y: 9 },
+  perceivedDirection: 'N',
+  language: 'orcish',
+  understood: false,
+  message: {},
+  ...extra,
 });
 
 describe('playerHear', () => {

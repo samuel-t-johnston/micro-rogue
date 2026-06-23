@@ -71,7 +71,10 @@ export function wrapText(ctx, text, maxWidth, opts = {}) {
   ctx.font = `${weight} ${size}px ${family}`;
   const lines = [];
   for (const paragraph of String(text).split('\n')) {
-    if (paragraph.trim() === '') { lines.push(''); continue; }
+    if (paragraph.trim() === '') {
+      lines.push('');
+      continue;
+    }
     let line = '';
     for (const word of paragraph.trim().split(/\s+/)) {
       const candidate = line ? `${line} ${word}` : word;
@@ -110,7 +113,11 @@ export function drawSegmentedControl(ctx, theme, { x, y, w, h, options, selected
     ctx.lineWidth = 1;
     ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1);
     drawText(ctx, options[i], r.x + r.w / 2, r.y + r.h / 2, {
-      color: active ? theme.bg : theme.text, size: 14, weight: '600', align: 'center', baseline: 'middle',
+      color: active ? theme.bg : theme.text,
+      size: 14,
+      weight: '600',
+      align: 'center',
+      baseline: 'middle',
     });
   });
 }

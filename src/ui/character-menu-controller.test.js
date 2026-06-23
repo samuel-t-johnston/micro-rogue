@@ -12,8 +12,13 @@ import { Slots, HUMANOID_SLOTS } from '../../data/equipment-slots.js';
 import { createLevel } from '../world/level.js';
 
 const theme = {
-  bg: '#000', surface: '#111', primary: '#444', accent: '#888',
-  text: '#fff', textDim: '#aaa', textDisabled: '#666',
+  bg: '#000',
+  surface: '#111',
+  primary: '#444',
+  accent: '#888',
+  text: '#fff',
+  textDim: '#aaa',
+  textDisabled: '#666',
 };
 const viewport = { width: 800, height: 600 };
 const getViewport = () => viewport;
@@ -32,20 +37,22 @@ function makePlayer() {
 // is called every frame; this ensures render() doesn't throw before handleInput is exercised.
 function makeCtx() {
   const noop = () => {};
-  return new Proxy({}, {
-    get: (_, key) => (key === 'font' || key === 'fillStyle' || key === 'strokeStyle' ||
-                       key === 'lineWidth' || key === 'textAlign' || key === 'textBaseline' ||
-                       key === 'globalAlpha') ? '' : noop,
-    set: () => true,
-  });
-}
-
-// Helper: find which card/row was hit by walking the rendered layout
-function findHit(ctx, controller, x, y) {
-  controller.render(ctx);
-  const submitted = [];
-  controller.handleInput({ type: 'pointerdown', x, y });
-  return submitted;
+  return new Proxy(
+    {},
+    {
+      get: (_, key) =>
+        key === 'font' ||
+        key === 'fillStyle' ||
+        key === 'strokeStyle' ||
+        key === 'lineWidth' ||
+        key === 'textAlign' ||
+        key === 'textBaseline' ||
+        key === 'globalAlpha'
+          ? ''
+          : noop,
+      set: () => true,
+    },
+  );
 }
 
 describe('character menu — full equip/unequip flow', () => {
@@ -55,7 +62,8 @@ describe('character menu — full equip/unequip flow', () => {
     ({ registry, player, dagger } = makePlayer());
     submitted = [];
     controller = createCharacterMenuController({
-      theme, getViewport,
+      theme,
+      getViewport,
       getPlayer: () => player,
       onAction: (action) => submitted.push(action),
     });
@@ -280,8 +288,11 @@ describe('character menu button', () => {
   it('hit area sits at bottom-right and calls onOpen', () => {
     let opened = 0;
     const btn = createCharacterMenuButton({
-      theme, getViewport,
-      onOpen: () => { opened++; },
+      theme,
+      getViewport,
+      onOpen: () => {
+        opened++;
+      },
     });
     // Button size 44, margin 12, anchored bottom-right.
     // x = 800 - 12 - 44 = 744, y = 600 - 12 - 44 = 544. Center: 766, 566.

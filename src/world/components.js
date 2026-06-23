@@ -220,7 +220,13 @@ export const components = {
   // `sourceFactions` is a snapshot of the emitter's factions at emit time (so the sound "remembers
   // who made it" even if that creature later moves or dies). A hearer uses it to recognize and
   // ignore allies; empty means faction-neutral (e.g. a combat clash), which reads as worth checking.
-  sound({ sourceId = null, volume = 0, language = null, message = null, sourceFactions = [] } = {}) {
+  sound({
+    sourceId = null,
+    volume = 0,
+    language = null,
+    message = null,
+    sourceFactions = [],
+  } = {}) {
     return { sourceId, volume, language, message, sourceFactions };
   },
 

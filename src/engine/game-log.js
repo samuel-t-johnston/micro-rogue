@@ -22,11 +22,15 @@ let visibilityProvider = () => true;
 
 export const gameLog = {
   // Wire the current-turn source once at game start. Defaults to 0 until set.
-  setTurnProvider(fn) { turnProvider = fn; },
+  setTurnProvider(fn) {
+    turnProvider = fn;
+  },
 
   // Wire the player-visibility source once at game start. Given the entry, returns
   // whether the player could perceive it. Defaults to "always visible" (tests/headless).
-  setVisibilityProvider(fn) { visibilityProvider = fn; },
+  setVisibilityProvider(fn) {
+    visibilityProvider = fn;
+  },
 
   // Record an entry. Pass a `display` string for player-visible events; omit it for
   // debug-only entries. `turn` and `seen` are stamped here; either may be overridden
@@ -35,8 +39,12 @@ export const gameLog = {
     log.add({ turn: turnProvider(), seen: visibilityProvider(entry), ...entry });
   },
 
-  getDisplayEntries(count) { return log.getDisplayEntries(count); },
-  getAll() { return log.getAll(); },
+  getDisplayEntries(count) {
+    return log.getDisplayEntries(count);
+  },
+  getAll() {
+    return log.getAll();
+  },
 
   // Clear the log and reset the injected sources. Called on new-game and in test setup.
   reset() {

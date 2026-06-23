@@ -19,7 +19,10 @@ export function buildSettingsPage() {
         id: 'handedness',
         label: 'Handedness',
         description: 'Which side of the screen the primary action button sits on.',
-        options: [{ label: 'Left', value: 'left' }, { label: 'Right', value: 'right' }],
+        options: [
+          { label: 'Left', value: 'left' },
+          { label: 'Right', value: 'right' },
+        ],
         get: () => gameSettings.get('handedness'),
         set: (v) => gameSettings.set('handedness', v),
       },
@@ -27,7 +30,10 @@ export function buildSettingsPage() {
         id: 'skipNewGameInstructions',
         label: 'Skip new game instructions',
         description: 'Start a new run without the welcome screen.',
-        options: [{ label: 'On', value: true }, { label: 'Off', value: false }],
+        options: [
+          { label: 'On', value: true },
+          { label: 'Off', value: false },
+        ],
         get: () => gameSettings.get('skipNewGameInstructions'),
         set: (v) => gameSettings.set('skipNewGameInstructions', v),
       },
@@ -35,7 +41,10 @@ export function buildSettingsPage() {
         id: 'renderMode',
         label: 'Graphics',
         description: 'Sprite art, or classic ASCII glyphs.',
-        options: [{ label: 'Sprites', value: 'sprite' }, { label: 'ASCII', value: 'glyph' }],
+        options: [
+          { label: 'Sprites', value: 'sprite' },
+          { label: 'ASCII', value: 'glyph' },
+        ],
         get: () => gameSettings.get('renderMode'),
         set: (v) => gameSettings.set('renderMode', v),
       },
@@ -47,6 +56,6 @@ export function buildSettingsPage() {
 export function buildCreditsPage() {
   return {
     title: 'Credits',
-    text: '-- Code --\nSam Johnston\n\n-- Pixel Art --\nELV Games\nShade\nGlionox\nCraftPix',
+    text: '-- Code --\nSam Johnston\n\n-- Pixel Art (and Inspiration) --\nProject Utumno/DCSS Artists\nELV Games\nMerchant-Shade\nGlionox\nCraftPix\nKenny Vleugels',
   };
 }

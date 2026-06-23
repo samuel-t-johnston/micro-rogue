@@ -6,7 +6,7 @@ import { subject, conjugate, itemName } from '../../engine/log-text.js';
  * @returns {boolean} Always `false` — picking up consumes the turn.
  */
 export function executePickup(actor, action, level, registry) {
-  const item = registry.getEntitiesWith('item').find(e => e.id === action.itemEntityId);
+  const item = registry.getEntitiesWith('item').find((e) => e.id === action.itemEntityId);
   if (!item) return false;
 
   const itemComp = item.components.get('item');

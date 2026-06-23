@@ -71,11 +71,17 @@ export function createSpriteRenderer({ catalog, sheets }) {
         images.map(
           (entry) =>
             new Promise((resolve, reject) => {
-              entry.img.onload = () => { entry.ready = true; resolve(); };
+              entry.img.onload = () => {
+                entry.ready = true;
+                resolve();
+              };
               entry.img.onerror = reject;
-              entry.img.src = new URL(`../../assets/sprites/${entry.sheet}-${entry.size}.png`, import.meta.url).href;
-            })
-        )
+              entry.img.src = new URL(
+                `../../assets/sprites/${entry.sheet}-${entry.size}.png`,
+                import.meta.url,
+              ).href;
+            }),
+        ),
       );
     },
 

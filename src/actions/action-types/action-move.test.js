@@ -21,27 +21,39 @@ function makeMover(registry, level, noisy) {
   return e;
 }
 
-const soundsOn = (level) => level.entities.filter(e => e.components.has('sound'));
+const soundsOn = (level) => level.entities.filter((e) => e.components.has('sound'));
 
 describe('executeMove noisy movement', () => {
   it('emits a sound at the new tile when a noisy mover moves (chance 1)', () => {
     const registry = createEntityRegistry();
     const level = makeLevel();
-    const e = makeMover(registry, level, { chance: 1, volume: 3, message: { kind: 'vermin-scrabble' } });
+    const e = makeMover(registry, level, {
+      chance: 1,
+      volume: 3,
+      message: { kind: 'vermin-scrabble' },
+    });
 
     executeMove(e, { x: 3, y: 2 }, level, registry);
 
     const [sound] = soundsOn(level);
     expect(sound.components.get('position')).toEqual({ x: 3, y: 2 });
     expect(sound.components.get('sound')).toMatchObject({
-      sourceId: e.id, volume: 3, language: null, message: { kind: 'vermin-scrabble' }, sourceFactions: ['scuttlers'],
+      sourceId: e.id,
+      volume: 3,
+      language: null,
+      message: { kind: 'vermin-scrabble' },
+      sourceFactions: ['scuttlers'],
     });
   });
 
   it('emits nothing when the chance is 0', () => {
     const registry = createEntityRegistry();
     const level = makeLevel();
-    const e = makeMover(registry, level, { chance: 0, volume: 3, message: { kind: 'vermin-scrabble' } });
+    const e = makeMover(registry, level, {
+      chance: 0,
+      volume: 3,
+      message: { kind: 'vermin-scrabble' },
+    });
     executeMove(e, { x: 3, y: 2 }, level, registry);
     expect(soundsOn(level)).toHaveLength(0);
   });

@@ -39,7 +39,11 @@ function entityPhrase(e) {
 function terrainPhrase(tileId) {
   if (!tileId) return 'nothing';
   let name;
-  try { name = getTileType(tileId).name.toLowerCase(); } catch { return 'nothing'; }
+  try {
+    name = getTileType(tileId).name.toLowerCase();
+  } catch {
+    return 'nothing';
+  }
   return name === 'floor' ? 'the floor' : withArticle(name);
 }
 
@@ -58,7 +62,7 @@ export function describeTile(level, viewer, tile) {
   const isSelf = pos && pos.x === x && pos.y === y;
 
   const occupants = [...level.getEntitiesAt(x, y)]
-    .filter(e => e.id !== viewer?.id && e.components.has('name'))
+    .filter((e) => e.id !== viewer?.id && e.components.has('name'))
     .sort((a, b) => rank(a) - rank(b));
 
   if (visible) {
@@ -70,7 +74,7 @@ export function describeTile(level, viewer, tile) {
   }
 
   if (remembered) {
-    const phrases = occupants.filter(e => e.components.has('persistVisible')).map(entityPhrase);
+    const phrases = occupants.filter((e) => e.components.has('persistVisible')).map(entityPhrase);
     if (phrases.length === 0) phrases.push(terrainPhrase(tp.memory.get(key)));
     return `You remember ${joinList(phrases)} there.`;
   }

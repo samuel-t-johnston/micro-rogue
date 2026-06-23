@@ -12,10 +12,10 @@ export const playerSmell = {
   evaluate(context) {
     const { memory, perception, selfState } = context;
     const own = new Set(selfState.factions);
-    const smells = (perception.smells ?? []).filter(s => !own.has(s.profile));
+    const smells = (perception.smells ?? []).filter((s) => !own.has(s.profile));
 
-    const current = new Set(smells.map(s => s.profile));
-    const logged = new Set((memory.smelledProfiles ?? []).filter(p => current.has(p)));
+    const current = new Set(smells.map((s) => s.profile));
+    const logged = new Set((memory.smelledProfiles ?? []).filter((p) => current.has(p)));
 
     for (const smell of smells) {
       if (logged.has(smell.profile)) continue;

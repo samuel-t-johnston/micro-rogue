@@ -31,7 +31,7 @@ export function run(level, stageConfig = {}, blackboard, rng) {
   const adjacency = blackboard['level:adjacency'] ?? [];
 
   // Union-find over zone ids (path-halving; no rank — graphs are tiny).
-  const parent = new Map(zones.map(z => [z.id, z.id]));
+  const parent = new Map(zones.map((z) => [z.id, z.id]));
   const find = (x) => {
     while (parent.get(x) !== x) {
       parent.set(x, parent.get(parent.get(x)));
@@ -41,7 +41,7 @@ export function run(level, stageConfig = {}, blackboard, rng) {
   };
 
   const edges = shuffle(adjacency, rng).map(([a, b]) => (a < b ? [a, b] : [b, a]));
-  const degree = new Map(zones.map(z => [z.id, 0]));
+  const degree = new Map(zones.map((z) => [z.id, 0]));
   const chosen = [];
   const leftover = [];
 
@@ -63,7 +63,11 @@ export function run(level, stageConfig = {}, blackboard, rng) {
 
   // Extra links for loops, only where both endpoints are still under the soft cap.
   for (const [a, b] of leftover) {
-    if (degree.get(a) < maxExtraDegree && degree.get(b) < maxExtraDegree && rng.random() < extraLinkChance) {
+    if (
+      degree.get(a) < maxExtraDegree &&
+      degree.get(b) < maxExtraDegree &&
+      rng.random() < extraLinkChance
+    ) {
       take(a, b);
     }
   }

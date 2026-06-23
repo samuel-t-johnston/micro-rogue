@@ -10,23 +10,30 @@ function ctx(smells, { passable = () => true, x = 5, y = 5, factions = ['scuttle
   };
 }
 
-const smell = ({ profile = 'player', direction = 'E', intensity = 10 } = {}) => ({ profile, direction, intensity });
+const smell = ({ profile = 'player', direction = 'E', intensity = 10 } = {}) => ({
+  profile,
+  direction,
+  intensity,
+});
 
 describe('trackScent', () => {
   it('steps toward a hostile scent gradient', () => {
-    expect(trackScent.evaluate(ctx([smell({ direction: 'E' })])))
-      .toEqual({ action: { type: 'move', x: 6, y: 5 } });
+    expect(trackScent.evaluate(ctx([smell({ direction: 'E' })]))).toEqual({
+      action: { type: 'move', x: 6, y: 5 },
+    });
   });
 
   it('follows the strongest of several hostile scents', () => {
-    const result = trackScent.evaluate(ctx([
-      smell({ profile: 'player', direction: 'E', intensity: 5 }),
-      smell({ profile: 'orcs', direction: 'W', intensity: 20 }),
-    ]));
+    const result = trackScent.evaluate(
+      ctx([
+        smell({ profile: 'player', direction: 'E', intensity: 5 }),
+        smell({ profile: 'orcs', direction: 'W', intensity: 20 }),
+      ]),
+    );
     expect(result).toEqual({ action: { type: 'move', x: 4, y: 5 } }); // orcs stronger → west
   });
 
-  it('ignores its own faction\'s scent (not hostile)', () => {
+  it("ignores its own faction's scent (not hostile)", () => {
     expect(trackScent.evaluate(ctx([smell({ profile: 'scuttlers', direction: 'E' })]))).toBeNull();
   });
 
@@ -35,7 +42,9 @@ describe('trackScent', () => {
   });
 
   it('returns null when the gradient step is blocked', () => {
-    expect(trackScent.evaluate(ctx([smell({ direction: 'E' })], { passable: () => false }))).toBeNull();
+    expect(
+      trackScent.evaluate(ctx([smell({ direction: 'E' })], { passable: () => false })),
+    ).toBeNull();
   });
 
   it('returns null with no smells', () => {

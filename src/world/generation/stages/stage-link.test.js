@@ -3,7 +3,7 @@ import { run as runLink } from './stage-link.js';
 import { run as runRoomGridGeometry } from './stage-room-grid-geometry.js';
 import { createRng } from '../../../engine/rng.js';
 
-const zonesOf = (ids) => ids.map(id => ({ id }));
+const zonesOf = (ids) => ids.map((id) => ({ id }));
 
 function linkGraph(zones, adjacency, seed = 1, config = {}) {
   const bb = { 'level:zones': zones, 'level:adjacency': adjacency };
@@ -13,18 +13,33 @@ function linkGraph(zones, adjacency, seed = 1, config = {}) {
 
 function connectedByLinks(zones, links) {
   if (zones.length <= 1) return true;
-  const nb = new Map(zones.map(z => [z.id, []]));
-  for (const { a, b } of links) { nb.get(a).push(b); nb.get(b).push(a); }
+  const nb = new Map(zones.map((z) => [z.id, []]));
+  for (const { a, b } of links) {
+    nb.get(a).push(b);
+    nb.get(b).push(a);
+  }
   const seen = new Set([zones[0].id]);
   const stack = [zones[0].id];
   while (stack.length) {
-    for (const n of nb.get(stack.pop())) if (!seen.has(n)) { seen.add(n); stack.push(n); }
+    for (const n of nb.get(stack.pop()))
+      if (!seen.has(n)) {
+        seen.add(n);
+        stack.push(n);
+      }
   }
   return seen.size === zones.length;
 }
 
 // A 4-cycle: spanning tree uses 3 of the 4 edges, leaving one for an optional loop link.
-const CYCLE = { zones: zonesOf([0, 1, 2, 3]), adj: [[0, 1], [1, 2], [2, 3], [0, 3]] };
+const CYCLE = {
+  zones: zonesOf([0, 1, 2, 3]),
+  adj: [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [0, 3],
+  ],
+};
 
 describe('link stage', () => {
   it('with no extra links, produces exactly a connected spanning tree', () => {
@@ -48,8 +63,9 @@ describe('link stage', () => {
   });
 
   it('is deterministic for a given seed', () => {
-    expect(linkGraph(zonesOf([0, 1, 2, 3]), CYCLE.adj, 7))
-      .toEqual(linkGraph(zonesOf([0, 1, 2, 3]), CYCLE.adj, 7));
+    expect(linkGraph(zonesOf([0, 1, 2, 3]), CYCLE.adj, 7)).toEqual(
+      linkGraph(zonesOf([0, 1, 2, 3]), CYCLE.adj, 7),
+    );
   });
 
   it('connects every zone of a real generated layout, drawing only from adjacency', () => {

@@ -16,19 +16,29 @@ import { buildSettingsPage, buildCreditsPage } from './game-menu-items.js';
  * couldn't be carried forward after an update and was cleared. Its button starts a new game.
  */
 
+/** Creates the main-menu scene (see the file overview). `onAction('new'|'continue')` is handled by main.js. */
 export function createMenuScene({ theme, getViewport, onAction, notice = null }) {
   let confirm = null; // a createActionMenu instance while confirming an overwrite
   let activeNotice = notice
     ? createNotice({
-        theme, getViewport, message: notice, buttonLabel: 'New Game',
-        onConfirm: () => { activeNotice = null; onAction?.('new'); },
-        onDismiss: () => { activeNotice = null; },
+        theme,
+        getViewport,
+        message: notice,
+        buttonLabel: 'New Game',
+        onConfirm: () => {
+          activeNotice = null;
+          onAction?.('new');
+        },
+        onDismiss: () => {
+          activeNotice = null;
+        },
       })
     : null;
 
   function askOverwrite() {
     confirm = createActionMenu({
-      theme, getViewport,
+      theme,
+      getViewport,
       title: 'Overwrite existing save?',
       actions: [
         { label: 'New Game', action: 'confirm' },
@@ -42,10 +52,20 @@ export function createMenuScene({ theme, getViewport, onAction, notice = null })
   }
 
   const shell = createMenuShell({
-    theme, getViewport,
+    theme,
+    getViewport,
     getItems: () => [
-      { id: 'new', label: 'New Game', onSelect: () => (hasSave() ? askOverwrite() : onAction?.('new')) },
-      { id: 'continue', label: 'Continue', enabled: hasSave(), onSelect: () => onAction?.('continue') },
+      {
+        id: 'new',
+        label: 'New Game',
+        onSelect: () => (hasSave() ? askOverwrite() : onAction?.('new')),
+      },
+      {
+        id: 'continue',
+        label: 'Continue',
+        enabled: hasSave(),
+        onSelect: () => onAction?.('continue'),
+      },
       { id: 'settings', label: 'Settings', submenu: buildSettingsPage() },
       { id: 'credits', label: 'Credits', submenu: buildCreditsPage() },
     ],
@@ -58,7 +78,11 @@ export function createMenuScene({ theme, getViewport, onAction, notice = null })
       ctx.fillRect(0, 0, width, height);
 
       drawText(ctx, 'ROGµE', width / 2, Math.round(height * 0.18), {
-        color: theme.text, size: 48, weight: '700', align: 'center', baseline: 'middle',
+        color: theme.text,
+        size: 48,
+        weight: '700',
+        align: 'center',
+        baseline: 'middle',
       });
 
       shell.render(ctx);

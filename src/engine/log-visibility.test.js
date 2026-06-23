@@ -18,11 +18,18 @@ describe('isEntryVisible', () => {
 
   it('always shows entries where the player is the target', () => {
     // Goblin (off-screen) hits the player — still shown.
-    expect(isEntryVisible({ actor: 2, target: PLAYER }, deps({ positions: { 2: { x: 0, y: 0 } } }))).toBe(true);
+    expect(
+      isEntryVisible({ actor: 2, target: PLAYER }, deps({ positions: { 2: { x: 0, y: 0 } } })),
+    ).toBe(true);
   });
 
   it('shows everything when there is no FOV data', () => {
-    expect(isEntryVisible({ actor: 2 }, { playerId: PLAYER, visibleTiles: null, getPosition: () => ({ x: 0, y: 0 }) })).toBe(true);
+    expect(
+      isEntryVisible(
+        { actor: 2 },
+        { playerId: PLAYER, visibleTiles: null, getPosition: () => ({ x: 0, y: 0 }) },
+      ),
+    ).toBe(true);
   });
 
   it('hides an NPC-vs-NPC entry when neither combatant is on a visible tile', () => {

@@ -61,7 +61,9 @@ describe('debugLogLines', () => {
 
 describe('formatDebugEntry', () => {
   it('prefixes the turn and uses the display string when present', () => {
-    expect(formatDebugEntry({ turn: 12, display: 'You enter.', seen: true })).toBe('T12 You enter.');
+    expect(formatDebugEntry({ turn: 12, display: 'You enter.', seen: true })).toBe(
+      'T12 You enter.',
+    );
   });
 
   it('renders structured fields for entries with no display string', () => {

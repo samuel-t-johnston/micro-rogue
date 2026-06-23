@@ -10,13 +10,13 @@ export function createDialogController({ theme, getViewport }) {
   return {
     // Show an item list dialog. Resolves with { confirmed, taken } when closed.
     showItemList({ title, items }) {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         active = createItemListDialog({
           theme,
           getViewport,
           title,
           items,
-          onClose: result => {
+          onClose: (result) => {
             active = null;
             resolve(result);
           },

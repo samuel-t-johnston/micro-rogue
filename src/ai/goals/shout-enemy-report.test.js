@@ -15,7 +15,11 @@ describe('shoutEnemyReport', () => {
     // Hostile to the north-east of the commander.
     const result = shoutEnemyReport.evaluate(ctx([obs(7, 8, 2, ['player'])]));
     expect(result).toEqual({
-      action: { type: 'shout', volume: expect.any(Number), message: { kind: 'enemy-report', direction: 'NE' } },
+      action: {
+        type: 'shout',
+        volume: expect.any(Number),
+        message: { kind: 'enemy-report', direction: 'NE' },
+      },
     });
   });
 
@@ -23,13 +27,13 @@ describe('shoutEnemyReport', () => {
     const memory = {};
     const enemy = [obs(7, 8, 5, ['player'])];
     expect(shoutEnemyReport.evaluate(ctx(enemy, memory))).not.toBeNull(); // first sighting → shout
-    expect(shoutEnemyReport.evaluate(ctx(enemy, memory))).toBeNull();     // same enemy → fall through
+    expect(shoutEnemyReport.evaluate(ctx(enemy, memory))).toBeNull(); // same enemy → fall through
   });
 
   it('reports again when the enemy leaves sight and returns', () => {
     const memory = {};
     const enemy = [obs(7, 8, 5, ['player'])];
-    shoutEnemyReport.evaluate(ctx(enemy, memory));        // reported
+    shoutEnemyReport.evaluate(ctx(enemy, memory)); // reported
     expect(shoutEnemyReport.evaluate(ctx([], memory))).toBeNull(); // out of sight — forgotten
     expect(shoutEnemyReport.evaluate(ctx(enemy, memory))).not.toBeNull(); // re-seen → re-report
   });

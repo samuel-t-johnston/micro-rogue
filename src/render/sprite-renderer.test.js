@@ -12,14 +12,14 @@ describe('pickSheetSize', () => {
   });
 
   it('prefers the larger sheet when it divides the target evenly (more detail)', () => {
-    expect(pickSheetSize(32, sizes)).toBe(32);  // 32×1 native, not 16×2
-    expect(pickSheetSize(64, sizes)).toBe(32);  // 32×2, not 16×4
-    expect(pickSheetSize(96, sizes)).toBe(32);  // 48px @ dpr2 → 32×3
+    expect(pickSheetSize(32, sizes)).toBe(32); // 32×1 native, not 16×2
+    expect(pickSheetSize(64, sizes)).toBe(32); // 32×2, not 16×4
+    expect(pickSheetSize(96, sizes)).toBe(32); // 48px @ dpr2 → 32×3
     expect(pickSheetSize(128, sizes)).toBe(32); // 64px @ dpr2 → 32×4
   });
 
   it('falls back to a smaller sheet when the larger one would not scale cleanly', () => {
-    expect(pickSheetSize(48, sizes)).toBe(16);  // 48px @ dpr1: 48%32≠0, 48%16=0 → 16×3
+    expect(pickSheetSize(48, sizes)).toBe(16); // 48px @ dpr1: 48%32≠0, 48%16=0 → 16×3
     expect(pickSheetSize(144, sizes)).toBe(16); // 48px @ dpr3: 144%32≠0, 144%16=0 → 16×9
   });
 
@@ -48,12 +48,27 @@ describe('resolveDraw', () => {
 
   it('picks the best sheet size for the target and scales the cell to it', () => {
     // 32px target on a multi-size sheet → 32px sheet; cell (2,0) → source (64, 0).
-    expect(resolveDraw('floor', 32, { catalog, sheets })).toEqual({ sheet: 'sprite-sheet', size: 32, sx: 64, sy: 0 });
+    expect(resolveDraw('floor', 32, { catalog, sheets })).toEqual({
+      sheet: 'sprite-sheet',
+      size: 32,
+      sx: 64,
+      sy: 0,
+    });
     // 16px target → 16px sheet; cell (2,0) → source (32, 0).
-    expect(resolveDraw('floor', 16, { catalog, sheets })).toEqual({ sheet: 'sprite-sheet', size: 16, sx: 32, sy: 0 });
+    expect(resolveDraw('floor', 16, { catalog, sheets })).toEqual({
+      sheet: 'sprite-sheet',
+      size: 16,
+      sx: 32,
+      sy: 0,
+    });
   });
 
   it('uses a single-size sheet at any target', () => {
-    expect(resolveDraw('knight', 64, { catalog, sheets })).toEqual({ sheet: 'knight', size: 16, sx: 16, sy: 48 });
+    expect(resolveDraw('knight', 64, { catalog, sheets })).toEqual({
+      sheet: 'knight',
+      size: 16,
+      sx: 16,
+      sy: 48,
+    });
   });
 });

@@ -60,8 +60,14 @@ describe('createRngService', () => {
   });
 
   it('different stream names are independent', () => {
-    const seqA = (() => { const r = createRngService(99).stream('combat'); return [r.random(), r.random()]; })();
-    const seqB = (() => { const r = createRngService(99).stream('loot'); return [r.random(), r.random()]; })();
+    const seqA = (() => {
+      const r = createRngService(99).stream('combat');
+      return [r.random(), r.random()];
+    })();
+    const seqB = (() => {
+      const r = createRngService(99).stream('loot');
+      return [r.random(), r.random()];
+    })();
     expect(seqA).not.toEqual(seqB);
   });
 
@@ -90,11 +96,17 @@ describe('createRngService', () => {
 describe('generation is independent of gameplay', () => {
   it('a derived mapgen stream is unaffected by how far the gameplay stream advanced', () => {
     rng.init(12345);
-    const seqA = (() => { const r = rng.deriveRng('mapgen', 0, 0); return [r.random(), r.random(), r.random()]; })();
+    const seqA = (() => {
+      const r = rng.deriveRng('mapgen', 0, 0);
+      return [r.random(), r.random(), r.random()];
+    })();
 
     for (let i = 0; i < 17; i++) rng.random(); // churn the gameplay stream
 
-    const seqB = (() => { const r = rng.deriveRng('mapgen', 0, 0); return [r.random(), r.random(), r.random()]; })();
+    const seqB = (() => {
+      const r = rng.deriveRng('mapgen', 0, 0);
+      return [r.random(), r.random(), r.random()];
+    })();
     expect(seqB).toEqual(seqA);
   });
 });
@@ -128,7 +140,7 @@ describe('ambient rng (gameplay façade)', () => {
   });
 
   it('a new named persistent stream is captured in the snapshot (forkability)', () => {
-    rng.random();              // touch gameplay
+    rng.random(); // touch gameplay
     rng.stream('spawns').random(); // a fork-defined persistent stream
     const snap = rng.snapshot();
     expect(snap.streams).toHaveProperty('gameplay');

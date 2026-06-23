@@ -26,11 +26,19 @@ function drawHeader(ctx, theme, viewport, title, backGlyph) {
   ctx.fillStyle = theme.surface;
   ctx.fillRect(back.x, back.y, back.w, back.h);
   drawText(ctx, backGlyph, back.x + back.w / 2, back.y + back.h / 2, {
-    color: theme.text, size: 22, weight: '600', align: 'center', baseline: 'middle',
+    color: theme.text,
+    size: 22,
+    weight: '600',
+    align: 'center',
+    baseline: 'middle',
   });
 
   drawText(ctx, title, viewport.width / 2, MARGIN + HEADER_H / 2, {
-    color: theme.text, size: 22, weight: '700', align: 'center', baseline: 'middle',
+    color: theme.text,
+    size: 22,
+    weight: '700',
+    align: 'center',
+    baseline: 'middle',
   });
 }
 
@@ -44,7 +52,11 @@ export function createCharacterMenuRoot({ theme, getViewport, cards, onClose, on
     const cardH = cardW;
     const rows = Math.ceil(cards.length / cols);
     const gridH = rows * cardH + (rows - 1) * CARD_GAP;
-    const gridStartY = MARGIN + HEADER_H + MARGIN + Math.max(0, Math.floor((vp.height - HEADER_H - 3 * MARGIN - gridH) / 2));
+    const gridStartY =
+      MARGIN +
+      HEADER_H +
+      MARGIN +
+      Math.max(0, Math.floor((vp.height - HEADER_H - 3 * MARGIN - gridH) / 2));
 
     return cards.map((card, i) => {
       const col = i % cols;
@@ -74,27 +86,46 @@ export function createCharacterMenuRoot({ theme, getViewport, cards, onClose, on
         const cx = card.x + card.w / 2;
         const cy = card.y + card.h / 2 - 12;
         drawText(ctx, card.glyph, cx, cy, {
-          color: theme.text, size: CARD_GLYPH_SIZE, align: 'center', baseline: 'middle',
+          color: theme.text,
+          size: CARD_GLYPH_SIZE,
+          align: 'center',
+          baseline: 'middle',
         });
         drawText(ctx, card.label, cx, card.y + card.h - 18, {
-          color: theme.text, size: CARD_LABEL_SIZE, weight: '600', align: 'center', baseline: 'middle',
+          color: theme.text,
+          size: CARD_LABEL_SIZE,
+          weight: '600',
+          align: 'center',
+          baseline: 'middle',
         });
         if (card.badge) {
           drawText(ctx, card.badge, cx, card.y + card.h - 38, {
-            color: theme.textDim, size: 12, align: 'center', baseline: 'middle',
+            color: theme.textDim,
+            size: 12,
+            align: 'center',
+            baseline: 'middle',
           });
         }
       }
     },
 
     handleInput(event) {
-      if (event.type === 'keydown' && event.key === 'Escape') { onClose(); return true; }
+      if (event.type === 'keydown' && event.key === 'Escape') {
+        onClose();
+        return true;
+      }
       if (event.type !== 'pointerdown') return event.type === 'pointermove';
 
-      if (hitTest(backButtonRect(), event.x, event.y)) { onClose(); return true; }
+      if (hitTest(backButtonRect(), event.x, event.y)) {
+        onClose();
+        return true;
+      }
 
       for (const card of layoutCards()) {
-        if (hitTest(card, event.x, event.y)) { onSelect(card.id); return true; }
+        if (hitTest(card, event.x, event.y)) {
+          onSelect(card.id);
+          return true;
+        }
       }
       return true; // consume all input while menu is open
     },
@@ -105,7 +136,14 @@ export function createCharacterMenuRoot({ theme, getViewport, cards, onClose, on
  * Wraps a screen body (renderer + input handler) in the consistent header + back chrome. The body
  * draws into the rect passed to `renderBody`/`handleBodyInput`.
  */
-export function createCharacterMenuSubScreen({ theme, getViewport, title, renderBody, handleBodyInput, onBack }) {
+export function createCharacterMenuSubScreen({
+  theme,
+  getViewport,
+  title,
+  renderBody,
+  handleBodyInput,
+  onBack,
+}) {
   function bodyRect() {
     const vp = getViewport();
     const top = MARGIN + HEADER_H + MARGIN;
@@ -120,9 +158,13 @@ export function createCharacterMenuSubScreen({ theme, getViewport, title, render
     },
 
     handleInput(event) {
-      if (event.type === 'keydown' && event.key === 'Escape') { onBack(); return true; }
+      if (event.type === 'keydown' && event.key === 'Escape') {
+        onBack();
+        return true;
+      }
       if (event.type === 'pointerdown' && hitTest(backButtonRect(), event.x, event.y)) {
-        onBack(); return true;
+        onBack();
+        return true;
       }
       if (handleBodyInput?.(event, bodyRect())) return true;
       return event.type === 'pointerdown' || event.type === 'pointermove';

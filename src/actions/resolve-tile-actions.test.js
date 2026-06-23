@@ -15,8 +15,8 @@ function makeLevel(w = 5, h = 5) {
 
 const PLAYER = { x: 2, y: 2 };
 // Every tile carries a trailing free 'look' row; the gameplay assertions below ignore it.
-const gameplay = (rows) => rows.filter(r => r.id !== 'look');
-const ids = (rows) => gameplay(rows).map(r => r.id);
+const gameplay = (rows) => rows.filter((r) => r.id !== 'look');
+const ids = (rows) => gameplay(rows).map((r) => r.id);
 const resolve = (level, x, y) => resolveTileActions(level, PLAYER, { x, y });
 
 describe('resolveTileActions', () => {
@@ -119,10 +119,21 @@ describe('resolveTileActions', () => {
 
   it('offers Look last on every tile, as a free action', () => {
     level.placeEntity(createDoor(registry, 2, 1)); // a tile with gameplay actions
-    for (const [x, y] of [[3, 2], [2, 1], [0, 0], [2, 2]]) { // empty adj, door, distant, self
+    for (const [x, y] of [
+      [3, 2],
+      [2, 1],
+      [0, 0],
+      [2, 2],
+    ]) {
+      // empty adj, door, distant, self
       const rows = resolve(level, x, y);
       const last = rows[rows.length - 1];
-      expect(last).toEqual({ id: 'look', label: 'Look', action: { type: 'lookAt', x, y }, free: true });
+      expect(last).toEqual({
+        id: 'look',
+        label: 'Look',
+        action: { type: 'lookAt', x, y },
+        free: true,
+      });
     }
   });
 });

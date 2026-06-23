@@ -23,7 +23,7 @@ describe('vision acuity (range from the vision component)', () => {
   it('limits FOV to the component range', () => {
     const { level, e } = setup(3);
     const { visibleTiles } = vision(e, level, 0);
-    expect(visibleTiles.has('13,10')).toBe(true);  // 3 tiles east — within range 3
+    expect(visibleTiles.has('13,10')).toBe(true); // 3 tiles east — within range 3
     expect(visibleTiles.has('14,10')).toBe(false); // 4 tiles east — beyond range 3
   });
 

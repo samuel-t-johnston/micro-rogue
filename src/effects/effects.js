@@ -13,7 +13,7 @@ import { effectDamage } from './effect-damage.js';
 
 // Effect type → handler registry. Add new effect types here.
 const EFFECTS = {
-  heal:   effectHeal,
+  heal: effectHeal,
   damage: effectDamage,
 };
 
@@ -29,6 +29,6 @@ export function applyEffect(effectType, user, target, params, level, registry) {
 
 /** Canonical effect type names. */
 export const EffectTypes = Object.freeze({
-  HEAL:   'heal',
+  HEAL: 'heal',
   DAMAGE: 'damage',
 });

@@ -12,7 +12,10 @@ function makeScene({ amulet = null, x = 5, y = 5, exitAt = null } = {}) {
     ['inventory', { items }],
   ]);
   const exitTile = exitAt ?? { x, y };
-  const exit = entity([['dungeonExit', {}], ['position', exitTile]]);
+  const exit = entity([
+    ['dungeonExit', {}],
+    ['position', exitTile],
+  ]);
   const level = {
     getEntitiesAt: (qx, qy) => new Set(qx === exitTile.x && qy === exitTile.y ? [exit] : []),
   };
@@ -32,7 +35,12 @@ describe('escapeWithQuestItem', () => {
   });
 
   it('does not win holding the quest item off the exit', () => {
-    const ctx = makeScene({ amulet: questItem('amulet-of-yendor'), x: 1, y: 1, exitAt: { x: 9, y: 9 } });
+    const ctx = makeScene({
+      amulet: questItem('amulet-of-yendor'),
+      x: 1,
+      y: 1,
+      exitAt: { x: 9, y: 9 },
+    });
     expect(condition(ctx)).toBeNull();
   });
 

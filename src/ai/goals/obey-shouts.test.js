@@ -37,7 +37,7 @@ describe('obeyShouts', () => {
   it('keeps advancing on the last heading for a few turns after the sound fades', () => {
     const memory = {};
     obeyShouts.evaluate(ctx([sound({ direction: 'E' })], memory)); // hears the order
-    const next = obeyShouts.evaluate(ctx([], memory));             // no sound now
+    const next = obeyShouts.evaluate(ctx([], memory)); // no sound now
     expect(next).toEqual({ action: { type: 'move', x: 6, y: 5 } });
   });
 
@@ -49,7 +49,9 @@ describe('obeyShouts', () => {
   });
 
   it('returns null when the heading tile is blocked', () => {
-    const result = obeyShouts.evaluate(ctx([sound({ direction: 'E' })], {}, { passable: () => false }));
+    const result = obeyShouts.evaluate(
+      ctx([sound({ direction: 'E' })], {}, { passable: () => false }),
+    );
     expect(result).toBeNull();
   });
 });

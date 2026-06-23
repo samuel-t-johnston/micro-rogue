@@ -9,10 +9,12 @@ export const attackAdjacent = {
   evaluate(context) {
     const { selfState, perception } = context;
 
-    const target = perception.entities.find(o =>
-      o.tags.isActor &&
-      areHostile(selfState.factions, o.factions) &&
-      chebyshevDistance(selfState.position, o.position) === 1);
+    const target = perception.entities.find(
+      (o) =>
+        o.tags.isActor &&
+        areHostile(selfState.factions, o.factions) &&
+        chebyshevDistance(selfState.position, o.position) === 1,
+    );
 
     if (!target) return null;
     return { action: { type: 'attack', targetEntityId: target.entityId } };

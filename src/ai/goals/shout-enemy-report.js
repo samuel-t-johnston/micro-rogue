@@ -19,14 +19,15 @@ export const shoutEnemyReport = {
   evaluate(context) {
     const { memory, perception, selfState } = context;
 
-    const hostiles = perception.entities.filter(o =>
-      o.tags.isActor && areHostile(selfState.factions, o.factions));
-    const visibleIds = new Set(hostiles.map(h => h.entityId));
+    const hostiles = perception.entities.filter(
+      (o) => o.tags.isActor && areHostile(selfState.factions, o.factions),
+    );
+    const visibleIds = new Set(hostiles.map((h) => h.entityId));
 
     // Forget enemies no longer visible so a re-encounter triggers a fresh report.
-    const reported = new Set((memory.reportedEnemyIds ?? []).filter(id => visibleIds.has(id)));
+    const reported = new Set((memory.reportedEnemyIds ?? []).filter((id) => visibleIds.has(id)));
 
-    const unreported = hostiles.filter(h => !reported.has(h.entityId));
+    const unreported = hostiles.filter((h) => !reported.has(h.entityId));
     if (unreported.length === 0) {
       memory.reportedEnemyIds = [...reported];
       return null; // nothing new to report — fall through to combat
@@ -36,13 +37,18 @@ export const shoutEnemyReport = {
     let best = chebyshevDistance(selfState.position, target.position);
     for (const h of unreported) {
       const d = chebyshevDistance(selfState.position, h.position);
-      if (d < best) { target = h; best = d; }
+      if (d < best) {
+        target = h;
+        best = d;
+      }
     }
 
     reported.add(target.entityId);
     memory.reportedEnemyIds = [...reported];
 
     const direction = cardinalDirection(selfState.position, target.position);
-    return { action: { type: 'shout', volume: SHOUT_VOLUME, message: { kind: 'enemy-report', direction } } };
+    return {
+      action: { type: 'shout', volume: SHOUT_VOLUME, message: { kind: 'enemy-report', direction } },
+    };
   },
 };

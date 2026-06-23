@@ -27,5 +27,5 @@ export function isEntryVisible(entry, { playerId, visibleTiles, getPosition }) {
 
   if (positions.length === 0) return true;
 
-  return positions.some(p => visibleTiles.has(`${p.x},${p.y}`));
+  return positions.some((p) => visibleTiles.has(`${p.x},${p.y}`));
 }

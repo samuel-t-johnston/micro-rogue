@@ -10,14 +10,16 @@ function makeEntity(extra) {
   return e;
 }
 
-const player = () => makeEntity((r, e) => {
-  r.addComponent(e, 'name', components.name('Player'));
-  r.addComponent(e, 'playerControlled', components.playerControlled());
-});
+const player = () =>
+  makeEntity((r, e) => {
+    r.addComponent(e, 'name', components.name('Player'));
+    r.addComponent(e, 'playerControlled', components.playerControlled());
+  });
 
-const goblin = () => makeEntity((r, e) => {
-  r.addComponent(e, 'name', components.name('Goblin'));
-});
+const goblin = () =>
+  makeEntity((r, e) => {
+    r.addComponent(e, 'name', components.name('Goblin'));
+  });
 
 describe('log-text', () => {
   it('detects the player via the playerControlled component', () => {
@@ -43,7 +45,9 @@ describe('log-text', () => {
   });
 
   it('lowercases item names for mid-sentence use', () => {
-    const potion = makeEntity((r, e) => r.addComponent(e, 'name', components.name('Healing Potion')));
+    const potion = makeEntity((r, e) =>
+      r.addComponent(e, 'name', components.name('Healing Potion')),
+    );
     expect(itemName(potion)).toBe('healing potion');
   });
 });

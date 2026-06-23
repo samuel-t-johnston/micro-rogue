@@ -22,16 +22,21 @@ function makeActor(registry, level, { withVoice = true } = {}) {
 }
 
 function soundsOnLevel(level) {
-  return level.entities.filter(e => e.components.has('sound'));
+  return level.entities.filter((e) => e.components.has('sound'));
 }
 
 describe('executeShout', () => {
-  it('emits a sound at the actor\'s tile, stamped with the actor\'s voice language', () => {
+  it("emits a sound at the actor's tile, stamped with the actor's voice language", () => {
     const registry = createEntityRegistry();
     const level = makeLevel();
     const actor = makeActor(registry, level);
 
-    executeShout(actor, { type: 'shout', volume: 8, message: { kind: 'enemy-report', direction: 'NW' } }, level, registry);
+    executeShout(
+      actor,
+      { type: 'shout', volume: 8, message: { kind: 'enemy-report', direction: 'NW' } },
+      level,
+      registry,
+    );
 
     const [sound] = soundsOnLevel(level);
     expect(sound.components.get('position')).toEqual({ x: 2, y: 2 });
@@ -59,6 +64,8 @@ describe('executeShout', () => {
     const registry = createEntityRegistry();
     const level = makeLevel();
     const actor = makeActor(registry, level);
-    expect(executeShout(actor, { type: 'shout', volume: 5, message: {} }, level, registry)).toBe(false);
+    expect(executeShout(actor, { type: 'shout', volume: 5, message: {} }, level, registry)).toBe(
+      false,
+    );
   });
 });

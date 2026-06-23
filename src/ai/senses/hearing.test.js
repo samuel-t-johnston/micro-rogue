@@ -28,7 +28,11 @@ describe('hearing sense', () => {
     const { registry, level, hearer } = setup({ range: 5 });
     // 4 tiles east, volume 0 → within range 5.
     const sound = emitSound(registry, level, {
-      sourceId: 99, x: 14, y: 10, volume: 0, language: null,
+      sourceId: 99,
+      x: 14,
+      y: 10,
+      volume: 0,
+      language: null,
       message: { kind: 'enemy-report', direction: 'NW' },
     });
 
@@ -51,14 +55,14 @@ describe('hearing sense', () => {
     expect(hearing(hearer, level, 0).sounds).toHaveLength(0);
   });
 
-  it('extends audibility by the sound\'s volume', () => {
+  it("extends audibility by the sound's volume", () => {
     const { registry, level, hearer } = setup({ range: 5 });
     // 8 tiles east, volume 3 → reach 8 == distance 8 → audible.
     emitSound(registry, level, { sourceId: 99, x: 18, y: 10, volume: 3 });
     expect(hearing(hearer, level, 0).sounds).toHaveLength(1);
   });
 
-  it('never reports the hearer\'s own sounds', () => {
+  it("never reports the hearer's own sounds", () => {
     const { registry, level, hearer } = setup({ range: 5 });
     emitSound(registry, level, { sourceId: hearer.id, x: 11, y: 10, volume: 0 });
     expect(hearing(hearer, level, 0).sounds).toHaveLength(0);
@@ -68,12 +72,14 @@ describe('hearing sense', () => {
     const { registry, level, hearer } = setup({ range: 5, knownLanguages: ['orcish'] });
     emitSound(registry, level, { sourceId: 91, x: 12, y: 10, volume: 0, language: 'orcish' });
     emitSound(registry, level, { sourceId: 92, x: 8, y: 10, volume: 0, language: 'elvish' });
-    const bySource = Object.fromEntries(hearing(hearer, level, 0).sounds.map(s => [s.sourceId, s.understood]));
-    expect(bySource[91]).toBe(true);   // orcish — known
-    expect(bySource[92]).toBe(false);  // elvish — unknown
+    const bySource = Object.fromEntries(
+      hearing(hearer, level, 0).sounds.map((s) => [s.sourceId, s.understood]),
+    );
+    expect(bySource[91]).toBe(true); // orcish — known
+    expect(bySource[92]).toBe(false); // elvish — unknown
   });
 
-  it('passes the sound\'s source factions through to the percept', () => {
+  it("passes the sound's source factions through to the percept", () => {
     const { registry, level, hearer } = setup({ range: 5 });
     emitSound(registry, level, { sourceId: 91, x: 12, y: 10, volume: 0, sourceFactions: ['orcs'] });
     expect(hearing(hearer, level, 0).sounds[0].sourceFactions).toEqual(['orcs']);

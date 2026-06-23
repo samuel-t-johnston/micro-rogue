@@ -9,7 +9,9 @@ function openLevel(w = 9, h = 9) {
   level.height = h;
   level.tiles = Array.from({ length: h }, (_, y) =>
     Array.from({ length: w }, (_, x) =>
-      x === 0 || y === 0 || x === w - 1 || y === h - 1 ? 'wall' : 'floor'));
+      x === 0 || y === 0 || x === w - 1 || y === h - 1 ? 'wall' : 'floor',
+    ),
+  );
   return level;
 }
 
@@ -44,8 +46,8 @@ describe('chaseOthers', () => {
   });
 
   it('targets the nearest of multiple hostiles', () => {
-    const near = obs(1, 2, 4, ['player']);  // distance 2
-    const far = obs(2, 2, 8, ['player']);   // distance 6
+    const near = obs(1, 2, 4, ['player']); // distance 2
+    const far = obs(2, 2, 8, ['player']); // distance 6
     const result = chaseOthers.evaluate(ctx([far, near], openLevel()));
     // Should step toward the nearer target at (2,4): y increases toward it.
     expect(result.action.type).toBe('move');

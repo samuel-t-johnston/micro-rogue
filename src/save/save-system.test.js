@@ -41,7 +41,9 @@ async function buildGame() {
   level.height = 8;
   level.tiles = Array.from({ length: level.height }, (_, y) =>
     Array.from({ length: level.width }, (_, x) =>
-      (x === 0 || y === 0 || x === level.width - 1 || y === level.height - 1) ? 'wall' : 'floor'));
+      x === 0 || y === 0 || x === level.width - 1 || y === level.height - 1 ? 'wall' : 'floor',
+    ),
+  );
   level.blackboard = { theme: 'test' };
 
   const cx = 6;
@@ -66,12 +68,19 @@ async function buildGame() {
   player.components.get('inventory').items.push(potion);
 
   const dagger = createDagger(registry, null, null, player.id);
-  dagger.components.get('item').location = { type: 'equipped', ownerId: player.id, slot: Slots.WEAPON };
+  dagger.components.get('item').location = {
+    type: 'equipped',
+    ownerId: player.id,
+    slot: Slots.WEAPON,
+  };
   player.components.get('wearsEquipment').slots[Slots.WEAPON] = dagger;
 
   const mem = player.components.get('memory');
   mem.autoMoveTarget = { x: 3, y: 4 };
-  mem.knownEnemyIds = registry.getEntitiesWith('ai').filter(e => e !== player).map(e => e.id);
+  mem.knownEnemyIds = registry
+    .getEntitiesWith('ai')
+    .filter((e) => e !== player)
+    .map((e) => e.id);
 
   // Deterministic perception content (independent of FOV specifics) to assert Set/Map fidelity.
   const tp = player.components.get('tilePerception');
@@ -129,7 +138,7 @@ describe('serializeGame / deserializeGame round-trip', () => {
     expect(Array.isArray(p.components.get('memory').knownEnemyIds)).toBe(true);
 
     // Chest contents survive — items live only in the registry, referenced by ids.
-    const chest = restored.registry.getAllEntities().find(e => e.components.has('container'));
+    const chest = restored.registry.getAllEntities().find((e) => e.components.has('container'));
     const chestItems = chest.components.get('inventory').items;
     expect(chestItems).toHaveLength(3);
     for (const item of chestItems) {
@@ -149,7 +158,7 @@ describe('serializeGame / deserializeGame round-trip', () => {
     const save = serializeGame({ registry, level, player, turnCount: 1 });
     const restored = deserializeGame(JSON.parse(JSON.stringify(save)));
 
-    const maxId = Math.max(...restored.registry.getAllEntities().map(e => e.id));
+    const maxId = Math.max(...restored.registry.getAllEntities().map((e) => e.id));
     expect(restored.registry.getNextId()).toBe(registry.getNextId());
     expect(restored.registry.getNextId()).toBeGreaterThan(maxId);
   });
@@ -161,7 +170,12 @@ describe('serializeGame / deserializeGame round-trip', () => {
       'floor-1': { level: { width: 3, height: 3, tiles: [], entityIds: [] }, entities: [] },
     };
     const save = serializeGame({
-      registry, level, player, turnCount: 3, currentNodeId: 'floor-2', frozenLevels,
+      registry,
+      level,
+      player,
+      turnCount: 3,
+      currentNodeId: 'floor-2',
+      frozenLevels,
     });
 
     const restored = deserializeGame(JSON.parse(JSON.stringify(save)));
@@ -176,8 +190,13 @@ describe('loadSave migration runner', () => {
   // These tests push stub migrations; snapshot and restore the real chain around each so the
   // shipped migrations (and other tests) are unaffected.
   let realMigrations;
-  beforeEach(() => { realMigrations = migrations.slice(); });
-  afterEach(() => { migrations.length = 0; migrations.push(...realMigrations); });
+  beforeEach(() => {
+    realMigrations = migrations.slice();
+  });
+  afterEach(() => {
+    migrations.length = 0;
+    migrations.push(...realMigrations);
+  });
 
   it('throws SaveTooNewError for a save from a newer schema', () => {
     expect(() => loadSave({ saveVersion: SAVE_VERSION + 1 })).toThrow(SaveTooNewError);
@@ -195,7 +214,10 @@ describe('loadSave migration runner', () => {
     migrations.push({
       from: SAVE_VERSION,
       to: SAVE_VERSION + 1,
-      migrate: (s) => { s.migrated = true; return s; },
+      migrate: (s) => {
+        s.migrated = true;
+        return s;
+      },
     });
     const out = loadSave({ saveVersion: SAVE_VERSION, versionHistory: [] });
     expect(out.migrated).toBe(true);
@@ -208,7 +230,9 @@ describe('loadSave migration runner', () => {
     migrations.push({
       from: SAVE_VERSION,
       to: SAVE_VERSION + 1,
-      migrate: () => { throw new Error('boom'); },
+      migrate: () => {
+        throw new Error('boom');
+      },
     });
     try {
       loadSave({ saveVersion: SAVE_VERSION, versionHistory: [] });
@@ -268,7 +292,7 @@ describe('v2 → v3 migration (real, from a fixture)', () => {
 });
 
 describe('v3 → v4 migration (real, from a fixture)', () => {
-  const findEntity = (entities, id) => entities.find(e => e.id === id);
+  const findEntity = (entities, id) => entities.find((e) => e.id === id);
 
   it('gives every turnTaker entity a creature marker', () => {
     const migrated = loadSave(saveV3);
@@ -297,7 +321,7 @@ describe('v3 → v4 migration (real, from a fixture)', () => {
 });
 
 describe('v4 → v5 migration (real, from a fixture)', () => {
-  const findEntity = (entities, id) => entities.find(e => e.id === id);
+  const findEntity = (entities, id) => entities.find((e) => e.id === id);
 
   it('converts known sprite coordinates to catalog names', () => {
     const migrated = loadSave(saveV4);

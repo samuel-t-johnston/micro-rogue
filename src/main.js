@@ -56,7 +56,8 @@ let pendingNotice = null;
 // Deferred so the in-flight GAME mount unwinds before we tear it down.
 function handleSaveLoadFailed() {
   clearSave();
-  pendingNotice = "Your saved game couldn't be carried forward after a game update, so it has been cleared.";
+  pendingNotice =
+    "Your saved game couldn't be carried forward after a game update, so it has been cleared.";
   queueMicrotask(() => appState.transition(AppState.MENU));
 }
 
@@ -65,7 +66,9 @@ function handleSaveLoadFailed() {
 // scene starts fresh because startMode is 'new'.
 function startNewGame() {
   startMode = 'new';
-  appState.transition(gameSettings.get('skipNewGameInstructions') ? AppState.GAME : AppState.INSTRUCTIONS);
+  appState.transition(
+    gameSettings.get('skipNewGameInstructions') ? AppState.GAME : AppState.INSTRUCTIONS,
+  );
 }
 
 function handleMenuAction(id) {
@@ -82,9 +85,7 @@ function handleMenuAction(id) {
   }
 }
 
-appState.register(AppState.SPLASH, () =>
-  createSplashScene({ appState, theme, getViewport })
-);
+appState.register(AppState.SPLASH, () => createSplashScene({ appState, theme, getViewport }));
 appState.register(AppState.MENU, () => {
   const notice = pendingNotice;
   pendingNotice = null; // consume: the message shows on this mount only
@@ -101,14 +102,14 @@ appState.register(AppState.GAME, () =>
     },
     onNewGame: startNewGame,
     onLoadFailed: handleSaveLoadFailed,
-  })
+  }),
 );
 appState.register(AppState.INSTRUCTIONS, () =>
   createInstructionsScene({
     theme,
     getViewport,
     onContinue: () => appState.transition(AppState.GAME),
-  })
+  }),
 );
 appState.register(AppState.RESULTS, () =>
   createResultsScene({
@@ -116,7 +117,7 @@ appState.register(AppState.RESULTS, () =>
     getViewport,
     getResults: () => lastResults,
     onContinue: () => appState.transition(AppState.MENU),
-  })
+  }),
 );
 
 resize();
@@ -135,7 +136,10 @@ function updateDebugPointer(x, y) {
   if (!debugOverlay) return;
   const scene = appState.layers.top();
   const world = scene?.screenToWorld?.(x, y);
-  if (!world) { debugOverlay.setPointerPos(x, y, null); return; }
+  if (!world) {
+    debugOverlay.setPointerPos(x, y, null);
+    return;
+  }
   const tx = Math.floor(world.x);
   const ty = Math.floor(world.y);
   debugOverlay.setPointerPos(x, y, scene.getDebugInfo?.(tx, ty) ?? { x: tx, y: ty });
@@ -143,7 +147,13 @@ function updateDebugPointer(x, y) {
 requestAnimationFrame(frame);
 
 canvas.addEventListener('pointerdown', (e) => {
-  appState.handleInput({ type: 'pointerdown', x: e.clientX, y: e.clientY, pointerId: e.pointerId, button: e.button });
+  appState.handleInput({
+    type: 'pointerdown',
+    x: e.clientX,
+    y: e.clientY,
+    pointerId: e.pointerId,
+    button: e.button,
+  });
   updateDebugPointer(e.clientX, e.clientY);
 });
 canvas.addEventListener('pointermove', (e) => {
@@ -154,7 +164,12 @@ canvas.addEventListener('pointerup', (e) => {
   appState.handleInput({ type: 'pointerup', x: e.clientX, y: e.clientY, pointerId: e.pointerId });
 });
 canvas.addEventListener('pointercancel', (e) => {
-  appState.handleInput({ type: 'pointercancel', x: e.clientX, y: e.clientY, pointerId: e.pointerId });
+  appState.handleInput({
+    type: 'pointercancel',
+    x: e.clientX,
+    y: e.clientY,
+    pointerId: e.pointerId,
+  });
 });
 // Desktop secondary click → contextual tile menu. preventDefault suppresses the OS context menu.
 canvas.addEventListener('contextmenu', (e) => {
@@ -162,17 +177,36 @@ canvas.addEventListener('contextmenu', (e) => {
   appState.handleInput({ type: 'contextmenu', x: e.clientX, y: e.clientY });
 });
 // Desktop zoom. preventDefault stops ctrl+wheel page zoom; the canvas already sets touch-action:none.
-canvas.addEventListener('wheel', (e) => {
-  e.preventDefault();
-  appState.handleInput({ type: 'wheel', deltaY: e.deltaY, x: e.clientX, y: e.clientY });
-}, { passive: false });
+canvas.addEventListener(
+  'wheel',
+  (e) => {
+    e.preventDefault();
+    appState.handleInput({ type: 'wheel', deltaY: e.deltaY, x: e.clientX, y: e.clientY });
+  },
+  { passive: false },
+);
 window.addEventListener('keydown', (e) => {
   if (debugOverlay) {
-    if (e.key === '`') { debugOverlay.toggle(); return; }
-    if (e.key === '1') { debugOverlay.toggleFov(); return; }
-    if (e.key === '2') { debugOverlay.togglePassability(); return; }
-    if (e.key === '3') { debugOverlay.toggleScent(); return; }
-    if (e.key === '4') { debugOverlay.toggleSound(); return; }
+    if (e.key === '`') {
+      debugOverlay.toggle();
+      return;
+    }
+    if (e.key === '1') {
+      debugOverlay.toggleFov();
+      return;
+    }
+    if (e.key === '2') {
+      debugOverlay.togglePassability();
+      return;
+    }
+    if (e.key === '3') {
+      debugOverlay.toggleScent();
+      return;
+    }
+    if (e.key === '4') {
+      debugOverlay.toggleSound();
+      return;
+    }
   }
   appState.handleInput({ type: 'keydown', key: e.key });
 });

@@ -11,8 +11,9 @@ export const chaseOthers = {
   evaluate(context) {
     const { selfState, perception, level } = context;
 
-    const hostiles = perception.entities.filter(o =>
-      o.tags.isActor && areHostile(selfState.factions, o.factions));
+    const hostiles = perception.entities.filter(
+      (o) => o.tags.isActor && areHostile(selfState.factions, o.factions),
+    );
     if (hostiles.length === 0) return null;
 
     let target = hostiles[0];

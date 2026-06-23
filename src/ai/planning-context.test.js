@@ -96,14 +96,23 @@ describe('applySenses', () => {
 describe('applySenses fog-of-war furniture', () => {
   // Places a furniture-like entity at (x,y) with a renderable and the given marker components.
   function placeFurniture(level, x, y, renderable, markers = ['persistVisible']) {
-    const components = new Map([['position', { x, y }], ['renderable', renderable]]);
+    const components = new Map([
+      ['position', { x, y }],
+      ['renderable', renderable],
+    ]);
     for (const m of markers) components.set(m, {});
     const entity = { id: `f-${x}-${y}`, components };
     level.placeEntity(entity);
     return entity;
   }
 
-  const doorRenderable = { sprite: { col: 16, row: 22 }, color: '#8B6F47', glyph: '+', glyphColor: '#c8a36a', layer: 0 };
+  const doorRenderable = {
+    sprite: { col: 16, row: 22 },
+    color: '#8B6F47',
+    glyph: '+',
+    glyphColor: '#c8a36a',
+    layer: 0,
+  };
 
   it('snapshots a persistVisible entity on a visible tile', () => {
     const level = makeLevel(5, 5);
@@ -137,7 +146,9 @@ describe('applySenses fog-of-war furniture', () => {
     visibleTiles = new Set(['0,0']); // walk away; tile 2,3 no longer visible
     applySenses(entity, level);
 
-    expect(entity.components.get('tilePerception').rememberedEntities.get('2,3')).toEqual([doorRenderable]);
+    expect(entity.components.get('tilePerception').rememberedEntities.get('2,3')).toEqual([
+      doorRenderable,
+    ]);
   });
 
   it('replaces the snapshot with the latest appearance when the tile is re-seen', () => {
@@ -149,7 +160,9 @@ describe('applySenses fog-of-war furniture', () => {
     door.components.get('renderable').glyph = "'"; // door opened: appearance changes
     applySenses(entity, level);
 
-    expect(entity.components.get('tilePerception').rememberedEntities.get('2,3')[0].glyph).toBe("'");
+    expect(entity.components.get('tilePerception').rememberedEntities.get('2,3')[0].glyph).toBe(
+      "'",
+    );
   });
 
   it('clears a remembered tile when its furniture is gone on re-sighting', () => {
@@ -170,121 +183,241 @@ describe('buildPlanningContext', () => {
 
   it('merges entity observations from multiple senses, higher confidence wins', () => {
     const obs = (confidence) => ({
-      entityId: 'e1', position: { x: 1, y: 0 }, confidence, turnObserved: 1, tags: {},
+      entityId: 'e1',
+      position: { x: 1, y: 0 },
+      confidence,
+      turnObserved: 1,
+      tags: {},
     });
     const entity = makeEntity({
       senses: [makeSense(new Set(), [obs(60)]), makeSense(new Set(), [obs(80)])],
     });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 1 });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(5, 5),
+      inputController,
+      turnCount: 1,
+    });
     expect(ctx.perception.entities).toHaveLength(1);
     expect(ctx.perception.entities[0].confidence).toBe(80);
   });
 
   it('exposes visibleTiles as the current-turn visible Set', () => {
     const entity = makeEntity({ senses: [makeSense(new Set(['1,0']))] });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(5, 5),
+      inputController,
+      turnCount: 0,
+    });
     expect(ctx.perception.visibleTiles.has('1,0')).toBe(true);
   });
 
   it('exposes knownTiles as the tilePerception memory map', () => {
     const entity = makeEntity({ senses: [makeSense(new Set(['1,0']))] });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(5, 5),
+      inputController,
+      turnCount: 0,
+    });
     expect(ctx.perception.knownTiles).toBe(entity.components.get('tilePerception').memory);
     expect(ctx.perception.knownTiles.get('1,0')).toBe('floor');
   });
 
   it('collects sounds from sense results into perception.sounds', () => {
     registerSense('mock-hears', () => ({
-      entities: [], visibleTiles: new Set(), sounds: [{ soundId: 1, message: { kind: 'x' } }],
+      entities: [],
+      visibleTiles: new Set(),
+      sounds: [{ soundId: 1, message: { kind: 'x' } }],
     }));
     const entity = makeEntity({ senses: ['mock-hears'] });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(5, 5),
+      inputController,
+      turnCount: 0,
+    });
     expect(ctx.perception.sounds).toEqual([{ soundId: 1, message: { kind: 'x' } }]);
   });
 
   it('dedupes a sound reported by more than one sense, by soundId', () => {
-    registerSense('mock-hears-a', () => ({ entities: [], visibleTiles: new Set(), sounds: [{ soundId: 5 }] }));
-    registerSense('mock-hears-b', () => ({ entities: [], visibleTiles: new Set(), sounds: [{ soundId: 5 }] }));
+    registerSense('mock-hears-a', () => ({
+      entities: [],
+      visibleTiles: new Set(),
+      sounds: [{ soundId: 5 }],
+    }));
+    registerSense('mock-hears-b', () => ({
+      entities: [],
+      visibleTiles: new Set(),
+      sounds: [{ soundId: 5 }],
+    }));
     const entity = makeEntity({ senses: ['mock-hears-a', 'mock-hears-b'] });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(5, 5),
+      inputController,
+      turnCount: 0,
+    });
     expect(ctx.perception.sounds).toHaveLength(1);
   });
 
   it('defaults perception.sounds to empty when no sense reports sounds', () => {
     const entity = makeEntity({ senses: [makeSense(new Set(['1,0']))] });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(5, 5),
+      inputController,
+      turnCount: 0,
+    });
     expect(ctx.perception.sounds).toEqual([]);
   });
 
   it('collects smells from sense results into perception.smells', () => {
     registerSense('mock-smells', () => ({
-      entities: [], visibleTiles: new Set(), smells: [{ profile: 'orcs', intensity: 5 }],
+      entities: [],
+      visibleTiles: new Set(),
+      smells: [{ profile: 'orcs', intensity: 5 }],
     }));
     const entity = makeEntity({ senses: ['mock-smells'] });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(5, 5),
+      inputController,
+      turnCount: 0,
+    });
     expect(ctx.perception.smells).toEqual([{ profile: 'orcs', intensity: 5 }]);
   });
 
   it('keeps the strongest reading when two senses report the same scent profile', () => {
-    registerSense('mock-smell-a', () => ({ entities: [], visibleTiles: new Set(), smells: [{ profile: 'orcs', intensity: 3 }] }));
-    registerSense('mock-smell-b', () => ({ entities: [], visibleTiles: new Set(), smells: [{ profile: 'orcs', intensity: 9 }] }));
+    registerSense('mock-smell-a', () => ({
+      entities: [],
+      visibleTiles: new Set(),
+      smells: [{ profile: 'orcs', intensity: 3 }],
+    }));
+    registerSense('mock-smell-b', () => ({
+      entities: [],
+      visibleTiles: new Set(),
+      smells: [{ profile: 'orcs', intensity: 9 }],
+    }));
     const entity = makeEntity({ senses: ['mock-smell-a', 'mock-smell-b'] });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(5, 5),
+      inputController,
+      turnCount: 0,
+    });
     expect(ctx.perception.smells).toEqual([{ profile: 'orcs', intensity: 9 }]);
   });
 
   it('defaults perception.smells to empty when no sense reports smells', () => {
     const entity = makeEntity({ senses: [makeSense(new Set(['1,0']))] });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 0 });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(5, 5),
+      inputController,
+      turnCount: 0,
+    });
     expect(ctx.perception.smells).toEqual([]);
   });
 });
 
 describe('perception memory (lastKnownEnemy)', () => {
   const inputController = { waitForInput: () => {}, hasPendingInput: () => false };
-  const enemy = { entityId: 9, position: { x: 3, y: 0 }, factions: ['player'], tags: { isActor: true } };
+  const enemy = {
+    entityId: 9,
+    position: { x: 3, y: 0 },
+    factions: ['player'],
+    tags: { isActor: true },
+  };
 
-  it('records a seen hostile\'s exact tile when the entity remembers enemies', () => {
+  it("records a seen hostile's exact tile when the entity remembers enemies", () => {
     const entity = makeEntity({
-      senses: [makeSense(new Set(), [enemy])], faction: ['orcs'], memory: { remembersEnemies: true },
+      senses: [makeSense(new Set(), [enemy])],
+      faction: ['orcs'],
+      memory: { remembersEnemies: true },
     });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 7 });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(5, 5),
+      inputController,
+      turnCount: 7,
+    });
     expect(ctx.memory.lastKnownEnemy).toEqual({ pos: { x: 3, y: 0 }, turn: 7, source: 'sight' });
   });
 
   it('does not record when the entity does not remember enemies', () => {
-    const entity = makeEntity({ senses: [makeSense(new Set(), [enemy])], faction: ['orcs'], memory: {} });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(5, 5), inputController, turnCount: 1 });
+    const entity = makeEntity({
+      senses: [makeSense(new Set(), [enemy])],
+      faction: ['orcs'],
+      memory: {},
+    });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(5, 5),
+      inputController,
+      turnCount: 1,
+    });
     expect(ctx.memory.lastKnownEnemy).toBeUndefined();
   });
 
   it('records a non-ally noise as a projected tile when nothing is seen', () => {
     registerSense('mock-enemy-noise', () => ({
-      entities: [], visibleTiles: new Set(),
+      entities: [],
+      visibleTiles: new Set(),
       sounds: [{ soundId: 1, perceivedDirection: 'E', distance: 3, sourceFactions: ['player'] }],
     }));
-    const entity = makeEntity({ senses: ['mock-enemy-noise'], faction: ['orcs'], memory: { remembersEnemies: true } });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(10, 10), inputController, turnCount: 2 });
+    const entity = makeEntity({
+      senses: ['mock-enemy-noise'],
+      faction: ['orcs'],
+      memory: { remembersEnemies: true },
+    });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(10, 10),
+      inputController,
+      turnCount: 2,
+    });
     expect(ctx.memory.lastKnownEnemy).toEqual({ pos: { x: 3, y: 0 }, turn: 2, source: 'hearing' });
   });
 
   it('ignores a noise from a confirmed ally', () => {
     registerSense('mock-ally-noise', () => ({
-      entities: [], visibleTiles: new Set(),
+      entities: [],
+      visibleTiles: new Set(),
       sounds: [{ soundId: 1, perceivedDirection: 'E', distance: 3, sourceFactions: ['orcs'] }],
     }));
-    const entity = makeEntity({ senses: ['mock-ally-noise'], faction: ['orcs'], memory: { remembersEnemies: true } });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(10, 10), inputController, turnCount: 2 });
+    const entity = makeEntity({
+      senses: ['mock-ally-noise'],
+      faction: ['orcs'],
+      memory: { remembersEnemies: true },
+    });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(10, 10),
+      inputController,
+      turnCount: 2,
+    });
     expect(ctx.memory.lastKnownEnemy).toBeUndefined();
   });
 
   it('prefers a vision sighting over a heard noise', () => {
     registerSense('mock-see-and-hear', () => ({
-      entities: [enemy], visibleTiles: new Set(),
+      entities: [enemy],
+      visibleTiles: new Set(),
       sounds: [{ soundId: 1, perceivedDirection: 'S', distance: 5, sourceFactions: ['player'] }],
     }));
-    const entity = makeEntity({ senses: ['mock-see-and-hear'], faction: ['orcs'], memory: { remembersEnemies: true } });
-    const ctx = buildPlanningContext({ entity, level: makeLevel(10, 10), inputController, turnCount: 3 });
+    const entity = makeEntity({
+      senses: ['mock-see-and-hear'],
+      faction: ['orcs'],
+      memory: { remembersEnemies: true },
+    });
+    const ctx = buildPlanningContext({
+      entity,
+      level: makeLevel(10, 10),
+      inputController,
+      turnCount: 3,
+    });
     expect(ctx.memory.lastKnownEnemy.source).toBe('sight');
   });
 });

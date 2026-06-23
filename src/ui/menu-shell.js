@@ -1,5 +1,9 @@
 import { drawText, drawButton, hitTest, wrapText } from './canvas-ui.js';
-import { layoutSettingsRows, drawSettingsRows, handleSettingsRowsInput } from './settings-controls.js';
+import {
+  layoutSettingsRows,
+  drawSettingsRows,
+  handleSettingsRowsInput,
+} from './settings-controls.js';
 
 /**
  * @file Reusable drill-down menu: a centered vertical list of buttons with optional sub-pages.
@@ -30,7 +34,7 @@ const TEXT_MAX_COL = 520;
 
 /** Creates a drill-down menu shell (see the file overview for the item/sub-page shapes and modes). */
 export function createMenuShell({ theme, getViewport, getItems, onClose = null }) {
-  const pages = [];          // sub-page stack; empty === root
+  const pages = []; // sub-page stack; empty === root
   let hoverId = null;
   let settingsLayout = null; // last render's settings-row geometry, reused for hit-testing
 
@@ -38,7 +42,7 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
   const currentPage = () => (isRoot() ? null : pages[pages.length - 1]);
   const settingsRows = () => currentPage()?.rows ?? null;
   const pageText = () => currentPage()?.text ?? null;
-  const currentItems = () => (isRoot() ? getItems() : pages[pages.length - 1].items ?? []);
+  const currentItems = () => (isRoot() ? getItems() : (pages[pages.length - 1].items ?? []));
 
   // Top-left corner button: ✕ to close at the overlay root, ‹ to go back on a sub-page.
   function cornerButton() {
@@ -62,10 +66,18 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
     }));
   }
 
-  function back() { pages.pop(); hoverId = null; settingsLayout = null; }
+  function back() {
+    pages.pop();
+    hoverId = null;
+    settingsLayout = null;
+  }
 
   return {
-    reset() { pages.length = 0; hoverId = null; settingsLayout = null; },
+    reset() {
+      pages.length = 0;
+      hoverId = null;
+      settingsLayout = null;
+    },
 
     render(ctx) {
       const { width, height } = getViewport();
@@ -87,14 +99,22 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
         ctx.fillStyle = theme.surface;
         ctx.fillRect(corner.x, corner.y, corner.w, corner.h);
         drawText(ctx, corner.glyph, corner.x + corner.w / 2, corner.y + corner.h / 2, {
-          color: theme.text, size: 22, weight: '600', align: 'center', baseline: 'middle',
+          color: theme.text,
+          size: 22,
+          weight: '600',
+          align: 'center',
+          baseline: 'middle',
         });
       }
 
       // Sub-page title header (root branding is the caller's responsibility).
       if (!isRoot()) {
         drawText(ctx, pages[pages.length - 1].title, width / 2, MARGIN + CORNER_BTN / 2, {
-          color: theme.text, size: 22, weight: '700', align: 'center', baseline: 'middle',
+          color: theme.text,
+          size: 22,
+          weight: '700',
+          align: 'center',
+          baseline: 'middle',
         });
       }
 
@@ -112,7 +132,10 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
         const startY = Math.round((height - lines.length * TEXT_LINE_H) / 2);
         lines.forEach((line, i) => {
           drawText(ctx, line, width / 2, startY + i * TEXT_LINE_H, {
-            color: theme.text, size: TEXT_SIZE, align: 'center', baseline: 'top',
+            color: theme.text,
+            size: TEXT_SIZE,
+            align: 'center',
+            baseline: 'top',
           });
         });
         return;
@@ -121,14 +144,20 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
       const rects = buttonRects();
       if (rects.length === 0 && !isRoot()) {
         drawText(ctx, pages[pages.length - 1].placeholder ?? '', width / 2, height / 2, {
-          color: theme.textDim, size: 16, align: 'center', baseline: 'middle',
+          color: theme.textDim,
+          size: 16,
+          align: 'center',
+          baseline: 'middle',
         });
         return;
       }
 
       for (const r of rects) {
         drawButton(ctx, theme, {
-          x: r.x, y: r.y, w: r.w, h: r.h,
+          x: r.x,
+          y: r.y,
+          w: r.w,
+          h: r.h,
           label: r.item.label,
           enabled: r.item.enabled !== false,
           hover: hoverId === r.item.id,
@@ -138,8 +167,14 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
 
     handleInput(event) {
       if (event.type === 'keydown' && event.key === 'Escape') {
-        if (!isRoot()) { back(); return true; }
-        if (onClose) { onClose(); return true; }
+        if (!isRoot()) {
+          back();
+          return true;
+        }
+        if (onClose) {
+          onClose();
+          return true;
+        }
         return false;
       }
 
@@ -147,7 +182,10 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
         hoverId = null;
         if (settingsRows()) return false; // segments have no hover state
         for (const r of buttonRects()) {
-          if (r.item.enabled !== false && hitTest(r, event.x, event.y)) { hoverId = r.item.id; break; }
+          if (r.item.enabled !== false && hitTest(r, event.x, event.y)) {
+            hoverId = r.item.id;
+            break;
+          }
         }
         return false;
       }
@@ -156,7 +194,8 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
 
       const corner = cornerButton();
       if (corner && hitTest(corner, event.x, event.y)) {
-        if (isRoot()) onClose(); else back();
+        if (isRoot()) onClose();
+        else back();
         return true;
       }
 
@@ -167,8 +206,10 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
 
       for (const r of buttonRects()) {
         if (r.item.enabled === false || !hitTest(r, event.x, event.y)) continue;
-        if (r.item.submenu) { pages.push(r.item.submenu); hoverId = null; }
-        else r.item.onSelect?.();
+        if (r.item.submenu) {
+          pages.push(r.item.submenu);
+          hoverId = null;
+        } else r.item.onSelect?.();
         return true;
       }
 

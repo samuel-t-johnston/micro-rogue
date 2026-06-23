@@ -27,9 +27,17 @@ function floorComponents(level) {
     seen.add(start);
     while (stack.length) {
       const [x, y] = stack.pop().split(',').map(Number);
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      for (const [dx, dy] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ]) {
         const k = key(x + dx, y + dy);
-        if (floor.has(k) && !seen.has(k)) { seen.add(k); stack.push(k); }
+        if (floor.has(k) && !seen.has(k)) {
+          seen.add(k);
+          stack.push(k);
+        }
       }
     }
   }
@@ -75,7 +83,7 @@ describe('carve-rooms stage', () => {
   });
 
   it('varies room sizes across seeds', () => {
-    const floorCount = (lvl) => lvl.tiles.flat().filter(t => t === 'floor').length;
+    const floorCount = (lvl) => lvl.tiles.flat().filter((t) => t === 'floor').length;
     const counts = new Set();
     for (let s = 1; s <= 10; s++) counts.add(floorCount(carve(s)));
     expect(counts.size).toBeGreaterThan(1);

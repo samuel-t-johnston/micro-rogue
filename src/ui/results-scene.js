@@ -18,11 +18,10 @@ const HEADINGS = { win: 'Victory', lose: 'Defeat' };
 export function createResultsScene({ theme, getViewport, getResults, onContinue }) {
   // The outcome message can be a full sentence, so wrap it to the column; stat lines follow it.
   function lines(ctx, results, colW) {
-    const message = results.message || (results.outcome === 'win' ? 'You escaped the dungeon.' : 'You died in the dungeon.');
-    return [
-      ...wrapText(ctx, message, colW, { size: BODY_SIZE }),
-      `Turns: ${results.turns ?? 0}`,
-    ];
+    const message =
+      results.message ||
+      (results.outcome === 'win' ? 'You escaped the dungeon.' : 'You died in the dungeon.');
+    return [...wrapText(ctx, message, colW, { size: BODY_SIZE }), `Turns: ${results.turns ?? 0}`];
   }
 
   return {

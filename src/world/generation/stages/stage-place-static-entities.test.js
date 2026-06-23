@@ -36,13 +36,11 @@ describe('placeStaticEntities stage', () => {
   });
 
   it('fills a chest with its authored contents', () => {
-    const { level } = place([
-      { type: 'chest', x: 7, y: 7, contents: ['sword', 'leatherArmor'] },
-    ]);
+    const { level } = place([{ type: 'chest', x: 7, y: 7, contents: ['sword', 'leatherArmor'] }]);
     const chest = at(level, 7, 7)[0];
     expect(chest.components.has('container')).toBe(true);
     const items = chest.components.get('inventory').items;
-    expect(items.map(i => i.components.get('name'))).toEqual(['Sword', 'Leather Armor']);
+    expect(items.map((i) => i.components.get('name'))).toEqual(['Sword', 'Leather Armor']);
   });
 
   it('throws on an unknown entity type', () => {

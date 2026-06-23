@@ -7,7 +7,11 @@ export function createBoulder(registry, x, y) {
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'opaque', components.opaque());
-  registry.addComponent(entity, 'renderable', components.renderable('boulder', '#888888', 'O', '#d8d8d8'));
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('boulder', '#888888', 'O', '#d8d8d8'),
+  );
   registry.addComponent(entity, 'persistVisible', components.persistVisible());
   return entity;
 }
@@ -18,7 +22,11 @@ export function createChest(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Chest'));
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
-  registry.addComponent(entity, 'renderable', components.renderable('chest', '#8B6914', '=', '#d4af37'));
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('chest', '#8B6914', '=', '#d4af37'),
+  );
   registry.addComponent(entity, 'container', components.container());
   registry.addComponent(entity, 'inventory', components.inventory());
   registry.addComponent(entity, 'persistVisible', components.persistVisible());
@@ -35,7 +43,11 @@ export function createStairs(registry, x, y, direction = 'up', to = null) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name(up ? 'Stairs Up' : 'Stairs Down'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  registry.addComponent(entity, 'renderable', components.renderable(up ? 'stairs-up' : 'stairs-down', '#888888', up ? '<' : '>', '#dddddd'));
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable(up ? 'stairs-up' : 'stairs-down', '#888888', up ? '<' : '>', '#dddddd'),
+  );
   registry.addComponent(entity, 'transition', components.transition(to, direction));
   registry.addComponent(entity, 'persistVisible', components.persistVisible());
   return entity;
@@ -60,7 +72,11 @@ export function createDoor(registry, x, y) {
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'opaque', components.opaque());
-  registry.addComponent(entity, 'renderable', components.renderable('door-closed', '#8B6F47', '+', '#c8a36a'));
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('door-closed', '#8B6F47', '+', '#c8a36a'),
+  );
   registry.addComponent(entity, 'openable', components.openable('door-closed', 'door-open'));
   registry.addComponent(entity, 'persistVisible', components.persistVisible());
   return entity;

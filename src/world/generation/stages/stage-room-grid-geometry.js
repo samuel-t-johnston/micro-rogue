@@ -27,7 +27,7 @@ const DEFAULTS = { cols: 3, rows: 3, cellSize: 10, deletes: 1, merges: 1, minZon
 const cellsAdjacent = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) === 1;
 
 // Adjacency between two groups of cells: any cell of one orthogonally touching any cell of the other.
-const groupsAdjacent = (g1, g2) => g1.some(c1 => g2.some(c2 => cellsAdjacent(c1, c2)));
+const groupsAdjacent = (g1, g2) => g1.some((c1) => g2.some((c2) => cellsAdjacent(c1, c2)));
 
 // True if a set of cells is a single orthogonally-connected component.
 function cellsConnected(cells) {
@@ -37,9 +37,17 @@ function cellsConnected(cells) {
   const stack = [cells[0]];
   while (stack.length) {
     const [c, r] = stack.pop();
-    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    for (const [dc, dr] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ]) {
       const k = `${c + dc},${r + dr}`;
-      if (present.has(k) && !seen.has(k)) { seen.add(k); stack.push([c + dc, r + dr]); }
+      if (present.has(k) && !seen.has(k)) {
+        seen.add(k);
+        stack.push([c + dc, r + dr]);
+      }
     }
   }
   return seen.size === cells.length;
@@ -47,8 +55,8 @@ function cellsConnected(cells) {
 
 // Tile-space bounding box of a group of cells.
 function rectOf(cells, cellSize) {
-  const cols = cells.map(c => c[0]);
-  const rows = cells.map(c => c[1]);
+  const cols = cells.map((c) => c[0]);
+  const rows = cells.map((c) => c[1]);
   const minC = Math.min(...cols);
   const minR = Math.min(...rows);
   return {
@@ -61,8 +69,8 @@ function rectOf(cells, cellSize) {
 
 // Stable ordering key for a group of cells: its top-left cell, row-major.
 function groupKey(cells) {
-  const minR = Math.min(...cells.map(c => c[1]));
-  const minC = Math.min(...cells.map(c => c[0]));
+  const minR = Math.min(...cells.map((c) => c[1]));
+  const minC = Math.min(...cells.map((c) => c[0]));
   return [minR, minC];
 }
 
@@ -87,11 +95,11 @@ export function run(level, stageConfig = {}, blackboard, rng) {
     const removable = cells.filter((_, i) => cellsConnected(cells.filter((_, k) => k !== i)));
     if (removable.length === 0) break;
     const victim = rng.pick(removable);
-    cells = cells.filter(c => c !== victim);
+    cells = cells.filter((c) => c !== victim);
   }
 
   // Merge adjacent groups. Groups grow as they absorb neighbors (option B: polyomino zones).
-  let groups = cells.map(c => [c]);
+  let groups = cells.map((c) => [c]);
   for (let m = 0; m < merges; m++) {
     if (groups.length <= minZones) break;
     const pairs = [];
@@ -122,7 +130,8 @@ export function run(level, stageConfig = {}, blackboard, rng) {
   const adjacency = [];
   for (let i = 0; i < zones.length; i++) {
     for (let j = i + 1; j < zones.length; j++) {
-      if (groupsAdjacent(zones[i].cells, zones[j].cells)) adjacency.push([zones[i].id, zones[j].id]);
+      if (groupsAdjacent(zones[i].cells, zones[j].cells))
+        adjacency.push([zones[i].id, zones[j].id]);
     }
   }
 

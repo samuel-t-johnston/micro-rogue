@@ -60,7 +60,9 @@ describe('executeSelfInteract', () => {
     const stairs = createStairs(registry, 2, 2, 'down');
     level.placeEntity(stairs);
     let requested = null;
-    level.onTransition = (entity) => { requested = entity; };
+    level.onTransition = (entity) => {
+      requested = entity;
+    };
 
     const result = await executeSelfInteract(actor, {}, level, registry, dialogController);
 

@@ -9,7 +9,7 @@ function levelOf(...entities) {
 }
 
 function observed(result, entityId) {
-  return result.entities.find(o => o.entityId === entityId);
+  return result.entities.find((o) => o.entityId === entityId);
 }
 
 describe('megaVision isActor / isPlayer tags', () => {
@@ -21,10 +21,10 @@ describe('megaVision isActor / isPlayer tags', () => {
     return e;
   }
 
-  const observer = make(e => registry.addComponent(e, 'position', components.position(0, 0)));
+  const observer = make((e) => registry.addComponent(e, 'position', components.position(0, 0)));
 
   it('tags an entity with a creature component as an actor', () => {
-    const monster = make(e => {
+    const monster = make((e) => {
       registry.addComponent(e, 'position', components.position(1, 1));
       registry.addComponent(e, 'creature', components.creature());
     });
@@ -33,7 +33,7 @@ describe('megaVision isActor / isPlayer tags', () => {
   });
 
   it('does not tag a non-creature (e.g. a floor item) as an actor', () => {
-    const item = make(e => {
+    const item = make((e) => {
       registry.addComponent(e, 'position', components.position(2, 2));
       registry.addComponent(e, 'item', components.item({ type: 'map' }));
     });
@@ -44,7 +44,7 @@ describe('megaVision isActor / isPlayer tags', () => {
   it('does not treat a turnTaker without a creature component as an actor', () => {
     // turnTaker is about action order, not identity — a non-creature timed object can take
     // turns without being a creature. Decoupled so senses report only true creatures as actors.
-    const timedObject = make(e => {
+    const timedObject = make((e) => {
       registry.addComponent(e, 'position', components.position(3, 3));
       registry.addComponent(e, 'turnTaker', components.turnTaker(1));
     });
@@ -53,7 +53,7 @@ describe('megaVision isActor / isPlayer tags', () => {
   });
 
   it('tags the player-controlled entity as the player', () => {
-    const player = make(e => {
+    const player = make((e) => {
       registry.addComponent(e, 'position', components.position(4, 4));
       registry.addComponent(e, 'creature', components.creature());
       registry.addComponent(e, 'playerControlled', components.playerControlled());

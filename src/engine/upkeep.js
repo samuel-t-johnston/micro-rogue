@@ -15,7 +15,9 @@ const steps = new Map(); // name -> fn(context)
 /** Ordered registry of upkeep steps run once per player turn. Register with a unique name. */
 export const upkeep = {
   // Registers (or replaces, by name) a step. Insertion order is run order; replacing keeps position.
-  register(name, fn) { steps.set(name, fn); },
+  register(name, fn) {
+    steps.set(name, fn);
+  },
 
   // Runs every registered step in order with the given context.
   run(context) {
@@ -23,5 +25,7 @@ export const upkeep = {
   },
 
   // Clears all steps (new game / test isolation).
-  reset() { steps.clear(); },
+  reset() {
+    steps.clear();
+  },
 };

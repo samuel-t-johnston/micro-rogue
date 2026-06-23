@@ -14,7 +14,7 @@ export function createEventLog() {
   // string that were also perceivable when logged (`seen !== false`). Entries the
   // visibility provider never classified (`seen` undefined) default to shown.
   function getDisplayEntries(count) {
-    const display = entries.filter(e => e.display != null && e.seen !== false);
+    const display = entries.filter((e) => e.display != null && e.seen !== false);
     return display.slice(-count);
   }
 

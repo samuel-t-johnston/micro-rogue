@@ -38,7 +38,12 @@ const STAGES = {
  * rng's derived seed are captured automatically so a frozen level carries its full identity.
  * @throws {Error} On an unknown stage type.
  */
-export async function runPipeline(pipelineConfig, rng, registry, { onStageComplete, identity } = {}) {
+export async function runPipeline(
+  pipelineConfig,
+  rng,
+  registry,
+  { onStageComplete, identity } = {},
+) {
   const level = createLevel({
     branch: identity?.branch ?? null,
     depth: identity?.depth ?? null,

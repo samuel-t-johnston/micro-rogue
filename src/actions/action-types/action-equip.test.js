@@ -27,7 +27,9 @@ describe('executeEquip', () => {
   it('updates item.location to equipped with slot and owner', () => {
     executeEquip(actor, { itemEntityId: dagger.id }, null, registry);
     expect(dagger.components.get('item').location).toEqual({
-      type: 'equipped', ownerId: actor.id, slot: Slots.WEAPON,
+      type: 'equipped',
+      ownerId: actor.id,
+      slot: Slots.WEAPON,
     });
   });
 
@@ -38,13 +40,20 @@ describe('executeEquip', () => {
   it('swaps the previously equipped item back to inventory', () => {
     const oldDagger = createDagger(registry, null, null, actor.id);
     actor.components.get('wearsEquipment').slots[Slots.WEAPON] = oldDagger;
-    oldDagger.components.get('item').location = { type: 'equipped', ownerId: actor.id, slot: Slots.WEAPON };
+    oldDagger.components.get('item').location = {
+      type: 'equipped',
+      ownerId: actor.id,
+      slot: Slots.WEAPON,
+    };
 
     executeEquip(actor, { itemEntityId: dagger.id }, null, registry);
 
     expect(actor.components.get('wearsEquipment').slots[Slots.WEAPON]).toBe(dagger);
     expect(actor.components.get('inventory').items).toContain(oldDagger);
-    expect(oldDagger.components.get('item').location).toEqual({ type: 'inventory', ownerId: actor.id });
+    expect(oldDagger.components.get('item').location).toEqual({
+      type: 'inventory',
+      ownerId: actor.id,
+    });
   });
 
   it('returns false and does nothing when item not in inventory', () => {

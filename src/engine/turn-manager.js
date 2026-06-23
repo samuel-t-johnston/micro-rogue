@@ -11,8 +11,14 @@
  *   resolves (`free` is the action's free-action flag); the win-condition check rides it.
  * - `initialTurnCount` seeds the player turn count when loading a save (fresh games pass 0).
  */
-export function createTurnManager({ getActiveEntities, invokeAction, onTurnStart, onTurnEnd, initialTurnCount = 0 }) {
-  const queue = [];  // ordered list of entities
+export function createTurnManager({
+  getActiveEntities,
+  invokeAction,
+  onTurnStart,
+  onTurnEnd,
+  initialTurnCount = 0,
+}) {
+  const queue = []; // ordered list of entities
   let playerTurnCount = initialTurnCount;
   let currentEntity = null;
   let running = false;
@@ -36,7 +42,7 @@ export function createTurnManager({ getActiveEntities, invokeAction, onTurnStart
         // Yield to macrotasks so the browser stays responsive while idle.
         // Using setTimeout (not Promise.resolve) is essential: microtask-only
         // yields starve macrotask callbacks (including test stop() calls) forever.
-        await new Promise(r => setTimeout(r, 0));
+        await new Promise((r) => setTimeout(r, 0));
         continue;
       }
 
@@ -74,7 +80,7 @@ export function createTurnManager({ getActiveEntities, invokeAction, onTurnStart
       // Yield between entity turns so macrotask callbacks (input events,
       // test assertions) can run. One setTimeout per turn is negligible for
       // a turn-based game.
-      await new Promise(r => setTimeout(r, 0));
+      await new Promise((r) => setTimeout(r, 0));
     }
   }
 
@@ -90,7 +96,11 @@ export function createTurnManager({ getActiveEntities, invokeAction, onTurnStart
   return {
     start,
     stop,
-    get playerTurnCount() { return playerTurnCount; },
-    get currentEntity() { return currentEntity; },
+    get playerTurnCount() {
+      return playerTurnCount;
+    },
+    get currentEntity() {
+      return currentEntity;
+    },
   };
 }

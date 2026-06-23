@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { applyEffect, EffectTypes } from './effects.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
 import { createLevel } from '../world/level.js';

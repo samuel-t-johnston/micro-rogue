@@ -4,8 +4,21 @@
  * carries `contents` (item type names). Placement is exact and deterministic — no RNG. `stairsUp`
  * doubles as the player's entry point. See docs/howto/static-map-layouts.md.
  */
-import { createStairs, createDungeonExit, createChest, createBoulder, createDoor } from '../../furniture.js';
-import { createHealingPotion, createPotionOfPain, createDagger, createSword, createLeatherArmor, createScroll } from '../../items.js';
+import {
+  createStairs,
+  createDungeonExit,
+  createChest,
+  createBoulder,
+  createDoor,
+} from '../../furniture.js';
+import {
+  createHealingPotion,
+  createPotionOfPain,
+  createDagger,
+  createSword,
+  createLeatherArmor,
+  createScroll,
+} from '../../items.js';
 import { createGoblin, createOrc, createOrcCommander, createScuttler } from '../../creatures.js';
 import { components } from '../../components.js';
 

@@ -18,7 +18,16 @@ function fullGenerate(seed) {
   const level = createLevel();
   const reg = createEntityRegistry();
   const bb = level.blackboard;
-  for (const stage of [runRoomGridGeometry, runLabel, runLink, runCarveRooms, runCarveHalls, runStairs, runSpawn, runPopulate]) {
+  for (const stage of [
+    runRoomGridGeometry,
+    runLabel,
+    runLink,
+    runCarveRooms,
+    runCarveHalls,
+    runStairs,
+    runSpawn,
+    runPopulate,
+  ]) {
     stage(level, {}, bb, createRng(seed), reg);
   }
   return { level, bb, reg };
@@ -38,20 +47,27 @@ function generate(seed = 1) {
 const zoneOf = (pos, bb) => {
   const cs = bb['level:grid'].cellSize;
   const cell = `${Math.floor(pos.x / cs)},${Math.floor(pos.y / cs)}`;
-  return bb['level:zones'].find(z => z.cells.some(([c, r]) => `${c},${r}` === cell));
+  return bb['level:zones'].find((z) => z.cells.some(([c, r]) => `${c},${r}` === cell));
 };
 
 describe('weightedPick', () => {
   it('favours higher-weighted rooms', () => {
-    const rooms = [{ id: 0, labels: ['room'] }, { id: 1, labels: ['room', 'treasure'] }];
+    const rooms = [
+      { id: 0, labels: ['room'] },
+      { id: 1, labels: ['room', 'treasure'] },
+    ];
     const rng = createRng(1);
     let treasure = 0;
-    for (let i = 0; i < 400; i++) if (weightedPick(rooms, { treasure: 9 }, rng).id === 1) treasure++;
+    for (let i = 0; i < 400; i++)
+      if (weightedPick(rooms, { treasure: 9 }, rng).id === 1) treasure++;
     expect(treasure).toBeGreaterThan(300); // ~9:1 toward the treasure room
   });
 
   it('falls back to uniform when all weights are zero', () => {
-    const rooms = [{ id: 0, labels: ['room'] }, { id: 1, labels: ['room'] }];
+    const rooms = [
+      { id: 0, labels: ['room'] },
+      { id: 1, labels: ['room'] },
+    ];
     expect(() => weightedPick(rooms, {}, createRng(1))).not.toThrow();
   });
 });
@@ -59,7 +75,7 @@ describe('weightedPick', () => {
 describe('populate stage', () => {
   it('puts a chest with 1-3 items in each treasure room', () => {
     const { bb, reg } = generate(2);
-    const treasureZones = bb['level:zones'].filter(z => z.labels.includes('treasure'));
+    const treasureZones = bb['level:zones'].filter((z) => z.labels.includes('treasure'));
     const chests = reg.getEntitiesWith('container');
     expect(chests).toHaveLength(treasureZones.length);
     for (const chest of chests) {
@@ -87,9 +103,10 @@ describe('populate stage', () => {
 
   it('places goblins in separate rooms', () => {
     const { bb, reg } = generate(2);
-    const goblinRooms = reg.getEntitiesWith('ai')
-      .filter(c => c.components.get('name') === 'Goblin')
-      .map(c => zoneOf(c.components.get('position'), bb).id);
+    const goblinRooms = reg
+      .getEntitiesWith('ai')
+      .filter((c) => c.components.get('name') === 'Goblin')
+      .map((c) => zoneOf(c.components.get('position'), bb).id);
     expect(new Set(goblinRooms).size).toBe(goblinRooms.length);
   });
 
@@ -112,7 +129,8 @@ describe('populate stage', () => {
     for (let seed = 1; seed <= 15; seed++) {
       const { bb, reg } = fullGenerate(seed);
       const roomSet = new Set();
-      for (const z of bb['level:zones']) for (const [x, y] of roomTiles(z, bb['level:rooms'])) roomSet.add(`${x},${y}`);
+      for (const z of bb['level:zones'])
+        for (const [x, y] of roomTiles(z, bb['level:rooms'])) roomSet.add(`${x},${y}`);
 
       const blockers = [];
       for (const e of reg.getAllEntities()) {
@@ -139,11 +157,12 @@ describe('populate stage', () => {
     runCarveRooms(level, {}, bb, createRng(3));
     runPopulate(level, {}, bb, createRng(3), reg);
 
-    const amulets = reg.getEntitiesWith('questItem')
-      .filter(e => e.components.get('questItem').id === 'amulet-of-yendor');
+    const amulets = reg
+      .getEntitiesWith('questItem')
+      .filter((e) => e.components.get('questItem').id === 'amulet-of-yendor');
     expect(amulets).toHaveLength(1);
 
-    const amuletZone = bb['level:zones'].find(z => z.labels.includes('amulet'));
+    const amuletZone = bb['level:zones'].find((z) => z.labels.includes('amulet'));
     const tile = centermostRoomTile(amuletZone, bb['level:rooms']);
     const pos = amulets[0].components.get('position');
     expect([pos.x, pos.y]).toEqual(tile);
@@ -155,9 +174,14 @@ describe('populate stage', () => {
   });
 
   it('is deterministic for a given seed', () => {
-    const fingerprint = (g) => g.reg.getEntitiesWith('renderable')
-      .map(e => { const p = e.components.get('position'); return `${e.components.get('name')}@${p ? `${p.x},${p.y}` : '-'}`; })
-      .sort();
+    const fingerprint = (g) =>
+      g.reg
+        .getEntitiesWith('renderable')
+        .map((e) => {
+          const p = e.components.get('position');
+          return `${e.components.get('name')}@${p ? `${p.x},${p.y}` : '-'}`;
+        })
+        .sort();
     expect(fingerprint(generate(8))).toEqual(fingerprint(generate(8)));
   });
 });

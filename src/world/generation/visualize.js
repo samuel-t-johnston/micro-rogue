@@ -7,7 +7,11 @@ import { getTileType } from '../tile-registry.js';
 
 function tileChar(id) {
   if (id == null) return ' ';
-  try { return getTileType(id).symbol ?? '?'; } catch { return '?'; }
+  try {
+    return getTileType(id).symbol ?? '?';
+  } catch {
+    return '?';
+  }
 }
 
 /**
@@ -29,7 +33,7 @@ export function levelToAscii(level) {
     const r = entity.components.get('renderable');
     if (pos && r?.glyph && grid[pos.y]?.[pos.x] !== undefined) grid[pos.y][pos.x] = r.glyph;
   }
-  return grid.map(row => row.join('')).join('\n');
+  return grid.map((row) => row.join('')).join('\n');
 }
 
 /** The planning graph as a text summary: zones (with labels/cells/rect), links, and raw adjacency. */
@@ -39,12 +43,14 @@ export function zonesToText(blackboard) {
   const adjacency = blackboard['level:adjacency'] ?? [];
   const lines = [`Zones (${zones.length}):`];
   for (const z of zones) {
-    const cells = z.cells.map(c => `(${c[0]},${c[1]})`).join(' ');
+    const cells = z.cells.map((c) => `(${c[0]},${c[1]})`).join(' ');
     const rect = z.rect ? `${z.rect.x},${z.rect.y} ${z.rect.w}x${z.rect.h}` : '';
     lines.push(`  ${z.id} [${z.labels.join(', ')}]  cells=${cells}  rect=${rect}`);
   }
-  lines.push(`Links (${links.length}): ${links.map(l => `${l.a}-${l.b}`).join(', ')}`);
-  lines.push(`Adjacency (${adjacency.length}): ${adjacency.map(([a, b]) => `${a}-${b}`).join(', ')}`);
+  lines.push(`Links (${links.length}): ${links.map((l) => `${l.a}-${l.b}`).join(', ')}`);
+  lines.push(
+    `Adjacency (${adjacency.length}): ${adjacency.map(([a, b]) => `${a}-${b}`).join(', ')}`,
+  );
   return lines.join('\n');
 }
 
@@ -56,10 +62,10 @@ export function zonesToMermaid(blackboard) {
   const zones = blackboard['level:zones'] ?? [];
   const links = blackboard['level:links'] ?? [];
   const adjacency = blackboard['level:adjacency'] ?? [];
-  const linked = new Set(links.map(l => `${l.a},${l.b}`));
+  const linked = new Set(links.map((l) => `${l.a},${l.b}`));
   const out = ['flowchart TD'];
   for (const z of zones) {
-    const special = z.labels.filter(l => l !== 'room');
+    const special = z.labels.filter((l) => l !== 'room');
     out.push(`  z${z.id}["${special.length ? `${z.id} · ${special.join('/')}` : z.id}"]`);
   }
   for (const l of links) out.push(`  z${l.a} --- z${l.b}`);

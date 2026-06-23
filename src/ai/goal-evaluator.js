@@ -4,7 +4,7 @@
  */
 
 /**
- * @typedef {Object} Goal
+ * @typedef {object} Goal
  * @property {(context: import('./planning-context.js').PlanningContext) => (GoalResult | null | Promise<GoalResult | null>)} evaluate
  *   Decides this turn: return a GoalResult to act, or null to fall through to the next goal. May
  *   mutate `context.memory` as a side effect even when returning null.

@@ -24,17 +24,19 @@ export function parseLayout(mod, layoutName, level) {
   const width = rows[0].length;
   for (let i = 1; i < rows.length; i++) {
     if (rows[i].length !== width) {
-      throw new Error(`Map "${layoutName}" has inconsistent row lengths (row 0: ${width}, row ${i}: ${rows[i].length})`);
+      throw new Error(
+        `Map "${layoutName}" has inconsistent row lengths (row 0: ${width}, row ${i}: ${rows[i].length})`,
+      );
     }
   }
   level.height = rows.length;
   level.width = width;
-  level.tiles = rows.map(row =>
-    [...row].map(char => {
+  level.tiles = rows.map((row) =>
+    [...row].map((char) => {
       const tileId = mod.legend[char];
       if (!tileId) throw new Error(`Unknown symbol "${char}" in map "${layoutName}"`);
       return tileId;
-    })
+    }),
   );
   return mod.entities ?? [];
 }

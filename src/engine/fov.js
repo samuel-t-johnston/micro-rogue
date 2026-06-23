@@ -14,10 +14,10 @@ export function computeFov(ox, oy, maxRange, isOpaque) {
   // [row_x, row_y, col_x, col_y]: maps (depth, col) to world offset from origin.
   // 4 quadrants cover the full 360° around the origin.
   const QUADRANTS = [
-    [ 1,  0,  0,  1],
-    [-1,  0,  0,  1],
-    [ 0,  1,  1,  0],
-    [ 0, -1,  1,  0],
+    [1, 0, 0, 1],
+    [-1, 0, 0, 1],
+    [0, 1, 1, 0],
+    [0, -1, 1, 0],
   ];
 
   for (const [rx, ry, cx, cy] of QUADRANTS) {

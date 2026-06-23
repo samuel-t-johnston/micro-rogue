@@ -27,7 +27,7 @@ function makeLevel() {
 }
 
 function displays() {
-  return gameLog.getDisplayEntries(50).map(e => e.display);
+  return gameLog.getDisplayEntries(50).map((e) => e.display);
 }
 
 describe('action logging', () => {
@@ -103,15 +103,16 @@ describe('action logging', () => {
     const oldDagger = createDagger(registry, null, null, player.id);
     const newDagger = createDagger(registry, null, null, player.id);
     player.components.get('wearsEquipment').slots[Slots.WEAPON] = oldDagger;
-    oldDagger.components.get('item').location = { type: 'equipped', ownerId: player.id, slot: Slots.WEAPON };
+    oldDagger.components.get('item').location = {
+      type: 'equipped',
+      ownerId: player.id,
+      slot: Slots.WEAPON,
+    };
     player.components.get('inventory').items.push(newDagger);
 
     executeEquip(player, { itemEntityId: newDagger.id }, level, registry);
 
-    expect(displays()).toEqual([
-      'You unequip the dagger.',
-      'You equip the dagger.',
-    ]);
+    expect(displays()).toEqual(['You unequip the dagger.', 'You equip the dagger.']);
   });
 
   it('logs a door interact as a debug entry with no display string', async () => {
@@ -121,7 +122,7 @@ describe('action logging', () => {
 
     await executeInteract(player, { targetEntityId: door.id }, level, registry);
 
-    const interact = gameLog.getAll().find(e => e.action === 'interact');
+    const interact = gameLog.getAll().find((e) => e.action === 'interact');
     expect(interact).toMatchObject({ interaction: 'door', opened: true });
     expect(interact.display).toBeUndefined();
     expect(displays()).toEqual([]); // never surfaces to the player
@@ -143,15 +144,12 @@ describe('action logging', () => {
     await executeInteract(player, { targetEntityId: chest.id }, level, registry, dialogController);
 
     // The interaction itself is debug-only...
-    const interact = gameLog.getAll().find(e => e.action === 'interact');
+    const interact = gameLog.getAll().find((e) => e.action === 'interact');
     expect(interact).toMatchObject({ interaction: 'container' });
     expect(interact.display).toBeUndefined();
 
     // ...while each item taken surfaces to the player.
-    expect(displays()).toEqual([
-      'You take the dagger.',
-      'You take the healing potion.',
-    ]);
+    expect(displays()).toEqual(['You take the dagger.', 'You take the healing potion.']);
   });
 
   it('logs a player-facing pickup line per item taken from the floor', async () => {
@@ -168,10 +166,7 @@ describe('action logging', () => {
 
     await executeSelfInteract(player, {}, level, registry, dialogController);
 
-    expect(displays()).toEqual([
-      'You pick up the dagger.',
-      'You pick up the healing potion.',
-    ]);
+    expect(displays()).toEqual(['You pick up the dagger.', 'You pick up the healing potion.']);
   });
 
   it('logs only the debug interact when a chest dialog is cancelled', async () => {
@@ -187,7 +182,9 @@ describe('action logging', () => {
 
     await executeInteract(player, { targetEntityId: chest.id }, level, registry, dialogController);
 
-    expect(gameLog.getAll().find(e => e.action === 'interact')).toMatchObject({ interaction: 'container' });
+    expect(gameLog.getAll().find((e) => e.action === 'interact')).toMatchObject({
+      interaction: 'container',
+    });
     expect(displays()).toEqual([]); // nothing taken → no player-facing line
   });
 
@@ -195,7 +192,7 @@ describe('action logging', () => {
     const player = makePlayer(2, 2);
     executeMove(player, { x: 3, y: 2 }, level);
 
-    const move = gameLog.getAll().find(e => e.action === 'move');
+    const move = gameLog.getAll().find((e) => e.action === 'move');
     expect(move).toMatchObject({ from: { x: 2, y: 2 }, to: { x: 3, y: 2 } });
     expect(move.display).toBeUndefined();
     expect(displays()).toEqual([]); // never surfaces to the player
@@ -207,16 +204,14 @@ describe('action logging', () => {
 
     executeAttack(player, { targetEntityId: goblin.id }, level, registry);
 
-    expect(displays()).toEqual([
-      'You hit the Goblin for 1 damage.',
-      'The Goblin dies.',
-    ]);
+    expect(displays()).toEqual(['You hit the Goblin for 1 damage.', 'The Goblin dies.']);
   });
 
   it('logs player death in second person when an NPC lands the killing blow', () => {
     const goblin = makeGoblin(3, 2);
     const player = makePlayer(2, 2);
-    player.components.get('health') ?? registry.addComponent(player, 'health', components.health(1, 1));
+    player.components.get('health') ??
+      registry.addComponent(player, 'health', components.health(1, 1));
 
     executeAttack(goblin, { targetEntityId: player.id }, level, registry);
 

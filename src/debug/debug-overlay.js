@@ -56,10 +56,22 @@ export function createDebugOverlay({ getViewport }) {
       for (let tx = x0; tx <= x1; tx++) {
         if (!isVisible(tx, ty)) continue;
         const { x, y } = worldToScreen(tx, ty);
-        if (!isVisible(tx, ty - 1)) { ctx.moveTo(x, y); ctx.lineTo(x + tileSize, y); }
-        if (!isVisible(tx, ty + 1)) { ctx.moveTo(x, y + tileSize); ctx.lineTo(x + tileSize, y + tileSize); }
-        if (!isVisible(tx - 1, ty)) { ctx.moveTo(x, y); ctx.lineTo(x, y + tileSize); }
-        if (!isVisible(tx + 1, ty)) { ctx.moveTo(x + tileSize, y); ctx.lineTo(x + tileSize, y + tileSize); }
+        if (!isVisible(tx, ty - 1)) {
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + tileSize, y);
+        }
+        if (!isVisible(tx, ty + 1)) {
+          ctx.moveTo(x, y + tileSize);
+          ctx.lineTo(x + tileSize, y + tileSize);
+        }
+        if (!isVisible(tx - 1, ty)) {
+          ctx.moveTo(x, y);
+          ctx.lineTo(x, y + tileSize);
+        }
+        if (!isVisible(tx + 1, ty)) {
+          ctx.moveTo(x + tileSize, y);
+          ctx.lineTo(x + tileSize, y + tileSize);
+        }
       }
     }
     ctx.stroke();
@@ -134,7 +146,7 @@ export function createDebugOverlay({ getViewport }) {
 
     const lineH = 16;
     const pad = 4;
-    const maxTextW = Math.max(...lines.map(l => ctx.measureText(l).width));
+    const maxTextW = Math.max(...lines.map((l) => ctx.measureText(l).width));
     const boxW = maxTextW + pad * 2;
     const boxH = lines.length * lineH + pad * 2;
 

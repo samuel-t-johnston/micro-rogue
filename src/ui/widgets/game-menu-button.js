@@ -23,7 +23,10 @@ export function createGameMenuButton({ theme, getViewport, onOpen }) {
       ctx.fillStyle = theme.surface;
       ctx.fillRect(btn.x, btn.y, btn.w, btn.h);
       drawText(ctx, '⚙', btn.x + btn.w / 2, btn.y + btn.h / 2, {
-        color: theme.text, size: 22, align: 'center', baseline: 'middle',
+        color: theme.text,
+        size: 22,
+        align: 'center',
+        baseline: 'middle',
       });
     },
 

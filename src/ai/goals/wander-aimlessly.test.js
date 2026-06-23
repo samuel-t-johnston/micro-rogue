@@ -12,7 +12,9 @@ function makeLevel(w = 5, h = 5, fill = 'floor') {
   level.height = h;
   level.tiles = Array.from({ length: h }, (_, y) =>
     Array.from({ length: w }, (_, x) =>
-      x === 0 || y === 0 || x === w - 1 || y === h - 1 ? 'wall' : fill));
+      x === 0 || y === 0 || x === w - 1 || y === h - 1 ? 'wall' : fill,
+    ),
+  );
   return level;
 }
 

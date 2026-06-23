@@ -16,7 +16,7 @@ export function createInputController() {
       return Promise.resolve(value);
     }
     if (!pending) {
-      pending = new Promise(resolve => {
+      pending = new Promise((resolve) => {
         resolvePending = resolve;
       });
     }

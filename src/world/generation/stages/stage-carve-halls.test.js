@@ -32,9 +32,17 @@ function floorComponents(level) {
     seen.add(start);
     while (stack.length) {
       const [x, y] = stack.pop().split(',').map(Number);
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      for (const [dx, dy] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ]) {
         const k = `${x + dx},${y + dy}`;
-        if (floor.has(k) && !seen.has(k)) { seen.add(k); stack.push(k); }
+        if (floor.has(k) && !seen.has(k)) {
+          seen.add(k);
+          stack.push(k);
+        }
       }
     }
   }
@@ -67,13 +75,22 @@ describe('carve-halls stage', () => {
       const { level, bb, reg } = generate(seed);
       const roomTiles = new Set();
       for (const r of Object.values(bb['level:rooms'])) {
-        for (let y = r.y0; y <= r.y1; y++) for (let x = r.x0; x <= r.x1; x++) roomTiles.add(`${x},${y}`);
+        for (let y = r.y0; y <= r.y1; y++)
+          for (let x = r.x0; x <= r.x1; x++) roomTiles.add(`${x},${y}`);
       }
       let contacts = 0;
       for (let y = 0; y < level.height; y++) {
         for (let x = 0; x < level.width; x++) {
           if (level.tiles[y][x] !== 'floor' || roomTiles.has(`${x},${y}`)) continue;
-          if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => roomTiles.has(`${x + dx},${y + dy}`))) contacts++;
+          if (
+            [
+              [1, 0],
+              [-1, 0],
+              [0, 1],
+              [0, -1],
+            ].some(([dx, dy]) => roomTiles.has(`${x + dx},${y + dy}`))
+          )
+            contacts++;
         }
       }
       expect(contacts).toBe(reg.getEntitiesWith('openable').length);
@@ -84,8 +101,12 @@ describe('carve-halls stage', () => {
     const a = generate(9);
     const b = generate(9);
     expect(a.level.tiles).toEqual(b.level.tiles);
-    const doorPos = (g) => g.reg.getEntitiesWith('openable')
-      .map(d => d.components.get('position')).map(p => `${p.x},${p.y}`).sort();
+    const doorPos = (g) =>
+      g.reg
+        .getEntitiesWith('openable')
+        .map((d) => d.components.get('position'))
+        .map((p) => `${p.x},${p.y}`)
+        .sort();
     expect(doorPos(a)).toEqual(doorPos(b));
   });
 });

@@ -17,8 +17,16 @@ export function createGoblin(registry, x, y) {
   registry.addComponent(entity, 'memory', components.memory());
   registry.addComponent(entity, 'senses', components.senses(['vision']));
   registry.addComponent(entity, 'tilePerception', components.tilePerception());
-  registry.addComponent(entity, 'ai', components.ai(['attack-adjacent', 'flee-from-others', 'wander-aimlessly']));
-  registry.addComponent(entity, 'renderable', components.renderable('goblin', '#0a1a0a', 'g', '#2ecc40'));
+  registry.addComponent(
+    entity,
+    'ai',
+    components.ai(['attack-adjacent', 'flee-from-others', 'wander-aimlessly']),
+  );
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('goblin', '#0a1a0a', 'g', '#2ecc40'),
+  );
   return entity;
 }
 
@@ -39,11 +47,29 @@ export function createOrc(registry, x, y) {
   registry.addComponent(entity, 'senses', components.senses(['vision', 'hearing']));
   registry.addComponent(entity, 'hearing', components.hearing(6));
   registry.addComponent(entity, 'knownLanguages', components.knownLanguages(['orcish']));
-  registry.addComponent(entity, 'scentSource', components.scentSource({ profile: 'orcs', intensity: 10 }));
+  registry.addComponent(
+    entity,
+    'scentSource',
+    components.scentSource({ profile: 'orcs', intensity: 10 }),
+  );
   registry.addComponent(entity, 'tilePerception', components.tilePerception());
   // Below chase/attack: hears an understood report and converges; investigates a lost trail before giving up.
-  registry.addComponent(entity, 'ai', components.ai(['attack-adjacent', 'chase-others', 'obey-shouts', 'investigate', 'wander-aimlessly']));
-  registry.addComponent(entity, 'renderable', components.renderable('orc', '#0a1a0a', 'o', '#e74c3c'));
+  registry.addComponent(
+    entity,
+    'ai',
+    components.ai([
+      'attack-adjacent',
+      'chase-others',
+      'obey-shouts',
+      'investigate',
+      'wander-aimlessly',
+    ]),
+  );
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('orc', '#0a1a0a', 'o', '#e74c3c'),
+  );
   return entity;
 }
 
@@ -69,10 +95,29 @@ export function createOrcCommander(registry, x, y) {
   registry.addComponent(entity, 'hearing', components.hearing(6));
   registry.addComponent(entity, 'knownLanguages', components.knownLanguages(['orcish']));
   registry.addComponent(entity, 'voice', components.voice('orcish'));
-  registry.addComponent(entity, 'scentSource', components.scentSource({ profile: 'orcs', intensity: 10 }));
+  registry.addComponent(
+    entity,
+    'scentSource',
+    components.scentSource({ profile: 'orcs', intensity: 10 }),
+  );
   registry.addComponent(entity, 'tilePerception', components.tilePerception());
-  registry.addComponent(entity, 'ai', components.ai(['shout-enemy-report', 'attack-adjacent', 'chase-others', 'obey-shouts', 'investigate', 'wander-aimlessly']));
-  registry.addComponent(entity, 'renderable', components.renderable('orc-commander', '#0a1a0a', 'O', '#ff6b5b'));
+  registry.addComponent(
+    entity,
+    'ai',
+    components.ai([
+      'shout-enemy-report',
+      'attack-adjacent',
+      'chase-others',
+      'obey-shouts',
+      'investigate',
+      'wander-aimlessly',
+    ]),
+  );
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('orc-commander', '#0a1a0a', 'O', '#ff6b5b'),
+  );
   return entity;
 }
 
@@ -95,9 +140,27 @@ export function createScuttler(registry, x, y) {
   registry.addComponent(entity, 'senses', components.senses(['vision', 'smell']));
   registry.addComponent(entity, 'vision', components.vision(3)); // myopic
   registry.addComponent(entity, 'smell', components.smell(0.3)); // keen nose: low threshold
-  registry.addComponent(entity, 'noisyMovement', components.noisyMovement({ chance: 0.5, volume: 4, message: { kind: 'vermin-scrabble' } }));
+  registry.addComponent(
+    entity,
+    'noisyMovement',
+    components.noisyMovement({ chance: 0.5, volume: 4, message: { kind: 'vermin-scrabble' } }),
+  );
   registry.addComponent(entity, 'tilePerception', components.tilePerception());
-  registry.addComponent(entity, 'ai', components.ai(['attack-adjacent', 'chase-others', 'track-scent', 'investigate', 'wander-aimlessly']));
-  registry.addComponent(entity, 'renderable', components.renderable('scuttler', '#0a1a0a', 's', '#c2a04a'));
+  registry.addComponent(
+    entity,
+    'ai',
+    components.ai([
+      'attack-adjacent',
+      'chase-others',
+      'track-scent',
+      'investigate',
+      'wander-aimlessly',
+    ]),
+  );
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('scuttler', '#0a1a0a', 's', '#c2a04a'),
+  );
   return entity;
 }

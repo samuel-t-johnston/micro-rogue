@@ -2,9 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { createTurnManager } from './turn-manager.js';
 
 function makeEntity(id, speed = 1, isPlayer = false) {
-  const components = new Map([
-    ['turnTaker', { speed, accumulator: 0 }],
-  ]);
+  const components = new Map([['turnTaker', { speed, accumulator: 0 }]]);
   if (isPlayer) components.set('playerControlled', {});
   return { id, components };
 }
@@ -23,7 +21,10 @@ describe('createTurnManager', () => {
       let acts = 0;
       const tm = createTurnManager({
         getActiveEntities: () => [entity],
-        invokeAction: async () => { acts++; return false; },
+        invokeAction: async () => {
+          acts++;
+          return false;
+        },
       });
       tm.start();
       await runUntil(tm, () => expect(acts).toBeGreaterThanOrEqual(3));
@@ -38,7 +39,7 @@ describe('createTurnManager', () => {
       let bActive = true;
 
       const tm = createTurnManager({
-        getActiveEntities: () => bActive ? [a, b] : [a],
+        getActiveEntities: () => (bActive ? [a, b] : [a]),
         invokeAction: async (e) => {
           if (e.id === 1) aActs++;
           else bActs++;
@@ -120,7 +121,10 @@ describe('createTurnManager', () => {
       let acts = 0;
       const tm = createTurnManager({
         getActiveEntities: () => [sound],
-        invokeAction: async () => { acts++; return false; },
+        invokeAction: async () => {
+          acts++;
+          return false;
+        },
       });
       tm.start();
       await runUntil(tm, () => expect(acts).toBeGreaterThanOrEqual(3));
@@ -144,7 +148,10 @@ describe('createTurnManager', () => {
       let creatureActs = 0;
       const tm = createTurnManager({
         getActiveEntities: () => [sound, creature],
-        invokeAction: async (e) => { if (e.id === 2) creatureActs++; return false; },
+        invokeAction: async (e) => {
+          if (e.id === 2) creatureActs++;
+          return false;
+        },
       });
       tm.start();
       await runUntil(tm, () => expect(creatureActs).toBeGreaterThanOrEqual(3));
@@ -160,7 +167,9 @@ describe('createTurnManager', () => {
         invokeAction: async () => false,
       });
       tm.start();
-      await runUntil(tm, () => expect(entity.components.get('turnTaker').actCount).toBeGreaterThanOrEqual(3));
+      await runUntil(tm, () =>
+        expect(entity.components.get('turnTaker').actCount).toBeGreaterThanOrEqual(3),
+      );
       expect(entity.components.get('turnTaker').actCount).toBeGreaterThanOrEqual(3);
     });
   });
@@ -172,10 +181,15 @@ describe('createTurnManager', () => {
       const tm = createTurnManager({
         getActiveEntities: () => [entity],
         onTurnStart: (e) => events.push(`start:${e.id}`),
-        invokeAction: async (e) => { events.push(`act:${e.id}`); return false; },
+        invokeAction: async (e) => {
+          events.push(`act:${e.id}`);
+          return false;
+        },
       });
       tm.start();
-      await runUntil(tm, () => expect(events.filter(e => e === 'act:1').length).toBeGreaterThanOrEqual(2));
+      await runUntil(tm, () =>
+        expect(events.filter((e) => e === 'act:1').length).toBeGreaterThanOrEqual(2),
+      );
       // Every act is immediately preceded by a start for the same entity.
       const firstActIdx = events.indexOf('act:1');
       expect(events[firstActIdx - 1]).toBe('start:1');
@@ -189,10 +203,15 @@ describe('createTurnManager', () => {
       const tm = createTurnManager({
         getActiveEntities: () => [entity],
         onTurnEnd: (e, { free }) => events.push(`end:${e.id}:${free}`),
-        invokeAction: async (e) => { events.push(`act:${e.id}`); return false; },
+        invokeAction: async (e) => {
+          events.push(`act:${e.id}`);
+          return false;
+        },
       });
       tm.start();
-      await runUntil(tm, () => expect(events.filter(e => e === 'act:1').length).toBeGreaterThanOrEqual(2));
+      await runUntil(tm, () =>
+        expect(events.filter((e) => e === 'act:1').length).toBeGreaterThanOrEqual(2),
+      );
       // Every act is immediately followed by an end for the same entity, with the free flag.
       const firstActIdx = events.indexOf('act:1');
       expect(events[firstActIdx + 1]).toBe('end:1:false');
@@ -234,7 +253,10 @@ describe('createTurnManager', () => {
 
       const tm = createTurnManager({
         getActiveEntities: () => [player],
-        invokeAction: async () => { acts++; return false; },
+        invokeAction: async () => {
+          acts++;
+          return false;
+        },
       });
       tm.start();
       await runUntil(tm, () => expect(acts).toBeGreaterThanOrEqual(5));
@@ -247,7 +269,10 @@ describe('createTurnManager', () => {
 
       const tm = createTurnManager({
         getActiveEntities: () => [npc],
-        invokeAction: async () => { acts++; return false; },
+        invokeAction: async () => {
+          acts++;
+          return false;
+        },
       });
       tm.start();
       await runUntil(tm, () => expect(acts).toBeGreaterThanOrEqual(5));

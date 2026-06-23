@@ -10,7 +10,7 @@ export function executeDrop(actor, action, level, registry) {
   const inventory = actor.components.get('inventory');
   if (!inventory) return false;
 
-  const item = inventory.items.find(e => e.id === action.itemEntityId);
+  const item = inventory.items.find((e) => e.id === action.itemEntityId);
   if (!item) return false;
 
   const pos = actor.components.get('position');
