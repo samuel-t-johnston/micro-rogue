@@ -8,11 +8,9 @@ const PADDING = 16;
 
 /**
  * Creates a centered floating action menu — used by screens to surface per-item action choices
- * (e.g. Use / Drop / Cancel for a potion). Captures all input until dismissed.
- * @param {object} opts
- * @param {{ label: string, action: object|null }[]} opts.actions - Rows; `action` is the payload to
- *   submit when tapped, or null for a Cancel/dismiss row.
- * @param {(action: object|null) => void} opts.onSelect - Invoked with the chosen action (null when cancelled).
+ * (e.g. Use / Drop / Cancel for a potion). Captures all input until dismissed. `actions` is a list of
+ * `{ label, action }` rows (`action` is the payload to submit when tapped, or null for a Cancel/
+ * dismiss row); `onSelect` is invoked with the chosen action, or null when cancelled.
  */
 export function createActionMenu({ theme, getViewport, title, actions, onSelect }) {
   function layout() {

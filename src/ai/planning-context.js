@@ -135,7 +135,7 @@ export function applySenses(entity, level, turnCount = 0) {
 }
 
 /**
- * @typedef {Object} PlanningContext
+ * @typedef {object} PlanningContext
  * @property {object} memory - The entity's `memory` component (undefined for memoryless entities).
  * @property {{ position: {x: number, y: number}, factions: string[] }} selfState - The acting entity's own state.
  * @property {{ entities: object[], sounds: object[], smells: object[], visibleTiles: Set<string>, knownTiles: Map<string, number> }} perception - Merged, reconciled output of all the entity's senses.

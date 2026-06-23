@@ -16,6 +16,7 @@ import { buildSettingsPage, buildCreditsPage } from './game-menu-items.js';
  * couldn't be carried forward after an update and was cleared. Its button starts a new game.
  */
 
+/** Creates the main-menu scene (see the file overview). `onAction('new'|'continue')` is handled by main.js. */
 export function createMenuScene({ theme, getViewport, onAction, notice = null }) {
   let confirm = null; // a createActionMenu instance while confirming an overwrite
   let activeNotice = notice

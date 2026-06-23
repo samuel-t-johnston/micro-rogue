@@ -85,13 +85,11 @@ export function clampScroll(scroll, contentH, viewportH) {
 }
 
 /**
- * Bottom-left message log: a few ghost lines plus an icon when closed; a scrollable
- * modal overlay when open. Tapping the icon cycles the view state; the overlay's [✕],
- * a closing tap, or Escape dismisses it.
- *
- * @param {() => Array} getDisplayEntries - player-facing entries (display + seen).
- * @param {() => Array} getAllEntries - every event-log entry (debug view).
- * @param {() => boolean} isDebugEnabled - whether the debug step is reachable.
+ * Bottom-left message log: a few ghost lines plus an icon when closed; a scrollable modal overlay
+ * when open. Tapping the icon cycles the view state; the overlay's [✕], a closing tap, or Escape
+ * dismisses it. The injected accessors supply player-facing entries (`getDisplayEntries`), every
+ * event-log entry for the debug view (`getAllEntries`), and whether the debug step is reachable
+ * (`isDebugEnabled`).
  */
 export function createMessageLogWidget({ theme, getViewport, getDisplayEntries, getAllEntries, isDebugEnabled }) {
   let viewState = LogViewState.GHOST;

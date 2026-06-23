@@ -1,4 +1,4 @@
-import { drawText, drawButton, hitTest } from './canvas-ui.js';
+import { drawButton, hitTest } from './canvas-ui.js';
 
 /**
  * @file A point-anchored contextual action menu — the popover raised by a long-press (touch) or

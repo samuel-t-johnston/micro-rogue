@@ -12,6 +12,7 @@ import { buildSettingsPage, buildCreditsPage } from './game-menu-items.js';
  * into a fresh run.
  */
 
+/** Creates the in-game menu overlay controller (see the file overview). */
 export function createGameMenuController({ theme, getViewport, onNewGame }) {
   let open = false;
   let confirm = null; // a createActionMenu instance while confirming New Game

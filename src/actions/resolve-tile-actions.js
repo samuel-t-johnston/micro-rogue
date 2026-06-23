@@ -29,7 +29,7 @@ function selfAction(occupants) {
 }
 
 /**
- * @typedef {Object} TileAction
+ * @typedef {object} TileAction
  * @property {string} id - Stable identifier (menu keys / tests).
  * @property {string} label - Player-facing menu text.
  * @property {object} action - The concrete game action to submit; the action system dispatches by `type`.

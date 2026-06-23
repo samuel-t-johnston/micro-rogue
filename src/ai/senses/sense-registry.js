@@ -4,7 +4,7 @@ import { createSmellSense } from './smell.js';
 import { megaVision } from './mega-vision.js';
 
 /**
- * @typedef {Object} SenseResult
+ * @typedef {object} SenseResult
  * @property {object[]} [entities] - Observed entities: `{ entityId, position, confidence, turnObserved, factions, tags }`.
  * @property {Set<string>} [visibleTiles] - "x,y" keys of tiles the sense reveals (vision-type senses).
  * @property {object[]} [sounds] - Heard sound percepts (hearing-type senses).

@@ -40,14 +40,6 @@ function makeCtx() {
   });
 }
 
-// Helper: find which card/row was hit by walking the rendered layout
-function findHit(ctx, controller, x, y) {
-  controller.render(ctx);
-  const submitted = [];
-  controller.handleInput({ type: 'pointerdown', x, y });
-  return submitted;
-}
-
 describe('character menu — full equip/unequip flow', () => {
   let registry, player, dagger, submitted, controller;
 

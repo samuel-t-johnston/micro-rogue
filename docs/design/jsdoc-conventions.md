@@ -62,13 +62,13 @@ Skip the tag when the parameter name and the one-line description already make i
 | `@param {type} name - desc` | Parameter. Optional: `[name]`; with default: `[name=value]`; rest: `{...type} parts`. |
 | `@returns {type} desc` | Return value. Omit for `void`/obvious returns; include when semantics are non-obvious or nullable. |
 | `@throws {Type} desc` | Errors thrown. |
-| `@typedef {Object} Name` + `@property` | Define a reusable shape (a component, an extension-point context, a result object). Put it near where the shape originates. |
+| `@typedef {object} Name` + `@property` | Define a reusable shape (a component, an extension-point context, a result object). Put it near where the shape originates. Use lowercase `object` — `check-types` rejects `Object`. |
 | `@callback Name` | Document a function-typed parameter (e.g. a goal's `evaluate`). |
 | `@see` | Cross-reference a design doc or related symbol. |
 | `@example` | Usage snippet — high value on public/extension-facing APIs, optional elsewhere. |
 | `@deprecated` | Mark for removal, with the replacement. |
 
-Avoid `@author`, `@version`, `@since`, `@file` — git already tracks that, and they rot.
+Use `@file` for module headers (see the table above). Avoid `@author`, `@version`, `@since` — git already tracks that, and they rot.
 
 ## Type syntax (keep it valid)
 
@@ -122,64 +122,29 @@ Notes:
 
 ---
 
-## Adoption steps: when ESLint is added
+## Tooling
 
-ESLint is not yet in the project. When it is added, wire up JSDoc linting as follows. These rules enforce *presence and well-formedness* — matching the docs-only, tags-by-judgment stance — and deliberately do **not** require `@param`/`@returns` on every export.
+ESLint (flat config, `eslint.config.js`) and Prettier (`prettier.config.js`) are set up:
 
-1. **Install:**
-   ```
-   npm install -D eslint eslint-plugin-jsdoc
-   ```
+- `npm run lint` / `npm run lint:fix` — ESLint
+- `npm run format` / `npm run format:check` — Prettier
 
-2. **Flat config** (`eslint.config.js`, ESM to match `"type": "module"`):
-   ```js
-   import jsdoc from 'eslint-plugin-jsdoc';
+**Prettier owns formatting; ESLint owns code quality and JSDoc shape.** `eslint-config-prettier` is loaded last so the two never fight over style.
 
-   export default [
-     {
-       files: ['src/**/*.js'],
-       ignores: ['**/*.test.js'],
-       plugins: { jsdoc },
-       rules: {
-         // Require a block on exported functions/classes; not on trivial internals.
-         'jsdoc/require-jsdoc': ['warn', {
-           publicOnly: true,
-           require: { FunctionDeclaration: true, ClassDeclaration: true, MethodDefinition: false },
-           // Factory functions are exported function declarations — covered above.
-         }],
-         // If a block exists, keep it well-formed and consistent with the code:
-         'jsdoc/check-param-names': 'error',   // documented params must match the signature
-         'jsdoc/check-types': 'error',         // valid type syntax (keeps us ts-check-ready)
-         'jsdoc/check-tag-names': 'error',     // no invented tags
-         'jsdoc/no-undefined-types': 'warn',   // @typedef names must resolve
-         'jsdoc/require-param-description': 'warn',
-         'jsdoc/require-returns-description': 'warn',
-         // Intentionally OFF — tags are by judgment, not mandatory:
-         'jsdoc/require-param': 'off',
-         'jsdoc/require-returns': 'off',
-       },
-     },
-   ];
-   ```
+The JSDoc rules enforce *presence and well-formedness*, not content:
 
-3. **Add a script** to `package.json`:
-   ```json
-   "lint": "eslint .",
-   "lint:fix": "eslint . --fix"
-   ```
+- `require-jsdoc` (**error**, `publicOnly`) — a block on every exported function/class declaration.
+- `check-param-names`, `check-types`, `check-tag-names` (**error**) — documented params match the signature; lowercase `{object}` not `{Object}`; no invented tags.
+- `no-undefined-types` (**warn**) — `@typedef` and `import()` type names must resolve.
+- `require-param`, `require-returns`, `require-param-description`, `require-returns-description` (**off**) — tags are by judgment, and forcing a description on a self-evident tag just restates the type (see [Anti-patterns](#anti-patterns)).
 
-4. **Sequence the rollout:**
-   - Land this convention doc first (done).
-   - Run the backfill sweep (audit + fix existing comments, directory by directory) against this standard.
-   - Add ESLint with `require-jsdoc` at **`warn`** while the backfill is in progress, so legacy gaps don't block work.
-   - Once backfill is complete, flip `require-jsdoc` (and the `warn`-level rules) to **`error`** so regressions fail the lint.
-   - Add `npm run lint` to whatever pre-commit / CI checks exist at that point.
+`no-unused-vars` uses `args: 'none'`: handlers, stages, and seams keep a full shared signature without using every parameter, but unused *variables and imports* remain errors. `eslint.config.js` is the authoritative source — it also wires the right globals per area (browser for `src`/`data`, node for `scripts`, serviceworker for `service-worker.js`).
 
 ## Future: enabling type-checking
 
 Optional later phase, deliberately deferred. Because we write valid type syntax now, turning on editor/CI type-checking is incremental:
 
-1. Add a `jsconfig.json` with `"checkJs": true` and `"strict"` scoped to start (e.g. only `src/engine/**` — the pure-logic cores: `rng`, `geometry`, `path-finder`, `fov`, where inference pays off most).
+1. Add a `jsconfig.json` with `"checkJs": true` and `"strict"` scoped to start (e.g. the pure-logic cores where inference pays off most: `rng`/`fov` in `src/engine`, `geometry`/`pathfinding` in `src/world`).
 2. Add `// @ts-check` to individual files as they're brought up to clean, or rely on `checkJs` globally and silence noisy files by omission.
 3. Run `npx tsc --noEmit` in CI. No emit, no build — type-checking only; the shipped JS is unchanged.
 
