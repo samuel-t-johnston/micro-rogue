@@ -2,8 +2,12 @@ import { executePickup } from './action-pickup.js';
 import { gameLog } from '../../engine/game-log.js';
 import { subject, conjugate, itemName } from '../../engine/log-text.js';
 
-// Handles a tap on the actor's own tile.
-// Returns true (free action) if nothing picked up or dialog cancelled; false (turn consumed) otherwise.
+/**
+ * Handles a tap on the actor's own tile: travel via stairs underfoot, or pick up item(s) here
+ * (a single item directly, multiple via a dialog).
+ * @returns {Promise<boolean>} `true` (free action) if nothing was picked up or the dialog was
+ *   cancelled; `false` (turn consumed) otherwise.
+ */
 export async function executeSelfInteract(actor, _action, level, registry, dialogController) {
   const pos = actor.components.get('position');
 

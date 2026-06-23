@@ -1,8 +1,10 @@
 import { gameLog } from '../../engine/game-log.js';
 import { subject, conjugate, itemName } from '../../engine/log-text.js';
 
-// Removes the item in the given slot from the actor's equipment back into inventory.
-// Returns false — unequip always consumes a turn.
+/**
+ * Removes the item in the given slot (`action.slot`) from the actor's equipment back into inventory.
+ * @returns {boolean} Always `false` — unequipping consumes the turn.
+ */
 export function executeUnequip(actor, action, _level, _registry) {
   const wears = actor.components.get('wearsEquipment');
   if (!wears) return false;

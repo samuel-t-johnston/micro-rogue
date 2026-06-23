@@ -2,11 +2,13 @@ import { applyEffect } from '../../effects/effects.js';
 import { gameLog } from '../../engine/game-log.js';
 import { subject, conjugate, itemName } from '../../engine/log-text.js';
 
-// Consumes an item from the actor's inventory: applies its effect to the actor,
-// then removes the item from inventory and destroys the entity.
-// action.targetEntityId is optional — currently always self (drinking); a future
-// "throw potion" action could pass a different target through the same handler.
-// Returns false — consume always consumes a turn.
+/**
+ * Consumes an item from the actor's inventory: applies its effect to the actor, then removes the
+ * item from inventory and destroys the entity. `action.targetEntityId` is optional — currently
+ * always self (drinking); a future "throw potion" action could pass a different target through the
+ * same handler.
+ * @returns {boolean} Always `false` — consuming an item consumes the turn.
+ */
 export function executeConsume(actor, action, level, registry) {
   const inventory = actor.components.get('inventory');
   if (!inventory) return false;
