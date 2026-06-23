@@ -1,16 +1,18 @@
-// Entity/level (de)serialization for the save system.
-//
-// The save format is a flat list of all registry entities, each cross-referencing others
-// (and the level referencing its members) purely by integer id. Almost every component is
-// already plain JSON — the codebase stores goals/senses/effects as string keys and never
-// holds function references. Only three component shapes can't go straight to JSON, and
-// each gets a codec below:
-//   - inventory:      `items` holds live entity refs        -> ids
-//   - wearsEquipment: `slots[slot]` holds an entity ref|null -> id|null
-//   - tilePerception: `visible` Set, `memory`/`rememberedEntities` Maps -> array / entries
-//
-// Keeping these as runtime types (refs, Set, Map) is the right call for gameplay hot paths;
-// the conversion lives here at the boundary rather than leaking into the gameplay systems.
+/**
+ * @file Entity/level (de)serialization for the save system.
+ *
+ * The save format is a flat list of all registry entities, each cross-referencing others
+ * (and the level referencing its members) purely by integer id. Almost every component is
+ * already plain JSON — the codebase stores goals/senses/effects as string keys and never
+ * holds function references. Only three component shapes can't go straight to JSON, and
+ * each gets a codec below:
+ *   - inventory:      `items` holds live entity refs        -> ids
+ *   - wearsEquipment: `slots[slot]` holds an entity ref|null -> id|null
+ *   - tilePerception: `visible` Set, `memory`/`rememberedEntities` Maps -> array / entries
+ *
+ * Keeping these as runtime types (refs, Set, Map) is the right call for gameplay hot paths;
+ * the conversion lives here at the boundary rather than leaking into the gameplay systems.
+ */
 import { createLevel } from '../world/level.js';
 import { serializeScent, deserializeScent } from '../world/scent.js';
 
@@ -63,6 +65,7 @@ function deserializeComponent(name, data, getEntity) {
   return codec ? codec.deserialize(data, getEntity) : structuredClone(data);
 }
 
+/** Serializes one entity to `{ id, components }`, applying a component codec where one exists. */
 export function serializeEntity(entity) {
   const components = {};
   for (const [name, data] of entity.components) {
@@ -71,13 +74,16 @@ export function serializeEntity(entity) {
   return { id: entity.id, components };
 }
 
+/** Serializes every entity in the registry to a flat array. */
 export function serializeEntities(registry) {
   return registry.getAllEntities().map(serializeEntity);
 }
 
-// Rehydrates entities into `registry` in two passes so the object graph resolves cleanly:
-// pass 1 creates every shell (so all ids exist), pass 2 populates components and resolves
-// id references against the now-complete registry.
+/**
+ * Rehydrates entities into `registry` in two passes so the object graph resolves cleanly: pass 1
+ * creates every shell (so all ids exist), pass 2 populates components and resolves id references
+ * against the now-complete registry.
+ */
 export function deserializeEntities(serialized, registry) {
   for (const { id } of serialized) {
     registry.createEntityWithId(id);
@@ -91,6 +97,7 @@ export function deserializeEntities(serialized, registry) {
   }
 }
 
+/** Serializes a level's structure (tiles, overrides, blackboard, scent) plus its member entity ids. */
 export function serializeLevel(level) {
   return {
     branch: level.branch,
@@ -107,8 +114,10 @@ export function serializeLevel(level) {
   };
 }
 
-// Rebuilds a level and re-places its member entities (which must already exist in `registry`).
-// placeEntity() rebuilds the spatial index from each entity's position, so it is never serialized.
+/**
+ * Rebuilds a level and re-places its member entities (which must already exist in `registry`).
+ * placeEntity() rebuilds the spatial index from each entity's position, so it is never serialized.
+ */
 export function deserializeLevel(data, registry) {
   const level = createLevel({
     branch: data.branch ?? null,
