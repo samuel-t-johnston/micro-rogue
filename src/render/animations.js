@@ -1,20 +1,22 @@
-// The game's single animation sink. Animations are purely cosmetic: game state
-// resolves immediately (an entity's `position` is the destination the instant it
-// moves), and the animation layer just makes the sprite *chase* that already-settled
-// truth. Nothing in the turn loop ever awaits an animation — this module is a leaf
-// that depends on nothing and that nothing depends on, which is what keeps it from
-// sprouting tendrils across the codebase (see docs/design/ux-design.md "Animations").
-//
-// Like `gameLog` and `rng`, it's an ambient singleton: producers (move/attack actions,
-// the death chokepoint, future spells) fire-and-forget from wherever they resolve, and
-// the renderer is the one consumer that reads the resulting transforms.
-//
-// Two flavours of animation:
-//   - Attached: modify how an existing entity is drawn (slide offset, attack lunge).
-//     Keyed by entity id; the normal entity pass still draws the sprite, transformed.
-//   - Detached: own their visual (a snapshot of sprite + position) and draw in a
-//     separate pass. Needed when there's no live entity to attach to — death smoosh
-//     (the entity is removed before it could animate), and projectiles later.
+/**
+ * @file The game's single animation sink. Animations are purely cosmetic: game state
+ * resolves immediately (an entity's `position` is the destination the instant it
+ * moves), and the animation layer just makes the sprite *chase* that already-settled
+ * truth. Nothing in the turn loop ever awaits an animation — this module is a leaf
+ * that depends on nothing and that nothing depends on, which is what keeps it from
+ * sprouting tendrils across the codebase (see docs/design/ux-design.md "Animations").
+ *
+ * Like `gameLog` and `rng`, it's an ambient singleton: producers (move/attack actions,
+ * the death chokepoint, future spells) fire-and-forget from wherever they resolve, and
+ * the renderer is the one consumer that reads the resulting transforms.
+ *
+ * Two flavours of animation:
+ *   - Attached: modify how an existing entity is drawn (slide offset, attack lunge).
+ *     Keyed by entity id; the normal entity pass still draws the sprite, transformed.
+ *   - Detached: own their visual (a snapshot of sprite + position) and draw in a
+ *     separate pass. Needed when there's no live entity to attach to — death smoosh
+ *     (the entity is removed before it could animate), and projectiles later.
+ */
 
 // Motion durations (ms). Movement slide is kept short (ux-design: 80–120ms) so turn
 // pace never reads as sluggish; the others are tuned for "feel" and easily nudged.
@@ -199,4 +201,5 @@ function createAnimationManager() {
   };
 }
 
+/** The game's ambient animation singleton (see the file overview). */
 export const animations = createAnimationManager();

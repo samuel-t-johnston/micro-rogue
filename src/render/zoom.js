@@ -1,20 +1,29 @@
-// Discrete zoom ladder for the map view (roadmap M7). Levels are on-screen tile sizes in CSS
-// pixels; sprites are sourced from the 16px sheet and scaled to these by integer factors
-// (×1..×4), so every level stays pixel-crisp. Index 0 is the widest view, the last index the
-// closest. Pure state — input (wheel/pinch) and the renderer drive it; nothing here is persisted.
+/**
+ * @file Discrete zoom ladder for the map view (roadmap M7). Levels are on-screen tile sizes in CSS
+ * pixels; sprites are sourced from the 16px sheet and scaled to these by integer factors (×1..×4), so
+ * every level stays pixel-crisp. Index 0 is the widest view, the last index the closest. Pure state —
+ * input (wheel/pinch) and the renderer drive it; nothing here is persisted.
+ */
 
+/** On-screen tile sizes (CSS px) for each zoom level; index 0 is the widest view. */
 export const ZOOM_LEVELS = [16, 32, 48, 64];
 
 const clampIndex = (i, levels) => Math.max(0, Math.min(levels.length - 1, i));
 
-// Platform default: touch devices (coarse pointer) start closer for fat-finger legibility;
-// mouse/desktop (fine pointer) start wider to show more of the map.
+/**
+ * Platform default zoom index: touch devices (coarse pointer) start closer for fat-finger
+ * legibility; mouse/desktop (fine pointer) start wider to show more of the map.
+ */
 export function defaultZoomIndex(isCoarsePointer, levels = ZOOM_LEVELS) {
   const target = isCoarsePointer ? 48 : 32;
   const i = levels.indexOf(target);
   return i >= 0 ? i : clampIndex(Math.floor(levels.length / 2), levels);
 }
 
+/**
+ * Creates a zoom controller: holds the current level index and exposes its tile size, in/out
+ * capability flags, and clamped index mutators. Returned values are the new index.
+ */
 export function createZoom({ levels = ZOOM_LEVELS, index = 0 } = {}) {
   let current = clampIndex(index, levels);
   return {

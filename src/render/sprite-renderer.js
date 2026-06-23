@@ -1,8 +1,10 @@
-// Draws named sprites from the catalog (data/sprites/sprite-catalog.js). A sprite name resolves to
-// a sheet + grid cell; the sheet may exist at several pixel sizes ("families"), and we pick the best
-// one per draw for the current zoom level and device pixel ratio. Integer upscales of pixel art stay
-// crisp, so we prefer the most detailed sheet that still scales by a whole number to the on-screen
-// device-pixel size.
+/**
+ * @file Draws named sprites from the catalog (data/sprites/sprite-catalog.js). A sprite name resolves
+ * to a sheet + grid cell; the sheet may exist at several pixel sizes ("families"), and we pick the
+ * best one per draw for the current zoom level and device pixel ratio. Integer upscales of pixel art
+ * stay crisp, so we prefer the most detailed sheet that still scales by a whole number to the
+ * on-screen device-pixel size.
+ */
 
 /**
  * Choose the source sheet size for a device-pixel tile target.
@@ -42,6 +44,11 @@ function referencedSheets(catalog) {
   return [...new Set(Object.values(catalog).map((e) => e.sheet))];
 }
 
+/**
+ * Creates the sprite renderer: preloads one image per referenced (sheet, size), and exposes `load()`
+ * and a `draw()` that picks the best-fit loaded sheet for the requested size (falling back to any
+ * loaded size, then to a color/glyph fill via a `false` return).
+ */
 export function createSpriteRenderer({ catalog, sheets }) {
   // One image per referenced (sheet, size), each tracking its own load state.
   const images = [];
