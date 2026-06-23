@@ -164,3 +164,15 @@ export function createScuttler(registry, x, y) {
   );
   return entity;
 }
+
+/**
+ * Sample constructors for every creature, keyed by label — one canonical instance of each placed at
+ * the origin. The source of truth for "which creatures exist" when enumerating content (e.g. the
+ * sprite/glyph coverage test). Add a creature here when you add its factory above.
+ */
+export const CREATURE_SAMPLES = {
+  goblin: (r) => createGoblin(r, 0, 0),
+  orc: (r) => createOrc(r, 0, 0),
+  'orc commander': (r) => createOrcCommander(r, 0, 0),
+  scuttler: (r) => createScuttler(r, 0, 0),
+};

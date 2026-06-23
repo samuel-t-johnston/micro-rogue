@@ -49,3 +49,12 @@ export async function createPlayer(registry, x, y) {
   );
   return entity;
 }
+
+/**
+ * Sample constructor for the player, keyed by label — a canonical instance at the origin, so content
+ * enumeration (e.g. the sprite/glyph coverage test) can treat the player uniformly with creatures and
+ * items. `make` is async, matching createPlayer.
+ */
+export const PLAYER_SAMPLE = {
+  player: (r) => createPlayer(r, 0, 0),
+};
