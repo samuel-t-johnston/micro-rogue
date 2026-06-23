@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { scentAt, depositScent, diffuseAndDecay, gradientDir, scentUpkeep, serializeScent, deserializeScent } from './scent.js';
+import {
+  scentAt,
+  depositScent,
+  diffuseAndDecay,
+  gradientDir,
+  scentUpkeep,
+  serializeScent,
+  deserializeScent,
+} from './scent.js';
 import { createLevel } from './level.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
 import { components } from './components.js';
@@ -9,7 +17,7 @@ function makeLevel(rows) {
   const level = createLevel();
   level.height = rows.length;
   level.width = rows[0].length;
-  level.tiles = rows.map(r => [...r].map(c => (c === '#' ? 'wall' : 'floor')));
+  level.tiles = rows.map((r) => [...r].map((c) => (c === '#' ? 'wall' : 'floor')));
   return level;
 }
 

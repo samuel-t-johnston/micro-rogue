@@ -41,7 +41,9 @@ function crc32(buf) {
 
 const paeth = (a, b, c) => {
   const p = a + b - c;
-  const pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
+  const pa = Math.abs(p - a),
+    pb = Math.abs(p - b),
+    pc = Math.abs(p - c);
   return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
 };
 
@@ -49,7 +51,11 @@ const paeth = (a, b, c) => {
 // enough for the sheets we ship without pulling in a PNG library.
 function decodePng(buf) {
   if (buf.subarray(0, 8).toString('hex') !== PNG_SIG) throw new Error('Not a PNG file');
-  let width = 0, height = 0, bitDepth = 0, colorType = 0, interlace = 0;
+  let width = 0,
+    height = 0,
+    bitDepth = 0,
+    colorType = 0,
+    interlace = 0;
   const idat = [];
   let off = 8;
   while (off < buf.length) {
@@ -58,8 +64,11 @@ function decodePng(buf) {
     const data = buf.subarray(off + 8, off + 8 + len);
     off += 12 + len; // length(4) + type(4) + data + crc(4)
     if (type === 'IHDR') {
-      width = data.readUInt32BE(0); height = data.readUInt32BE(4);
-      bitDepth = data[8]; colorType = data[9]; interlace = data[12];
+      width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
+      bitDepth = data[8];
+      colorType = data[9];
+      interlace = data[12];
     } else if (type === 'IDAT') idat.push(data);
     else if (type === 'IEND') break;
   }
@@ -83,19 +92,36 @@ function decodePng(buf) {
       const c = x >= channels ? prev[x - channels] : 0;
       let out;
       switch (ft) {
-        case 0: out = v; break;
-        case 1: out = v + a; break;
-        case 2: out = v + b; break;
-        case 3: out = v + ((a + b) >> 1); break;
-        case 4: out = v + paeth(a, b, c); break;
-        default: throw new Error(`Unknown scanline filter ${ft}`);
+        case 0:
+          out = v;
+          break;
+        case 1:
+          out = v + a;
+          break;
+        case 2:
+          out = v + b;
+          break;
+        case 3:
+          out = v + ((a + b) >> 1);
+          break;
+        case 4:
+          out = v + paeth(a, b, c);
+          break;
+        default:
+          throw new Error(`Unknown scanline filter ${ft}`);
       }
       cur[x] = out & 0xff;
     }
     for (let x = 0; x < width; x++) {
-      const si = x * channels, di = (y * width + x) * 4;
-      if (channels >= 3) { rgba[di] = cur[si]; rgba[di + 1] = cur[si + 1]; rgba[di + 2] = cur[si + 2]; }
-      else { rgba[di] = rgba[di + 1] = rgba[di + 2] = cur[si]; } // grayscale → replicate
+      const si = x * channels,
+        di = (y * width + x) * 4;
+      if (channels >= 3) {
+        rgba[di] = cur[si];
+        rgba[di + 1] = cur[si + 1];
+        rgba[di + 2] = cur[si + 2];
+      } else {
+        rgba[di] = rgba[di + 1] = rgba[di + 2] = cur[si];
+      } // grayscale → replicate
       rgba[di + 3] = channels === 4 ? cur[si + 3] : channels === 2 ? cur[si + 1] : 255;
     }
     cur.copy(prev);
@@ -112,12 +138,16 @@ function encodePng(width, height, rgba) {
     rgba.copy(raw, y * (stride + 1) + 1, y * stride, y * stride + stride);
   }
   const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(width, 0); ihdr.writeUInt32BE(height, 4);
-  ihdr[8] = 8; ihdr[9] = 6; // 8-bit RGBA
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr[8] = 8;
+  ihdr[9] = 6; // 8-bit RGBA
   const chunk = (type, data) => {
-    const len = Buffer.alloc(4); len.writeUInt32BE(data.length, 0);
+    const len = Buffer.alloc(4);
+    len.writeUInt32BE(data.length, 0);
     const body = Buffer.concat([Buffer.from(type, 'ascii'), data]);
-    const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(body), 0);
+    const crc = Buffer.alloc(4);
+    crc.writeUInt32BE(crc32(body), 0);
     return Buffer.concat([len, body, crc]);
   };
   return Buffer.concat([
@@ -132,8 +162,10 @@ function parseArgs(argv) {
   const flags = {};
   const pos = [];
   for (const a of argv) {
-    if (a.startsWith('--')) { const [k, v] = a.slice(2).split('='); flags[k] = v === undefined ? true : v; }
-    else pos.push(a);
+    if (a.startsWith('--')) {
+      const [k, v] = a.slice(2).split('=');
+      flags[k] = v === undefined ? true : v;
+    } else pos.push(a);
   }
   return { flags, pos };
 }
@@ -141,13 +173,16 @@ function parseArgs(argv) {
 function main() {
   const { flags, pos } = parseArgs(process.argv.slice(2));
   if (pos.length !== 3 && pos.length !== 5) {
-    console.error('Usage: node scripts/sprite-preview.mjs <sheet.png> <col> <row> [<col1> <row1>] [--size=N] [--scale=N] [--grid] [--out=FILE]');
+    console.error(
+      'Usage: node scripts/sprite-preview.mjs <sheet.png> <col> <row> [<col1> <row1>] [--size=N] [--scale=N] [--grid] [--out=FILE]',
+    );
     process.exit(1);
   }
   const sheetPath = pos[0];
-  let [c0, r0, c1, r1] = pos.length === 5
-    ? pos.slice(1).map(Number)
-    : [Number(pos[1]), Number(pos[2]), Number(pos[1]), Number(pos[2])];
+  let [c0, r0, c1, r1] =
+    pos.length === 5
+      ? pos.slice(1).map(Number)
+      : [Number(pos[1]), Number(pos[2]), Number(pos[1]), Number(pos[2])];
   if ([c0, r0, c1, r1].some((n) => !Number.isInteger(n) || n < 0)) {
     console.error('col/row must be non-negative integers');
     process.exit(1);
@@ -161,33 +196,52 @@ function main() {
   const grid = Boolean(flags.grid);
 
   const sheet = decodePng(readFileSync(sheetPath));
-  const cols = sheet.width / size, rows = sheet.height / size;
+  const cols = sheet.width / size,
+    rows = sheet.height / size;
   if (!Number.isInteger(cols) || !Number.isInteger(rows)) {
     console.error(`Sheet ${sheet.width}×${sheet.height} is not a whole number of ${size}px cells`);
     process.exit(1);
   }
   if (c1 >= cols || r1 >= rows) {
-    console.error(`Region exceeds the ${cols}×${rows} grid (cols 0..${cols - 1}, rows 0..${rows - 1})`);
+    console.error(
+      `Region exceeds the ${cols}×${rows} grid (cols 0..${cols - 1}, rows 0..${rows - 1})`,
+    );
     process.exit(1);
   }
 
-  const cellCols = c1 - c0 + 1, cellRows = r1 - r0 + 1;
-  const outW = cellCols * size * scale, outH = cellRows * size * scale;
+  const cellCols = c1 - c0 + 1,
+    cellRows = r1 - r0 + 1;
+  const outW = cellCols * size * scale,
+    outH = cellRows * size * scale;
   const out = Buffer.alloc(outW * outH * 4);
   // Nearest-neighbor: each output pixel samples the source cell-block pixel under it.
   for (let oy = 0; oy < outH; oy++) {
     const sy = r0 * size + Math.floor(oy / scale);
     for (let ox = 0; ox < outW; ox++) {
       const sx = c0 * size + Math.floor(ox / scale);
-      const si = (sy * sheet.width + sx) * 4, di = (oy * outW + ox) * 4;
-      out[di] = sheet.rgba[si]; out[di + 1] = sheet.rgba[si + 1];
-      out[di + 2] = sheet.rgba[si + 2]; out[di + 3] = sheet.rgba[si + 3];
+      const si = (sy * sheet.width + sx) * 4,
+        di = (oy * outW + ox) * 4;
+      out[di] = sheet.rgba[si];
+      out[di + 1] = sheet.rgba[si + 1];
+      out[di + 2] = sheet.rgba[si + 2];
+      out[di + 3] = sheet.rgba[si + 3];
     }
   }
   if (grid) {
-    const line = (di) => { out[di] = 255; out[di + 1] = 0; out[di + 2] = 255; out[di + 3] = 255; };
-    for (let c = 1; c < cellCols; c++) { const ox = c * size * scale; for (let oy = 0; oy < outH; oy++) line((oy * outW + ox) * 4); }
-    for (let r = 1; r < cellRows; r++) { const oy = r * size * scale; for (let ox = 0; ox < outW; ox++) line((oy * outW + ox) * 4); }
+    const line = (di) => {
+      out[di] = 255;
+      out[di + 1] = 0;
+      out[di + 2] = 255;
+      out[di + 3] = 255;
+    };
+    for (let c = 1; c < cellCols; c++) {
+      const ox = c * size * scale;
+      for (let oy = 0; oy < outH; oy++) line((oy * outW + ox) * 4);
+    }
+    for (let r = 1; r < cellRows; r++) {
+      const oy = r * size * scale;
+      for (let ox = 0; ox < outW; ox++) line((oy * outW + ox) * 4);
+    }
   }
 
   const single = c0 === c1 && r0 === r1;
@@ -196,7 +250,9 @@ function main() {
   const outPath = flags.out ?? join(OUT_DIR, `${sheetBase}-${region}.png`);
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, encodePng(outW, outH, out));
-  console.log(`${basename(sheetPath)} [${size}px] cols ${c0}..${c1}, rows ${r0}..${r1} → ${outPath} (${outW}×${outH}, ${scale}×${grid ? ', grid' : ''})`);
+  console.log(
+    `${basename(sheetPath)} [${size}px] cols ${c0}..${c1}, rows ${r0}..${r1} → ${outPath} (${outW}×${outH}, ${scale}×${grid ? ', grid' : ''})`,
+  );
 }
 
 main();

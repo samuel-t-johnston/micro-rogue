@@ -21,8 +21,11 @@ export function clampCamera({ x, y }, { width, height }) {
  * tile size to convert pixels to tiles, then clamped to the level bounds.
  */
 export function panCamera(camera, dxScreen, dyScreen, tileSize, bounds) {
-  return clampCamera({
-    x: camera.x - dxScreen / tileSize,
-    y: camera.y - dyScreen / tileSize,
-  }, bounds);
+  return clampCamera(
+    {
+      x: camera.x - dxScreen / tileSize,
+      y: camera.y - dyScreen / tileSize,
+    },
+    bounds,
+  );
 }

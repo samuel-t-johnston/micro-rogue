@@ -93,7 +93,9 @@ describe('describeTile', () => {
       placeItem(registry, level, 3, 3, 'Dagger');
       level.placeEntity(createChest(registry, 3, 3));
       const viewer = makeViewer(registry, 2, 2, { visible: ['3,3'] });
-      expect(describeTile(level, viewer, { x: 3, y: 3 })).toBe('You see an Orc, a dagger, and a chest.');
+      expect(describeTile(level, viewer, { x: 3, y: 3 })).toBe(
+        'You see an Orc, a dagger, and a chest.',
+      );
     });
 
     it('reports the self tile as standing here when empty', () => {

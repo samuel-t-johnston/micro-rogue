@@ -34,7 +34,10 @@ describe('executePickup', () => {
 
   it('updates item.location to inventory with the actor id', () => {
     executePickup(actor, { itemEntityId: potion.id }, level, registry);
-    expect(potion.components.get('item').location).toEqual({ type: 'inventory', ownerId: actor.id });
+    expect(potion.components.get('item').location).toEqual({
+      type: 'inventory',
+      ownerId: actor.id,
+    });
   });
 
   it('adds the item to the actor inventory', () => {

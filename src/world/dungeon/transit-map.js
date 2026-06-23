@@ -12,7 +12,7 @@ export function getStart(map) {
 
 /** The node descriptor (`{ id, pipelineId, branch, depth }`) for an id, or null. */
 export function getNode(map, nodeId) {
-  return map.nodes.find(n => n.id === nodeId) ?? null;
+  return map.nodes.find((n) => n.id === nodeId) ?? null;
 }
 
 /**

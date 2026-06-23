@@ -60,17 +60,34 @@ export function createContextMenu({ theme, getViewport, anchor, rows, onSelect }
       ctx.strokeRect(panel.x + 0.5, panel.y + 0.5, panel.w - 1, panel.h - 1);
 
       rows.forEach((row, i) => {
-        drawButton(ctx, theme, { ...rowRect(panel, i), label: row.label, enabled: true, hover: i === hover });
+        drawButton(ctx, theme, {
+          ...rowRect(panel, i),
+          label: row.label,
+          enabled: true,
+          hover: i === hover,
+        });
       });
     },
 
     handleInput(event) {
-      if (event.type === 'keydown' && event.key === 'Escape') { onSelect(null); return true; }
-      if (event.type === 'pointermove') { hover = rowAt(event.x, event.y); return true; }
+      if (event.type === 'keydown' && event.key === 'Escape') {
+        onSelect(null);
+        return true;
+      }
+      if (event.type === 'pointermove') {
+        hover = rowAt(event.x, event.y);
+        return true;
+      }
       if (event.type === 'pointerdown') {
         const i = rowAt(event.x, event.y);
-        if (i >= 0) { onSelect(rows[i].action); return true; }
-        if (!hitTest(layout(), event.x, event.y)) { onSelect(null); return true; } // tap-outside dismisses
+        if (i >= 0) {
+          onSelect(rows[i].action);
+          return true;
+        }
+        if (!hitTest(layout(), event.x, event.y)) {
+          onSelect(null);
+          return true;
+        } // tap-outside dismisses
         return true; // inside the panel but not on a row — consume
       }
       return event.type === 'pointerup' || event.type === 'pointercancel';

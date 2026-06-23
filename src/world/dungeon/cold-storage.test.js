@@ -55,7 +55,12 @@ describe('freezeLevel / thawLevel round-trip', () => {
 
     expect(level2.getTile(0, 0)).toBe('floor');
     expect(level2.blackboard).toEqual({ theme: 'maze' });
-    expect(level2).toMatchObject({ branch: 0, depth: 1, pipelineId: 'random-static-maze', seed: 555 });
+    expect(level2).toMatchObject({
+      branch: 0,
+      depth: 1,
+      pipelineId: 'random-static-maze',
+      seed: 555,
+    });
 
     const monster2 = [...level2.getEntitiesAt(2, 2)][0];
     expect(monster2.components.get('name')).toBe('Goblin');
@@ -70,13 +75,13 @@ describe('freezeLevel / thawLevel round-trip', () => {
 describe('freezeLevel exclusion (limbo)', () => {
   it('omits the excluded sub-graph from the blob and leaves it in the registry', () => {
     const { registry, level, player, monster } = buildLevel({ withPlayer: true });
-    const excludeIds = new Set([...collectSubgraph([player])].map(e => e.id));
+    const excludeIds = new Set([...collectSubgraph([player])].map((e) => e.id));
     const carriedId = player.components.get('inventory').items[0].id;
 
     const blob = freezeLevel(registry, level, excludeIds);
 
     // Player + carried item are not in the frozen blob...
-    const frozenIds = blob.entities.map(e => e.id);
+    const frozenIds = blob.entities.map((e) => e.id);
     expect(frozenIds).not.toContain(player.id);
     expect(frozenIds).not.toContain(carriedId);
     // ...nor referenced by the frozen level...
@@ -92,7 +97,7 @@ describe('freezeLevel exclusion (limbo)', () => {
 
   it('keeps nextId monotonic so thawing never collides with live ids', () => {
     const { registry, level, player } = buildLevel({ withPlayer: true });
-    const excludeIds = new Set([...collectSubgraph([player])].map(e => e.id));
+    const excludeIds = new Set([...collectSubgraph([player])].map((e) => e.id));
     const nextIdBefore = registry.getNextId();
 
     const blob = freezeLevel(registry, level, excludeIds);
@@ -101,7 +106,7 @@ describe('freezeLevel exclusion (limbo)', () => {
 
     // Thawing into the same registry re-registers the frozen ids without exceeding the counter.
     thawLevel(blob, registry);
-    const maxId = Math.max(...registry.getAllEntities().map(e => e.id));
+    const maxId = Math.max(...registry.getAllEntities().map((e) => e.id));
     expect(registry.getNextId()).toBeGreaterThan(maxId);
   });
 });

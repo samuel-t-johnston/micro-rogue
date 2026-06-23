@@ -24,7 +24,9 @@ export function collectDeviceInfo() {
     maxTouchPoints: nav.maxTouchPoints ?? null,
     devicePixelRatio: win.devicePixelRatio ?? null,
     viewport: { width: win.innerWidth ?? null, height: win.innerHeight ?? null },
-    screen: win.screen ? { width: win.screen.width ?? null, height: win.screen.height ?? null } : null,
+    screen: win.screen
+      ? { width: win.screen.width ?? null, height: win.screen.height ?? null }
+      : null,
   };
 }
 
@@ -32,7 +34,14 @@ export function collectDeviceInfo() {
  * Assembles the bundle from the live game. Pure data in, JSON-safe data out — reuses serializeGame
  * for the save snapshot so the bundle and the savegame can never disagree.
  */
-export function buildSupportBundle({ registry, level, player, turnCount, currentNodeId, frozenLevels }) {
+export function buildSupportBundle({
+  registry,
+  level,
+  player,
+  turnCount,
+  currentNodeId,
+  frozenLevels,
+}) {
   return {
     bundleVersion: SUPPORT_BUNDLE_VERSION,
     generatedAt: new Date().toISOString(),

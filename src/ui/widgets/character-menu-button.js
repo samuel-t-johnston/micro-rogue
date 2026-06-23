@@ -22,7 +22,10 @@ export function createCharacterMenuButton({ theme, getViewport, onOpen }) {
       ctx.fillStyle = theme.surface;
       ctx.fillRect(btn.x, btn.y, btn.w, btn.h);
       drawText(ctx, '\u{1F464}', btn.x + btn.w / 2, btn.y + btn.h / 2, {
-        color: theme.text, size: 22, align: 'center', baseline: 'middle',
+        color: theme.text,
+        size: 22,
+        align: 'center',
+        baseline: 'middle',
       });
     },
 

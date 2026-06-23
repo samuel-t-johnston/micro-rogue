@@ -32,7 +32,9 @@ describe('handleDeath', () => {
     level.placeEntity(player);
 
     let signalled = null;
-    level.onPlayerDeath = (entity) => { signalled = entity; };
+    level.onPlayerDeath = (entity) => {
+      signalled = entity;
+    };
 
     handleDeath(player, level, registry);
 

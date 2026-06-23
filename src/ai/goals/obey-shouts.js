@@ -15,8 +15,9 @@ export const obeyShouts = {
   evaluate(context) {
     const { memory, perception, selfState, level } = context;
 
-    const order = (perception.sounds ?? []).find(s =>
-      s.understood && s.message?.kind === 'enemy-report' && s.message.direction);
+    const order = (perception.sounds ?? []).find(
+      (s) => s.understood && s.message?.kind === 'enemy-report' && s.message.direction,
+    );
     if (order) {
       memory.heading = order.message.direction;
       memory.headingTurns = HEADING_PERSISTENCE;

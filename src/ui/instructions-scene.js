@@ -23,7 +23,7 @@ const MAX_COL = 560;
 const BODY_SIZE = 18;
 const BODY_LINE_H = 26;
 const BOX_SIZE = 24;
-const ROW_H = 44;          // checkbox row hit height — meets the 44px tap-target floor
+const ROW_H = 44; // checkbox row hit height — meets the 44px tap-target floor
 const BUTTON_W = 240;
 const BUTTON_H = 56;
 
@@ -48,9 +48,20 @@ export function createInstructionsScene({ theme, getViewport, onContinue, showCh
     const buttonY = checkRowY + (showCheckbox ? ROW_H + 24 : 8);
 
     return {
-      colX, colW, headingY, bodyTop, bodyLines, boxY,
+      colX,
+      colW,
+      headingY,
+      bodyTop,
+      bodyLines,
+      boxY,
       checkbox: { x: colX, y: checkRowY, w: colW, h: ROW_H },
-      button: { x: Math.round((width - BUTTON_W) / 2), y: buttonY, w: BUTTON_W, h: BUTTON_H, label: 'Start Adventure' },
+      button: {
+        x: Math.round((width - BUTTON_W) / 2),
+        y: buttonY,
+        w: BUTTON_W,
+        h: BUTTON_H,
+        label: 'Start Adventure',
+      },
     };
   }
 
@@ -69,18 +80,29 @@ export function createInstructionsScene({ theme, getViewport, onContinue, showCh
       cached = lay;
 
       drawText(ctx, HEADING, width / 2, lay.headingY, {
-        color: theme.text, size: 34, weight: '700', align: 'center', baseline: 'middle',
+        color: theme.text,
+        size: 34,
+        weight: '700',
+        align: 'center',
+        baseline: 'middle',
       });
 
       lay.bodyLines.forEach((line, i) => {
         drawText(ctx, line, lay.colX, lay.bodyTop + i * BODY_LINE_H, {
-          color: theme.text, size: BODY_SIZE, align: 'left', baseline: 'top',
+          color: theme.text,
+          size: BODY_SIZE,
+          align: 'left',
+          baseline: 'top',
         });
       });
 
       if (showCheckbox) {
         drawCheckbox(ctx, theme, {
-          x: lay.colX, y: lay.boxY, size: BOX_SIZE, checked: skip, label: 'Do not display again',
+          x: lay.colX,
+          y: lay.boxY,
+          size: BOX_SIZE,
+          checked: skip,
+          label: 'Do not display again',
         });
       }
 
@@ -96,8 +118,14 @@ export function createInstructionsScene({ theme, getViewport, onContinue, showCh
         return false;
       }
       if (event.type === 'pointerdown') {
-        if (showCheckbox && hitTest(checkbox, event.x, event.y)) { toggleSkip(); return true; }
-        if (hitTest(button, event.x, event.y)) { onContinue?.(); return true; }
+        if (showCheckbox && hitTest(checkbox, event.x, event.y)) {
+          toggleSkip();
+          return true;
+        }
+        if (hitTest(button, event.x, event.y)) {
+          onContinue?.();
+          return true;
+        }
         return true;
       }
       if (event.type === 'keydown' && (event.key === 'Enter' || event.key === ' ')) {

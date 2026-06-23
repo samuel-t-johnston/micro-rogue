@@ -11,10 +11,18 @@ import { createEquipmentScreenBody } from './screens/equipment-screen.js';
 export function createCharacterMenuController({ theme, getViewport, getPlayer, onAction }) {
   let screen = null;
 
-  function close() { screen = null; }
-  function openRoot() { screen = buildRoot(); }
-  function openInventory() { screen = buildInventory(); }
-  function openEquipment() { screen = buildEquipment(); }
+  function close() {
+    screen = null;
+  }
+  function openRoot() {
+    screen = buildRoot();
+  }
+  function openInventory() {
+    screen = buildInventory();
+  }
+  function openEquipment() {
+    screen = buildEquipment();
+  }
 
   function buildRoot() {
     const player = getPlayer();
@@ -25,10 +33,21 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
     const totalSlots = wears ? Object.keys(wears.slots).length : 0;
 
     return createCharacterMenuRoot({
-      theme, getViewport,
+      theme,
+      getViewport,
       cards: [
-        { id: 'inventory', label: 'Inventory', glyph: '🎒', badge: itemCount > 0 ? `${itemCount}` : null },
-        { id: 'equipment', label: 'Equipment', glyph: '⚔', badge: totalSlots > 0 ? `${equippedCount}/${totalSlots}` : null },
+        {
+          id: 'inventory',
+          label: 'Inventory',
+          glyph: '🎒',
+          badge: itemCount > 0 ? `${itemCount}` : null,
+        },
+        {
+          id: 'equipment',
+          label: 'Equipment',
+          glyph: '⚔',
+          badge: totalSlots > 0 ? `${equippedCount}/${totalSlots}` : null,
+        },
       ],
       onClose: close,
       onSelect: (id) => {
@@ -40,7 +59,8 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
 
   function buildInventory() {
     const body = createInventoryScreenBody({
-      theme, getViewport,
+      theme,
+      getViewport,
       getItems: () => getPlayer()?.components.get('inventory')?.items ?? [],
       onAction: (action) => {
         close();
@@ -48,7 +68,8 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
       },
     });
     return createCharacterMenuSubScreen({
-      theme, getViewport,
+      theme,
+      getViewport,
       title: 'Inventory',
       onBack: openRoot,
       renderBody: body.render,
@@ -58,7 +79,8 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
 
   function buildEquipment() {
     const body = createEquipmentScreenBody({
-      theme, getViewport,
+      theme,
+      getViewport,
       getSlots: () => {
         const wears = getPlayer()?.components.get('wearsEquipment');
         if (!wears) return [];
@@ -67,7 +89,7 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
       getEquippableInventory: () => {
         const inv = getPlayer()?.components.get('inventory');
         if (!inv) return [];
-        return inv.items.filter(it => it.components.has('equippable'));
+        return inv.items.filter((it) => it.components.has('equippable'));
       },
       onAction: (action) => {
         close();
@@ -75,7 +97,8 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
       },
     });
     return createCharacterMenuSubScreen({
-      theme, getViewport,
+      theme,
+      getViewport,
       title: 'Equipment',
       onBack: openRoot,
       renderBody: body.render,
@@ -84,10 +107,16 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
   }
 
   return {
-    get isOpen() { return screen !== null; },
+    get isOpen() {
+      return screen !== null;
+    },
     open: openRoot,
     close,
-    render(ctx) { screen?.render(ctx); },
-    handleInput(event) { return screen?.handleInput(event) ?? false; },
+    render(ctx) {
+      screen?.render(ctx);
+    },
+    handleInput(event) {
+      return screen?.handleInput(event) ?? false;
+    },
   };
 }

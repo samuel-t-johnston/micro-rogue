@@ -42,11 +42,13 @@ describe('randomStatic stage', () => {
     expect(level.width).toBe(15);
     expect(level.height).toBe(15);
     const entities = level.blackboard['static:entities'];
-    expect(entities.some(e => e.type === 'stairsUp')).toBe(true);
+    expect(entities.some((e) => e.type === 'stairsUp')).toBe(true);
   });
 
   it('throws when no layouts are configured', async () => {
     const level = createLevel();
-    await expect(runRandomStatic(level, { layouts: [] }, level.blackboard, createRng(1))).rejects.toThrow();
+    await expect(
+      runRandomStatic(level, { layouts: [] }, level.blackboard, createRng(1)),
+    ).rejects.toThrow();
   });
 });

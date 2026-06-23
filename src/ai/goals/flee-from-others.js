@@ -3,7 +3,7 @@ import { chebyshevDistance, passableNeighbors } from '../../world/geometry.js';
 
 // Distance from `pos` to the nearest hostile.
 function nearestHostileDistance(pos, hostiles) {
-  return Math.min(...hostiles.map(h => chebyshevDistance(pos, h.position)));
+  return Math.min(...hostiles.map((h) => chebyshevDistance(pos, h.position)));
 }
 
 /**
@@ -15,8 +15,9 @@ export const fleeFromOthers = {
   evaluate(context) {
     const { selfState, perception, level } = context;
 
-    const hostiles = perception.entities.filter(o =>
-      o.tags.isActor && areHostile(selfState.factions, o.factions));
+    const hostiles = perception.entities.filter(
+      (o) => o.tags.isActor && areHostile(selfState.factions, o.factions),
+    );
     if (hostiles.length === 0) return null;
 
     const currentDistance = nearestHostileDistance(selfState.position, hostiles);

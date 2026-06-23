@@ -32,7 +32,7 @@ describe('entity reference codecs', () => {
     owner.components.get('wearsEquipment').slots.weapon = sword; // armor stays null
 
     const serialized = serializeEntities(reg);
-    const ownerS = serialized.find(e => e.id === owner.id);
+    const ownerS = serialized.find((e) => e.id === owner.id);
     expect(ownerS.components.inventory.items).toEqual([potion.id]);
     expect(ownerS.components.wearsEquipment.slots).toEqual({ weapon: sword.id, armor: null });
 
@@ -60,7 +60,10 @@ describe('tilePerception Set/Map codec', () => {
 
     const s = serializeEntities(reg)[0];
     expect(s.components.tilePerception.visible).toEqual(['1,2', '3,4']);
-    expect(s.components.tilePerception.memory).toEqual([['1,2', 'floor'], ['5,5', 'wall']]);
+    expect(s.components.tilePerception.memory).toEqual([
+      ['1,2', 'floor'],
+      ['5,5', 'wall'],
+    ]);
 
     const tp2 = rehydrate(reg).getEntity(e.id).components.get('tilePerception');
     expect(tp2.visible).toBeInstanceOf(Set);
@@ -73,7 +76,13 @@ describe('tilePerception Set/Map codec', () => {
     const reg = createEntityRegistry();
     const e = reg.createEntity();
     const tp = components.tilePerception();
-    const snap = { sprite: { col: 16, row: 22 }, color: '#8B6F47', glyph: '+', glyphColor: '#c8a36a', layer: 0 };
+    const snap = {
+      sprite: { col: 16, row: 22 },
+      color: '#8B6F47',
+      glyph: '+',
+      glyphColor: '#c8a36a',
+      layer: 0,
+    };
     tp.rememberedEntities.set('2,3', [snap]);
     reg.addComponent(e, 'tilePerception', tp);
 
@@ -106,7 +115,10 @@ describe('level serialization', () => {
     const level = createLevel();
     level.width = 3;
     level.height = 2;
-    level.tiles = [['floor', 'floor', 'wall'], ['wall', 'floor', 'floor']];
+    level.tiles = [
+      ['floor', 'floor', 'wall'],
+      ['wall', 'floor', 'floor'],
+    ];
     level.overrides.set('2,1', 'pit');
     level.blackboard = { theme: 'dungeon' };
     const mob = reg.createEntity();

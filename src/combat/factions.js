@@ -8,5 +8,5 @@
 export function areHostile(factionsA, factionsB) {
   const a = factionsA ?? [];
   const b = factionsB ?? [];
-  return !a.some(tag => b.includes(tag));
+  return !a.some((tag) => b.includes(tag));
 }

@@ -7,5 +7,9 @@ import { loadStaticLayout } from '../static-layout.js';
 
 /** Runs the static structure stage (see the file overview). */
 export async function run(level, stageConfig, blackboard) {
-  blackboard['static:entities'] = await loadStaticLayout(stageConfig.layout, level, stageConfig.importLayout);
+  blackboard['static:entities'] = await loadStaticLayout(
+    stageConfig.layout,
+    level,
+    stageConfig.importLayout,
+  );
 }

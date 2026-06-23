@@ -18,7 +18,10 @@ describe('sprite catalog', () => {
   it('every declared sheet lists at least one positive size', () => {
     for (const [sheet, sizes] of Object.entries(SHEETS)) {
       expect(Array.isArray(sizes) && sizes.length > 0, `${sheet} sizes`).toBe(true);
-      expect(sizes.every((s) => Number.isInteger(s) && s > 0), `${sheet} sizes`).toBe(true);
+      expect(
+        sizes.every((s) => Number.isInteger(s) && s > 0),
+        `${sheet} sizes`,
+      ).toBe(true);
     }
   });
 });

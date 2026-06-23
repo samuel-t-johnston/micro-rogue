@@ -25,18 +25,20 @@ import { gameLog } from '../engine/game-log.js';
 export function createActionSystem({ level, inputController, registry, dialogController }) {
   // Action type → handler lookup. Add new action types here.
   const dispatch = {
-    move:         (entity, action) => executeMove(entity, action, level, registry),
-    interact:     (entity, action) => executeInteract(entity, action, level, registry, dialogController),
-    pickup:       (entity, action) => executePickup(entity, action, level, registry),
-    selfInteract: (entity, action) => executeSelfInteract(entity, action, level, registry, dialogController),
-    equip:        (entity, action) => executeEquip(entity, action, level, registry),
-    unequip:      (entity, action) => executeUnequip(entity, action, level, registry),
-    consume:      (entity, action) => executeConsume(entity, action, level, registry),
-    drop:         (entity, action) => executeDrop(entity, action, level, registry),
-    wait:         () => executeWait(),
-    attack:       (entity, action) => executeAttack(entity, action, level, registry),
-    lookAt:       (entity, action) => executeLookAt(entity, action, level),
-    shout:        (entity, action) => executeShout(entity, action, level, registry),
+    move: (entity, action) => executeMove(entity, action, level, registry),
+    interact: (entity, action) =>
+      executeInteract(entity, action, level, registry, dialogController),
+    pickup: (entity, action) => executePickup(entity, action, level, registry),
+    selfInteract: (entity, action) =>
+      executeSelfInteract(entity, action, level, registry, dialogController),
+    equip: (entity, action) => executeEquip(entity, action, level, registry),
+    unequip: (entity, action) => executeUnequip(entity, action, level, registry),
+    consume: (entity, action) => executeConsume(entity, action, level, registry),
+    drop: (entity, action) => executeDrop(entity, action, level, registry),
+    wait: () => executeWait(),
+    attack: (entity, action) => executeAttack(entity, action, level, registry),
+    lookAt: (entity, action) => executeLookAt(entity, action, level),
+    shout: (entity, action) => executeShout(entity, action, level, registry),
   };
 
   async function executeAction(entity, action) {
@@ -63,7 +65,9 @@ export function createActionSystem({ level, inputController, registry, dialogCon
     const ai = entity.components.get('ai');
     if (!ai) return false;
     const context = buildPlanningContext({
-      entity, level, inputController,
+      entity,
+      level,
+      inputController,
       turnCount: entity.components.get('turnTaker')?.actCount ?? 0,
     });
     const result = await evaluateGoals(resolveGoals(ai.goals), context, (_goal, i) => {

@@ -5,6 +5,6 @@
  * blood/scorch decals, OVERLAY = 30 for emotes) without renumbering existing layers.
  */
 export const RenderLayers = Object.freeze({
-  ITEM:    10,
+  ITEM: 10,
   DEFAULT: 20,
 });

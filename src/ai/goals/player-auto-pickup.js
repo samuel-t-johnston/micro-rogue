@@ -16,7 +16,7 @@ export const playerAutoPickup = {
 
     if (!moved) return null;
 
-    const itemsHere = [...level.getEntitiesAt(x, y)].filter(e => e.components.has('item'));
+    const itemsHere = [...level.getEntitiesAt(x, y)].filter((e) => e.components.has('item'));
     if (itemsHere.length !== 1) return null;
 
     return { action: { type: 'pickup', itemEntityId: itemsHere[0].id } };

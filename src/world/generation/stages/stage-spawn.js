@@ -11,11 +11,17 @@ export function run(level, stageConfig, blackboard, rng, registry) {
   const zones = blackboard['level:zones'] ?? [];
   const rooms = blackboard['level:rooms'] ?? {};
 
-  const zone = zones.find(z => z.labels.includes('stairs-up')) ?? zones[0];
-  if (!zone) { console.warn('[spawn] no zones; no entry point placed'); return; }
+  const zone = zones.find((z) => z.labels.includes('stairs-up')) ?? zones[0];
+  if (!zone) {
+    console.warn('[spawn] no zones; no entry point placed');
+    return;
+  }
 
   const tile = centermostRoomTile(zone, rooms);
-  if (!tile) { console.warn('[spawn] entry zone has no room; no entry point placed'); return; }
+  if (!tile) {
+    console.warn('[spawn] entry zone has no room; no entry point placed');
+    return;
+  }
 
   const entry = registry.createEntity();
   registry.addComponent(entry, 'position', components.position(tile[0], tile[1]));

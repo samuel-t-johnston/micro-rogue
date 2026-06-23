@@ -51,8 +51,8 @@ describe('segmentRects', () => {
   it('splits a rect into equal adjacent segments', () => {
     const segs = segmentRects({ x: 100, y: 10, w: 120, h: 40 }, 3);
     expect(segs).toHaveLength(3);
-    expect(segs.map(s => s.x)).toEqual([100, 140, 180]);
-    expect(segs.map(s => s.w)).toEqual([40, 40, 40]);
-    expect(segs.every(s => s.y === 10 && s.h === 40)).toBe(true);
+    expect(segs.map((s) => s.x)).toEqual([100, 140, 180]);
+    expect(segs.map((s) => s.w)).toEqual([40, 40, 40]);
+    expect(segs.every((s) => s.y === 10 && s.h === 40)).toBe(true);
   });
 });

@@ -14,8 +14,10 @@ describe('spawn/exit components', () => {
   it('entryPoint is a tag; transition carries a nullable destination and a port', () => {
     expect(components.entryPoint()).toEqual({});
     expect(components.transition()).toEqual({ to: null, port: null });
-    expect(components.transition({ branch: 0, depth: 1 }, 'down'))
-      .toEqual({ to: { branch: 0, depth: 1 }, port: 'down' });
+    expect(components.transition({ branch: 0, depth: 1 }, 'down')).toEqual({
+      to: { branch: 0, depth: 1 },
+      port: 'down',
+    });
   });
 });
 
@@ -40,7 +42,10 @@ describe('resolveSpawn', () => {
     makeEntry(reg, 1, 1);
     makeEntry(reg, 2, 2);
     const spawn = resolveSpawn(reg, { width: 20, height: 20 });
-    expect([{ x: 1, y: 1 }, { x: 2, y: 2 }]).toContainEqual(spawn);
+    expect([
+      { x: 1, y: 1 },
+      { x: 2, y: 2 },
+    ]).toContainEqual(spawn);
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
   });

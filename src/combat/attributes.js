@@ -15,8 +15,8 @@ export const Attributes = Object.freeze({
 // Base value per attribute, read from the owning component. attackDamage comes from the
 // attacker component (unarmed base); HP is the entity's max HP from the health component.
 const BASE = {
-  attackDamage: entity => entity.components.get('attacker')?.damage ?? 0,
-  HP:           entity => entity.components.get('health')?.max ?? 0,
+  attackDamage: (entity) => entity.components.get('attacker')?.damage ?? 0,
+  HP: (entity) => entity.components.get('health')?.max ?? 0,
 };
 
 /**

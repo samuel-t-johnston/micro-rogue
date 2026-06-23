@@ -47,9 +47,14 @@ describe('emitSound', () => {
     expect(sound.components.get('decay').lifespan).toBe(5);
   });
 
-  it('snapshots the emitter\'s factions onto the sound', () => {
+  it("snapshots the emitter's factions onto the sound", () => {
     const registry = createEntityRegistry();
-    const sound = emitSound(registry, makeLevel(), { x: 0, y: 0, volume: 1, sourceFactions: ['orcs'] });
+    const sound = emitSound(registry, makeLevel(), {
+      x: 0,
+      y: 0,
+      volume: 1,
+      sourceFactions: ['orcs'],
+    });
     expect(sound.components.get('sound').sourceFactions).toEqual(['orcs']);
   });
 });

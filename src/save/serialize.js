@@ -20,8 +20,8 @@ import { serializeScent, deserializeScent } from '../world/scent.js';
 // getEntity(id) resolves an id back to its (already-created) entity during load.
 const COMPONENT_CODECS = {
   inventory: {
-    serialize: (data) => ({ items: data.items.map(e => e.id) }),
-    deserialize: (data, getEntity) => ({ items: data.items.map(id => getEntity(id)) }),
+    serialize: (data) => ({ items: data.items.map((e) => e.id) }),
+    deserialize: (data, getEntity) => ({ items: data.items.map((id) => getEntity(id)) }),
   },
   wearsEquipment: {
     serialize: (data) => {
@@ -106,11 +106,11 @@ export function serializeLevel(level) {
     seed: level.seed,
     width: level.width,
     height: level.height,
-    tiles: level.tiles.map(row => [...row]),
+    tiles: level.tiles.map((row) => [...row]),
     overrides: [...level.overrides],
     blackboard: structuredClone(level.blackboard),
     scent: serializeScent(level),
-    entityIds: level.entities.map(e => e.id),
+    entityIds: level.entities.map((e) => e.id),
   };
 }
 
@@ -127,7 +127,7 @@ export function deserializeLevel(data, registry) {
   });
   level.width = data.width;
   level.height = data.height;
-  level.tiles = data.tiles.map(row => [...row]);
+  level.tiles = data.tiles.map((row) => [...row]);
   level.overrides = new Map(data.overrides);
   level.blackboard = structuredClone(data.blackboard);
   level.scent = deserializeScent(data.scent, data.width, data.height);

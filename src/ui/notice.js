@@ -14,7 +14,14 @@ const BUTTON_H = 44;
 const BUTTON_GAP = 18;
 
 /** Creates a modal notice. `onConfirm` fires on the button; `onDismiss` on Escape or tap-outside. */
-export function createNotice({ theme, getViewport, message, buttonLabel = 'OK', onConfirm, onDismiss }) {
+export function createNotice({
+  theme,
+  getViewport,
+  message,
+  buttonLabel = 'OK',
+  onConfirm,
+  onDismiss,
+}) {
   let button = null; // last render's button rect, reused for hit-testing
 
   function layout(ctx) {
@@ -24,7 +31,14 @@ export function createNotice({ theme, getViewport, message, buttonLabel = 'OK', 
     const h = PADDING + lines.length * LINE_H + BUTTON_GAP + BUTTON_H + PADDING;
     const x = Math.round((vp.width - w) / 2);
     const y = Math.round((vp.height - h) / 2);
-    return { x, y, w, h, lines, button: { x: x + PADDING, y: y + h - PADDING - BUTTON_H, w: w - 2 * PADDING, h: BUTTON_H } };
+    return {
+      x,
+      y,
+      w,
+      h,
+      lines,
+      button: { x: x + PADDING, y: y + h - PADDING - BUTTON_H, w: w - 2 * PADDING, h: BUTTON_H },
+    };
   }
 
   return {
@@ -43,16 +57,25 @@ export function createNotice({ theme, getViewport, message, buttonLabel = 'OK', 
 
       p.lines.forEach((line, i) => {
         drawText(ctx, line, p.x + p.w / 2, p.y + PADDING + i * LINE_H, {
-          color: theme.text, size: TEXT_SIZE, align: 'center', baseline: 'top',
+          color: theme.text,
+          size: TEXT_SIZE,
+          align: 'center',
+          baseline: 'top',
         });
       });
       drawButton(ctx, theme, { ...p.button, label: buttonLabel, enabled: true });
     },
 
     handleInput(event) {
-      if (event.type === 'keydown' && event.key === 'Escape') { onDismiss?.(); return true; }
+      if (event.type === 'keydown' && event.key === 'Escape') {
+        onDismiss?.();
+        return true;
+      }
       if (event.type === 'pointerdown') {
-        if (button && hitTest(button, event.x, event.y)) { onConfirm?.(); return true; }
+        if (button && hitTest(button, event.x, event.y)) {
+          onConfirm?.();
+          return true;
+        }
         onDismiss?.(); // tap anywhere outside the button dismisses
         return true;
       }

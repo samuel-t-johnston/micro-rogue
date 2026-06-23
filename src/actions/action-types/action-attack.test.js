@@ -41,7 +41,11 @@ describe('executeAttack', () => {
   it('includes worn-weapon modifiers in the damage', () => {
     const actor = makeActor(1);
     const dagger = registry.createEntity();
-    registry.addComponent(dagger, 'attributeModifiers', components.attributeModifiers({ attackDamage: 1 }));
+    registry.addComponent(
+      dagger,
+      'attributeModifiers',
+      components.attributeModifiers({ attackDamage: 1 }),
+    );
     actor.components.get('wearsEquipment').slots[Slots.WEAPON] = dagger;
     const target = makeTarget(5);
 
@@ -65,7 +69,7 @@ describe('executeAttack', () => {
     expect(executeAttack(actor, { targetEntityId: 999 }, level, registry)).toBe(false);
   });
 
-  it('emits a faction-neutral combat sound at the attacker\'s tile', () => {
+  it("emits a faction-neutral combat sound at the attacker's tile", () => {
     const actor = makeActor(1);
     registry.addComponent(actor, 'position', components.position(1, 1));
     level.placeEntity(actor);
@@ -73,11 +77,13 @@ describe('executeAttack', () => {
 
     executeAttack(actor, { targetEntityId: target.id }, level, registry);
 
-    const sound = level.entities.find(e => e.components.has('sound'));
+    const sound = level.entities.find((e) => e.components.has('sound'));
     expect(sound).toBeTruthy();
     expect(sound.components.get('position')).toEqual({ x: 1, y: 1 });
     expect(sound.components.get('sound')).toMatchObject({
-      sourceId: actor.id, message: { kind: 'combat' }, sourceFactions: [],
+      sourceId: actor.id,
+      message: { kind: 'combat' },
+      sourceFactions: [],
     });
   });
 });

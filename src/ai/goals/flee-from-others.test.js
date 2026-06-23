@@ -9,7 +9,9 @@ function openLevel(w = 7, h = 7) {
   level.height = h;
   level.tiles = Array.from({ length: h }, (_, y) =>
     Array.from({ length: w }, (_, x) =>
-      x === 0 || y === 0 || x === w - 1 || y === h - 1 ? 'wall' : 'floor'));
+      x === 0 || y === 0 || x === w - 1 || y === h - 1 ? 'wall' : 'floor',
+    ),
+  );
   return level;
 }
 
@@ -20,7 +22,8 @@ function sparseLevel(floors, w = 5, h = 5) {
   level.height = h;
   const open = new Set(floors);
   level.tiles = Array.from({ length: h }, (_, y) =>
-    Array.from({ length: w }, (_, x) => (open.has(`${x},${y}`) ? 'floor' : 'wall')));
+    Array.from({ length: w }, (_, x) => (open.has(`${x},${y}`) ? 'floor' : 'wall')),
+  );
   return level;
 }
 

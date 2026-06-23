@@ -28,7 +28,10 @@ function drawGlyphCell(ctx, { color, glyph, glyphColor }, x, y, size) {
  * the draw passes (map, remembered entities, live entities, detached animations) plus coordinate
  * conversions and camera/zoom controls. Honors the `renderMode` setting (sprite vs glyph) live.
  */
-export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LEVELS.indexOf(32) }) }) {
+export function createRenderer({
+  getViewport,
+  zoom = createZoom({ index: ZOOM_LEVELS.indexOf(32) }),
+}) {
   const sprites = createSpriteRenderer({ catalog: SPRITES, sheets: SHEETS });
   const camera = { x: 0, y: 0 }; // tile coords at screen center
 
@@ -118,7 +121,9 @@ export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LE
       if (tx < x0 || tx > x1 || ty < y0 || ty > y1) continue;
       const { x, y } = worldToScreen(tx, ty);
       // Lower layers (items) under higher (furniture); a copy keeps the stored order intact.
-      const ordered = [...snapshots].sort((a, b) => (a.layer ?? RenderLayers.DEFAULT) - (b.layer ?? RenderLayers.DEFAULT));
+      const ordered = [...snapshots].sort(
+        (a, b) => (a.layer ?? RenderLayers.DEFAULT) - (b.layer ?? RenderLayers.DEFAULT),
+      );
       for (const snap of ordered) drawRenderable(ctx, snap, x, y, null);
     }
     ctx.globalAlpha = 1;
@@ -146,7 +151,10 @@ export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LE
       if (tilePerception && !tilePerception.visible.has(`${pos.x},${pos.y}`)) continue;
       visible.push({ entity, pos, renderable });
     }
-    visible.sort((a, b) => (a.renderable.layer ?? RenderLayers.DEFAULT) - (b.renderable.layer ?? RenderLayers.DEFAULT));
+    visible.sort(
+      (a, b) =>
+        (a.renderable.layer ?? RenderLayers.DEFAULT) - (b.renderable.layer ?? RenderLayers.DEFAULT),
+    );
 
     for (const { entity, pos, renderable } of visible) {
       const { x, y } = worldToScreen(pos.x, pos.y);
@@ -199,7 +207,9 @@ export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LE
 
   return {
     load: () => sprites.load(),
-    get tileSize() { return ts(); },
+    get tileSize() {
+      return ts();
+    },
     worldToScreen,
     screenToWorld,
     getVisibleTileRange,
@@ -209,7 +219,9 @@ export function createRenderer({ getViewport, zoom = createZoom({ index: ZOOM_LE
     drawAnimations,
     zoomIn: () => zoom.zoomIn(),
     zoomOut: () => zoom.zoomOut(),
-    get camera() { return { x: camera.x, y: camera.y }; },
+    get camera() {
+      return { x: camera.x, y: camera.y };
+    },
     setCamera(x, y) {
       camera.x = x;
       camera.y = y;

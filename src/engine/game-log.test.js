@@ -12,7 +12,7 @@ describe('gameLog singleton', () => {
     gameLog.add({ display: 'b' });
 
     const all = gameLog.getAll();
-    expect(all.map(e => e.turn)).toEqual([3, 7]);
+    expect(all.map((e) => e.turn)).toEqual([3, 7]);
   });
 
   it('lets the caller override the stamped turn', () => {
@@ -23,10 +23,10 @@ describe('gameLog singleton', () => {
 
   it('getDisplayEntries returns only entries with a display string', () => {
     gameLog.add({ display: 'visible 1' });
-    gameLog.add({ action: 'move' });            // debug-only, no display
+    gameLog.add({ action: 'move' }); // debug-only, no display
     gameLog.add({ display: 'visible 2' });
 
-    const lines = gameLog.getDisplayEntries(5).map(e => e.display);
+    const lines = gameLog.getDisplayEntries(5).map((e) => e.display);
     expect(lines).toEqual(['visible 1', 'visible 2']);
   });
 
@@ -45,7 +45,7 @@ describe('gameLog singleton', () => {
     gameLog.add({ actor: 1, display: 'mine' });
     gameLog.add({ actor: 2, display: 'theirs' });
 
-    expect(gameLog.getAll().map(e => e.seen)).toEqual([true, false]);
+    expect(gameLog.getAll().map((e) => e.seen)).toEqual([true, false]);
   });
 
   it('getDisplayEntries hides entries the provider marked unseen', () => {
@@ -53,13 +53,13 @@ describe('gameLog singleton', () => {
     gameLog.add({ actor: 1, display: 'visible action' });
     gameLog.add({ actor: 2, display: 'hidden action' });
 
-    expect(gameLog.getDisplayEntries(5).map(e => e.display)).toEqual(['visible action']);
+    expect(gameLog.getDisplayEntries(5).map((e) => e.display)).toEqual(['visible action']);
   });
 
   it('lets the caller override the stamped seen flag', () => {
     gameLog.setVisibilityProvider(() => false);
     gameLog.add({ actor: 2, display: 'forced', seen: true });
-    expect(gameLog.getDisplayEntries(5).map(e => e.display)).toEqual(['forced']);
+    expect(gameLog.getDisplayEntries(5).map((e) => e.display)).toEqual(['forced']);
   });
 
   it('defaults seen to true, and reset restores the default visibility provider', () => {

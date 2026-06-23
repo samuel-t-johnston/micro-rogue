@@ -7,8 +7,14 @@
  */
 
 const DIRECTION_WORDS = {
-  N: 'north', NE: 'northeast', E: 'east', SE: 'southeast',
-  S: 'south', SW: 'southwest', W: 'west', NW: 'northwest',
+  N: 'north',
+  NE: 'northeast',
+  E: 'east',
+  SE: 'southeast',
+  S: 'south',
+  SW: 'southwest',
+  W: 'west',
+  NW: 'northwest',
 };
 
 // Flavor adjective per language for the un-understood case. Falls back to the bare language name.

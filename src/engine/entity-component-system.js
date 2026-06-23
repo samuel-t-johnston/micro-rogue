@@ -4,8 +4,8 @@
  */
 export function createEntityRegistry() {
   let nextId = 1;
-  const entities = new Map();          // id -> entity
-  const componentIndex = new Map();    // componentName -> Set<id>
+  const entities = new Map(); // id -> entity
+  const componentIndex = new Map(); // componentName -> Set<id>
 
   function createEntity() {
     const entity = { id: nextId++, components: new Map() };
@@ -39,7 +39,7 @@ export function createEntityRegistry() {
   function getEntitiesWith(name) {
     const ids = componentIndex.get(name);
     if (!ids) return [];
-    return [...ids].map(id => entities.get(id)).filter(Boolean);
+    return [...ids].map((id) => entities.get(id)).filter(Boolean);
   }
 
   function getAllEntities() {

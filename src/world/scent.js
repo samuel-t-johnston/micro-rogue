@@ -9,10 +9,10 @@ import { getTileType } from './tile-registry.js';
  */
 
 // Tuning knobs — all scent is a single scalar per tile per profile:
-const DECAY = 0.85;    // multiplicative fade per round
-const SPREAD = 0.20;   // fraction of a tile's value that mixes outward each round
-const EPSILON = 0.05;  // values below this snap to 0, keeping the field sparse
-const MAX = 100;       // per-tile deposit ceiling
+const DECAY = 0.85; // multiplicative fade per round
+const SPREAD = 0.2; // fraction of a tile's value that mixes outward each round
+const EPSILON = 0.05; // values below this snap to 0, keeping the field sparse
+const MAX = 100; // per-tile deposit ceiling
 
 const index = (level, x, y) => y * level.width + x;
 

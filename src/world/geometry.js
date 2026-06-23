@@ -2,8 +2,14 @@
 
 /** 8-directional neighbor offsets (orthogonal first, then diagonals). */
 export const DIRECTIONS_8 = [
-  [-1, 0], [1, 0], [0, -1], [0, 1],
-  [-1, -1], [-1, 1], [1, -1], [1, 1],
+  [-1, 0],
+  [1, 0],
+  [0, -1],
+  [0, 1],
+  [-1, -1],
+  [-1, 1],
+  [1, -1],
+  [1, 1],
 ];
 
 /** Chebyshev (chessboard) distance — the number of 8-directional steps between two tiles. */
@@ -30,7 +36,14 @@ export function cardinalDirection(from, to) {
  * Used by goals that turn a perceived direction (a shouted heading, a scent gradient) into a move.
  */
 export const DIRECTION_STEPS = {
-  N: [0, -1], NE: [1, -1], E: [1, 0], SE: [1, 1], S: [0, 1], SW: [-1, 1], W: [-1, 0], NW: [-1, -1],
+  N: [0, -1],
+  NE: [1, -1],
+  E: [1, 0],
+  SE: [1, 1],
+  S: [0, 1],
+  SW: [-1, 1],
+  W: [-1, 0],
+  NW: [-1, -1],
 };
 
 /**
@@ -54,7 +67,7 @@ export function projectTile(level, from, direction, maxDist) {
 
 /** The passable tiles orthogonally or diagonally adjacent to `pos`. */
 export function passableNeighbors(pos, level) {
-  return DIRECTIONS_8
-    .map(([dx, dy]) => ({ x: pos.x + dx, y: pos.y + dy }))
-    .filter(tile => level.isPassable(tile.x, tile.y));
+  return DIRECTIONS_8.map(([dx, dy]) => ({ x: pos.x + dx, y: pos.y + dy })).filter((tile) =>
+    level.isPassable(tile.x, tile.y),
+  );
 }

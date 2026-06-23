@@ -21,13 +21,17 @@ const randIn = (lo, hi, rng) => lo + rng.nextInt(0, hi - lo + 1);
 // segments carveH(la,mid,pa) → carve(pa↔pb @ mid) → carveH(mid,lb,pb) degrade to a straight or L route
 // when pa==pb or mid sits on a door line, so the caller stays a single uniform three-segment carve.
 function planCorridor(la, lb, al, ah, bl, bh, rng) {
-  const lo = Math.max(al, bl), hi = Math.min(ah, bh);
-  if (lo <= hi) {                              // facing walls overlap → straight cut at a shared offset
+  const lo = Math.max(al, bl),
+    hi = Math.min(ah, bh);
+  if (lo <= hi) {
+    // facing walls overlap → straight cut at a shared offset
     const s = randIn(lo, hi, rng);
     return { pa: s, pb: s, mid: la };
   }
-  const innerLo = Math.min(la, lb) + 1, innerHi = Math.max(la, lb) - 1;
-  if (innerLo <= innerHi) {                    // gutter ≥ 3: an interior lane exists → Z-bend through it
+  const innerLo = Math.min(la, lb) + 1,
+    innerHi = Math.max(la, lb) - 1;
+  if (innerLo <= innerHi) {
+    // gutter ≥ 3: an interior lane exists → Z-bend through it
     return { pa: randIn(al, ah, rng), pb: randIn(bl, bh, rng), mid: randIn(innerLo, innerHi, rng) };
   }
   // 2-tile gutter and no overlap: bend off the mutually-nearest corners, leg on B's door line. The leg
@@ -41,11 +45,17 @@ export function run(level, stageConfig, blackboard, rng, registry) {
   const zones = blackboard['level:zones'] ?? [];
   const links = blackboard['level:links'] ?? [];
   const rooms = blackboard['level:rooms'] ?? {};
-  const byId = new Map(zones.map(z => [z.id, z]));
+  const byId = new Map(zones.map((z) => [z.id, z]));
 
-  const carve = (x, y) => { if (level.tiles[y]?.[x] !== undefined) level.tiles[y][x] = 'floor'; };
-  const carveH = (x0, x1, y) => { for (let x = Math.min(x0, x1); x <= Math.max(x0, x1); x++) carve(x, y); };
-  const carveV = (y0, y1, x) => { for (let y = Math.min(y0, y1); y <= Math.max(y0, y1); y++) carve(x, y); };
+  const carve = (x, y) => {
+    if (level.tiles[y]?.[x] !== undefined) level.tiles[y][x] = 'floor';
+  };
+  const carveH = (x0, x1, y) => {
+    for (let x = Math.min(x0, x1); x <= Math.max(x0, x1); x++) carve(x, y);
+  };
+  const carveV = (y0, y1, x) => {
+    for (let y = Math.min(y0, y1); y <= Math.max(y0, y1); y++) carve(x, y);
+  };
 
   for (const link of links) {
     const za = byId.get(link.a);
@@ -53,7 +63,8 @@ export function run(level, stageConfig, blackboard, rng, registry) {
     if (!za || !zb) continue;
 
     const pairs = [];
-    for (const ca of za.cells) for (const cb of zb.cells) if (cellsAdjacent(ca, cb)) pairs.push([ca, cb]);
+    for (const ca of za.cells)
+      for (const cb of zb.cells) if (cellsAdjacent(ca, cb)) pairs.push([ca, cb]);
     if (pairs.length === 0) continue;
     const [ca, cb] = rng.pick(pairs);
     const a = rooms[`${ca[0]},${ca[1]}`];

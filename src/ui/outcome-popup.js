@@ -39,10 +39,18 @@ export function createOutcomePopup({ theme, getViewport, onNext }) {
   }
 
   return {
-    get isVisible() { return visible; },
+    get isVisible() {
+      return visible;
+    },
 
-    show(result = 'lose') { visible = true; outcome = result; },
-    hide() { visible = false; hover = false; },
+    show(result = 'lose') {
+      visible = true;
+      outcome = result;
+    },
+    hide() {
+      visible = false;
+      hover = false;
+    },
 
     render(ctx) {
       if (!visible) return;

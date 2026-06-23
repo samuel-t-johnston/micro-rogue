@@ -11,7 +11,7 @@ import { drawText, drawSegmentedControl, segmentRects, wrapText, hitTest } from 
  * call `set`. Bound to a store (gameSettings) by the row's author — this module stays store-agnostic.
  */
 const MARGIN = 16;
-const MAX_COL = 520;          // cap the column on desktop; phones use near-full width
+const MAX_COL = 520; // cap the column on desktop; phones use near-full width
 const TOP = MARGIN + 44 + 28; // below the corner button / title header
 const ROW_GAP = 18;
 const ROW_PAD = 10;
@@ -20,8 +20,8 @@ const DESC_SIZE = 14;
 const DESC_LINE_H = 19;
 const DESC_GAP = 4;
 const CONTROL_GAP = 10;
-const CONTROL_H = 44;         // meets the 44px tap-target floor
-const SEG_W = 64;             // per-segment width
+const CONTROL_H = 44; // meets the 44px tap-target floor
+const SEG_W = 64; // per-segment width
 
 /**
  * Computes per-row geometry. Needs `ctx` to measure/wrap descriptions, so the caller drives it from
@@ -34,16 +34,29 @@ export function layoutSettingsRows(ctx, getViewport, rows) {
 
   let y = TOP;
   return rows.map((row) => {
-    const descLines = row.description ? wrapText(ctx, row.description, colW, { size: DESC_SIZE }) : [];
+    const descLines = row.description
+      ? wrapText(ctx, row.description, colW, { size: DESC_SIZE })
+      : [];
     const descY = y + ROW_PAD + LABEL_SIZE + DESC_GAP;
-    const controlY = (descLines.length ? descY + descLines.length * DESC_LINE_H : y + ROW_PAD + LABEL_SIZE) + CONTROL_GAP;
+    const controlY =
+      (descLines.length ? descY + descLines.length * DESC_LINE_H : y + ROW_PAD + LABEL_SIZE) +
+      CONTROL_GAP;
     const controlW = row.options.length * SEG_W;
     const control = { x: colX + colW - controlW, y: controlY, w: controlW, h: CONTROL_H };
     const rowH = controlY + CONTROL_H + ROW_PAD - y;
 
-    const selectedIndex = Math.max(0, row.options.findIndex((o) => o.value === row.get()));
+    const selectedIndex = Math.max(
+      0,
+      row.options.findIndex((o) => o.value === row.get()),
+    );
     const laid = {
-      row, colX, labelY: y + ROW_PAD, descY, descLines, control, selectedIndex,
+      row,
+      colX,
+      labelY: y + ROW_PAD,
+      descY,
+      descLines,
+      control,
+      selectedIndex,
       segments: segmentRects(control, row.options.length),
     };
     y += rowH + ROW_GAP;
@@ -55,11 +68,18 @@ export function layoutSettingsRows(ctx, getViewport, rows) {
 export function drawSettingsRows(ctx, theme, layout) {
   for (const r of layout) {
     drawText(ctx, r.row.label, r.colX, r.labelY, {
-      color: theme.text, size: LABEL_SIZE, weight: '600', align: 'left', baseline: 'top',
+      color: theme.text,
+      size: LABEL_SIZE,
+      weight: '600',
+      align: 'left',
+      baseline: 'top',
     });
     r.descLines.forEach((line, i) => {
       drawText(ctx, line, r.colX, r.descY + i * DESC_LINE_H, {
-        color: theme.textDim, size: DESC_SIZE, align: 'left', baseline: 'top',
+        color: theme.textDim,
+        size: DESC_SIZE,
+        align: 'left',
+        baseline: 'top',
       });
     });
     drawSegmentedControl(ctx, theme, {

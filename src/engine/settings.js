@@ -48,8 +48,12 @@ let current = { ...DEFAULT_SETTINGS };
 
 /** Ambient singleton for player UI preferences: in-memory state plus localStorage persistence. */
 export const gameSettings = {
-  get(key) { return current[key]; },
-  all() { return { ...current }; },
+  get(key) {
+    return current[key];
+  },
+  all() {
+    return { ...current };
+  },
 
   // Set one key and persist. An invalid value (or unknown key) is a no-op — the key keeps its
   // prior valid value — rather than silently snapping back to the default or corrupting the store.
@@ -67,7 +71,9 @@ export const gameSettings = {
   },
 
   // Test hook: restore defaults without touching storage.
-  reset() { current = { ...DEFAULT_SETTINGS }; },
+  reset() {
+    current = { ...DEFAULT_SETTINGS };
+  },
 };
 
 // --- localStorage I/O ---

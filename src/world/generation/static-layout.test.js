@@ -9,7 +9,8 @@ describe('parseLayout', () => {
     const level = createLevel();
     const entities = parseLayout(
       { legend, tiles: '###\n#.#\n###', entities: [{ type: 'stairsUp', x: 1, y: 1 }] },
-      'test', level,
+      'test',
+      level,
     );
     expect(level.width).toBe(3);
     expect(level.height).toBe(3);
@@ -22,12 +23,14 @@ describe('parseLayout', () => {
   });
 
   it('throws on inconsistent row lengths', () => {
-    expect(() => parseLayout({ legend, tiles: '###\n#.' }, 'bad', createLevel()))
-      .toThrow(/inconsistent row lengths/);
+    expect(() => parseLayout({ legend, tiles: '###\n#.' }, 'bad', createLevel())).toThrow(
+      /inconsistent row lengths/,
+    );
   });
 
   it('throws on a symbol missing from the legend', () => {
-    expect(() => parseLayout({ legend, tiles: '#?#' }, 'bad', createLevel()))
-      .toThrow(/Unknown symbol "\?"/);
+    expect(() => parseLayout({ legend, tiles: '#?#' }, 'bad', createLevel())).toThrow(
+      /Unknown symbol "\?"/,
+    );
   });
 });

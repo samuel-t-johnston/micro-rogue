@@ -8,7 +8,8 @@ import { loadStaticLayout } from '../static-layout.js';
 /** Runs the randomStatic structure stage (see the file overview). */
 export async function run(level, stageConfig, blackboard, rng) {
   const layouts = stageConfig.layouts ?? [];
-  if (layouts.length === 0) throw new Error('randomStatic stage requires a non-empty `layouts` array');
+  if (layouts.length === 0)
+    throw new Error('randomStatic stage requires a non-empty `layouts` array');
   const layout = rng.pick(layouts);
   blackboard['static:layout'] = layout;
   blackboard['static:entities'] = await loadStaticLayout(layout, level, stageConfig.importLayout);

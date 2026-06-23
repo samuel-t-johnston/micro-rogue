@@ -3,7 +3,11 @@ import * as spiral from '../../../data/maps/maze-spiral.js';
 import * as zigzag from '../../../data/maps/maze-zigzag.js';
 import * as pillars from '../../../data/maps/maze-pillars.js';
 
-const parse = (tiles) => tiles.trim().split('\n').map(row => [...row]);
+const parse = (tiles) =>
+  tiles
+    .trim()
+    .split('\n')
+    .map((row) => [...row]);
 
 // Reachable floor tiles from (sx, sy) via 4-way flood fill.
 function floodFill(grid, sx, sy) {
@@ -28,7 +32,14 @@ const MAPS = [
   { name: 'maze-pillars', mod: pillars, items: 2, creatures: { scuttler: 5 }, chests: 1 },
 ];
 
-const ITEM_TYPES = new Set(['healingPotion', 'potionOfPain', 'dagger', 'sword', 'leatherArmor', 'scroll']);
+const ITEM_TYPES = new Set([
+  'healingPotion',
+  'potionOfPain',
+  'dagger',
+  'sword',
+  'leatherArmor',
+  'scroll',
+]);
 
 describe.each(MAPS)('$name', ({ mod, items, creatures, chests }) => {
   const grid = parse(mod.tiles);
@@ -42,13 +53,13 @@ describe.each(MAPS)('$name', ({ mod, items, creatures, chests }) => {
   });
 
   it('has all floor reachable from the up-stairs, including the down-stairs', () => {
-    const up = mod.entities.find(e => e.type === 'stairsUp');
-    const down = mod.entities.find(e => e.type === 'stairsDown');
+    const up = mod.entities.find((e) => e.type === 'stairsUp');
+    const down = mod.entities.find((e) => e.type === 'stairsDown');
     expect(up).toBeTruthy();
     expect(down).toBeTruthy();
 
     const reachable = floodFill(grid, up.x, up.y);
-    const floorCount = grid.flat().filter(c => c === '.').length;
+    const floorCount = grid.flat().filter((c) => c === '.').length;
     expect(reachable.size).toBe(floorCount); // single connected floor component
     expect(reachable.has(`${down.x},${down.y}`)).toBe(true);
   });
@@ -65,12 +76,12 @@ describe.each(MAPS)('$name', ({ mod, items, creatures, chests }) => {
 
   it('carries exactly one up- and one down-stairs and the expected contents', () => {
     const count = (pred) => mod.entities.filter(pred).length;
-    expect(count(e => e.type === 'stairsUp')).toBe(1);
-    expect(count(e => e.type === 'stairsDown')).toBe(1);
-    expect(count(e => ITEM_TYPES.has(e.type))).toBe(items);
-    expect(count(e => e.type === 'chest')).toBe(chests);
+    expect(count((e) => e.type === 'stairsUp')).toBe(1);
+    expect(count((e) => e.type === 'stairsDown')).toBe(1);
+    expect(count((e) => ITEM_TYPES.has(e.type))).toBe(items);
+    expect(count((e) => e.type === 'chest')).toBe(chests);
     for (const [type, n] of Object.entries(creatures)) {
-      expect(count(e => e.type === type)).toBe(n);
+      expect(count((e) => e.type === type)).toBe(n);
     }
   });
 });

@@ -10,9 +10,9 @@
 export default {
   start: { node: 'floor-1', port: 'up' },
   nodes: [
-    { id: 'floor-1', pipelineId: 'static-test-level',  branch: 0, depth: 0 },
+    { id: 'floor-1', pipelineId: 'static-test-level', branch: 0, depth: 0 },
     { id: 'floor-2', pipelineId: 'random-static-maze', branch: 0, depth: 1 },
-    { id: 'floor-3', pipelineId: 'procedural-3x3',     branch: 0, depth: 2 },
+    { id: 'floor-3', pipelineId: 'procedural-3x3', branch: 0, depth: 2 },
   ],
   edges: [
     { a: ['floor-1', 'down'], b: ['floor-2', 'up'], dir: 'bidi' },

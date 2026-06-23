@@ -19,7 +19,7 @@ import { resolveArrival } from './spawn.js';
 /** Creates the dungeon runtime (see the file overview): start/travel/restore/snapshot over floors. */
 export function createLevelManager({ registry, transitMap }) {
   const coldStorage = new Map(); // nodeId -> frozen blob (the inactive floors)
-  let current = null;            // { nodeId, level }
+  let current = null; // { nodeId, level }
 
   // Generates a floor from its transit-map node, drawing from the per-level mapgen stream derived
   // from the node's identity so the floor is the same every time the seed is.
@@ -76,7 +76,7 @@ export function createLevelManager({ registry, transitMap }) {
       if (!dest) return null;
 
       // The player's whole sub-graph (carried + equipped items) travels with them, never frozen.
-      const excludeIds = new Set([...collectSubgraph([player])].map(e => e.id));
+      const excludeIds = new Set([...collectSubgraph([player])].map((e) => e.id));
       const frozen = freezeLevel(registry, current.level, excludeIds);
       frozen.playerMemory = extractPlayerMemory(player); // fog of war rides into the frozen record
       coldStorage.set(current.nodeId, frozen);
@@ -115,7 +115,11 @@ export function createLevelManager({ registry, transitMap }) {
       return { currentNodeId: current.nodeId, frozenLevels };
     },
 
-    getCurrentLevel() { return current?.level ?? null; },
-    getCurrentNodeId() { return current?.nodeId ?? null; },
+    getCurrentLevel() {
+      return current?.level ?? null;
+    },
+    getCurrentNodeId() {
+      return current?.nodeId ?? null;
+    },
   };
 }

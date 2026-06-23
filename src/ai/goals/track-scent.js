@@ -14,8 +14,9 @@ export const trackScent = {
   evaluate(context) {
     const { selfState, perception, level } = context;
 
-    const hostile = (perception.smells ?? []).filter(s =>
-      s.direction && areHostile(selfState.factions, [s.profile]));
+    const hostile = (perception.smells ?? []).filter(
+      (s) => s.direction && areHostile(selfState.factions, [s.profile]),
+    );
     if (hostile.length === 0) return null;
 
     let target = hostile[0];

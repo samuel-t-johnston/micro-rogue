@@ -2,8 +2,13 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { createOutcomePopup } from './outcome-popup.js';
 
 const theme = {
-  bg: '#000', surface: '#111', primary: '#444', accent: '#888',
-  text: '#fff', textDim: '#aaa', textDisabled: '#666',
+  bg: '#000',
+  surface: '#111',
+  primary: '#444',
+  accent: '#888',
+  text: '#fff',
+  textDim: '#aaa',
+  textDisabled: '#666',
 };
 const viewport = { width: 800, height: 600 };
 const getViewport = () => viewport;
@@ -12,12 +17,22 @@ const getViewport = () => viewport;
 // on a happy-dom stub before input is exercised.
 function makeCtx() {
   const noop = () => {};
-  return new Proxy({}, {
-    get: (_, key) => (key === 'font' || key === 'fillStyle' || key === 'strokeStyle' ||
-                       key === 'lineWidth' || key === 'textAlign' || key === 'textBaseline' ||
-                       key === 'globalAlpha') ? '' : noop,
-    set: () => true,
-  });
+  return new Proxy(
+    {},
+    {
+      get: (_, key) =>
+        key === 'font' ||
+        key === 'fillStyle' ||
+        key === 'strokeStyle' ||
+        key === 'lineWidth' ||
+        key === 'textAlign' ||
+        key === 'textBaseline' ||
+        key === 'globalAlpha'
+          ? ''
+          : noop,
+      set: () => true,
+    },
+  );
 }
 
 // "Next" button geometry (PANEL_W=320, PANEL_H=180, BUTTON_W=160, BUTTON_H=52, viewport 800x600):
@@ -32,7 +47,13 @@ describe('outcome popup', () => {
 
   beforeEach(() => {
     nextCount = 0;
-    popup = createOutcomePopup({ theme, getViewport, onNext: () => { nextCount++; } });
+    popup = createOutcomePopup({
+      theme,
+      getViewport,
+      onNext: () => {
+        nextCount++;
+      },
+    });
   });
 
   it('starts hidden', () => {

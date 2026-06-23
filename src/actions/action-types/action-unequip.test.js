@@ -16,7 +16,11 @@ describe('executeUnequip', () => {
 
     dagger = createDagger(registry, null, null, actor.id);
     actor.components.get('wearsEquipment').slots[Slots.WEAPON] = dagger;
-    dagger.components.get('item').location = { type: 'equipped', ownerId: actor.id, slot: Slots.WEAPON };
+    dagger.components.get('item').location = {
+      type: 'equipped',
+      ownerId: actor.id,
+      slot: Slots.WEAPON,
+    };
   });
 
   it('moves the item from the slot into inventory', () => {
@@ -27,7 +31,10 @@ describe('executeUnequip', () => {
 
   it('updates item.location to inventory with the actor id', () => {
     executeUnequip(actor, { slot: Slots.WEAPON }, null, registry);
-    expect(dagger.components.get('item').location).toEqual({ type: 'inventory', ownerId: actor.id });
+    expect(dagger.components.get('item').location).toEqual({
+      type: 'inventory',
+      ownerId: actor.id,
+    });
   });
 
   it('consumes a turn', () => {

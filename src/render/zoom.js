@@ -27,12 +27,29 @@ export function defaultZoomIndex(isCoarsePointer, levels = ZOOM_LEVELS) {
 export function createZoom({ levels = ZOOM_LEVELS, index = 0 } = {}) {
   let current = clampIndex(index, levels);
   return {
-    get index() { return current; },
-    get tileSize() { return levels[current]; },
-    get canZoomIn() { return current < levels.length - 1; },
-    get canZoomOut() { return current > 0; },
-    zoomIn() { current = clampIndex(current + 1, levels); return current; },   // closer / bigger tiles
-    zoomOut() { current = clampIndex(current - 1, levels); return current; },  // wider / smaller tiles
-    setIndex(i) { current = clampIndex(i, levels); return current; },
+    get index() {
+      return current;
+    },
+    get tileSize() {
+      return levels[current];
+    },
+    get canZoomIn() {
+      return current < levels.length - 1;
+    },
+    get canZoomOut() {
+      return current > 0;
+    },
+    zoomIn() {
+      current = clampIndex(current + 1, levels);
+      return current;
+    }, // closer / bigger tiles
+    zoomOut() {
+      current = clampIndex(current - 1, levels);
+      return current;
+    }, // wider / smaller tiles
+    setIndex(i) {
+      current = clampIndex(i, levels);
+      return current;
+    },
   };
 }

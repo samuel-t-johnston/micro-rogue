@@ -2,8 +2,13 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { createGameMenuController } from './game-menu-controller.js';
 
 const theme = {
-  bg: '#000', surface: '#111', primary: '#444', accent: '#888',
-  text: '#fff', textDim: '#aaa', textDisabled: '#666',
+  bg: '#000',
+  surface: '#111',
+  primary: '#444',
+  accent: '#888',
+  text: '#fff',
+  textDim: '#aaa',
+  textDisabled: '#666',
 };
 const viewport = { width: 800, height: 600 };
 const getViewport = () => viewport;
@@ -11,22 +16,33 @@ const getViewport = () => viewport;
 // Mock 2D context — render() runs every frame; this keeps it from throwing on a happy-dom stub.
 function makeCtx() {
   const noop = () => {};
-  return new Proxy({}, {
-    get: (_, key) => {
-      if (key === 'measureText') return (t) => ({ width: String(t).length * 8 });
-      return (key === 'font' || key === 'fillStyle' || key === 'strokeStyle' ||
-              key === 'lineWidth' || key === 'textAlign' || key === 'textBaseline' ||
-              key === 'globalAlpha') ? '' : noop;
+  return new Proxy(
+    {},
+    {
+      get: (_, key) => {
+        if (key === 'measureText') return (t) => ({ width: String(t).length * 8 });
+        return key === 'font' ||
+          key === 'fillStyle' ||
+          key === 'strokeStyle' ||
+          key === 'lineWidth' ||
+          key === 'textAlign' ||
+          key === 'textBaseline' ||
+          key === 'globalAlpha'
+          ? ''
+          : noop;
+      },
+      set: () => true,
     },
-    set: () => true,
-  });
+  );
 }
 
 // Layout-derived tap targets (menu-shell: BUTTON_W 260, BUTTON_H 56, GAP 16; viewport 800x600).
 // 4 items → total 272, startY 164, x-center 400. Row i center y = 164 + i*72 + 28.
 const ROW = {
-  resume: { x: 400, y: 192 }, newGame: { x: 400, y: 264 },
-  settings: { x: 400, y: 336 }, credits: { x: 400, y: 408 },
+  resume: { x: 400, y: 192 },
+  newGame: { x: 400, y: 264 },
+  settings: { x: 400, y: 336 },
+  credits: { x: 400, y: 408 },
 };
 const CORNER = { x: 38, y: 38 }; // ✕ / ‹ corner button center
 // Confirm action-menu (2 actions, centered): button0 center (400,296), button1 (400,348).
@@ -38,7 +54,11 @@ describe('game menu controller', () => {
   beforeEach(() => {
     newGameCalls = 0;
     controller = createGameMenuController({
-      theme, getViewport, onNewGame: () => { newGameCalls++; },
+      theme,
+      getViewport,
+      onNewGame: () => {
+        newGameCalls++;
+      },
     });
     ctx = makeCtx();
   });
@@ -66,7 +86,7 @@ describe('game menu controller', () => {
     controller.open();
     controller.render(ctx);
     tap(ROW.newGame);
-    expect(newGameCalls).toBe(0);   // confirm shown, not yet committed
+    expect(newGameCalls).toBe(0); // confirm shown, not yet committed
     expect(controller.isOpen).toBe(true);
 
     controller.render(ctx);

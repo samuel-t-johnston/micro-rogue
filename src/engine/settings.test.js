@@ -15,8 +15,10 @@ describe('normalizeSettings', () => {
   });
 
   it('drops unknown keys', () => {
-    expect(normalizeSettings({ handedness: 'left', bogus: 1 }))
-      .toEqual({ ...DEFAULT_SETTINGS, handedness: 'left' });
+    expect(normalizeSettings({ handedness: 'left', bogus: 1 })).toEqual({
+      ...DEFAULT_SETTINGS,
+      handedness: 'left',
+    });
   });
 
   it('keeps a valid skipNewGameInstructions boolean', () => {
@@ -24,7 +26,9 @@ describe('normalizeSettings', () => {
   });
 
   it('falls back to the default for a non-boolean skipNewGameInstructions', () => {
-    expect(normalizeSettings({ skipNewGameInstructions: 'yes' }).skipNewGameInstructions).toBe(false);
+    expect(normalizeSettings({ skipNewGameInstructions: 'yes' }).skipNewGameInstructions).toBe(
+      false,
+    );
   });
 
   it('defaults renderMode to sprite', () => {

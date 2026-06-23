@@ -2,17 +2,36 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { createContextMenu } from './context-menu.js';
 
 const theme = {
-  bg: '#000', surface: '#111', primary: '#444', accent: '#888',
-  text: '#fff', textDim: '#aaa', textDisabled: '#666',
+  bg: '#000',
+  surface: '#111',
+  primary: '#444',
+  accent: '#888',
+  text: '#fff',
+  textDim: '#aaa',
+  textDisabled: '#666',
 };
 const getViewport = () => ({ width: 800, height: 600 });
 
 function makeCtx() {
   const noop = () => {};
-  return new Proxy({}, {
-    get: (_, key) => ['font', 'fillStyle', 'strokeStyle', 'lineWidth', 'textAlign', 'textBaseline', 'globalAlpha'].includes(key) ? '' : noop,
-    set: () => true,
-  });
+  return new Proxy(
+    {},
+    {
+      get: (_, key) =>
+        [
+          'font',
+          'fillStyle',
+          'strokeStyle',
+          'lineWidth',
+          'textAlign',
+          'textBaseline',
+          'globalAlpha',
+        ].includes(key)
+          ? ''
+          : noop,
+      set: () => true,
+    },
+  );
 }
 
 // Geometry (PANEL_W=240, ROW_H=44, ROW_GAP=6, PAD=8, MARGIN=8): for a 2-row menu, h = 16 + 88 + 6 = 110.
@@ -23,8 +42,12 @@ const ROWS = [
 
 describe('context menu', () => {
   let chosen;
-  const onSelect = (a) => { chosen = a; };
-  beforeEach(() => { chosen = undefined; });
+  const onSelect = (a) => {
+    chosen = a;
+  };
+  beforeEach(() => {
+    chosen = undefined;
+  });
 
   function make(anchor) {
     return createContextMenu({ theme, getViewport, anchor, rows: ROWS, onSelect });

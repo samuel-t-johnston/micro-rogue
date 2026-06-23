@@ -39,7 +39,7 @@ function randomSeed() {
 
 // Coerces a mix argument to a uint32: numbers used directly, strings hashed.
 function toUint32(v) {
-  return typeof v === 'string' ? hashName(v) : (v >>> 0);
+  return typeof v === 'string' ? hashName(v) : v >>> 0;
 }
 
 // --- a single stream ---
@@ -53,19 +53,29 @@ export function createRng(seed) {
   let _state = _seed;
 
   function advance() {
-    _state = (_state + 0x6D2B79F5) >>> 0;
+    _state = (_state + 0x6d2b79f5) >>> 0;
     let t = Math.imul(_state ^ (_state >>> 15), 1 | _state);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   }
 
   return {
-    getSeed() { return _seed; },
-    getState() { return _state; },
-    setState(state) { _state = state >>> 0; },
-    random() { return advance(); },
+    getSeed() {
+      return _seed;
+    },
+    getState() {
+      return _state;
+    },
+    setState(state) {
+      _state = state >>> 0;
+    },
+    random() {
+      return advance();
+    },
     /** Returns an integer in [min, max). */
-    nextInt(min, max) { return Math.floor(advance() * (max - min)) + min; },
+    nextInt(min, max) {
+      return Math.floor(advance() * (max - min)) + min;
+    },
     pick(arr) {
       if (arr.length === 0) throw new Error('rng.pick called with empty array');
       return arr[Math.floor(advance() * arr.length)];
@@ -87,7 +97,9 @@ export function createRngService(masterSeed) {
   const streams = new Map(); // name -> persistent rng instance
 
   return {
-    getMasterSeed() { return _master; },
+    getMasterSeed() {
+      return _master;
+    },
 
     stream(name) {
       let s = streams.get(name);
@@ -127,18 +139,28 @@ let _service = createRngService();
 
 export const rng = {
   /** Starts a new world with the given master seed (random if omitted). */
-  init(seed) { _service = createRngService(seed); },
+  init(seed) {
+    _service = createRngService(seed);
+  },
 
-  getMasterSeed() { return _service.getMasterSeed(); },
+  getMasterSeed() {
+    return _service.getMasterSeed();
+  },
 
   /** A named persistent stream whose state is carried in the save (gameplay is the default one). */
-  stream(name) { return _service.stream(name); },
+  stream(name) {
+    return _service.stream(name);
+  },
 
   /** A fresh, re-derivable stream keyed by name + mix inputs (e.g. map generation). */
-  deriveRng(name, ...mix) { return _service.derive(name, ...mix); },
+  deriveRng(name, ...mix) {
+    return _service.derive(name, ...mix);
+  },
 
   /** Persistent-stream states for the save: { seed, streams }. */
-  snapshot() { return _service.snapshot(); },
+  snapshot() {
+    return _service.snapshot();
+  },
 
   /** Rebuilds the world from a snapshot ({ seed, streams }). */
   restore(snapshot) {
@@ -147,7 +169,13 @@ export const rng = {
   },
 
   // Gameplay-stream consumption — the common case.
-  random() { return _service.stream('gameplay').random(); },
-  nextInt(min, max) { return _service.stream('gameplay').nextInt(min, max); },
-  pick(arr) { return _service.stream('gameplay').pick(arr); },
+  random() {
+    return _service.stream('gameplay').random();
+  },
+  nextInt(min, max) {
+    return _service.stream('gameplay').nextInt(min, max);
+  },
+  pick(arr) {
+    return _service.stream('gameplay').pick(arr);
+  },
 };

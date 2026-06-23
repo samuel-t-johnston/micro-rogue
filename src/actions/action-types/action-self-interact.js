@@ -14,13 +14,15 @@ export async function executeSelfInteract(actor, _action, level, registry, dialo
   // Stairs (a `transition` entity) underfoot take precedence: tapping your own tile travels. The
   // scene wired level.onTransition to perform the level swap (the action system can't, since it
   // closes over the level being left); we just request it and consume the turn.
-  const transitionEntity = [...level.getEntitiesAt(pos.x, pos.y)].find(e => e.components.has('transition'));
+  const transitionEntity = [...level.getEntitiesAt(pos.x, pos.y)].find((e) =>
+    e.components.has('transition'),
+  );
   if (transitionEntity && level.onTransition) {
     level.onTransition(transitionEntity);
     return false;
   }
 
-  const itemsHere = [...level.getEntitiesAt(pos.x, pos.y)].filter(e => e.components.has('item'));
+  const itemsHere = [...level.getEntitiesAt(pos.x, pos.y)].filter((e) => e.components.has('item'));
 
   if (itemsHere.length === 0) return true;
   if (itemsHere.length === 1) {

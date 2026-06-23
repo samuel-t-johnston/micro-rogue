@@ -27,18 +27,21 @@ describe('stairs stage', () => {
       const stairs = reg.getEntitiesWith('transition');
       expect(stairs).toHaveLength(2);
 
-      const up = stairs.find(s => s.components.get('name') === 'Stairs Up');
-      const down = stairs.find(s => s.components.get('name') === 'Stairs Down');
+      const up = stairs.find((s) => s.components.get('name') === 'Stairs Up');
+      const down = stairs.find((s) => s.components.get('name') === 'Stairs Down');
       expect(up).toBeTruthy();
       expect(down).toBeTruthy();
       expect(up.components.get('transition')).toEqual({ to: null, port: 'up' });
       expect(down.components.get('transition')).toEqual({ to: null, port: 'down' });
 
       const cs = bb['level:grid'].cellSize;
-      for (const [s, label] of [[up, 'stairs-up'], [down, 'stairs-down']]) {
+      for (const [s, label] of [
+        [up, 'stairs-up'],
+        [down, 'stairs-down'],
+      ]) {
         const pos = s.components.get('position');
         expect(level.tiles[pos.y][pos.x]).toBe('floor');
-        const zone = bb['level:zones'].find(z => z.labels.includes(label));
+        const zone = bb['level:zones'].find((z) => z.labels.includes(label));
         const cells = new Set(zone.cells.map(([c, r]) => `${c},${r}`));
         expect(cells.has(cellOf(pos, cs))).toBe(true);
       }
@@ -46,8 +49,12 @@ describe('stairs stage', () => {
   });
 
   it('is deterministic for a given seed', () => {
-    const posOf = (g) => g.reg.getEntitiesWith('transition')
-      .map(s => s.components.get('position')).map(p => `${p.x},${p.y}`).sort();
+    const posOf = (g) =>
+      g.reg
+        .getEntitiesWith('transition')
+        .map((s) => s.components.get('position'))
+        .map((p) => `${p.x},${p.y}`)
+        .sort();
     expect(posOf(generate(5))).toEqual(posOf(generate(5)));
   });
 });

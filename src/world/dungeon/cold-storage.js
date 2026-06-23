@@ -5,7 +5,12 @@
  * multi-floor state is absorbed here at the transition boundary instead of being pushed into every
  * system. See docs/design/map-generation.md ("Level Lifecycle and Cold Storage").
  */
-import { serializeEntity, deserializeEntities, serializeLevel, deserializeLevel } from '../../save/serialize.js';
+import {
+  serializeEntity,
+  deserializeEntities,
+  serializeLevel,
+  deserializeLevel,
+} from '../../save/serialize.js';
 import { collectSubgraph } from './subgraph.js';
 
 /**
@@ -21,7 +26,7 @@ export function freezeLevel(registry, level, excludeIds = new Set()) {
   // from `level.entities` reaches the player's inventory too, so the exclude set is what keeps the
   // player's carried items from being dragged into the freeze.
   const reachable = collectSubgraph(level.entities);
-  const frozen = [...reachable].filter(e => !exclude.has(e.id));
+  const frozen = [...reachable].filter((e) => !exclude.has(e.id));
 
   // Drop any excluded on-map entity (the player) from the level first, so the blob's `entityIds`
   // never references an entity the blob doesn't contain.

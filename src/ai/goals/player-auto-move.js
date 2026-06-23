@@ -31,11 +31,13 @@ export const playerAutoMove = {
     }
 
     // Cancel: a new enemy entered vision since auto-move started
-    const visibleEnemyIds = new Set(perception.entities
-      .filter(e => e.tags.isActor && areHostile(selfState.factions, e.factions))
-      .map(e => e.entityId));
+    const visibleEnemyIds = new Set(
+      perception.entities
+        .filter((e) => e.tags.isActor && areHostile(selfState.factions, e.factions))
+        .map((e) => e.entityId),
+    );
     const knownEnemyIds = new Set(memory.knownEnemyIds ?? []);
-    const hasNewEnemy = [...visibleEnemyIds].some(id => !knownEnemyIds.has(id));
+    const hasNewEnemy = [...visibleEnemyIds].some((id) => !knownEnemyIds.has(id));
 
     if (hasNewEnemy) {
       cancelAutoMove(memory);
@@ -57,7 +59,7 @@ export const playerAutoMove = {
 
     memory.knownEnemyIds = [...visibleEnemyIds];
 
-    await new Promise(r => setTimeout(r, AUTO_MOVE_DELAY_MS));
+    await new Promise((r) => setTimeout(r, AUTO_MOVE_DELAY_MS));
 
     // Re-check for a tap that arrived during the delay
     if (hasPendingInput()) {

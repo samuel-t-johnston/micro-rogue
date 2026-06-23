@@ -45,9 +45,9 @@ function clamp01(v) {
 }
 
 function createAnimationManager() {
-  let active = [];     // all in-flight animations, attached and detached
-  let current = 0;     // last frame timestamp; getters sample against this
-  let enabled = true;  // reduced-motion / "disable animations" kill switch
+  let active = []; // all in-flight animations, attached and detached
+  let current = 0; // last frame timestamp; getters sample against this
+  let enabled = true; // reduced-motion / "disable animations" kill switch
 
   // Progress of an animation at the current frame time, clamped to [0, 1].
   function progress(anim) {
@@ -107,8 +107,12 @@ function createAnimationManager() {
     detached,
     frame,
 
-    setEnabled(v) { enabled = v; },
-    get enabled() { return enabled; },
+    setEnabled(v) {
+      enabled = v;
+    },
+    get enabled() {
+      return enabled;
+    },
 
     // Attached: slide a sprite from its previous tile to its (already-updated) logical
     // tile. Modelled as an offset that decays to zero, so rapid moves chain cleanly —
@@ -118,8 +122,8 @@ function createAnimationManager() {
       if (!enabled || !from || !to) return;
       const existing = transformFor(entity.id);
       const startOffset = {
-        x: (from.x - to.x) + (existing?.dx ?? 0),
-        y: (from.y - to.y) + (existing?.dy ?? 0),
+        x: from.x - to.x + (existing?.dx ?? 0),
+        y: from.y - to.y + (existing?.dy ?? 0),
       };
       if (startOffset.x === 0 && startOffset.y === 0) return;
       add({
@@ -172,7 +176,12 @@ function createAnimationManager() {
         renderable: { sprite: r.sprite, color: r.color, glyph: r.glyph, glyphColor: r.glyphColor },
         duration: opts.duration ?? SMOOSH_MS,
         ease: easeOutQuad,
-        sample: (e) => ({ scaleX: 1 + 0.3 * e, scaleY: 1 - 0.85 * e, alpha: 1 - e, anchor: 'bottom' }),
+        sample: (e) => ({
+          scaleX: 1 + 0.3 * e,
+          scaleY: 1 - 0.85 * e,
+          alpha: 1 - e,
+          anchor: 'bottom',
+        }),
       });
     },
 

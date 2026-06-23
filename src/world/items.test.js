@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createHealingPotion, createPotionOfPain, createSword, createLeatherArmor, createScroll, createAmulet } from './items.js';
+import {
+  createHealingPotion,
+  createPotionOfPain,
+  createSword,
+  createLeatherArmor,
+  createScroll,
+  createAmulet,
+} from './items.js';
 import { createEntityRegistry } from '../engine/entity-component-system.js';
 import { EffectTypes } from '../effects/effects.js';
 import { Slots } from '../../data/equipment-slots.js';
@@ -52,7 +59,9 @@ describe('createPotionOfPain', () => {
 
 describe('new items', () => {
   let registry;
-  beforeEach(() => { registry = createEntityRegistry(); });
+  beforeEach(() => {
+    registry = createEntityRegistry();
+  });
 
   it('sword is a weapon with an attack bonus', () => {
     const sword = createSword(registry, 1, 1);

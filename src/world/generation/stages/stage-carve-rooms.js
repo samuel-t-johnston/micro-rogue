@@ -24,7 +24,8 @@ export function run(level, stageConfig, blackboard, rng) {
   level.width = grid.cols * cs;
   level.height = grid.rows * cs;
   level.tiles = Array.from({ length: level.height }, () =>
-    Array.from({ length: level.width }, () => 'wall'));
+    Array.from({ length: level.width }, () => 'wall'),
+  );
 
   const cellZone = new Map();
   for (const z of zones) for (const [gc, gr] of z.cells) cellZone.set(`${gc},${gr}`, z.id);
@@ -37,10 +38,16 @@ export function run(level, stageConfig, blackboard, rng) {
       const ix1 = gc * cs + cs - 2;
       const iy0 = gr * cs + 1;
       const iy1 = gr * cs + cs - 2;
-      const w = Math.min(ix1 - ix0 + 1, MIN_FLOOR + rng.nextInt(0, Math.max(1, (ix1 - ix0 + 1) - MIN_FLOOR + 1)));
-      const h = Math.min(iy1 - iy0 + 1, MIN_FLOOR + rng.nextInt(0, Math.max(1, (iy1 - iy0 + 1) - MIN_FLOOR + 1)));
-      const x0 = ix0 + rng.nextInt(0, (ix1 - ix0 + 1) - w + 1);
-      const y0 = iy0 + rng.nextInt(0, (iy1 - iy0 + 1) - h + 1);
+      const w = Math.min(
+        ix1 - ix0 + 1,
+        MIN_FLOOR + rng.nextInt(0, Math.max(1, ix1 - ix0 + 1 - MIN_FLOOR + 1)),
+      );
+      const h = Math.min(
+        iy1 - iy0 + 1,
+        MIN_FLOOR + rng.nextInt(0, Math.max(1, iy1 - iy0 + 1 - MIN_FLOOR + 1)),
+      );
+      const x0 = ix0 + rng.nextInt(0, ix1 - ix0 + 1 - w + 1);
+      const y0 = iy0 + rng.nextInt(0, iy1 - iy0 + 1 - h + 1);
       room.set(`${gc},${gr}`, { x0, y0, x1: x0 + w - 1, y1: y0 + h - 1 });
     }
   }
@@ -52,8 +59,8 @@ export function run(level, stageConfig, blackboard, rng) {
       const a = room.get(`${gc},${gr}`);
       if (cellZone.get(`${gc + 1},${gr}`) === z.id) {
         const b = room.get(`${gc + 1},${gr}`);
-        a.x1 = (gc + 1) * cs - 1;   // A reaches its east edge…
-        b.x0 = (gc + 1) * cs;       // …B reaches its west edge (adjacent column)
+        a.x1 = (gc + 1) * cs - 1; // A reaches its east edge…
+        b.x0 = (gc + 1) * cs; // …B reaches its west edge (adjacent column)
         ensureOverlap(a, b, 'y0', 'y1');
       }
       if (cellZone.get(`${gc},${gr + 1}`) === z.id) {

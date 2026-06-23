@@ -8,8 +8,10 @@ const PADDING = 12;
 // Cancel is always last and always submits null (close the menu, no action).
 function actionsForItem(item) {
   const out = [];
-  if (item.components.has('consumable')) out.push({ label: 'Use', action: { type: 'consume', itemEntityId: item.id } });
-  if (item.components.has('equippable')) out.push({ label: 'Equip', action: { type: 'equip', itemEntityId: item.id } });
+  if (item.components.has('consumable'))
+    out.push({ label: 'Use', action: { type: 'consume', itemEntityId: item.id } });
+  if (item.components.has('equippable'))
+    out.push({ label: 'Equip', action: { type: 'equip', itemEntityId: item.id } });
   out.push({ label: 'Drop', action: { type: 'drop', itemEntityId: item.id } });
   out.push({ label: 'Cancel', action: null });
   return out;
@@ -30,7 +32,8 @@ export function createInventoryScreenBody({ theme, getViewport, getItems, onActi
   function openMenuFor(item) {
     activeItem = item;
     menu = createActionMenu({
-      theme, getViewport,
+      theme,
+      getViewport,
       title: `${item.components.get('name') ?? 'Item'} — Actions`,
       actions: actionsForItem(item),
       onSelect: (action) => {
@@ -46,7 +49,9 @@ export function createInventoryScreenBody({ theme, getViewport, getItems, onActi
       const items = getItems();
       if (items.length === 0) {
         drawText(ctx, '(empty)', body.x + body.w / 2, body.y + PADDING * 2, {
-          color: theme.textDim, size: 14, align: 'center',
+          color: theme.textDim,
+          size: 14,
+          align: 'center',
         });
       } else {
         items.forEach((item, i) => {
@@ -61,14 +66,18 @@ export function createInventoryScreenBody({ theme, getViewport, getItems, onActi
           }
           const name = item.components.get('name') ?? 'Unknown';
           drawText(ctx, name, rect.x + PADDING, rect.y + ROW_H / 2, {
-            color: isActive ? theme.bg : theme.text, size: 14, baseline: 'middle',
+            color: isActive ? theme.bg : theme.text,
+            size: 14,
+            baseline: 'middle',
           });
 
           const equippable = item.components.get('equippable');
           if (equippable) {
             drawText(ctx, `(${equippable.slot})`, rect.x + rect.w - PADDING, rect.y + ROW_H / 2, {
               color: isActive ? theme.bg : theme.textDim,
-              size: 12, align: 'right', baseline: 'middle',
+              size: 12,
+              align: 'right',
+              baseline: 'middle',
             });
           }
         });

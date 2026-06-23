@@ -3,7 +3,16 @@ import { areHostile } from '../../combat/factions.js';
 import { resolveTileActions } from '../../actions/resolve-tile-actions.js';
 
 // Actions the UI submits already resolved (character menu, the contextual tile menu).
-const PASS_THROUGH = new Set(['equip', 'unequip', 'consume', 'drop', 'interact', 'attack', 'selfInteract', 'lookAt']);
+const PASS_THROUGH = new Set([
+  'equip',
+  'unequip',
+  'consume',
+  'drop',
+  'interact',
+  'attack',
+  'selfInteract',
+  'lookAt',
+]);
 
 /**
  * Player goal: waits for player input and turns it into an action. A raw map `tap` is interpreted
@@ -30,8 +39,8 @@ export const playerGetInput = {
       if (!path || path.length === 0) return null;
       // Snapshot visible enemies so auto-move can detect new ones next turn.
       memory.knownEnemyIds = perception.entities
-        .filter(e => e.tags.isActor && areHostile(selfState.factions, e.factions))
-        .map(e => e.entityId);
+        .filter((e) => e.tags.isActor && areHostile(selfState.factions, e.factions))
+        .map((e) => e.entityId);
       memory.autoMoveTarget = { x: tx, y: ty };
       return { type: 'move', x: path[0].x, y: path[0].y };
     };
@@ -42,7 +51,9 @@ export const playerGetInput = {
       // Raw map tap: interpret it against the tile, act on the primary action. Skip the always-present
       // free 'lookAt' row — examining is menu-only, so a plain tap on a wall/empty stays a no-op.
       if (input.type === 'tap') {
-        const primary = resolveTileActions(level, selfState.position, input).find(r => r.action.type !== 'lookAt');
+        const primary = resolveTileActions(level, selfState.position, input).find(
+          (r) => r.action.type !== 'lookAt',
+        );
         if (!primary) continue;
         if (primary.action.type === 'move') {
           const move = handleMove(primary.action.x, primary.action.y);

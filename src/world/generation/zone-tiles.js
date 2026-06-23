@@ -30,7 +30,10 @@ export function centermostRoomTile(zone, rooms) {
   let bestD = Infinity;
   for (const [x, y] of tiles) {
     const d = (x - cx) ** 2 + (y - cy) ** 2;
-    if (d < bestD) { bestD = d; best = [x, y]; }
+    if (d < bestD) {
+      bestD = d;
+      best = [x, y];
+    }
   }
   return best;
 }

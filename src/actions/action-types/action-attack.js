@@ -39,7 +39,13 @@ export function executeAttack(actor, action, level, registry) {
   // of who's swinging, so no hearer dismisses it as "just an ally."
   const actorPos = actor.components.get('position');
   if (actorPos) {
-    emitSound(registry, level, { sourceId: actor.id, x: actorPos.x, y: actorPos.y, volume: 6, message: { kind: 'combat' } });
+    emitSound(registry, level, {
+      sourceId: actor.id,
+      x: actorPos.x,
+      y: actorPos.y,
+      volume: 6,
+      message: { kind: 'combat' },
+    });
   }
 
   applyEffect('damage', actor, target, { amount }, level, registry);

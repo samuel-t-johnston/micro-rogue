@@ -10,8 +10,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 const { goalActs } = vi.hoisted(() => ({ goalActs: new Map() }));
 
 vi.mock('../ai/goals/goal-registry.js', () => ({
-  resolveGoals: names =>
-    names.map(name => ({
+  resolveGoals: (names) =>
+    names.map((name) => ({
       evaluate: () => (goalActs.get(name) ? { action: { type: 'wait' } } : null),
     })),
 }));
@@ -49,7 +49,7 @@ describe('invokeAction goal bookkeeping', () => {
   });
 
   function goalChanges() {
-    return gameLog.getAll().filter(e => e.action === 'goalChange');
+    return gameLog.getAll().filter((e) => e.action === 'goalChange');
   }
 
   it('records the winning goal on ai.lastGoal and logs the first activation', async () => {
@@ -106,7 +106,7 @@ describe('invokeAction decay handling', () => {
     return sound;
   }
 
-  it('decrements a decay entity\'s lifespan each turn without destroying it early', async () => {
+  it("decrements a decay entity's lifespan each turn without destroying it early", async () => {
     const sound = makeSound(2);
     await system.invokeAction(sound);
     expect(sound.components.get('decay').lifespan).toBe(1);

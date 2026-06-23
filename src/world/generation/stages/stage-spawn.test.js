@@ -30,7 +30,7 @@ describe('spawn stage', () => {
       const pos = entries[0].components.get('position');
       expect(level.tiles[pos.y][pos.x]).toBe('floor');
 
-      const stairsUp = bb['level:zones'].find(z => z.labels.includes('stairs-up'));
+      const stairsUp = bb['level:zones'].find((z) => z.labels.includes('stairs-up'));
       const cs = bb['level:grid'].cellSize;
       const cell = `${Math.floor(pos.x / cs)},${Math.floor(pos.y / cs)}`;
       expect(cellsOf(stairsUp).has(cell)).toBe(true);

@@ -16,11 +16,12 @@ export const playerHear = {
     // Only "hear" sounds whose origin you can't currently see — a visible event speaks for itself
     // (its own log lines), so surfacing "you hear fighting" for a brawl in plain view is just noise.
     const visible = perception.visibleTiles ?? new Set();
-    const sounds = (perception.sounds ?? []).filter(s =>
-      !(s.position && visible.has(`${s.position.x},${s.position.y}`)));
+    const sounds = (perception.sounds ?? []).filter(
+      (s) => !(s.position && visible.has(`${s.position.x},${s.position.y}`)),
+    );
 
-    const currentIds = new Set(sounds.map(s => s.soundId));
-    const logged = new Set((memory.heardSoundIds ?? []).filter(id => currentIds.has(id)));
+    const currentIds = new Set(sounds.map((s) => s.soundId));
+    const logged = new Set((memory.heardSoundIds ?? []).filter((id) => currentIds.has(id)));
 
     for (const sound of sounds) {
       if (logged.has(sound.soundId)) continue;

@@ -7,11 +7,21 @@ const getViewport = () => ({ width: 800, height: 600 });
 
 function makeRows() {
   const state = { handedness: 'right' };
-  const rows = [{
-    id: 'handedness', label: 'Handedness', description: 'Side of the action button.',
-    options: [{ label: 'Left', value: 'left' }, { label: 'Right', value: 'right' }],
-    get: () => state.handedness, set: (v) => { state.handedness = v; },
-  }];
+  const rows = [
+    {
+      id: 'handedness',
+      label: 'Handedness',
+      description: 'Side of the action button.',
+      options: [
+        { label: 'Left', value: 'left' },
+        { label: 'Right', value: 'right' },
+      ],
+      get: () => state.handedness,
+      set: (v) => {
+        state.handedness = v;
+      },
+    },
+  ];
   return { rows, state };
 }
 
@@ -26,7 +36,9 @@ describe('settings rows', () => {
     const layout = layoutSettingsRows(fakeCtx(), getViewport, rows);
     const left = layout[0].segments[0];
     const handled = handleSettingsRowsInput(layout, {
-      type: 'pointerdown', x: left.x + left.w / 2, y: left.y + left.h / 2,
+      type: 'pointerdown',
+      x: left.x + left.w / 2,
+      y: left.y + left.h / 2,
     });
     expect(handled).toBe(true);
     expect(state.handedness).toBe('left');

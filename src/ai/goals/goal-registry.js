@@ -16,19 +16,19 @@ import { investigate } from './investigate.js';
 // The `ai` component holds names (not function references) so it serializes cleanly;
 // goals are resolved here at evaluation time. Add new goals to this map.
 const goals = {
-  'player-auto-move': playerAutoMove,       // Player goal: auto-move toward a target tile
-  'player-auto-pickup': playerAutoPickup,   // Player goal: auto-pickup items on the current tile
-  'player-hear': playerHear,                // Player goal: log heard sounds (side effect, never acts)
-  'player-smell': playerSmell,              // Player goal: log notable smells (side effect, never acts)
-  'player-get-input': playerGetInput,       // Player goal: wait for player input and execute it
-  'wander-aimlessly': wanderAimlessly,      // NPC goal: pick a random adjacent tile and move there
-  'attack-adjacent': attackAdjacent,        // NPC goal: attack a hostile actor in an adjacent tile
-  'flee-from-others': fleeFromOthers,       // NPC goal: move away from the nearest hostile actor
-  'chase-others': chaseOthers,              // NPC goal: move toward the nearest hostile actor
-  'shout-enemy-report': shoutEnemyReport,   // NPC goal: shout the direction of a newly-seen hostile
-  'obey-shouts': obeyShouts,                // NPC goal: advance toward an understood shouted order
-  'track-scent': trackScent,                // NPC goal: follow the strongest hostile scent gradient
-  'investigate': investigate,               // NPC goal: pursue the last place a foe was perceived
+  'player-auto-move': playerAutoMove, // Player goal: auto-move toward a target tile
+  'player-auto-pickup': playerAutoPickup, // Player goal: auto-pickup items on the current tile
+  'player-hear': playerHear, // Player goal: log heard sounds (side effect, never acts)
+  'player-smell': playerSmell, // Player goal: log notable smells (side effect, never acts)
+  'player-get-input': playerGetInput, // Player goal: wait for player input and execute it
+  'wander-aimlessly': wanderAimlessly, // NPC goal: pick a random adjacent tile and move there
+  'attack-adjacent': attackAdjacent, // NPC goal: attack a hostile actor in an adjacent tile
+  'flee-from-others': fleeFromOthers, // NPC goal: move away from the nearest hostile actor
+  'chase-others': chaseOthers, // NPC goal: move toward the nearest hostile actor
+  'shout-enemy-report': shoutEnemyReport, // NPC goal: shout the direction of a newly-seen hostile
+  'obey-shouts': obeyShouts, // NPC goal: advance toward an understood shouted order
+  'track-scent': trackScent, // NPC goal: follow the strongest hostile scent gradient
+  investigate: investigate, // NPC goal: pursue the last place a foe was perceived
 };
 
 /**
@@ -38,7 +38,7 @@ const goals = {
  * @returns {object[]} The resolved goal objects (see the `Goal` typedef in goal-evaluator.js).
  */
 export function resolveGoals(names) {
-  return names.map(name => {
+  return names.map((name) => {
     const goal = goals[name];
     if (!goal) throw new Error(`Unknown goal: "${name}"`);
     return goal;

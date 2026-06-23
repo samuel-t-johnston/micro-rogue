@@ -10,7 +10,9 @@ const server = net.createServer();
 
 server.once('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${port} is in use. Run \`npm run dev:kill\` to free it, or use \`npm run dev:fresh\`.`);
+    console.error(
+      `Port ${port} is in use. Run \`npm run dev:kill\` to free it, or use \`npm run dev:fresh\`.`,
+    );
     process.exit(1);
   }
   console.error('Port check failed:', err);
