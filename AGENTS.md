@@ -105,6 +105,7 @@ DO NOT INSTALL TOOLS LIKE PLAYWRIGHT TO TEST UI!
 # PRs and Commits
  - Always commit to a branch, not main
  - Code changes should be reviewed and unit tested before committing.
+ - ESLint and Prettier should be run before committing.
  - Commit messages should be informative, but concise
  - Do not include Claude-specific info like Claude session IDs in commit messages.
  - User will create the PR.

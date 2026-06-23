@@ -237,8 +237,8 @@ Pre-Alpha Checklist — Alpha v0.1.0
 *Done when the engine supports a complete (simple) game experience; the codebase has been fully reviewed, and is a clean baseline for further expansion and new features.*
 
 - [ ] Full human code review and cleanup
-- [ ] Delete all stubs, empty dirs, unused assets
-- [ ] JS best practices
+- [x] Delete all stubs, empty dirs, unused assets
+- [x] JS best practices
   - modules vs classes?
   - JS Doc comments
   - ESLint + Prettier
