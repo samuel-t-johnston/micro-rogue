@@ -1,8 +1,10 @@
-// Realization stage: turns the zone plan into floor tiles. Inits the grid to wall, then carves a
-// random room per cell and merges same-zone cells by growing their rooms until they touch (no
-// intra-zone corridors). Rooms keep a 1-tile gutter on sides facing a *different* zone or the grid
-// edge, so adjacent zones never touch. Records each cell's room rect to `level:rooms` for the hall
-// stage. See docs/design/procedural-3x3-dungeon.md (Room variety & dog-leg halls).
+/**
+ * @file Realization stage: turns the zone plan into floor tiles. Inits the grid to wall, then carves
+ * a random room per cell and merges same-zone cells by growing their rooms until they touch (no
+ * intra-zone corridors). Rooms keep a 1-tile gutter on sides facing a *different* zone or the grid
+ * edge, so adjacent zones never touch. Records each cell's room rect to `level:rooms` for the hall
+ * stage. See docs/design/procedural-3x3-dungeon.md (Room variety & dog-leg halls).
+ */
 
 const MIN_FLOOR = 2; // a 2x2 floor room (4x4 counting its wall ring)
 
@@ -13,6 +15,7 @@ function ensureOverlap(a, b, k0, k1) {
   else a[k0] = b[k1];
 }
 
+/** Runs the carve-rooms realization stage (see the file overview). */
 export function run(level, stageConfig, blackboard, rng) {
   const grid = blackboard['level:grid'] ?? { cols: 0, rows: 0, cellSize: 10 };
   const cs = grid.cellSize;

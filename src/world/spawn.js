@@ -1,6 +1,8 @@
-// Resolves where the player arrives on a level: the entity tagged `entryPoint`. The player is
-// created and placed by the game scene (not the pipeline), so this reads the marker that generation
-// dropped. Falls back to the level centre if nothing is marked. See docs/design/procedural-3x3-dungeon.md.
+/**
+ * Resolves where the player arrives on a level: the entity tagged `entryPoint`. The player is created
+ * and placed by the game scene (not the pipeline), so this reads the marker that generation dropped.
+ * Falls back to the level centre if nothing is marked. See docs/design/procedural-3x3-dungeon.md.
+ */
 export function resolveSpawn(registry, level) {
   const entries = registry.getEntitiesWith('entryPoint');
   if (entries.length > 1) {
@@ -12,10 +14,12 @@ export function resolveSpawn(registry, level) {
   return { x: Math.floor(level.width / 2), y: Math.floor(level.height / 2) };
 }
 
-// Resolves where the player arrives when entering a level through a transition with the given
-// `port`: the position of the stairs (transition) entity whose `port` matches — you arrive standing
-// on the stairs you'd use to go back. Falls back to resolveSpawn (entryPoint / centre) if no
-// matching port is found. The level's entities must already be placed in `registry`.
+/**
+ * Resolves where the player arrives when entering a level through a transition with the given `port`:
+ * the position of the stairs (transition) entity whose `port` matches — you arrive standing on the
+ * stairs you'd use to go back. Falls back to resolveSpawn (entryPoint / centre) if no matching port
+ * is found. The level's entities must already be placed in `registry`.
+ */
 export function resolveArrival(registry, level, port) {
   const match = registry.getEntitiesWith('transition')
     .find(e => e.components.get('transition')?.port === port);

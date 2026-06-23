@@ -1,7 +1,9 @@
-// Population stage for static layouts: instantiates the authored entities a static/randomStatic stage
-// stashed on the blackboard (`static:entities`). Each spec is `{ type, x, y }`; `chest` also carries
-// `contents` (item type names). Placement is exact and deterministic — no RNG. `stairsUp` doubles as
-// the player's entry point. See docs/howto/static-map-layouts.md.
+/**
+ * @file Population stage for static layouts: instantiates the authored entities a static/randomStatic
+ * stage stashed on the blackboard (`static:entities`). Each spec is `{ type, x, y }`; `chest` also
+ * carries `contents` (item type names). Placement is exact and deterministic — no RNG. `stairsUp`
+ * doubles as the player's entry point. See docs/howto/static-map-layouts.md.
+ */
 import { createStairs, createDungeonExit, createChest, createBoulder, createDoor } from '../../furniture.js';
 import { createHealingPotion, createPotionOfPain, createDagger, createSword, createLeatherArmor, createScroll } from '../../items.js';
 import { createGoblin, createOrc, createOrcCommander, createScuttler } from '../../creatures.js';
@@ -50,6 +52,7 @@ function placeChest(level, registry, spec) {
   level.placeEntity(chest);
 }
 
+/** Runs the place-static-entities population stage (see the file overview). */
 export function run(level, stageConfig, blackboard, rng, registry) {
   for (const spec of blackboard['static:entities'] ?? []) {
     if (spec.type === 'chest') {

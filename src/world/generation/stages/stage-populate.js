@@ -1,6 +1,8 @@
-// Population stage: places items and creatures by room label. Treasure rooms get a chest plus a few
-// floor items; item rooms get floor items; creatures pick rooms by affinity weights (a room's weight
-// is the product of its labels' weights — >1 attracts, <1 repels). See docs/design/procedural-3x3-dungeon.md.
+/**
+ * @file Population stage: places items and creatures by room label. Treasure rooms get a chest plus a
+ * few floor items; item rooms get floor items; creatures pick rooms by affinity weights (a room's
+ * weight is the product of its labels' weights — >1 attracts, <1 repels). See docs/design/procedural-3x3-dungeon.md.
+ */
 import { createChest } from '../../furniture.js';
 import { createHealingPotion, createPotionOfPain, createDagger, createSword, createLeatherArmor, createScroll, createAmulet } from '../../items.js';
 import { createGoblin, createOrc, createOrcCommander } from '../../creatures.js';
@@ -37,7 +39,7 @@ function roomWeight(zone, weights) {
   return w;
 }
 
-// Weighted-random room pick; falls back to uniform if every weight is zero.
+/** Weighted-random room pick; falls back to uniform if every weight is zero. */
 export function weightedPick(rooms, weights, rng) {
   const ws = rooms.map(r => roomWeight(r, weights));
   const total = ws.reduce((a, b) => a + b, 0);
@@ -47,6 +49,7 @@ export function weightedPick(rooms, weights, rng) {
   return rooms[rooms.length - 1];
 }
 
+/** Runs the populate stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard, rng, registry) {
   const cfg = { ...DEFAULTS, ...stageConfig };
   const zones = blackboard['level:zones'] ?? [];

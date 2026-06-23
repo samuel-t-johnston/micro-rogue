@@ -1,3 +1,8 @@
+/**
+ * @file The map-generation pipeline runner: maps a pipeline config's ordered stage types to their
+ * stage functions and runs each against a fresh level, threading a shared blackboard. Register a
+ * stage type in STAGES to make it usable from a pipeline config.
+ */
 import { createLevel } from '../level.js';
 import { run as runStatic } from './stages/stage-static.js';
 import { run as runRandomStatic } from './stages/stage-random-static.js';
@@ -25,10 +30,14 @@ const STAGES = {
   populate: runPopulate,
 };
 
-// `onStageComplete(stageType, level)` (optional) fires after each stage — a debug seam for the
-// generation visualizer to snapshot the level as it evolves, without stages knowing about it.
-// `identity` ({ branch, depth }) stamps the level's place in the dungeon; the pipeline id and the
-// rng's derived seed are captured automatically so a frozen level carries its full identity.
+/**
+ * Runs a pipeline config's stages in order against a fresh level and returns it.
+ * `onStageComplete(stageType, level)` (optional) fires after each stage — a debug seam for the
+ * generation visualizer to snapshot the level as it evolves, without stages knowing about it.
+ * `identity` ({ branch, depth }) stamps the level's place in the dungeon; the pipeline id and the
+ * rng's derived seed are captured automatically so a frozen level carries its full identity.
+ * @throws {Error} On an unknown stage type.
+ */
 export async function runPipeline(pipelineConfig, rng, registry, { onStageComplete, identity } = {}) {
   const level = createLevel({
     branch: identity?.branch ?? null,
