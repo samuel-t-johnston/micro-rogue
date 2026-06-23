@@ -1,15 +1,17 @@
 import { chebyshevDistance, cardinalDirection } from '../../world/geometry.js';
 
-// Hearing sense. Unlike vision, it reports no entities and no visible tiles — it surfaces *sounds*:
-// located, decaying noise percepts into the SenseResult's `sounds` channel (merged into
-// context.perception.sounds). A percept is an imprecise lead — a compass direction and the sound's
-// structured message — never an exact position or an entity sighting. Goals turn understood messages
-// into behaviour (e.g. obey a shouted order); the player UI turns them into "you hear …" lines.
-//
-// Acuity (range) comes from the hearer's `hearing` component; a sound carries `volume`. The sound is
-// audible when distance <= range + volume. v1 uses straight-line (Chebyshev) distance with no
-// occlusion — walking-distance propagation and muffling (walls block, doors leak) is a planned
-// upgrade that changes only this function, not the SenseResult contract.
+/**
+ * Creates the hearing sense. Unlike vision, it reports no entities and no visible tiles — it surfaces
+ * *sounds*: located, decaying noise percepts into the SenseResult's `sounds` channel (merged into
+ * context.perception.sounds). A percept is an imprecise lead — a compass direction and the sound's
+ * structured message — never an exact position or an entity sighting. Goals turn understood messages
+ * into behaviour (e.g. obey a shouted order); the player UI turns them into "you hear …" lines.
+ *
+ * Acuity (range) comes from the hearer's `hearing` component; a sound carries `volume`. The sound is
+ * audible when distance <= range + volume. v1 uses straight-line (Chebyshev) distance with no
+ * occlusion — walking-distance propagation and muffling (walls block, doors leak) is a planned
+ * upgrade that changes only this function, not the SenseResult contract.
+ */
 export function createHearingSense() {
   return function hearing(entity, level, turnCount) {
     const pos = entity.components.get('position');

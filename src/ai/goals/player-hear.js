@@ -1,13 +1,15 @@
 import { gameLog } from '../../engine/game-log.js';
 import { describeSound } from '../../engine/sound-text.js';
 
-// Player goal that never acts — it surfaces heard sounds to the message log as a side effect, then
-// returns null so the real player goals run. Sits at the top of the player's stack precisely because
-// it always falls through: it logs every turn before movement/input is decided.
-//
-// Each sound (a short-lived entity) lingers in perception for a couple of turns, so we dedupe by the
-// sound's id, pruning the remembered set to what's currently heard — bounded, and a re-heard sound
-// id never recurs because ids aren't reused.
+/**
+ * Player goal that never acts — it surfaces heard sounds to the message log as a side effect, then
+ * returns null so the real player goals run. Sits at the top of the player's stack precisely because
+ * it always falls through: it logs every turn before movement/input is decided.
+ *
+ * Each sound (a short-lived entity) lingers in perception for a couple of turns, so we dedupe by the
+ * sound's id, pruning the remembered set to what's currently heard — bounded, and a re-heard sound
+ * id never recurs because ids aren't reused.
+ */
 export const playerHear = {
   evaluate(context) {
     const { memory, perception } = context;

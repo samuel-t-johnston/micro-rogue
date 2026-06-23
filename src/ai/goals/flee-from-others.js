@@ -6,9 +6,11 @@ function nearestHostileDistance(pos, hostiles) {
   return Math.min(...hostiles.map(h => chebyshevDistance(pos, h.position)));
 }
 
-// Moves away from hostile actors: steps to the adjacent tile that maximizes distance to
-// the nearest hostile. If no neighbor improves on the current distance (cornered), waits.
-// Returns null when no hostile is perceived.
+/**
+ * NPC goal: moves away from hostile actors — steps to the adjacent tile that maximizes distance to
+ * the nearest hostile. If no neighbor improves on the current distance (cornered), waits. Returns
+ * null when no hostile is perceived.
+ */
 export const fleeFromOthers = {
   evaluate(context) {
     const { selfState, perception, level } = context;

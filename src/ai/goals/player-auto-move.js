@@ -5,17 +5,18 @@ import { areHostile } from '../../combat/factions.js';
 // time to tap to interrupt. Does not affect single adjacent-tile moves.
 const AUTO_MOVE_DELAY_MS = 150;
 
-// Executes one step per turn toward memory.autoMoveTarget.
-// Cancels (clears target, returns null) if:
-//   - a buffered player input is waiting (tap/key during auto-move)
-//   - a new enemy has appeared in vision since auto-move started
-//   - the target has been reached
-//   - no path exists to the target
+// Clears all auto-move state from memory.
 function cancelAutoMove(memory) {
   delete memory.autoMoveTarget;
   delete memory.knownEnemyIds;
 }
 
+/**
+ * Player goal: steps one tile per turn toward `memory.autoMoveTarget`, cancelling (and clearing the
+ * target) if a player input is buffered (tap/key during auto-move), a new enemy enters vision, the
+ * target is reached, or no path exists. A short delay between steps keeps each move visible and
+ * interruptible.
+ */
 export const playerAutoMove = {
   async evaluate(context) {
     const { memory, perception, selfState, level, hasPendingInput } = context;

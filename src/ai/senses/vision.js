@@ -1,6 +1,11 @@
 import { computeFov } from '../../engine/fov.js';
 import { getTileType } from '../../world/tile-registry.js';
 
+/**
+ * Creates the vision sense: line-of-sight FOV gated by tile and entity opacity (range from the
+ * entity's `vision` component; unlimited if the component is absent). Reports every entity standing
+ * on a visible tile at confidence 100, plus the visible-tile set.
+ */
 export function createVisionSense() {
   return function vision(entity, level, turnCount) {
     const pos = entity.components.get('position');

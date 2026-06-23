@@ -83,29 +83,35 @@ Even though types aren't checked today, write them in valid TypeScript-flavored 
 
 ## Documenting extension contracts
 
-The highest-value docs in the engine. Define the seam's shape once with `@typedef`/`@callback`, then reference it. Example for the AI goal seam:
+The highest-value docs in the engine. **Define each seam's shape once, in the seam's home file**, then let the many implementations carry a plain prose description. Defining the typedef per-implementation doesn't scale (13 goals would each redefine it) and invites drift.
+
+Worked example — the AI goal seam. The contract lives where it's exercised (`goal-evaluator.js`):
 
 ```js
 /**
- * @typedef {Object} GoalResult
- * @property {{ type: string, [x: number], [y: number] }} action - The action to enqueue this turn.
+ * @typedef {{ action: object }} GoalResult
+ * A goal's decision for the turn. A goal returns `null` instead to fall through.
  */
 
 /**
- * A goal evaluated each turn against the creature's perceived world state.
- * @callback GoalEvaluate
- * @param {PlanningContext} context - Perceived state; goals never read the map directly.
- * @returns {GoalResult}
+ * @typedef {Object} Goal
+ * @property {(context: import('./planning-context.js').PlanningContext) => (GoalResult | null | Promise<GoalResult | null>)} evaluate
+ *   Decides this turn: return a GoalResult to act, or null to fall through to the next goal.
  */
+```
 
+`PlanningContext` similarly lives once in `planning-context.js`. Each of the 13 goal files then just describes *itself* — no typedef, no cross-file `@type`:
+
+```js
 /** Minimal NPC goal: step to a random passable adjacent tile each turn. */
 export const wanderAimlessly = {
-  /** @type {GoalEvaluate} */
   evaluate(context) { ... },
 };
 ```
 
-A new goal author now has one authoritative description of what `evaluate` receives and must return.
+Notes:
+- **Cross-file type references** use the `import('./other-file.js').TypeName` form (valid JSDoc, resolves under `@ts-check`, satisfies `no-undefined-types`). Use it only in the canonical contract files; don't sprinkle it across every implementation.
+- Keeping the implementations prose-only keeps them readable and lint-clean while the one authoritative typedef documents what every `evaluate` receives and must return.
 
 ## Anti-patterns
 

@@ -4,11 +4,13 @@ import { DIRECTION_STEPS } from '../../world/geometry.js';
 // in a couple of turns; this lets a heading carry the orc onward between shouts.
 const HEADING_PERSISTENCE = 4;
 
-// NPC goal: obey a shouted, understood enemy report by advancing in the reported direction. This is
-// a direction-based investigate — it only carries the creature roughly toward the foe; once it gains
-// line of sight, the higher-priority chase/attack goals take over (this goal sits below them). The
-// heading is held in memory for a few turns so the creature keeps moving between shouts; it lapses
-// on its own and is refreshed by each new understood order.
+/**
+ * NPC goal: obey a shouted, understood enemy report by advancing in the reported direction. This is
+ * a direction-based investigate — it only carries the creature roughly toward the foe; once it gains
+ * line of sight, the higher-priority chase/attack goals take over (this goal sits below them). The
+ * heading is held in memory for a few turns so the creature keeps moving between shouts; it lapses
+ * on its own and is refreshed by each new understood order.
+ */
 export const obeyShouts = {
   evaluate(context) {
     const { memory, perception, selfState, level } = context;
