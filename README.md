@@ -86,6 +86,17 @@ ROGμE uses Vitest with `happy-dom` for tests that need a DOM. Test files live a
 
 Run tests with `npm test` (watch mode) or `npm run test:run` (single pass).
 
+### Linting & Formatting
+
+ESLint handles code quality and JSDoc shape; Prettier handles formatting. Run them before committing:
+
+```
+npm run lint          # report ESLint issues
+npm run lint:fix      # auto-fix what ESLint can
+npm run format        # apply Prettier formatting
+npm run format:check  # check formatting without writing
+```
+
 ## Credits
 
 ROGμE is made by Sam Johnston, with help from Claude Code 🤖.
