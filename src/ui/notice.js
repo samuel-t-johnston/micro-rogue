@@ -1,9 +1,11 @@
 import { drawText, drawButton, hitTest, wrapText } from './canvas-ui.js';
 
-// A centered modal notice: a wrapped message plus a single button. For one-way information the
-// player must acknowledge (e.g. "your saved game couldn't be loaded"), as opposed to action-menu's
-// multi-choice prompts. Captures all input until dismissed; tapping the button confirms, while
-// Escape or a tap outside dismisses.
+/**
+ * @file A centered modal notice: a wrapped message plus a single button. For one-way information the
+ * player must acknowledge (e.g. "your saved game couldn't be loaded"), as opposed to action-menu's
+ * multi-choice prompts. Captures all input until dismissed; tapping the button confirms, while
+ * Escape or a tap outside dismisses.
+ */
 const PANEL_W = 320;
 const PADDING = 20;
 const LINE_H = 22;
@@ -11,6 +13,7 @@ const TEXT_SIZE = 15;
 const BUTTON_H = 44;
 const BUTTON_GAP = 18;
 
+/** Creates a modal notice. `onConfirm` fires on the button; `onDismiss` on Escape or tap-outside. */
 export function createNotice({ theme, getViewport, message, buttonLabel = 'OK', onConfirm, onDismiss }) {
   let button = null; // last render's button rect, reused for hit-testing
 

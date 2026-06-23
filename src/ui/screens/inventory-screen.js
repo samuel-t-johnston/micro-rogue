@@ -15,8 +15,10 @@ function actionsForItem(item) {
   return out;
 }
 
-// Inventory list. Tapping a row opens an action menu; selecting an action submits it
-// via onAction and the caller closes the menu. Cancelling clears the menu in place.
+/**
+ * Creates the inventory screen body. Tapping a row opens an action menu; selecting an action submits
+ * it via onAction and the caller closes the menu. Cancelling clears the menu in place.
+ */
 export function createInventoryScreenBody({ theme, getViewport, getItems, onAction }) {
   let activeItem = null;
   let menu = null;

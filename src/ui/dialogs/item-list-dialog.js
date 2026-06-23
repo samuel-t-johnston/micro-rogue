@@ -9,6 +9,11 @@ const CB_SIZE = 16;
 const BTN_W = 110;
 const BTN_H = 44; // minimum tap target (ux-design.md accessibility)
 
+/**
+ * Creates a modal multi-select item-list dialog (used for containers and floor pickups). All items
+ * start selected; the footer Take button reflects the count. `onClose` receives
+ * `{ confirmed, taken }` — Cancel/Escape yields `{ confirmed: false, taken: [] }`.
+ */
 export function createItemListDialog({ theme, getViewport, title, items, onClose }) {
   const selected = new Set(items.map(i => i.id));
 

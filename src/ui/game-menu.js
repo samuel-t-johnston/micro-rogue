@@ -5,14 +5,16 @@ import { createActionMenu } from './action-menu.js';
 import { createNotice } from './notice.js';
 import { buildSettingsPage, buildCreditsPage } from './game-menu-items.js';
 
-// Main menu scene. The option list and Settings drill-down come from the shared menu-shell
-// (same component the in-game menu uses); the scene only adds the ROGµE branding/background.
-//
-// New Game overwrites any existing save, so it confirms first when one is present. Continue is
-// enabled only when there is a save to load. onAction('new'|'continue') is handled by main.js.
-//
-// `notice` (optional) is a one-time message shown over the menu on entry — e.g. when a saved game
-// couldn't be carried forward after an update and was cleared. Its button starts a new game.
+/**
+ * @file Main menu scene. The option list and Settings drill-down come from the shared menu-shell
+ * (same component the in-game menu uses); the scene only adds the ROGµE branding/background.
+ *
+ * New Game overwrites any existing save, so it confirms first when one is present. Continue is
+ * enabled only when there is a save to load. onAction('new'|'continue') is handled by main.js.
+ *
+ * `notice` (optional) is a one-time message shown over the menu on entry — e.g. when a saved game
+ * couldn't be carried forward after an update and was cleared. Its button starts a new game.
+ */
 
 export function createMenuScene({ theme, getViewport, onAction, notice = null }) {
   let confirm = null; // a createActionMenu instance while confirming an overwrite

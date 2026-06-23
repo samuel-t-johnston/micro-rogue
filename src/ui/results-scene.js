@@ -1,17 +1,20 @@
 import { drawText, wrapText } from './canvas-ui.js';
 
-// Full-screen run-results page, shown after the player dismisses the death popup.
-// Modeled on the splash scene: a top-level AppState scene that fills the viewport.
-//
-// It is intentionally thin: getResults() hands back the final game state captured at the end of the
-// run ({ outcome, message, turns, player, level }), and this screen just presents it. New stat lines
-// (kills, depth, cause of death) can be added without touching the end-of-run flow.
+/**
+ * @file Full-screen run-results page, shown after the player dismisses the death popup. Modeled on
+ * the splash scene: a top-level AppState scene that fills the viewport.
+ *
+ * It is intentionally thin: getResults() hands back the final game state captured at the end of the
+ * run ({ outcome, message, turns, player, level }), and this screen just presents it. New stat lines
+ * (kills, depth, cause of death) can be added without touching the end-of-run flow.
+ */
 const LINE_H = 32;
 const MARGIN = 24;
 const MAX_COL = 560;
 const BODY_SIZE = 20;
 const HEADINGS = { win: 'Victory', lose: 'Defeat' };
 
+/** Creates the run-results scene. `getResults()` supplies the final state; any tap/key continues. */
 export function createResultsScene({ theme, getViewport, getResults, onContinue }) {
   // The outcome message can be a full sentence, so wrap it to the column; stat lines follow it.
   function lines(ctx, results, colW) {

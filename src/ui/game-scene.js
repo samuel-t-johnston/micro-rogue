@@ -1,3 +1,9 @@
+/**
+ * @file The in-game scene: owns the per-run dungeon runtime — entity registry, level manager,
+ * renderer/camera, turn loop, input controller, and the HUD/menu/dialog widgets — and routes render
+ * and input among them. It also owns the run lifecycle: new-vs-continue load in enter(), autosave,
+ * level transitions, and the single endGame() seam where death and victory converge.
+ */
 import { rng } from '../engine/rng.js';
 import { gameConfig } from '../engine/game-config.js';
 import { createRenderer } from '../render/renderer.js';
@@ -32,6 +38,10 @@ import { resolveTileActions } from '../actions/resolve-tile-actions.js';
 import { commitSave, loadSavedGame, clearSave } from '../save/save-system.js';
 import { buildSupportBundle, downloadSupportBundle } from '../save/support-bundle.js';
 
+/**
+ * Creates the in-game scene (see the file overview). `startMode` is 'new' or 'continue'; the host
+ * callbacks (onGameOver, onNewGame, onLoadFailed) bridge to main.js / app-state transitions.
+ */
 export function createGameScene({ theme, getViewport, onGameOver, onNewGame, onLoadFailed, startMode = 'new' }) {
   let level = null;
   let player = null;

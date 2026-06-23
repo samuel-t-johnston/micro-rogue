@@ -1,22 +1,24 @@
 import { drawText, drawButton, hitTest, wrapText } from './canvas-ui.js';
 import { layoutSettingsRows, drawSettingsRows, handleSettingsRowsInput } from './settings-controls.js';
 
-// Reusable drill-down menu: a centered vertical list of buttons with optional sub-pages.
-// Used by both the main-menu scene and the in-game menu overlay so they share one list/
-// navigation implementation (only the surrounding chrome — branding, backdrop — differs).
-//
-// items come from getItems() (re-read every frame, so live enablement like Continue ↔ hasSave
-// stays current). Each item is either:
-//   { id, label, enabled?, onSelect }                 — an action row
-//   { id, label, enabled?, submenu: { title, items, placeholder } } — drills into a sub-page
-// A sub-page with empty `items` renders its `placeholder` text. A sub-page carrying `rows` instead
-// of `items` is a settings page, rendered as label/description/segmented-control rows (see
-// settings-controls.js) rather than the centered button list. A sub-page carrying `text` instead is
-// a static text page (e.g. Credits), rendered as a centered block of wrapped lines.
-//
-// onClose (optional) marks "overlay mode": the shell dims the scene behind it, shows a ✕ close
-// affordance at the root, and swallows all input (modal). Without it (main-menu scene mode) the
-// caller draws its own background/branding and unhandled taps pass through.
+/**
+ * @file Reusable drill-down menu: a centered vertical list of buttons with optional sub-pages.
+ * Used by both the main-menu scene and the in-game menu overlay so they share one list/navigation
+ * implementation (only the surrounding chrome — branding, backdrop — differs).
+ *
+ * items come from getItems() (re-read every frame, so live enablement like Continue ↔ hasSave
+ * stays current). Each item is either:
+ *   { id, label, enabled?, onSelect }                 — an action row
+ *   { id, label, enabled?, submenu: { title, items, placeholder } } — drills into a sub-page
+ * A sub-page with empty `items` renders its `placeholder` text. A sub-page carrying `rows` instead
+ * of `items` is a settings page, rendered as label/description/segmented-control rows (see
+ * settings-controls.js) rather than the centered button list. A sub-page carrying `text` instead is
+ * a static text page (e.g. Credits), rendered as a centered block of wrapped lines.
+ *
+ * onClose (optional) marks "overlay mode": the shell dims the scene behind it, shows a ✕ close
+ * affordance at the root, and swallows all input (modal). Without it (main-menu scene mode) the
+ * caller draws its own background/branding and unhandled taps pass through.
+ */
 const BUTTON_W = 260;
 const BUTTON_H = 56;
 const BUTTON_GAP = 16;
@@ -26,6 +28,7 @@ const TEXT_SIZE = 18;
 const TEXT_LINE_H = 26;
 const TEXT_MAX_COL = 520;
 
+/** Creates a drill-down menu shell (see the file overview for the item/sub-page shapes and modes). */
 export function createMenuShell({ theme, getViewport, getItems, onClose = null }) {
   const pages = [];          // sub-page stack; empty === root
   let hoverId = null;

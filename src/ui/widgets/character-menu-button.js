@@ -9,6 +9,7 @@ const MARGIN = 12;
 // right-handed players, mirrored to bottom-left when handedness is 'left' (ux-design.md).
 const ANCHOR = Anchor.BOTTOM_RIGHT;
 
+/** Creates the character-menu HUD button (the primary action button). `onOpen` fires when tapped. */
 export function createCharacterMenuButton({ theme, getViewport, onOpen }) {
   function buttonRect() {
     const anchor = applyHandedness(ANCHOR, gameSettings.get('handedness'));

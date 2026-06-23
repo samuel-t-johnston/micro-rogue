@@ -6,12 +6,14 @@ const BUTTON_H = 44;
 const BUTTON_GAP = 8;
 const PADDING = 16;
 
-// Centered floating action menu. Used by screens to surface per-item action choices
-// (e.g. Use / Drop / Cancel for a potion). Captures all input until dismissed.
-//
-// actions: array of { label, action } — `action` is the game action payload to submit
-//   when the row is tapped, or null for a Cancel/dismiss row.
-// onSelect: invoked with the chosen `action` (or null when cancelled).
+/**
+ * Creates a centered floating action menu — used by screens to surface per-item action choices
+ * (e.g. Use / Drop / Cancel for a potion). Captures all input until dismissed.
+ * @param {object} opts
+ * @param {{ label: string, action: object|null }[]} opts.actions - Rows; `action` is the payload to
+ *   submit when tapped, or null for a Cancel/dismiss row.
+ * @param {(action: object|null) => void} opts.onSelect - Invoked with the chosen action (null when cancelled).
+ */
 export function createActionMenu({ theme, getViewport, title, actions, onSelect }) {
   function layout() {
     const vp = getViewport();

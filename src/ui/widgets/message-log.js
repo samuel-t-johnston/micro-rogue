@@ -18,6 +18,7 @@ const BODY_BOTTOM_RESERVE = BUTTON_SIZE + MARGIN;
 
 const GHOST_LINE_COUNT = 3;
 
+/** The message-log view states the icon cycles through (plus closed). */
 export const LogViewState = Object.freeze({
   GHOST: 'ghost',
   EXPANDED: 'expanded',

@@ -4,6 +4,7 @@ import { drawText, drawButton, hitTest } from './canvas-ui.js';
 const BUTTON_W = 240;
 const BUTTON_H = 56;
 
+/** Creates the splash scene: the title card; any tap or key transitions to the main menu. */
 export function createSplashScene({ appState, theme, getViewport }) {
   let hover = false;
 

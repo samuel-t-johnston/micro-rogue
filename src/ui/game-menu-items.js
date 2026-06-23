@@ -1,12 +1,16 @@
-// Shared content for the game menu. Both mounts of the game menu — the launch scene
-// (game-menu.js) and the in-game overlay (game-menu-controller.js) — surface the same
-// application/system options, so anything common lives here to keep them from drifting.
+/**
+ * @file Shared content for the game menu. Both mounts of the game menu — the launch scene
+ * (game-menu.js) and the in-game overlay (game-menu-controller.js) — surface the same
+ * application/system options, so anything common lives here to keep them from drifting.
+ */
 
 import { gameSettings } from '../engine/settings.js';
 
-// The Settings sub-page. Returns rows (label + optional description + a segmented control), rendered
-// by settings-controls.js via menu-shell. Each row binds to gameSettings: `get` is read every frame
-// so the active segment tracks live state, and selecting a segment persists immediately via `set`.
+/**
+ * Builds the Settings sub-page: rows (label + optional description + a segmented control), rendered
+ * by settings-controls.js via menu-shell. Each row binds to gameSettings: `get` is read every frame
+ * so the active segment tracks live state, and selecting a segment persists immediately via `set`.
+ */
 export function buildSettingsPage() {
   return {
     title: 'Settings',
@@ -39,7 +43,7 @@ export function buildSettingsPage() {
   };
 }
 
-// The Credits sub-page: a static text page (menu-shell renders `text` as a centered block).
+/** Builds the Credits sub-page: a static text page (menu-shell renders `text` as a centered block). */
 export function buildCreditsPage() {
   return {
     title: 'Credits',

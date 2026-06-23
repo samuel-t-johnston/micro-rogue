@@ -5,10 +5,12 @@ const ROW_H = 44; // minimum tap target (ux-design.md accessibility)
 const SECTION_H = 28;
 const PADDING = 12;
 
-// Equipment screen: shows current slot contents and inventory items eligible to be equipped.
-// Tapping a row opens an action menu — Equip/Cancel for inventory items, Unequip/Cancel for
-// equipped slots. (Drop is intentionally not offered here; equipped items must be unequipped
-// first, then dropped from the inventory screen.)
+/**
+ * Creates the equipment screen body: shows current slot contents and inventory items eligible to be
+ * equipped. Tapping a row opens an action menu — Equip/Cancel for inventory items, Unequip/Cancel for
+ * equipped slots. (Drop is intentionally not offered here; equipped items must be unequipped first,
+ * then dropped from the inventory screen.)
+ */
 export function createEquipmentScreenBody({ theme, getViewport, getSlots, getEquippableInventory, onAction }) {
   // activeRow identifies the highlighted row across re-renders. For equipped slots we use
   // the slot name; for inventory items we use the item entity.

@@ -1,13 +1,15 @@
 import { drawText, drawButton, hitTest } from './canvas-ui.js';
 
-// A point-anchored contextual action menu — the popover raised by a long-press (touch) or right-click
-// (desktop) on a map tile. Unlike the centered, screen-dimming action-menu, this opens *at* the tap
-// and clamps itself to the viewport (flipping left/up near an edge) so it never spills off-screen.
-// Modal while open: it swallows input and dismisses on selection, tap-outside, or Escape.
-//
-// anchor: { x, y } screen point the menu opens from (top-left corner, before edge clamping).
-// rows: array of { label, action } — `action` is the game action to submit when the row is tapped.
-// onSelect: invoked with the chosen `action`, or null when dismissed.
+/**
+ * @file A point-anchored contextual action menu — the popover raised by a long-press (touch) or
+ * right-click (desktop) on a map tile. Unlike the centered, screen-dimming action-menu, this opens
+ * *at* the tap and clamps itself to the viewport (flipping left/up near an edge) so it never spills
+ * off-screen. Modal while open: it swallows input and dismisses on selection, tap-outside, or Escape.
+ *
+ * - anchor: { x, y } screen point the menu opens from (top-left corner, before edge clamping).
+ * - rows: array of { label, action } — `action` is the game action to submit when the row is tapped.
+ * - onSelect: invoked with the chosen `action`, or null when dismissed.
+ */
 
 const PANEL_W = 240;
 const ROW_H = 44;
@@ -15,6 +17,7 @@ const ROW_GAP = 6;
 const PAD = 8;
 const MARGIN = 8; // keep this far from the viewport edge
 
+/** Creates a contextual menu anchored at a screen point. `onSelect(action|null)` on choice/dismiss. */
 export function createContextMenu({ theme, getViewport, anchor, rows, onSelect }) {
   let hover = -1;
 
