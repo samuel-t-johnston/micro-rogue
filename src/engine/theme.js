@@ -9,6 +9,7 @@ const TOKEN_MAP = {
   debug: '--color-debug',
 };
 
+/** Reads the live CSS custom-property theme values into a plain `{ token: value }` object. */
 export function readTheme(root = document.documentElement) {
   const styles = getComputedStyle(root);
   const theme = {};
@@ -18,4 +19,5 @@ export function readTheme(root = document.documentElement) {
   return theme;
 }
 
+/** Frozen map of theme token → CSS custom-property name. */
 export const THEME_TOKENS = Object.freeze({ ...TOKEN_MAP });

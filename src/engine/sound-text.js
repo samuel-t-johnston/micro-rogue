@@ -1,8 +1,10 @@
-// Renders a heard sound percept (from the hearing sense) into a player-facing log line. Mirrors
-// log-text.js's role for actions. The rule:
-//   - an un-understood vocalization → you hear that a *language* was shouted, not what it meant;
-//   - an understood vocalization (or a non-verbal sound) → you hear what it conveys.
-// Either way the imprecise compass direction it reached you from is appended.
+/**
+ * @file Renders a heard sound percept (from the hearing sense) into a player-facing log line. Mirrors
+ * log-text.js's role for actions. The rule:
+ *   - an un-understood vocalization → you hear that a *language* was shouted, not what it meant;
+ *   - an understood vocalization (or a non-verbal sound) → you hear what it conveys.
+ * Either way the imprecise compass direction it reached you from is appended.
+ */
 
 const DIRECTION_WORDS = {
   N: 'north', NE: 'northeast', E: 'east', SE: 'southeast',
@@ -38,6 +40,7 @@ function describeWhat({ understood, language, message }) {
   }
 }
 
+/** Renders a heard-sound percept into a player-facing log line. */
 export function describeSound(percept) {
   const word = DIRECTION_WORDS[percept.perceivedDirection];
   const suffix = word ? ` to the ${word}` : ' nearby';

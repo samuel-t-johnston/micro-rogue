@@ -1,15 +1,16 @@
-// Turn loop using the energy accumulator model (see docs/design/turn-order.md).
-// Entities act when their accumulator reaches 1. Speed < 1 acts less than once
-// per round; speed > 1 acts more. Default speed is 1.
-//
-// Dependencies are injected rather than imported so the turn module can be
-// swapped without touching the action system or entity layer.
-// `onTurnStart(entity)` fires the instant before an entity acts — every other entity has
-// resolved since it last acted, so the world is fully settled. The autosave hook uses it to
-// snapshot at the player's turn-start. `onTurnEnd(entity, { free })` fires symmetrically the instant
-// after the entity's action resolves (`free` is the action's free-action flag); the win-condition
-// check rides it to evaluate at the end of each player turn. `initialTurnCount` seeds the player
-// turn count when a game is loaded from a save (fresh games pass 0).
+/**
+ * Creates the turn loop using the energy accumulator model (see docs/design/turn-order.md).
+ * Entities act when their accumulator reaches 1. Speed < 1 acts less than once per round;
+ * speed > 1 acts more. Default speed is 1.
+ *
+ * Dependencies are injected rather than imported so the turn module can be swapped without
+ * touching the action system or entity layer.
+ * - `onTurnStart(entity)` fires the instant before an entity acts — every other entity has
+ *   resolved since it last acted, so the world is fully settled. The autosave hook snapshots here.
+ * - `onTurnEnd(entity, { free })` fires symmetrically the instant after the entity's action
+ *   resolves (`free` is the action's free-action flag); the win-condition check rides it.
+ * - `initialTurnCount` seeds the player turn count when loading a save (fresh games pass 0).
+ */
 export function createTurnManager({ getActiveEntities, invokeAction, onTurnStart, onTurnEnd, initialTurnCount = 0 }) {
   const queue = [];  // ordered list of entities
   let playerTurnCount = initialTurnCount;

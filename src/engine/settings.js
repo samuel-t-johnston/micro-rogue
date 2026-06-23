@@ -1,14 +1,17 @@
-// Player UI preferences — distinct from gameConfig (build/debug flags) and from the save
-// slot (per-run game state). Settings outlive any single run, so they get their own
-// localStorage key and are loaded once at boot. Like gameLog/rng/gameConfig this is an
-// ambient singleton: the widgets that honor a setting (e.g. handedness) read it directly
-// rather than having it threaded through every constructor.
-//
-// Parsing is split from I/O (see save-system.js) so the merge logic is unit-testable
-// without touching localStorage.
+/**
+ * @file Player UI preferences — distinct from gameConfig (build/debug flags) and from the save
+ * slot (per-run game state). Settings outlive any single run, so they get their own
+ * localStorage key and are loaded once at boot. Like gameLog/rng/gameConfig this is an
+ * ambient singleton: the widgets that honor a setting (e.g. handedness) read it directly
+ * rather than having it threaded through every constructor.
+ *
+ * Parsing is split from I/O (see save-system.js) so the merge logic is unit-testable
+ * without touching localStorage.
+ */
 
 const STORAGE_KEY = 'rogue:settings';
 
+/** Default player UI preferences; also defines the valid shape of the settings store. */
 export const DEFAULT_SETTINGS = Object.freeze({
   // 'right' → primary action button bottom-right (default). 'left' → mirror the
   // corner-anchored UI horizontally for left-handed reach. See docs/howto/handedness.md.
@@ -23,8 +26,10 @@ export const DEFAULT_SETTINGS = Object.freeze({
   renderMode: 'sprite',
 });
 
-// Merge a parsed object over the defaults, dropping unknown keys and invalid values. Any
-// malformed field falls back to its default, so a corrupt store can never wedge the UI.
+/**
+ * Merges a parsed object over the defaults, dropping unknown keys and invalid values. Any
+ * malformed field falls back to its default, so a corrupt store can never wedge the UI.
+ */
 export function normalizeSettings(raw) {
   const out = { ...DEFAULT_SETTINGS };
   if (raw && (raw.handedness === 'left' || raw.handedness === 'right')) {
@@ -41,6 +46,7 @@ export function normalizeSettings(raw) {
 
 let current = { ...DEFAULT_SETTINGS };
 
+/** Ambient singleton for player UI preferences: in-memory state plus localStorage persistence. */
 export const gameSettings = {
   get(key) { return current[key]; },
   all() { return { ...current }; },

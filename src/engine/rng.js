@@ -1,5 +1,5 @@
 /**
- * Seeded RNG. A single master seed yields independent streams, each derived by name, so
+ * @file Seeded RNG. A single master seed yields independent streams, each derived by name, so
  * unrelated concerns never perturb one another's sequences. See docs/design/rng-and-determinism.md.
  *
  * The underlying generator is Mulberry32.
