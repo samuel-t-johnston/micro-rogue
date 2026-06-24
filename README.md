@@ -1,10 +1,29 @@
 # ROGµE
 
-⚠️ROGµE IS IN VERY EARLY DEVELOPMENT AND IS NOT READY FOR USE YET. PLEASE CHECK BACK LATER.⚠️
-
 Micro-Rogue (stylized ROGµE) is a game engine for traditional roguelike games written in Javascript and HTML.
 
-ROGμE is designed to be an easy way to jump into game development, even if you don't have any experience in games or software dev. 
+ROGμE is designed to be an easy way to jump into game development, even if you don't have any experience in games, software dev, or Javascript.
+
+> [!WARNING]
+> ROGµE is currently in alpha. Features are added frequently, and breaking changes may happen.
+> There is a save migration system in place to update saves on load whenever possible.
+> 
+> The engine already supports:
+> - Running in-browser on desktop and mobile, with click or touch-based UI.
+> - "Install" as a [PWA](https://web.dev/articles/what-are-pwas) via "Add to Home Screen"
+> - Sprite and glyph-based (ASCII) graphics, swappable on the fly
+> - Zoom and pan
+> - Auto-save and load
+> - Items, equipment, and a simple inventory
+> - Creatures/monsters
+> - Combat
+> - Expandable "senses" system for creature and player perception (vision, hearing, smell)
+> - Goal-based, flexible AI system
+> - Expandable map generation system - pipelines and stages - supporting static and randomly generated maps
+> - Complete game loop with win and loss conditions
+> - Extensive documentation via short "how-to" guides
+
+(For a peek at what's coming up next, check out `/docs/roadmap.md`)
 
 ## Why a Traditional Roguelike?
 
@@ -20,7 +39,7 @@ There are several good game engines for roguelikes. ROGμE tries to make life ea
 
 1. **It’s already a game!** Every system in ROGμE comes pre-populated with data. It’s playable as a game straight out of the box. You can start by tweaking settings, adding new items, or totally overhauling major systems. It’s up to you.
 2. **It’s web-native and cross platform.** It uses vanilla JavaScript and HTML. You can play it on mobile, tablet or desktop. No server setup or install necessary. In fact, you can play it [on GitHub right now](https://samuel-t-johnston.github.io/micro-rogue/), thanks to GitHub Pages.
-3. **It’s AI-friendly!** ROGμE is designed from the ground up to work well with autonomous agents and AI coding assistants. Not using AI? No problem. The same detailed documentation that helps AI work in the codebase is also great for human developers.
+3. **It’s AI- and human-friendly!** ROGμE is designed from the ground up to work well with autonomous agents and AI coding assistants. Not using AI? No problem. The same detailed documentation that helps AI understand the codebase is also great for human developers.
 	
 ## How Do I Get Started?
 

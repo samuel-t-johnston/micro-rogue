@@ -53,4 +53,4 @@ Because comprehension is just `knownLanguages` ∩ `sound.language`, the levers 
 ## Deferred
 
 - **Propagation.** v1 audibility is straight-line (Chebyshev) range — it hears through walls. Walking-distance propagation (a `muffling` component: walls block, doors/boulders leak at higher path cost; weighted flood-fill) is a planned upgrade entirely inside [`hearing.js`](../../src/ai/senses/hearing.js); it changes no percept shape.
-- **Echolocation.** A precise, exact-tile hearing variant is deliberately separate from ordinary (imprecise) hearing — see the deferred list in [roadmap.md](../design/roadmap.md).
+- **Echolocation.** A precise, exact-tile hearing variant is deliberately separate from ordinary (imprecise) hearing — see the deferred list in [roadmap.md](../roadmap.md).
