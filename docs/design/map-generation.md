@@ -105,7 +105,7 @@ Enemies that follow the player through stairs are not serialized with the level 
 > level now carries its identity (`branch`, `depth`, `pipelineId`, `seed`) so a frozen blob
 > reconstructs without re-deriving. The coordinator that owns all of this — the transit map and the
 > freeze/generate/thaw travel operation — is documented in [dungeon-planner.md](dungeon-planner.md).
-> Code: [`src/world/level-manager.js`](../../src/world/level-manager.js),
+> Code: [`src/world/dungeon/level-manager.js`](../../src/world/dungeon/level-manager.js),
 > [`src/world/dungeon/cold-storage.js`](../../src/world/dungeon/cold-storage.js).
 
 ---

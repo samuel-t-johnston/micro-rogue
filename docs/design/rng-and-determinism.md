@@ -59,7 +59,7 @@ function deriveSeed(master, ...parts) {
 
 These functions are illustrative; the implementation may refine them. They are **part of the determinism contract** once shipped — changing them re-rolls every seed (fine pre-players; see the contract below).
 
-The RNG instance itself is the existing Mulberry32 ([`src/engine/rng.js`](../../src/engine/rng.js)), factored into a `createRng(seed)` building block. The service (`createRngService(masterSeed)`) layers `stream` / `derive` on top.
+The RNG instance itself is the existing Mulberry32 ([`src/engine/core/rng.js`](../../src/engine/core/rng.js)), factored into a `createRng(seed)` building block. The service (`createRngService(masterSeed)`) layers `stream` / `derive` on top.
 
 ## Map generation
 

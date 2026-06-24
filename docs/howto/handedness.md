@@ -10,11 +10,11 @@ primary controls fall under the other thumb.
 ## How a widget opts in
 
 Each corner widget declares its right-handed anchor and runs it through
-[`applyHandedness`](../../src/ui/anchor-system.js) before placing itself:
+[`applyHandedness`](../../src/ui/core/anchor-system.js) before placing itself:
 
 ```js
 import { Anchor, applyHandedness, placeBox } from '../anchor-system.js';
-import { gameSettings } from '../../engine/settings.js';
+import { gameSettings } from '../../engine/config/settings.js';
 
 const ANCHOR = Anchor.BOTTOM_RIGHT; // right-handed home
 function buttonRect() {
@@ -35,7 +35,7 @@ the next frame — there's no re-layout event to fire.
 ## The setting
 
 `handedness` lives in the persisted settings store
-([`src/engine/settings.js`](../../src/engine/settings.js)) under the `rogue:settings`
+([`src/engine/config/settings.js`](../../src/engine/config/settings.js)) under the `rogue:settings`
 localStorage key, loaded once at boot in `main.js`. It is surfaced as a toggle row on the
 **Settings** sub-page of the game menu (see [menus.md](menus.md)); selecting the row flips and
 persists the value in place. The store is the home for future UI preferences (vignette,

@@ -106,7 +106,7 @@ Resolution (`resolveDestination(map, node, port)`) returns the destination `{ no
 ## The travel operation **[built]**
 
 When the player activates a transition (tap-to-interact on stairs — see Trigger), the level manager
-([`src/world/level-manager.js`](../../src/world/level-manager.js)):
+([`src/world/dungeon/level-manager.js`](../../src/world/dungeon/level-manager.js)):
 
 1. **Limbo** — collects the player's whole entity sub-graph (carried + equipped items) via
    [`collectSubgraph`](../../src/world/dungeon/subgraph.js), so it travels with the player instead
@@ -179,10 +179,10 @@ shape at a glance and documents branches.
 
 - Transit map data — [`data/transit-map.js`](../../data/transit-map.js)
 - Resolution + node lookup — [`src/world/dungeon/transit-map.js`](../../src/world/dungeon/transit-map.js)
-- Dungeon runtime (travel, cold storage, current node) — [`src/world/level-manager.js`](../../src/world/level-manager.js)
+- Dungeon runtime (travel, cold storage, current node) — [`src/world/dungeon/level-manager.js`](../../src/world/dungeon/level-manager.js)
 - Freeze/thaw — [`src/world/dungeon/cold-storage.js`](../../src/world/dungeon/cold-storage.js)
 - Sub-graph closure — [`src/world/dungeon/subgraph.js`](../../src/world/dungeon/subgraph.js)
 - Pipeline registry — [`src/world/dungeon/pipelines.js`](../../src/world/dungeon/pipelines.js)
 - Trigger — [`src/actions/action-types/action-self-interact.js`](../../src/actions/action-types/action-self-interact.js)
-- Arrival placement — [`src/world/spawn.js`](../../src/world/spawn.js) (`resolveArrival`)
-- Scene orchestration — [`src/ui/game-scene.js`](../../src/ui/game-scene.js) (`mountLevel`, `performTransition`)
+- Arrival placement — [`src/world/map/spawn.js`](../../src/world/map/spawn.js) (`resolveArrival`)
+- Scene orchestration — [`src/ui/scenes/game-scene.js`](../../src/ui/scenes/game-scene.js) (`mountLevel`, `performTransition`)

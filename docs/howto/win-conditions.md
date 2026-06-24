@@ -4,7 +4,7 @@
 
 ## How it works
 
-Victory is decided by a registry of **win conditions** in [`src/engine/win-conditions.js`](../../src/engine/win-conditions.js), mirroring the [`upkeep`](../../src/engine/upkeep.js) and goal/effect registries. Each condition is a function:
+Victory is decided by a registry of **win conditions** in [`src/engine/turn/win-conditions.js`](../../src/engine/turn/win-conditions.js), mirroring the [`upkeep`](../../src/engine/turn/upkeep.js) and goal/effect registries. Each condition is a function:
 
 ```js
 fn({ registry, level, player }) -> null | { outcome: 'win', message }
@@ -23,10 +23,10 @@ Registration happens in `game-scene.js`'s `mountLevel`, so the check is live on 
 
 ## The pieces
 
-- **`questItem(id)` component** ([`components.js`](../../src/world/components.js)) — tags an item as an objective. The `id` (e.g. `'amulet-of-yendor'`) gives each quest item a distinct identity, so one component serves many. Conditions key on the **id, never the display name**.
+- **`questItem(id)` component** ([`components.js`](../../src/world/entities/components.js)) — tags an item as an objective. The `id` (e.g. `'amulet-of-yendor'`) gives each quest item a distinct identity, so one component serves many. Conditions key on the **id, never the display name**.
 - **`dungeonExit()` component** — a plain marker on the surface up-stairs (the win tile). Read by position; decoupled from how the exit was placed.
-- **Amulet** — `createAmulet` in [`items.js`](../../src/world/items.js): a plain carried item (no consumable/equippable behavior) with the `questItem('amulet-of-yendor')` tag.
-- **Dungeon exit** — `createDungeonExit` in [`furniture.js`](../../src/world/furniture.js): normal up-stairs plus the `dungeonExit` marker. Placed explicitly by whoever authors the top level — there is no auto-detection, so multiple exits are fine (any one satisfies the win).
+- **Amulet** — `createAmulet` in [`items.js`](../../src/world/entities/items.js): a plain carried item (no consumable/equippable behavior) with the `questItem('amulet-of-yendor')` tag.
+- **Dungeon exit** — `createDungeonExit` in [`furniture.js`](../../src/world/entities/furniture.js): normal up-stairs plus the `dungeonExit` marker. Placed explicitly by whoever authors the top level — there is no auto-detection, so multiple exits are fine (any one satisfies the win).
 
 ## Placement
 
@@ -35,7 +35,7 @@ Registration happens in `game-scene.js`'s `mountLevel`, so the check is live on 
 
 ## End of run
 
-Both player death and victory call `endGame({ outcome, message })` in [`game-scene.js`](../../src/ui/game-scene.js): it deletes the save (the run is over either way), freezes the turn loop, and shows the [outcome popup](../../src/ui/outcome-popup.js) (`'You Died'` / `'You Escaped!'`). Dismissing it advances to the Results scene, which shows the outcome heading and message. Detection differs by necessity — death is event-driven and immediate (a corpse must stop acting at once), win is polled at turn-end — but they share this one handler.
+Both player death and victory call `endGame({ outcome, message })` in [`game-scene.js`](../../src/ui/scenes/game-scene.js): it deletes the save (the run is over either way), freezes the turn loop, and shows the [outcome popup](../../src/ui/overlays/outcome-popup.js) (`'You Died'` / `'You Escaped!'`). Dismissing it advances to the Results scene, which shows the outcome heading and message. Detection differs by necessity — death is event-driven and immediate (a corpse must stop acting at once), win is polled at turn-end — but they share this one handler.
 
 ## Add your own
 

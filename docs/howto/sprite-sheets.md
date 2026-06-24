@@ -48,7 +48,7 @@ nearest-neighbor. See [zoom.md](zoom.md).
 
 ## Render mode: sprites or ASCII
 
-The **Graphics** setting (`renderMode`, in [`settings.js`](../../src/engine/settings.js)) switches
+The **Graphics** setting (`renderMode`, in [`settings.js`](../../src/engine/config/settings.js)) switches
 between `sprite` (default) and `glyph` (classic ASCII). The renderer reads it live, so toggling it
 in Settings takes effect on the next frame. In glyph mode the renderer skips sprites entirely and
 draws each renderable's/tile's `glyph` in `glyphColor` over its `color`.
@@ -61,7 +61,7 @@ false and the renderer falls back to the same glyph/color fill used by ASCII mod
 - The map renders immediately, before assets arrive.
 - An unknown or removed sprite name never crashes — it just shows the glyph. (This is also why old
   saves with stale sprite references stay safe; see the v4→v5 migration in
-  [`save-system.js`](../../src/save/save-system.js).)
+  [`save-system.js`](../../src/save/core/save-system.js).)
 
 Define a `sprite` **and** a `glyph` for every visible entity. The catalog's own test
 ([`sprite-catalog.test.js`](../../data/sprites/sprite-catalog.test.js)) checks every entry resolves

@@ -4,7 +4,7 @@
 
 ## How it works
 
-Turn order uses an **energy-accumulator model**, implemented in [`src/engine/turn-manager.js`](../../src/engine/turn-manager.js).
+Turn order uses an **energy-accumulator model**, implemented in [`src/engine/turn/turn-manager.js`](../../src/engine/turn/turn-manager.js).
 
 Every entity with a `turnTaker` component is in the queue. Each pass through the queue adds the entity's `speed` to its `accumulator`; when the accumulator reaches `1`, the entity acts and `1` is subtracted (it may act more than once if speed ≥ 1). This handles slow, normal, and fast entities with no special cases.
 
@@ -24,7 +24,7 @@ The module is deliberately swappable: its dependencies are **injected**, and not
 - `playerTurnCount` — player-facing turn counter (drives the HUD and autosave trigger).
 - `currentEntity` — whose turn it is (used by UI / debug overlay).
 
-Nothing else is exposed — queue contents, accumulators, and rescan logic are internal. The manager is wired up in [`game-scene.js`](../../src/ui/game-scene.js) (`getActiveEntities: () => registry.getEntitiesWith('turnTaker')`); a replacement just needs to satisfy the interface there.
+Nothing else is exposed — queue contents, accumulators, and rescan logic are internal. The manager is wired up in [`game-scene.js`](../../src/ui/scenes/game-scene.js) (`getActiveEntities: () => registry.getEntitiesWith('turnTaker')`); a replacement just needs to satisfy the interface there.
 
 ## Worth knowing
 

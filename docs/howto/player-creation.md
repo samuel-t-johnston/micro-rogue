@@ -3,7 +3,7 @@ Purpose: How player character creation works and how to extend it.
 
 ## Where it lives
 
-`src/world/player.js` — single module responsible for constructing the player entity. `game-scene.js` calls it and receives an entity; it knows nothing about what components that entity has.
+`src/world/entities/player.js` — single module responsible for constructing the player entity. `game-scene.js` calls it and receives an entity; it knows nothing about what components that entity has.
 
 ## Current interface
 
@@ -30,7 +30,7 @@ export async function createPlayer(registry, x, y) {
 }
 ```
 
-New component types go in `src/world/components.js` first.
+New component types go in `src/world/entities/components.js` first.
 
 ## Extending with a character creation UI
 

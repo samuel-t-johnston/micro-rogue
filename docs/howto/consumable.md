@@ -12,12 +12,12 @@ components.consumable(EffectTypes.HEAL, { amount: 10 })
 
 **The consume action** — [`action-consume.js`](../../src/actions/action-types/action-consume.js) — looks up the item in the actor's inventory, applies its effect, logs the use, then removes the item and destroys the entity. (It logs *before* destroying, so the item's `name` is still intact.)
 
-**The effects registry** — [`src/effects/effects.js`](../../src/effects/effects.js) — maps `effectType` keys to handler functions sharing the signature `(user, target, params, level, registry) → void`. The consumable stores the *key* (not a function reference) so it serializes cleanly; `applyEffect` resolves it at use time. Two effects exist today:
+**The effects registry** — [`src/effects/core/effects.js`](../../src/effects/core/effects.js) — maps `effectType` keys to handler functions sharing the signature `(user, target, params, level, registry) → void`. The consumable stores the *key* (not a function reference) so it serializes cleanly; `applyEffect` resolves it at use time. Two effects exist today:
 
 | Effect | Handler |
 |---|---|
-| `heal` | [`effect-heal.js`](../../src/effects/effect-heal.js) |
-| `damage` | [`effect-damage.js`](../../src/effects/effect-damage.js) |
+| `heal` | [`effect-heal.js`](../../src/effects/effect-types/effect-heal.js) |
+| `damage` | [`effect-damage.js`](../../src/effects/effect-types/effect-damage.js) |
 
 ## Add a new consumable
 
@@ -30,8 +30,8 @@ registry.addComponent(entity, 'consumable', components.consumable(EffectTypes.HE
 
 If the effect you need doesn't exist yet, add it to the effects registry:
 
-1. Write a handler in `src/effects/` with the `(user, target, params, level, registry)` signature.
-2. Register it in the `EFFECTS` map and add a key to `EffectTypes` in [`src/effects/effects.js`](../../src/effects/effects.js).
+1. Write a handler in `src/effects/effect-types/` with the `(user, target, params, level, registry)` signature.
+2. Register it in the `EFFECTS` map and add a key to `EffectTypes` in [`src/effects/core/effects.js`](../../src/effects/core/effects.js).
 
 ## Worth knowing
 

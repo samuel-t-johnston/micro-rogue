@@ -2,7 +2,7 @@
 Purpose: Initial save system design for ROGµE.
 
 > **As-built status (M4 persistence core).** This doc was written before any code. The persistence
-> core (`src/save/save-system.js` + `src/save/serialize.js`, `saveVersion: 1`) implements the
+> core (`src/save/core/save-system.js` + `src/save/core/serialize.js`, `saveVersion: 1`) implements the
 > principles, versioning, and migration design below as written, with **two structural divergences**
 > the code forced — both called out inline where they apply:
 > 1. **Serialization unit is the whole entity registry as one flat top-level `entities` list,
@@ -102,7 +102,7 @@ to a top-level `player` key to keep it from being serialized into a departing or
 > `wearsEquipment` (slot refs → ids), `memory` (goal state — `autoMoveTarget`, `knownEnemyIds`), `ai`
 > (goal-key stack + `lastGoal`), `tilePerception`, position, factions, etc. Item *locations* are
 > already discriminated unions carrying ids (`{ type: 'equipped', ownerId, slot }` etc.); see
-> `src/world/components.js`.
+> `src/world/entities/components.js`.
 
 ### `currentLevel` — Active Level State
 

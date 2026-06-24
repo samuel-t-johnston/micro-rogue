@@ -4,7 +4,7 @@
 
 ## The model
 
-Smell is **field-based and monster-facing**. A per-profile **scent field** lives on the level — `level.scent`, a `Map<profile, Float32Array>`, one cell per tile — managed by [`src/world/scent.js`](../../src/world/scent.js). The player never sees it (except via the debug heatmap); they experience smell only through occasional log cues and through how monsters behave.
+Smell is **field-based and monster-facing**. A per-profile **scent field** lives on the level — `level.scent`, a `Map<profile, Float32Array>`, one cell per tile — managed by [`src/world/sense-systems/scent.js`](../../src/world/sense-systems/scent.js). The player never sees it (except via the debug heatmap); they experience smell only through occasional log cues and through how monsters behave.
 
 Each round the field is **diffused and decayed**, then every scent source re-deposits at its current tile:
 
@@ -23,7 +23,7 @@ Because the gradient homes on the current position, **doubling back doesn't shak
 
 ## Emitting and tracking
 
-Emission is automatic: any entity with a `scentSource` deposits each round in the **per-player-turn upkeep** ([`src/engine/upkeep.js`](../../src/engine/upkeep.js)). No per-move hook — a stationary creature still smells. (The upkeep registry is the general home for "once per player turn" world updates; scent diffusion is registered there, ordered before the autosave so a reload restores a current field. The field is saved with the level, sparsely.)
+Emission is automatic: any entity with a `scentSource` deposits each round in the **per-player-turn upkeep** ([`src/engine/turn/upkeep.js`](../../src/engine/turn/upkeep.js)). No per-move hook — a stationary creature still smells. (The upkeep registry is the general home for "once per player turn" world updates; scent diffusion is registered there, ordered before the autosave so a reload restores a current field. The field is saved with the level, sparsely.)
 
 The `smell` sense reports **located scent percepts** into `context.perception.smells` — never entities, never exact positions:
 
@@ -45,7 +45,7 @@ The player is a `scentSource('player')`, so the swarm hunts them through the lat
 
 ## The player's nose
 
-The player has the `smell` sense with a *dull* threshold — only strong, near scent registers. The [`player-smell`](../../src/ai/goals/player-smell.js) goal logs notable scents ("You smell the stench of orcs to the north"), deduped by profile. **What's noteworthy is configurable**: [`smell-text.js`](../../src/engine/smell-text.js) holds a profile→flavor table, and a profile with no entry produces no line (orcs reek; scuttlers don't register — they're heard, not smelled).
+The player has the `smell` sense with a *dull* threshold — only strong, near scent registers. The [`player-smell`](../../src/ai/goals/player-smell.js) goal logs notable scents ("You smell the stench of orcs to the north"), deduped by profile. **What's noteworthy is configurable**: [`smell-text.js`](../../src/engine/log/smell-text.js) holds a profile→flavor table, and a profile with no entry produces no line (orcs reek; scuttlers don't register — they're heard, not smelled).
 
 ## Debugging
 
