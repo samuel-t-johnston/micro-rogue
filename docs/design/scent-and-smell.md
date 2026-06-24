@@ -210,7 +210,7 @@ carries it around the pillar on your scent; adjacent, it bites. The 15×15 pilla
 3-tile sight gives the player real room to use movement and the pillars to their advantage.
 
 **Placement:** replace the three goblins in `maze-pillars.js` with **five scuttlers**; register
-`scuttler` in the static-entity factory map (`stage-place-static-entities.js`). `maze-pillars` stays
+`scuttler` in the prefab catalog (`src/world/entity-prefabs.js`). `maze-pillars` stays
 in the random floor-2 rotation, so the swarm appears when that layout is rolled.
 
 **Emitters/sensers added elsewhere:** the player gains `scent('player')`, the `smell` sense, a
@@ -251,7 +251,7 @@ Shared contract change: `perception.smells` channel + `mergeSmells` (additive, m
    gains the `vermin-scrabble` phrase.
 8. **Scent serialization** in `serializeLevel`/`deserializeLevel` (sparse), with a round-trip test.
 9. **Creatures/wiring:** `createScuttler`; player + orcs gain `scentSource`/`smell`; swap five
-   scuttlers into `maze-pillars.js`; register `scuttler` in the static-entity factory.
+   scuttlers into `maze-pillars.js`; register `scuttler` in the prefab catalog (`entity-prefabs.js`).
 10. **Docs + debug:** new `docs/howto/smell.md`; update `ai-senses.md`/`ai-architecture.md`/
     `creature.md`; tick the M6 smell box and add the deferred bullets to `roadmap.md`; a debug-overlay
     scent heatmap layer for development.
