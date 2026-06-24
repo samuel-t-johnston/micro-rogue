@@ -3,22 +3,21 @@ import { createEntityRegistry } from '../engine/entity-component-system.js';
 import { SPRITES } from '../../data/sprites/sprite-catalog.js';
 import terrain from '../../data/tiles/terrain.js';
 import { PLAYER_SAMPLE } from './player.js';
-import { CREATURE_SAMPLES } from './creatures.js';
-import { ITEM_SAMPLES } from './items.js';
-import { FURNITURE_SAMPLES } from './furniture.js';
+import { ENTITY_PREFABS } from './entity-prefabs.js';
 
 // Every visible entity must carry BOTH a glyph (ASCII mode and the sprite-unavailable fallback) and
 // a sprite name that resolves in the catalog (sprite mode). This is the gate for "all visible
 // entities have glyphs and sprites" — it stays red until each new sprite name has catalog
 // coordinates. See docs/howto/sprite-sheets.md.
 //
-// The sample sets are exported by each content module, so a newly-added creature/item/furniture is
-// covered automatically once it's registered alongside its factory — no separate list to maintain here.
+// Every spawnable type is enumerated straight from ENTITY_PREFABS, so a newly-added creature/item/
+// furniture is covered automatically once it's registered there — no separate list to maintain here.
+// The player isn't a prefab (not map-spawnable), so it's folded in via PLAYER_SAMPLE.
 const factories = {
   ...PLAYER_SAMPLE,
-  ...CREATURE_SAMPLES,
-  ...ITEM_SAMPLES,
-  ...FURNITURE_SAMPLES,
+  ...Object.fromEntries(
+    Object.keys(ENTITY_PREFABS).map((id) => [id, (r) => ENTITY_PREFABS[id].make(r, 0, 0)]),
+  ),
 };
 
 describe('entity sprites + glyphs', () => {
