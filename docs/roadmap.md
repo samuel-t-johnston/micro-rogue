@@ -232,7 +232,7 @@ are additive fields with tolerant defaults, no migration needed.*
 
 ---
 
-Pre-Alpha Checklist — Alpha v0.1.0
+## Pre-Alpha Checklist — Alpha v0.1.0
 
 *Done when the engine supports a complete (simple) game experience; the codebase has been fully reviewed, and is a clean baseline for further expansion and new features.*
 
@@ -249,10 +249,68 @@ Pre-Alpha Checklist — Alpha v0.1.0
 - [x] Rearrange data modules - consider pulling out data files?
 - [ ] Review the “how-to” documents, correct mistakes, add missing info.
 - [ ] Replace/update original design docs
-- [ ] Spiff up GitHub and readme.md
+- [x] Spiff up GitHub and readme.md
 - [ ] Update version to v0.1.0
 
 *At the end of this milestone we will move into Alpha with standard version numbers: Alpha v0.1.0.*
+
+---
+
+## Alpha - v0.2.0 - Action Jackson
+
+*Done when the engine supports wait, drop, throw actions, and short range (spear) + long-range (bow) ranged attacks. Additional features to make these work: ammo item component, needs-ammo equipment property, stackable item component, ranged attack NPC goal, ranged attack player capability. Temporary map adjustments for testing.*
+
+- [ ] Wait - UI hook for existing action
+- [ ] Drop item - UI hook for existing action
+- [ ] Drop/swap items to container - action
+- [ ] Throw item - action
+- [ ] Ranged attack - 2 tile - spear weapon - player
+- [ ] Ranged attack - ♾️ - bow weapon (no miss mechanic yet) - player
+- [ ] Ammunition - arrows - required for bow, stackable
+- [ ] Ranged attack - NPC Goal
+- [ ] Monsters use equipment - equip/unequip NPC goals?
+- [ ] Orc commander spawns with bow, arrows. Ranged attack goal.
+
+---
+
+## Alpha - v0.3.0 - Level Up
+
+*Done when the engine supports different types of numeric attributes and pools for player and monsters, XP, and leveling up.*
+
+- [ ] Track attributes via the component
+  - "Score" type - STR, DEX, INT, CON, SPD, Level
+  - "Pool" type - HP, MP, Hunger
+  - "Accumulator" type - XP
+- [ ] Attributes set for Player and monsters
+- [ ] Gain XP on kill
+- [ ] Level up at XP tiers
+- [ ] Player attributes screen
+- [ ] Attributes added to HUD widget
+- [ ] New game Player stat allocation
+- [ ] Attributes used in other systems
+  - Throw/ranged miss chance?
+  - Attack damage
+  - Equip requirements
+
+---
+
+## Alpha - v0.4.0 - Maps, Maps, Maps
+
+*Done when the engine supports several visually distinct styles of random map generation, and item tables used for "floor" spawning, monster inventory, and monster loot drops.*
+
+- [ ] Map Gen - Binary Space Partitioning
+- [ ] Map Gen - Cellular Automata
+- [ ] Map Gen - Drunk Walk/Digger
+- [ ] Map Gen - Voronoi/Wave Function Collapse
+- [ ] Item Tables
+- [ ] RNG item spawn in map gen - item tables + player level
+- [ ] RNG monster inventory in map gen - item tables + player level
+- [ ] RNG monster loot drops - item tables
+
+---
+
+## Alpha - v0.5.0 - To Be Determined
+
 
 ---
 
@@ -260,26 +318,26 @@ Pre-Alpha Checklist — Alpha v0.1.0
 
 These are explicitly out of scope until a concrete need exists:
 
+- [ ] Standard formatting for aliases in howto files.
+- [ ] "Save" button that tells the user about auto-save.
+- **Light-sensitive vision sense** - current unlimited vision sense becomes "darkvision". Tile light levels + light emitters
 - **Re-entry pipelines** — simulate time passage on level reload; revisit once real re-entry scenarios exist
-- **ASCII rendering mode** — renderer interface (ADR-003) leaves the hook open; implement only if wanted
 - **Capacitor packaging** — deferred until/unless app store distribution is needed (ADR-001)
 - **Localization / templated display strings** — revisit if localization becomes real (ADR-013)
-- **Look-around mode** — draggable viewport detached from player; design threshold values when needed
-- **Configurable UI layout** — anchor system supports it; hardcoded defaults for now
+- **Configurable UI layout** — anchor system supports it; only lefty/righty modes for now
 - **Multi-turn NPC actions** — `turnsRequired` hook noted in AI architecture; don't implement until a concrete use case exists
 - **Particles and projectile animations** — leave a hook in the animation system; implement when ranged combat exists
 - **Dedicated map screen** — zoom-out-as-map first; separate map screen only if levels outgrow it
 - **Font size preferences** — desktop only, when settings system is built out
 - **ECS component subscription system** — `level.moveEntity()` is the current explicit coordination point for positional changes (ADR-018); extract to a subscription model if multiple independent systems need to react to the same component changes
-- **Long press** - secondary action hook - e.g. radial menu with options, like interact or move on an open door.
 - **Echolocation sense** — a precise hearing-style sense that resolves *exact* source tiles via walking-distance sound propagation (the muffling / weighted path-cost model explored during M6 hearing design). Distinct from ordinary hearing, which deliberately yields only an imprecise direction + a type/classification; echolocation would pinpoint the source. High-detail and arguably more "bat sonar" than human hearing — revisit as a special creature ability or player tool.
 - **Scent masking** — the counterplay to being a trackable scent emitter (see [scent-and-smell.md](scent-and-smell.md)): a way to suppress your own scent deposit, via a consumable (a `scentMask` status) or water terrain (a tile that washes scent). Without it, the only evasion against a scent tracker is distance and putting walls between you; this adds an active, item/terrain-driven option. Deferred from the first smell cut.
 - **Single-minded scent tracker** — a tracker that commits to one quarry's scent and resists distraction by newer/stronger scents (a remembered chosen target), versus the first cut's "follow the strongest enemy scent each turn." Makes elite hunters feel relentless and harder to shake by crossing another creature's trail.
 - **Non-faction scents** — smellable world events beyond creature factions: `blood`, food, smoke. Enables forensic cues ("fresh blood here") and luring/baiting, on the same scent-field machinery.
 - **Goal condition introspection** — a side-effect-free per-goal predicate so the inspector can show met/not-met status per goal without running `evaluate()` (which mutates shared memory). Prerequisite for the full AI state inspector (M6); the M3 goal inspector marks the last-activated goal instead, which needs no introspection interface
 - **Terrain modification** - Tile override layer: `getTile(x,y)` with override-first lookup;
+- [ ] pathfinding reads `context.level` directly rather than a sense-filtered "known map" (tracked in ADR-021).
 - [ ] `flee` goal: low-HP retreat behavior
-- [ ] GOAP planner: action-space search, goal priority stack, interruption on higher-priority goal
 - [ ] Full AI state inspector: confidence values, memory payload, all senses
 - [ ] Notification layer: compare sense results turn-over-turn, fan to log and emote system
 - [ ] Screen overlay effects: red vignette for low HP; reduced-motion fallback; disableable
