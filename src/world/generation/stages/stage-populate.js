@@ -3,33 +3,14 @@
  * few floor items; item rooms get floor items; creatures pick rooms by affinity weights (a room's
  * weight is the product of its labels' weights — >1 attracts, <1 repels). See docs/design/procedural-3x3-dungeon.md.
  */
-import { createChest } from '../../furniture.js';
-import {
-  createHealingPotion,
-  createPotionOfPain,
-  createDagger,
-  createSword,
-  createLeatherArmor,
-  createScroll,
-  createAmulet,
-} from '../../items.js';
-import { createGoblin, createOrc, createOrcCommander } from '../../creatures.js';
+import { ENTITY_PREFABS, prefabIdsByKind } from '../../entity-prefabs.js';
 import { roomTiles, centermostRoomTile } from '../zone-tiles.js';
 
-const ITEM_FACTORIES = {
-  healingPotion: createHealingPotion,
-  potionOfPain: createPotionOfPain,
-  dagger: createDagger,
-  sword: createSword,
-  leatherArmor: createLeatherArmor,
-  scroll: createScroll,
-};
-const ITEM_POOL = Object.keys(ITEM_FACTORIES);
-const CREATURE_FACTORIES = {
-  goblin: createGoblin,
-  orc: createOrc,
-  orcCommander: createOrcCommander,
-};
+const make = (registry, id, x, y, entityId) => ENTITY_PREFABS[id].make(registry, x, y, entityId);
+
+// Random floor/chest item pool: every item prefab except the Amulet, which is the win objective and
+// placed deterministically on the 'amulet' zone below — never rolled in.
+const ITEM_POOL = prefabIdsByKind('item').filter((id) => id !== 'amulet');
 
 // Spawn rules (overridable via stageConfig). Creature `weights` are per-label multipliers; a room's
 // pick-weight is the product over its labels (absent labels contribute 1). Exported so tests can
@@ -82,18 +63,18 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
   };
   const dropItem = (zone) => {
     const t = freeTile(zone);
-    if (t) level.placeEntity(ITEM_FACTORIES[rng.pick(ITEM_POOL)](registry, t[0], t[1]));
+    if (t) level.placeEntity(make(registry, rng.pick(ITEM_POOL), t[0], t[1]));
   };
 
   // Treasure rooms: a chest (with items) + some floor items.
   for (const zone of zones.filter((z) => z.labels.includes('treasure'))) {
     const ct = freeTile(zone);
     if (ct) {
-      const chest = createChest(registry, ct[0], ct[1]);
+      const chest = make(registry, 'chest', ct[0], ct[1]);
       const inv = chest.components.get('inventory');
       const n = randInt(cfg.treasureRoom.chestItems, rng);
       for (let i = 0; i < n; i++)
-        inv.items.push(ITEM_FACTORIES[rng.pick(ITEM_POOL)](registry, null, null, chest.id));
+        inv.items.push(make(registry, rng.pick(ITEM_POOL), null, null, chest.id));
       level.placeEntity(chest);
     }
     const n = randInt(cfg.treasureRoom.floorItems, rng);
@@ -112,7 +93,7 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
   // the 'amulet' label (every floor but the deepest) simply skip this.
   for (const zone of zones.filter((z) => z.labels.includes('amulet'))) {
     const t = centermostRoomTile(zone, rooms);
-    if (t) level.placeEntity(createAmulet(registry, t[0], t[1]));
+    if (t) level.placeEntity(make(registry, 'amulet', t[0], t[1]));
     else console.warn('[populate] amulet zone has no room; Amulet not placed');
   }
 
@@ -120,7 +101,6 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
   // rooms that still have an open tile.
   const spawnRooms = zones.filter((z) => !z.labels.includes('stairs-up'));
   for (const spec of cfg.creatures) {
-    const factory = CREATURE_FACTORIES[spec.type];
     const used = new Set();
     for (let i = 0; i < spec.count; i++) {
       const candidates = (
@@ -130,7 +110,7 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
       const room = weightedPick(candidates, spec.weights ?? {}, rng);
       used.add(room.id);
       const t = freeTile(room);
-      if (t) level.placeEntity(factory(registry, t[0], t[1]));
+      if (t) level.placeEntity(make(registry, spec.type, t[0], t[1]));
     }
   }
 }

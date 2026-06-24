@@ -82,17 +82,5 @@ export function createDoor(registry, x, y) {
   return entity;
 }
 
-/**
- * Sample constructors for every furniture type, keyed by label — one canonical instance of each placed
- * at the origin. The source of truth for "which furniture exists" when enumerating content (e.g. the
- * sprite/glyph coverage test). Stairs are listed as both variants because they render differently. Add
- * a type here when you add its factory above.
- */
-export const FURNITURE_SAMPLES = {
-  boulder: (r) => createBoulder(r, 0, 0),
-  chest: (r) => createChest(r, 0, 0),
-  'stairs up': (r) => createStairs(r, 0, 0, 'up'),
-  'stairs down': (r) => createStairs(r, 0, 0, 'down'),
-  door: (r) => createDoor(r, 0, 0),
-  'dungeon exit': (r) => createDungeonExit(r, 0, 0),
-};
+// When you add a furniture factory above, register it in src/world/entity-prefabs.js — that catalog
+// is the single source of truth for spawnable types, and entity-prefabs.test.js fails if you forget.
