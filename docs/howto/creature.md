@@ -53,7 +53,11 @@ Add `createX(registry, x, y)` to [`src/world/creatures.js`](../../src/world/crea
 - **Stats** — `health`, `attacker`, `turnTaker` speed.
 - **`renderable`** — glyph + colour (creatures are glyph-only for now; no sprites yet).
 
-### 2. Place it on the level
+### 2. Register it as a prefab
+
+Add an entry to [`src/world/entity-prefabs.js`](../../src/world/entity-prefabs.js) keyed by a stable id, e.g. `kobold: { kind: 'creature', make: createKobold }`. That catalog is the single source of truth for spawnable types — static maps and `stage-populate` place creatures by this id — and [`entity-prefabs.test.js`](../../src/world/entity-prefabs.test.js) fails if a `create*` factory is left unregistered.
+
+### 3. Place it on the level
 
 Call the factory and `level.placeEntity(...)`. This happens in a generation stage — procedurally in [`stage-populate.js`](../../src/world/generation/stages/stage-populate.js), or from a static layout's authored entities via [`stage-place-static-entities.js`](../../src/world/generation/stages/stage-place-static-entities.js). Having a `turnTaker` is what gets it into the turn queue automatically.
 

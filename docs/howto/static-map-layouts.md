@@ -39,7 +39,7 @@ Every row must be the same length, and every character must have an entry in `le
 - **Creatures** — `orc`, `goblin`. **Items** — `healingPotion`, `potionOfPain`, `dagger`, `sword`, `leatherArmor`, `scroll`.
 - **Furniture** — `boulder`, `door`, and `chest`. A `chest` carries a `contents` array of item type names that are created inside it.
 
-Placement is exact and deterministic (no RNG): the stage places exactly what the layout lists, where it lists it. Keep entity tiles on floor and avoid overlaps unless you intend a stack. Unknown types throw. The factory map lives in [`stage-place-static-entities.js`](../../src/world/generation/stages/stage-place-static-entities.js) — add a case there to support a new entity type.
+Placement is exact and deterministic (no RNG): the stage places exactly what the layout lists, where it lists it. Keep entity tiles on floor and avoid overlaps unless you intend a stack. Unknown types throw. The supported `type` ids are the keys of the prefab catalog in [`src/world/entity-prefabs.js`](../../src/world/entity-prefabs.js) — register a new entity type there to make it placeable.
 
 ## Create a new map
 
