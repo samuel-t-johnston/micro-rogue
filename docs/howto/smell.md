@@ -35,7 +35,7 @@ The [`track-scent`](../../src/ai/goals/track-scent.js) goal filters to profiles 
 
 ## Worked example: the scuttler swarm
 
-`createScuttler` is a fast, weak (2 HP) beast with **3-tile vision** and a keen nose. In the pillars maze (`data/maps/maze-pillars.js`, where five of them replace the goblins):
+`createScuttler` is a fast, weak (2 HP) beast with **3-tile vision** and a keen nose. In the pillars maze (`data/maps/maze-pillars.js`):
 
 1. **In the open**, within 3 tiles, it sees the player and `chase-others` drives it in.
 2. **Behind a pillar**, line of sight breaks, `chase-others` goes quiet, and `track-scent` carries it around the pillar on the player's scent.

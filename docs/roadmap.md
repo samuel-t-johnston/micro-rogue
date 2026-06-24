@@ -263,7 +263,7 @@ are additive fields with tolerant defaults, no migration needed.*
 - [ ] Wait - UI hook for existing action
 - [ ] Drop item - UI hook for existing action
 - [ ] Drop/swap items to container - action
-- [ ] Throw item - action
+- [ ] Throw item - action - perform the `effect` on the action's target
 - [ ] Ranged attack - 2 tile - spear weapon - player
 - [ ] Ranged attack - ♾️ - bow weapon (no miss mechanic yet) - player
 - [ ] Ammunition - arrows - required for bow, stackable
