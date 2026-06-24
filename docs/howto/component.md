@@ -2,6 +2,28 @@
 
 *A brief intro to the entity-component-system (ECS) and how to add a new component.*
 
+## What is an ECS
+
+Many roguelikes have a large number of game systems and entities that interact with each other. To support this ROGµE uses a strategy that is common in game dev, but may be unfamiliar to non-game developers: the Entity-Component-System or ECS.
+
+**Entities**
+
+Entities are the *nouns* of the game: player character, monsters, items, etc. All an entity really needs is an ID. This is the unique identifier that allows the game to differentiate between two otherwise identical entities (e.g. two different potions of healing). However, entities need functionality to be interesting, and that functionality is activated by components.
+
+**Components**
+
+Components are the *adjectives* of the game, describing what an entity is, what it can do, or what can be done to it. Some components are simple tags, while others may contain parameters or state. Because components are descriptive, they don't actually make things happen. For that, we need systems.
+
+**Systems**
+
+Systems are the *verbs* of the game. They act on entities, or on behalf of entities. They read the entities' components and do things.
+
+**Why Use ECS?**
+
+A more object-oriented approach might be to define specific types of actors in the game: a class hierarchy for monsters, another for items, and so on. However, this quickly grows in complexity as new features are added, and challenges arise in situations where domains overlap. Is the Player Character a Monster? What about a Sword item that has been animated by a spell?
+
+The ECS defines everything by collections of components. The Player Character entity can share many of the same components as a monster. This allows ROGµE to use the same goal system for monster AI and player actions like auto-pickup and auto-move. The player has senses, just like monsters. But the player has a few special components like `playerControlled`. Animating that sword becomes a simple matter of attaching components like `turnTaker`, `ai`, and `attacker` to a previously inanimate object.
+
 ## How it works
 
 The ECS has two parts:

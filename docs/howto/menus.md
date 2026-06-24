@@ -3,7 +3,7 @@
 *The two menu systems in the engine — the **game menu** (application/system) and the **character
 menu** (in-run gameplay) — what each is for, and how to add to them.*
 
-## The two menus
+## The two main menus
 
 They look similar but serve different jobs and never overlap in content.
 

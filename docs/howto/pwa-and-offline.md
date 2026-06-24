@@ -60,8 +60,8 @@ crisp at the sizes platforms actually use:
 | `icons/icon-512-maskable.png` | manifest, `purpose: "maskable"` (extra safe-zone padding for Android adaptive masks) |
 
 iOS does **not** use `favicon.ico` or the manifest icons reliably for the home screen — it
-needs the `apple-touch-icon` PNG link. Without it, iOS generates a placeholder (a white "R"
-from the title), which is the bug this setup fixes.
+needs the `apple-touch-icon` PNG link. Without it, iOS generates a placeholder (first letter of
+ the title), which is the bug this setup fixes.
 
 The PNGs are committed as static assets (no runtime generation). They were produced from the
 favicon's green-µ design on the manifest `background_color` (`#0a0e0a`). To regenerate after a
