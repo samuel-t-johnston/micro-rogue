@@ -6,11 +6,11 @@
 
 Interaction is split across two layers:
 
-**Detection** — `src/actions/resolve-tile-actions.js`
+**Detection** — `src/actions/core/resolve-tile-actions.js`
 `resolveTileActions` inspects a tile and returns the actions it offers, primary first. It's the single
 source of truth, shared by two callers: [`player-get-input.js`](../../src/ai/goals/player-get-input.js)
 takes element `[0]` to interpret a plain tap, and the contextual tile menu
-([`context-menu.js`](../../src/ui/context-menu.js), raised by long-press / right-click) lists them all.
+([`context-menu.js`](../../src/ui/menus/context-menu.js), raised by long-press / right-click) lists them all.
 A recognised interactable component yields an `interact` action; otherwise the tile yields a `move`
 (silently blocked if it isn't passable).
 
@@ -23,7 +23,7 @@ These two files are the only places that need to know about the full set of inte
 
 ### 1. Define a tag component
 
-Add a factory to [`src/world/components.js`](../../src/world/components.js), in alphabetical order:
+Add a factory to [`src/world/entities/components.js`](../../src/world/entities/components.js), in alphabetical order:
 
 ```js
 lockable() {
@@ -41,7 +41,7 @@ registry.addComponent(entity, 'lockable', components.lockable());
 
 ### 3. Register it for detection
 
-In [`src/actions/resolve-tile-actions.js`](../../src/actions/resolve-tile-actions.js), find the entity
+In [`src/actions/core/resolve-tile-actions.js`](../../src/actions/core/resolve-tile-actions.js), find the entity
 in the adjacent branch and push an `interact` row for it (follow the `container` case):
 
 ```js

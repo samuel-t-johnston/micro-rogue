@@ -1,9 +1,9 @@
-import { gameLog } from '../engine/game-log.js';
+import { gameLog } from '../engine/log/game-log.js';
 import { animations } from '../render/animations.js';
-import { subject, conjugate } from '../engine/log-text.js';
+import { subject, conjugate } from '../engine/log/log-text.js';
 
 /**
- * @file Death handling, triggered from the damage chokepoint (src/effects/effect-damage.js)
+ * @file Death handling, triggered from the damage chokepoint (src/effects/effect-types/effect-damage.js)
  * when an entity's HP reaches 0. Centralizing here means melee and consumable damage both
  * route death through one place.
  */

@@ -10,7 +10,7 @@ An item is an **entity** ([component.md](component.md)) built from:
 - the **`item`** component, which carries the item's **location**;
 - a **type-specific** component that says what the item *does* — `equippable` ([equipment.md](equipment.md)) or `consumable` ([consumable.md](consumable.md)).
 
-The factories live in [`src/world/items.js`](../../src/world/items.js) (`createHealingPotion`, `createDagger`, …).
+The factories live in [`src/world/entities/items.js`](../../src/world/entities/items.js) (`createHealingPotion`, `createDagger`, …).
 
 ### Location vs. position
 
@@ -26,7 +26,7 @@ Moving items between locations is done by **actions**, not by editing the compon
 
 ## Add a new item
 
-Add a `createX(registry, x, y, entityId)` factory to [`src/world/items.js`](../../src/world/items.js):
+Add a `createX(registry, x, y, entityId)` factory to [`src/world/entities/items.js`](../../src/world/entities/items.js):
 
 ```js
 export function createTorch(registry, x, y, entityId) {
@@ -45,7 +45,7 @@ export function createTorch(registry, x, y, entityId) {
 
 Then decide its behaviour by adding `equippable` ([equipment.md](equipment.md)) and/or `consumable` ([consumable.md](consumable.md)).
 
-Finally, register it in the prefab catalog [`src/world/entity-prefabs.js`](../../src/world/entity-prefabs.js) keyed by a stable id, e.g. `torch: { kind: 'item', make: createTorch }`. Maps and `stage-populate` place items by this id, and [`entity-prefabs.test.js`](../../src/world/entity-prefabs.test.js) fails if a `create*` factory is left unregistered.
+Finally, register it in the prefab catalog [`src/world/entities/entity-prefabs.js`](../../src/world/entities/entity-prefabs.js) keyed by a stable id, e.g. `torch: { kind: 'item', make: createTorch }`. Maps and `stage-populate` place items by this id, and [`entity-prefabs.test.js`](../../src/world/entities/entity-prefabs.test.js) fails if a `create*` factory is left unregistered.
 
 ## Worth knowing
 

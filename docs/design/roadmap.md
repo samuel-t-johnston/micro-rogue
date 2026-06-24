@@ -90,7 +90,7 @@ Open questions and deferred decisions are noted inline where they land on the ro
 - [x] Game menu shell: drill-down list, settings placeholder, new game / quit
 
 *Persistence-core note (landed): the serialize/deserialize engine, migration runner, and
-localStorage I/O live in `src/save/save-system.js` + `src/save/serialize.js`. Two adjustments to
+localStorage I/O live in `src/save/core/save-system.js` + `src/save/core/serialize.js`. Two adjustments to
 `save-system-design.md`, forced by the code: (1) the serialization unit is the **whole entity
 registry as one flat list** referenced by id — not `level.entities` — because items in
 chests/inventories/equipment are entities that live only in the registry; (2) the **player is
@@ -117,7 +117,7 @@ death-delete, support bundle, in-game menu) wire this core into the running game
 
 *Transitions/cold-storage note (landed): a **dungeon planner** ties the floors together. A plain-data
 **transit map** (`data/transit-map.js`) assigns each floor its `(branch, depth)` + pipeline and wires
-the stairs; the **level manager** (`src/world/level-manager.js`) freezes the floor you leave, thaws or
+the stairs; the **level manager** (`src/world/dungeon/level-manager.js`) freezes the floor you leave, thaws or
 generates the one you enter, and carries the player (with carried/equipped items) between them. The
 shipped dungeon is a linear 3-floor stack — floor 1 static, floor 2 the random-static mazes, floor 3
 the procedural 3×3 — connected by tap-to-travel stairs. Cold storage uses **model (b)**: only the
@@ -152,12 +152,12 @@ range** for now — walking-distance + `muffling` (walls block, doors leak) is a
 the sense that changes no contract. Save schema bumped v3→v4 (the `creature` marker).*
 
 *Smell/scent note (landed): a per-profile **scent field** lives on the level (`level.scent`,
-`src/world/scent.js`); creatures with a `scentSource` deposit each round, and the field **diffuses +
+`src/world/sense-systems/scent.js`); creatures with a `scentSource` deposit each round, and the field **diffuses +
 decays** so a moving emitter trails a fading wake and the gradient homes on where it is *now*. The
 `smell` sense reports gradient **direction + profile + intensity** into a new `perception.smells`
 channel; the `track-scent` goal climbs the gradient (sits below chase/attack — vision takes over once
 the quarry is seen), and `player-smell` logs notable scents. Diffusion runs in a new first-class
-**per-player-turn upkeep** registry (`src/engine/upkeep.js`) — ordered so scent diffuses before the
+**per-player-turn upkeep** registry (`src/engine/turn/upkeep.js`) — ordered so scent diffuses before the
 autosave; scent is **saved** with the level (sparse). The centerpiece is that the **player is a
 trackable emitter**: `scuttlers` (a fast, weak, 3-tile-sighted swarm that replaces the goblins in the
 pillars maze) hunt the player's scent through the lattice, silent to smell but noisy to hearing.
@@ -242,11 +242,11 @@ Pre-Alpha Checklist — Alpha v0.1.0
   - modules vs classes?
   - JS Doc comments
   - ESLint + Prettier
-- [ ] General Design Review
+- [x] General Design Review
   - Unit test gaps: tests cover function/edges, avoid tests fragile to change
   - Code smells
   - Design for easy replacement and modification of systems. Design for easy modification of content.
-- [ ] Rearrange data modules - consider pulling out data files?
+- [x] Rearrange data modules - consider pulling out data files?
 - [ ] Review the “how-to” documents, correct mistakes, add missing info.
 - [ ] Replace/update original design docs
 - [ ] Spiff up GitHub and readme.md

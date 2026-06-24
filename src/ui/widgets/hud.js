@@ -1,6 +1,6 @@
-import { drawText } from '../canvas-ui.js';
-import { Anchor, resolveAnchor, applyHandedness } from '../anchor-system.js';
-import { gameSettings } from '../../engine/settings.js';
+import { drawText } from '../core/canvas-ui.js';
+import { Anchor, resolveAnchor, applyHandedness } from '../core/anchor-system.js';
+import { gameSettings } from '../../engine/config/settings.js';
 
 const MARGIN = 12;
 const ANCHOR = Anchor.TOP_LEFT;

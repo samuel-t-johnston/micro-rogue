@@ -12,7 +12,7 @@ Equipment is built from three pieces plus a resolver:
 
 **equip / unequip actions** — [`action-equip.js`](../../src/actions/action-types/action-equip.js), [`action-unequip.js`](../../src/actions/action-types/action-unequip.js). Equipping into an occupied slot is an **atomic swap**: the displaced item returns to inventory, logged as its own unequip before the equip.
 
-**`attributeModifiers` + the attribute resolver** — the item's stat contributions (e.g. `{ attackDamage: 1 }`) are stored as data; [`getAttribute`](../../src/combat/attributes.js) computes an entity's effective stat as **base + sum of worn modifiers, derived on demand**. Nothing is added to or subtracted from stored stats on equip/unequip.
+**`attributeModifiers` + the attribute resolver** — the item's stat contributions (e.g. `{ attackDamage: 1 }`) are stored as data; [`getAttribute`](../../src/attributes/attributes.js) computes an entity's effective stat as **base + sum of worn modifiers, derived on demand**. Nothing is added to or subtracted from stored stats on equip/unequip.
 
 ## Add a new equippable item
 

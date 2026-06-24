@@ -14,13 +14,13 @@ open, input is intercepted first, so the press does nothing.
 
 ## What's inside
 
-Built by [`buildSupportBundle`](../../src/save/support-bundle.js):
+Built by [`buildSupportBundle`](../../src/save/support-bundle/support-bundle.js):
 
 | Field | Contents |
 |---|---|
 | `bundleVersion` | envelope version (independent of save/game versions) |
 | `generatedAt` | ISO timestamp |
-| `gameVersion` | from [`save-system.js`](../../src/save/save-system.js) |
+| `gameVersion` | from [`save-system.js`](../../src/save/core/save-system.js) |
 | `device` | best-effort `navigator`/`window` readout — user agent, language, viewport, DPR, screen |
 | `save` | the **live** game state, straight from `serializeGame` ([save-system-design.md](../design/save-system-design.md)) |
 | `log` | the full event log (`gameLog.getAll()`) — every entry, not just the displayed lines |
@@ -30,4 +30,4 @@ Built by [`buildSupportBundle`](../../src/save/support-bundle.js):
 - **The save snapshot is the live state**, not the last autosave — it reuses `serializeGame`, so the bundle's `save` block is exactly the save-file format and the two can never disagree.
 - **The full log travels**, including debug-only entries with no `display` string — that's the point for diagnosing "what actually happened."
 - **`buildSupportBundle` is pure and unit-tested**; `downloadSupportBundle` is a thin DOM side effect (Blob + anchor).
-- Wired into the game at the `?` handler in [`game-scene.js`](../../src/ui/game-scene.js).
+- Wired into the game at the `?` handler in [`game-scene.js`](../../src/ui/scenes/game-scene.js).

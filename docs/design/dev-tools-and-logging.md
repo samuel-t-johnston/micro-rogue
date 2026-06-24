@@ -64,7 +64,7 @@ The event log is omniscient — it records the goblin and orc fighting in the se
 
 **Stamp visibility at write-time, never at read-time.** FOV is temporal. A skirmish glimpsed on turn 5 should stay in the scrollback even after the combatants leave view; a fight behind a door on turn 5 should stay hidden even after the door is opened on turn 10. Re-judging an old entry against *current* FOV gets both cases wrong. So `seen` is frozen the moment the event is logged.
 
-The policy is a pure function (`engine/log-visibility.js`) so it's testable without a renderer; the game scene supplies the lookups (player id, the player's visible-tile set, an id→position resolver). The rules, in order:
+The policy is a pure function (`engine/log/log-visibility.js`) so it's testable without a renderer; the game scene supplies the lookups (player id, the player's visible-tile set, an id→position resolver). The rules, in order:
 
 1. The player's own actions, and anything happening *to* them, always surface (`actor`/`target` is the player).
 2. With no FOV data available, hide nothing.

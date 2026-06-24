@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { run as runRoomGridGeometry } from './stage-room-grid-geometry.js';
-import { createRng } from '../../../engine/rng.js';
+import { createRng } from '../../../engine/core/rng.js';
 
 // Runs the stage against a fresh blackboard and returns it.
 function generate(seed = 123, config = {}) {

@@ -6,7 +6,7 @@ ROGµE renders UI across two substrates: the HTML `<canvas>` (per ADR-002) for t
 
 ## Canvas UI primitive contract
 
-The canvas UI primitives in [`src/ui/canvas-ui.js`](../../src/ui/canvas-ui.js) are deliberately minimal:
+The canvas UI primitives in [`src/ui/core/canvas-ui.js`](../../src/ui/core/canvas-ui.js) are deliberately minimal:
 
 - They draw. They do not lay out. The caller passes pixel coordinates.
 - They read colors from the theme object, not from hardcoded values.

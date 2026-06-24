@@ -3,7 +3,7 @@
  * in the `stairs-up` zone (the classic "arrive on the up-stairs" — it lands on the same centre tile
  * the stairs stage uses). The game scene reads it via resolveSpawn. See docs/design/procedural-3x3-dungeon.md.
  */
-import { components } from '../../components.js';
+import { components } from '../../entities/components.js';
 import { centermostRoomTile } from '../zone-tiles.js';
 
 /** Runs the spawn (entry-point) finishing stage (see the file overview). */

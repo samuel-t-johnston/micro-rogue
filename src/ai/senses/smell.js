@@ -1,4 +1,4 @@
-import { scentAt, gradientDir } from '../../world/scent.js';
+import { scentAt, gradientDir } from '../../world/sense-systems/scent.js';
 
 /**
  * Creates the smell sense. Like hearing, it reports no entities and no visible tiles — it surfaces

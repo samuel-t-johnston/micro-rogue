@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { createEntityRegistry } from '../../engine/entity-component-system.js';
-import { createLevel } from '../level.js';
-import { components } from '../components.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
+import { createLevel } from '../map/level.js';
+import { components } from '../entities/components.js';
 import { collectSubgraph } from './subgraph.js';
 import { freezeLevel, thawLevel } from './cold-storage.js';
 

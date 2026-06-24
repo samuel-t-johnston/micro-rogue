@@ -6,10 +6,10 @@
 
 The ECS has two parts:
 
-**The registry** — [`src/engine/entity-component-system.js`](../../src/engine/entity-component-system.js)
+**The registry** — [`src/engine/core/entity-component-system.js`](../../src/engine/core/entity-component-system.js)
 Owns all entities and a reverse index for fast queries. An entity is just `{ id, components: Map }` — an id and a bag of components. The registry adds/removes/gets components and answers `getEntitiesWith(name)` in O(matches) via a `componentName → Set<id>` index that's kept in sync on every add, remove, and destroy.
 
-**The components** — [`src/world/components.js`](../../src/world/components.js)
+**The components** — [`src/world/entities/components.js`](../../src/world/entities/components.js)
 Each component is *plain data* created through a factory function. The factory file is the single definition site for every component's shape and defaults. There is no `System` class: a "system" is just a function that queries `getEntitiesWith(...)` and reads or writes component data — the turn manager, the action handlers, the senses, and the renderer are all systems in this sense.
 
 The guiding rule: **components are data, behaviour lives in systems.** A component never holds methods or function references.
@@ -18,7 +18,7 @@ The guiding rule: **components are data, behaviour lives in systems.** A compone
 
 ### 1. Add a factory
 
-Add to [`src/world/components.js`](../../src/world/components.js) in alphabetical order (the file is kept sorted):
+Add to [`src/world/entities/components.js`](../../src/world/entities/components.js) in alphabetical order (the file is kept sorted):
 
 ```js
 poisoned(turnsRemaining) {

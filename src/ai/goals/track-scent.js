@@ -1,5 +1,5 @@
 import { areHostile } from '../../combat/factions.js';
-import { DIRECTION_STEPS } from '../../world/geometry.js';
+import { DIRECTION_STEPS } from '../../world/map/geometry.js';
 
 /**
  * NPC goal: follow the strongest *hostile* scent toward its source. Reads perception.smells, keeps

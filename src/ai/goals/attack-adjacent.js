@@ -1,5 +1,5 @@
 import { areHostile } from '../../combat/factions.js';
-import { chebyshevDistance } from '../../world/geometry.js';
+import { chebyshevDistance } from '../../world/map/geometry.js';
 
 /**
  * NPC goal: attacks a hostile actor in an adjacent tile. Hostile = an actor (creature) that shares

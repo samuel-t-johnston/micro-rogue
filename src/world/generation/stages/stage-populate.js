@@ -3,7 +3,7 @@
  * few floor items; item rooms get floor items; creatures pick rooms by affinity weights (a room's
  * weight is the product of its labels' weights — >1 attracts, <1 repels). See docs/design/procedural-3x3-dungeon.md.
  */
-import { ENTITY_PREFABS, prefabIdsByKind } from '../../entity-prefabs.js';
+import { ENTITY_PREFABS, prefabIdsByKind } from '../../entities/entity-prefabs.js';
 import { roomTiles, centermostRoomTile } from '../zone-tiles.js';
 
 const make = (registry, id, x, y, entityId) => ENTITY_PREFABS[id].make(registry, x, y, entityId);

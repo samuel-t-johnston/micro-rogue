@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { createSmellSense } from './smell.js';
-import { createLevel } from '../../world/level.js';
-import { createEntityRegistry } from '../../engine/entity-component-system.js';
-import { components } from '../../world/components.js';
-import { depositScent } from '../../world/scent.js';
+import { createLevel } from '../../world/map/level.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
+import { components } from '../../world/entities/components.js';
+import { depositScent } from '../../world/sense-systems/scent.js';
 
 const smell = createSmellSense();
 

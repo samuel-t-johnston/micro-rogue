@@ -1,4 +1,4 @@
-import { chebyshevDistance, cardinalDirection } from '../../world/geometry.js';
+import { chebyshevDistance, cardinalDirection } from '../../world/map/geometry.js';
 
 /**
  * Creates the hearing sense. Unlike vision, it reports no entities and no visible tiles — it surfaces

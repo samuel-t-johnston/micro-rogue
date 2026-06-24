@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { createVisionSense } from './vision.js';
-import { createLevel } from '../../world/level.js';
-import { createEntityRegistry } from '../../engine/entity-component-system.js';
-import { components } from '../../world/components.js';
+import { createLevel } from '../../world/map/level.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
+import { components } from '../../world/entities/components.js';
 
 const vision = createVisionSense();
 

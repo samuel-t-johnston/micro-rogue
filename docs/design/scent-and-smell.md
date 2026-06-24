@@ -71,7 +71,7 @@ Starting constants (all tunable): `DECAY ≈ 0.85`, `SPREAD ≈ 0.20`, `intensit
 "Once per player turn, after the world has settled" is becoming a coordination hotspot (autosave
 today; scent diffusion now; status-effect ticks, regeneration, weather later). Rather than bury each
 new system in the game-scene `onTurnStart` closure or the turn manager, we promote it to a small
-ordered registry: **`src/engine/upkeep.js`**.
+ordered registry: **`src/engine/turn/upkeep.js`**.
 
 ```js
 export const upkeep = {
@@ -151,7 +151,7 @@ so every existing creature is unchanged and the scuttler can opt into `range 3`.
 - **`player-smell`** ([`goals/player-smell.js`](../../src/ai/goals/player-smell.js)) — twin of
   `player-hear`. Logs cues for non-self profiles, deduped by profile so a lingering scent doesn't
   spam every turn.
-- **`smell-text.describeSmell`** ([`src/engine/smell-text.js`](../../src/engine/smell-text.js)) —
+- **`smell-text.describeSmell`** ([`src/engine/log/smell-text.js`](../../src/engine/log/smell-text.js)) —
   twin of `sound-text`.
 
 **Configurable standout scents.** Not every scent is worth a log line. A profile → flavor map gates
@@ -210,7 +210,7 @@ carries it around the pillar on your scent; adjacent, it bites. The 15×15 pilla
 3-tile sight gives the player real room to use movement and the pillars to their advantage.
 
 **Placement:** replace the three goblins in `maze-pillars.js` with **five scuttlers**; register
-`scuttler` in the prefab catalog (`src/world/entity-prefabs.js`). `maze-pillars` stays
+`scuttler` in the prefab catalog (`src/world/entities/entity-prefabs.js`). `maze-pillars` stays
 in the random floor-2 rotation, so the swarm appears when that layout is rolled.
 
 **Emitters/sensers added elsewhere:** the player gains `scent('player')`, the `smell` sense, a
@@ -238,10 +238,10 @@ untouched for now.
 Shared contract change: `perception.smells` channel + `mergeSmells` (additive, mirrors `sounds`).
 
 1. **Components:** `scentSource`, `smell`, `vision` (acuity), `noisyMovement`. Factory tests.
-2. **Scent field module** (`src/world/scent.js`): create/size grids, `deposit`, `diffuseAndDecay`,
+2. **Scent field module** (`src/world/sense-systems/scent.js`): create/size grids, `deposit`, `diffuseAndDecay`,
    `intensityAt`, `gradientDir`. Pure and fully TDD-able — deposit→diffuse spreads to open neighbors
    but not through walls; decay reduces over rounds; gradient points uphill; field stays sparse.
-3. **Upkeep module** (`src/engine/upkeep.js`) + move autosave into it (scent step before autosave);
+3. **Upkeep module** (`src/engine/turn/upkeep.js`) + move autosave into it (scent step before autosave);
    wire `mountLevel.onTurnStart → upkeep.run`. Tests: ordered execution, reset.
 4. **Vision acuity refactor** (`vision.js` reads the `vision` component; undefined → unlimited). Add
    a vision-range test; confirm existing creatures unchanged.

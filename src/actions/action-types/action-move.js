@@ -1,7 +1,7 @@
-import { gameLog } from '../../engine/game-log.js';
+import { gameLog } from '../../engine/log/game-log.js';
 import { animations } from '../../render/animations.js';
-import { emitSound } from '../../world/sounds.js';
-import { rng } from '../../engine/rng.js';
+import { emitSound } from '../../world/sense-systems/sounds.js';
+import { rng } from '../../engine/core/rng.js';
 
 /**
  * Validates and executes a move to (action.x, action.y) (0-indexed tile coordinates).

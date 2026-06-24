@@ -1,14 +1,14 @@
-import { AppState, createAppStateMachine } from './engine/app-state.js';
-import { readTheme } from './engine/theme.js';
-import { gameConfig } from './engine/game-config.js';
-import { gameSettings } from './engine/settings.js';
-import { createSplashScene } from './ui/splash.js';
-import { createMenuScene } from './ui/game-menu.js';
-import { createGameScene } from './ui/game-scene.js';
-import { createInstructionsScene } from './ui/instructions-scene.js';
-import { createResultsScene } from './ui/results-scene.js';
+import { AppState, createAppStateMachine } from './engine/core/app-state.js';
+import { readTheme } from './engine/config/theme.js';
+import { gameConfig } from './engine/config/game-config.js';
+import { gameSettings } from './engine/config/settings.js';
+import { createSplashScene } from './ui/scenes/splash.js';
+import { createMenuScene } from './ui/scenes/game-menu.js';
+import { createGameScene } from './ui/scenes/game-scene.js';
+import { createInstructionsScene } from './ui/scenes/instructions-scene.js';
+import { createResultsScene } from './ui/scenes/results-scene.js';
 import { createDebugOverlay } from './debug/debug-overlay.js';
-import { clearSave } from './save/save-system.js';
+import { clearSave } from './save/core/save-system.js';
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');

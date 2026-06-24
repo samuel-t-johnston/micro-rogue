@@ -1,6 +1,6 @@
 import { areHostile } from '../../combat/factions.js';
-import { chebyshevDistance } from '../../world/geometry.js';
-import { findPathToAdjacent } from '../../world/pathfinding.js';
+import { chebyshevDistance } from '../../world/map/geometry.js';
+import { findPathToAdjacent } from '../../world/map/pathfinding.js';
 
 /**
  * NPC goal: moves toward the nearest hostile actor. Steps one tile along the shortest path to a tile

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { megaVision } from './mega-vision.js';
-import { createEntityRegistry } from '../../engine/entity-component-system.js';
-import { components } from '../../world/components.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
+import { components } from '../../world/entities/components.js';
 
 // Minimal level stand-in: mega-vision only reads `level.entities`.
 function levelOf(...entities) {

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { runPipeline } from './pipeline.js';
-import { createEntityRegistry } from '../../engine/entity-component-system.js';
-import { createRng } from '../../engine/rng.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
+import { createRng } from '../../engine/core/rng.js';
 
 describe('runPipeline', () => {
   it('rejects for an unknown stage type', async () => {

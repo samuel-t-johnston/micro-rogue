@@ -52,7 +52,7 @@ coordinator's job (see Protected Design Space).
   `item`, …). Convention over the free-form blackboard.
 - **Affinity / aversion** — per-label spawn-weight up/down for a populated entity type.
 
-Proposed shapes (in [`level.blackboard`](../../src/world/level.js)):
+Proposed shapes (in [`level.blackboard`](../../src/world/map/level.js)):
 
 ```js
 blackboard['level:zones'] = [
@@ -70,7 +70,7 @@ produces stable results.
 
 ## New components
 
-Added to [`src/world/components.js`](../../src/world/components.js):
+Added to [`src/world/entities/components.js`](../../src/world/entities/components.js):
 
 - **`transition(to = null, port = null)`** — marks a furniture entity (stairs now; pits, etc. later)
   as a level exit. **`port`** names the exit in the transit map (the stairs' direction, `'up'`/`'down'`),
@@ -78,7 +78,7 @@ Added to [`src/world/components.js`](../../src/world/components.js):
   optional pre-resolved destination, left **null** in the minimal cut (the transit map resolves
   destinations dynamically by port). Trigger is **tap-to-interact** (self-interact on the stair).
 - **`entryPoint()`** — tags the entity (with a `position`) where the player arrives.
-  [`game-scene`](../../src/ui/game-scene.js) places the player via `getEntitiesWith('entryPoint')`
+  [`game-scene`](../../src/ui/scenes/game-scene.js) places the player via `getEntitiesWith('entryPoint')`
   instead of the level center; if more than one, pick one (and log). Normally placed on the
   `stairs-up` entity, but kept separate so pit-arrivals / multi-entry levels can mark other spots.
 
@@ -93,7 +93,7 @@ first. The first *playable* checkpoint is step 6.
 | 2 | `label` stage | Label distinct random zones (default stairs-up, stairs-down, treasure, item, item; `labels` param), drawn without replacement; geometry-agnostic; skips trailing labels if short | `level:zones` → zone `labels` | unit: multiplicities, 5 distinct zones keep base `room`, custom labels, too-few-zones warning, determinism | `stages/stage-label.js`, register in `pipeline.js` (type `label`) | **Done** |
 | 3 | `link` stage | Random spanning tree (connectivity by construction) + soft-cap-limited extra links (`extraLinkChance`/`maxExtraDegree` params); links ⊆ adjacency | `level:zones`/`adjacency` → `level:links` | unit: spanning-tree-only, all-edges, ids/order, connectivity over 30 real layouts, soft-cap limits extras, determinism | `stages/stage-link.js`, register in `pipeline.js` (type `link`) | **Done** |
 | 4 | Visualization / debug tooling | Headless dev tool (`npm run visualize -- [runs] [seed] [out]`): runs a pipeline N times, writes a markdown report — config, timestamp, seeds, and a per-run **filmstrip** (snapshot after each stage). Renderers: `levelToAscii` (map), `zonesToText` + `zonesToMermaid` (topology). Pipeline gained an optional `onStageComplete` hook | level/blackboard → markdown file | unit: `levelToAscii`/`zonesToText`/`zonesToMermaid` (pure) + `onStageComplete` hook; tool run manually | `scripts/visualize-generation.mjs`, `src/world/generation/visualize.js`, `pipeline.js` hook, `docs/howto/visualizing-generation.md` | **Done** |
-| 5 | Spawn/exit components | Added `transition({to})` + `entryPoint()`; `createStairs` furniture; `resolveSpawn` reads the entryPoint and `game-scene` places the player there; static level drops an inert up-stairs + entryPoint at its centre (preserves the old start) | — | unit: `resolveSpawn` (position / center fallback / multi-entry guard) + component shapes; rest visual | `components.js`, `furniture.js`, `world/spawn.js`, `game-scene.js`, `stage-place-test-entities.js` | **Done** |
+| 5 | Spawn/exit components | Added `transition({to})` + `entryPoint()`; `createStairs` furniture; `resolveSpawn` reads the entryPoint and `game-scene` places the player there; static level drops an inert up-stairs + entryPoint at its centre (preserves the old start) | — | unit: `resolveSpawn` (position / center fallback / multi-entry guard) + component shapes; rest visual | `components.js`, `furniture.js`, `world/map/spawn.js`, `game-scene.js`, `stage-place-test-entities.js` | **Done** |
 | 6 | `carve-rooms` + config + `spawn` | `carveRooms` inits the wall grid and **carves per cell** (actual cells, same-zone seams opened, 1-tile gutters to other zones — never the bounding box; max-size rooms for now, variety deferred); `spawn` drops an `entryPoint` in the stairs-up room; `procedural-3x3` config; `game-scene` points at it; viz default updated. First playable (islands, no halls) | `level:zones`/`labels` → tiles, entryPoint entity | unit: level size, wall border, **one floor component per zone** (seams open + gutters separate) over 20 seeds, determinism; spawn on stairs-up floor; visual via viz | `stages/stage-carve-rooms.js`, `stages/stage-spawn.js`, `data/pipelines/procedural-3x3.js`, `game-scene.js`, `scripts/visualize-generation.mjs` | **Done** |
 | 7 | `carve-halls` stage | For each link, carve a straight cut through the 2-tile gutter at a non-corner shared offset + drop one door at the opening (dog-leg/longer routing deferred with room-size variety) | `level:links` + room tiles → floor tiles, door entities | unit: **single floor component** over 20 seeds (all rooms connected), one door/link on floor, determinism; visual | `stages/stage-carve-halls.js`, `data/pipelines/procedural-3x3.js`, viz | **Done** |
 | 8 | `stairs` stage | Place up/down stairs furniture (`createStairs`, `transition{to:null}`) at the centre floor of the labelled rooms; shares `zone-tiles.js` (centermostFloor) with spawn | `level:zones`/`labels` → entities | unit: one up + one down on floor in their zones, inert transition, determinism; `zone-tiles` helper | `stages/stage-stairs.js`, `world/generation/zone-tiles.js`, `stage-spawn.js` (refactor), config+viz | **Done** |
@@ -189,11 +189,11 @@ furniture/creatures never stack on stairs, doors, the entry point, or each other
 
 - Pipeline runner + stage registry — [`src/world/generation/pipeline.js`](../../src/world/generation/pipeline.js)
 - Existing stages (kept) — [`stage-static.js`](../../src/world/generation/stages/stage-static.js); static layouts place their authored entities via [`stage-place-static-entities.js`](../../src/world/generation/stages/stage-place-static-entities.js) (replaced the dev-only `stage-place-test-entities.js`)
-- Level model (tiles, blackboard, placeEntity, isPassable) — [`src/world/level.js`](../../src/world/level.js)
-- Components — [`src/world/components.js`](../../src/world/components.js)
-- Furniture / items / creatures — [`furniture.js`](../../src/world/furniture.js), [`items.js`](../../src/world/items.js), [`creatures.js`](../../src/world/creatures.js)
+- Level model (tiles, blackboard, placeEntity, isPassable) — [`src/world/map/level.js`](../../src/world/map/level.js)
+- Components — [`src/world/entities/components.js`](../../src/world/entities/components.js)
+- Furniture / items / creatures — [`furniture.js`](../../src/world/entities/furniture.js), [`items.js`](../../src/world/entities/items.js), [`creatures.js`](../../src/world/entities/creatures.js)
 - Tiles & equipment slots — [`data/tiles/terrain.js`](../../data/tiles/terrain.js), [`data/equipment-slots.js`](../../data/equipment-slots.js)
-- Generation RNG — [`src/engine/rng.js`](../../src/engine/rng.js) (`rng.deriveRng('mapgen', branch, depth)`)
-- Pipeline invocation + player placement — [`src/ui/game-scene.js`](../../src/ui/game-scene.js)
+- Generation RNG — [`src/engine/core/rng.js`](../../src/engine/core/rng.js) (`rng.deriveRng('mapgen', branch, depth)`)
+- Pipeline invocation + player placement — [`src/ui/scenes/game-scene.js`](../../src/ui/scenes/game-scene.js)
 - Pipeline configs — [`data/pipelines/`](../../data/pipelines/static-test-level.js)
 - Design — [map-generation.md](map-generation.md), [rng-and-determinism.md](rng-and-determinism.md)

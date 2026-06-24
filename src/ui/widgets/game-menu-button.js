@@ -1,6 +1,6 @@
-import { drawText, hitTest } from '../canvas-ui.js';
-import { Anchor, applyHandedness, placeBox } from '../anchor-system.js';
-import { gameSettings } from '../../engine/settings.js';
+import { drawText, hitTest } from '../core/canvas-ui.js';
+import { Anchor, applyHandedness, placeBox } from '../core/anchor-system.js';
+import { gameSettings } from '../../engine/config/settings.js';
 
 const BUTTON_SIZE = 44;
 const MARGIN = 12;

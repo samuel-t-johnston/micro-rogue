@@ -1,6 +1,6 @@
-import { findPath } from '../../world/pathfinding.js';
+import { findPath } from '../../world/map/pathfinding.js';
 import { areHostile } from '../../combat/factions.js';
-import { resolveTileActions } from '../../actions/resolve-tile-actions.js';
+import { resolveTileActions } from '../../actions/core/resolve-tile-actions.js';
 
 // Actions the UI submits already resolved (character menu, the contextual tile menu).
 const PASS_THROUGH = new Set([

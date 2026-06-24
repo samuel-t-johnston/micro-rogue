@@ -2,7 +2,7 @@
 
 *How the seeded RNG works and how to use it. For the determinism model and the contract, see [rng-and-determinism.md](../design/rng-and-determinism.md).*
 
-The generator is [Mulberry32](https://gist.github.com/tommyettinger/46a874533244883189143505d203312c). One **master seed** per game yields any number of **independent streams**, each derived from the master by name, so unrelated concerns never perturb one another's sequences. It all lives in [`src/engine/rng.js`](../../src/engine/rng.js).
+The generator is [Mulberry32](https://gist.github.com/tommyettinger/46a874533244883189143505d203312c). One **master seed** per game yields any number of **independent streams**, each derived from the master by name, so unrelated concerns never perturb one another's sequences. It all lives in [`src/engine/core/rng.js`](../../src/engine/core/rng.js).
 
 There are two ways to get a stream:
 
@@ -27,7 +27,7 @@ Most code just wants "the game's RNG." The exported `rng` singleton is a façade
 ## Draw a random value
 
 ```js
-import { rng } from '../engine/rng.js';
+import { rng } from '../engine/core/rng.js';
 rng.pick(directions);   // gameplay stream — combat, AI, loot all share it
 ```
 
@@ -60,11 +60,11 @@ meta = { ...rng.snapshot(), turnCount, nextEntityId };
 rng.restore({ seed: save.meta.seed, streams: save.meta.streams });
 ```
 
-The v1 save format stored a single `meta.rngState`; the v1→v2 migration ([`save-system.js`](../../src/save/save-system.js)) lifts it into `meta.streams.gameplay`.
+The v1 save format stored a single `meta.rngState`; the v1→v2 migration ([`save-system.js`](../../src/save/core/save-system.js)) lifts it into `meta.streams.gameplay`.
 
 ## Replace the algorithm
 
-Swap the body of `createRng` in `rng.js`; nothing outside needs to change as long as the instance contract holds (`random` / `nextInt` / `pick` / `getState` / `setState` / `getSeed`). The mix helpers (`hashName`, `deriveSeed`) are independent of the generator. Update the JSDoc `@see` link, and run [`rng.test.js`](../../src/engine/rng.test.js) — it exercises the full contract.
+Swap the body of `createRng` in `rng.js`; nothing outside needs to change as long as the instance contract holds (`random` / `nextInt` / `pick` / `getState` / `setState` / `getSeed`). The mix helpers (`hashName`, `deriveSeed`) are independent of the generator. Update the JSDoc `@see` link, and run [`rng.test.js`](../../src/engine/core/rng.test.js) — it exercises the full contract.
 
 ## Worth knowing
 

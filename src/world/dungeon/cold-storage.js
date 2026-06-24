@@ -10,7 +10,7 @@ import {
   deserializeEntities,
   serializeLevel,
   deserializeLevel,
-} from '../../save/serialize.js';
+} from '../../save/core/serialize.js';
 import { collectSubgraph } from './subgraph.js';
 
 /**

@@ -1,5 +1,5 @@
-import { gameLog } from '../../engine/game-log.js';
-import { subject, conjugate, itemName } from '../../engine/log-text.js';
+import { gameLog } from '../../engine/log/game-log.js';
+import { subject, conjugate, itemName } from '../../engine/log/log-text.js';
 
 /**
  * Moves an equippable item from the actor's inventory into its equipment slot. If the slot is

@@ -8,7 +8,7 @@ An action is a plain data object: `{ type, ...params }`, e.g. `{ type: 'move', x
 
 **Produced by a goal** — a goal's `evaluate(context)` returns `{ action }` (see [ai-goals.md](ai-goals.md)). This is the *only* source of actions; the player and NPCs both go through goals.
 
-**Dispatched** — [`src/actions/action-system.js`](../../src/actions/action-system.js)
+**Dispatched** — [`src/actions/core/action-system.js`](../../src/actions/core/action-system.js)
 `invokeAction(entity)` evaluates the entity's goal stack, then looks the winning action's `type` up in the `dispatch` table and calls the matching handler.
 
 **Executed** — `src/actions/action-types/action-*.js`
@@ -31,7 +31,7 @@ Create `src/actions/action-types/action-<name>.js` exporting `execute<Name>(acto
 
 ### 2. Register it in the dispatch table
 
-In [`src/actions/action-system.js`](../../src/actions/action-system.js), add an entry mapping the `type` string to your handler:
+In [`src/actions/core/action-system.js`](../../src/actions/core/action-system.js), add an entry mapping the `type` string to your handler:
 
 ```js
 const dispatch = {

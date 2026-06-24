@@ -1,4 +1,4 @@
-import { emitSound } from '../../world/sounds.js';
+import { emitSound } from '../../world/sense-systems/sounds.js';
 
 /**
  * Emits a sound entity at the actor's tile encoding a structured message (e.g. an enemy report).

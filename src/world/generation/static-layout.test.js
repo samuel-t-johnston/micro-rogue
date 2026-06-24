@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseLayout } from './static-layout.js';
-import { createLevel } from '../level.js';
+import { createLevel } from '../map/level.js';
 
 const legend = { '.': 'floor', '#': 'wall' };
 

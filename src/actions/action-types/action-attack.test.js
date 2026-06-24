@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { executeAttack } from './action-attack.js';
-import { createEntityRegistry } from '../../engine/entity-component-system.js';
-import { createLevel } from '../../world/level.js';
-import { components } from '../../world/components.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
+import { createLevel } from '../../world/map/level.js';
+import { components } from '../../world/entities/components.js';
 import { Slots, HUMANOID_SLOTS } from '../../../data/equipment-slots.js';
 
 describe('executeAttack', () => {

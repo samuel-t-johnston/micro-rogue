@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { fleeFromOthers } from './flee-from-others.js';
-import { createLevel } from '../../world/level.js';
+import { createLevel } from '../../world/map/level.js';
 
 // Floor interior with a wall border.
 function openLevel(w = 7, h = 7) {

@@ -1,6 +1,6 @@
-import { applyEffect } from '../../effects/effects.js';
-import { gameLog } from '../../engine/game-log.js';
-import { subject, conjugate, itemName } from '../../engine/log-text.js';
+import { applyEffect } from '../../effects/core/effects.js';
+import { gameLog } from '../../engine/log/game-log.js';
+import { subject, conjugate, itemName } from '../../engine/log/log-text.js';
 
 /**
  * Consumes an item from the actor's inventory: applies its effect to the actor, then removes the

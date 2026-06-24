@@ -4,7 +4,7 @@
 
 ## How it works
 
-A creature is not a class — it's an **entity built from a recipe of components** ([component.md](component.md)). The factories live in [`src/world/creatures.js`](../../src/world/creatures.js) (`createGoblin`, `createOrc`). The standard active-NPC recipe:
+A creature is not a class — it's an **entity built from a recipe of components** ([component.md](component.md)). The factories live in [`src/world/entities/creatures.js`](../../src/world/entities/creatures.js) (`createGoblin`, `createOrc`). The standard active-NPC recipe:
 
 | Component | Role |
 |---|---|
@@ -45,7 +45,7 @@ ai: ['attack-adjacent', 'chase-others',     'wander-aimlessly']  // orc
 
 ### 1. Add a factory
 
-Add `createX(registry, x, y)` to [`src/world/creatures.js`](../../src/world/creatures.js), following the recipe. The interesting choices are:
+Add `createX(registry, x, y)` to [`src/world/entities/creatures.js`](../../src/world/entities/creatures.js), following the recipe. The interesting choices are:
 
 - **Goal stack** (`ai`) — its behaviour and priorities.
 - **`faction`** — who it's hostile to.
@@ -55,7 +55,7 @@ Add `createX(registry, x, y)` to [`src/world/creatures.js`](../../src/world/crea
 
 ### 2. Register it as a prefab
 
-Add an entry to [`src/world/entity-prefabs.js`](../../src/world/entity-prefabs.js) keyed by a stable id, e.g. `kobold: { kind: 'creature', make: createKobold }`. That catalog is the single source of truth for spawnable types — static maps and `stage-populate` place creatures by this id — and [`entity-prefabs.test.js`](../../src/world/entity-prefabs.test.js) fails if a `create*` factory is left unregistered.
+Add an entry to [`src/world/entities/entity-prefabs.js`](../../src/world/entities/entity-prefabs.js) keyed by a stable id, e.g. `kobold: { kind: 'creature', make: createKobold }`. That catalog is the single source of truth for spawnable types — static maps and `stage-populate` place creatures by this id — and [`entity-prefabs.test.js`](../../src/world/entities/entity-prefabs.test.js) fails if a `create*` factory is left unregistered.
 
 ### 3. Place it on the level
 
@@ -63,7 +63,7 @@ Call the factory and `level.placeEntity(...)`. This happens in a generation stag
 
 ## Worth knowing
 
-- **The player is the same recipe.** [`createPlayer`](../../src/world/player.js) uses the identical component set plus `playerControlled` and a player goal stack. There is no separate "player vs monster" code path — they differ only in components.
+- **The player is the same recipe.** [`createPlayer`](../../src/world/entities/player.js) uses the identical component set plus `playerControlled` and a player goal stack. There is no separate "player vs monster" code path — they differ only in components.
 - **Behaviour = goal stack order.** To make a creature braver, smarter, or cowardly, reorder or swap its goals; you rarely need new code.
 - **Hostility is faction-derived.** Two entities are friendly if they share a faction tag; a factionless entity reads as hostile to everyone (see [`factions.js`](../../src/combat/factions.js)).
 - **"Monster" is just a synonym.** The codebase says *creature* (the file is `creatures.js`); there's no `monster` concept in code.

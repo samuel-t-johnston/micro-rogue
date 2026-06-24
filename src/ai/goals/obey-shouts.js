@@ -1,4 +1,4 @@
-import { DIRECTION_STEPS } from '../../world/geometry.js';
+import { DIRECTION_STEPS } from '../../world/map/geometry.js';
 
 // How many turns to keep advancing on a heard order after the sound itself has faded. Sounds decay
 // in a couple of turns; this lets a heading carry the orc onward between shouts.
