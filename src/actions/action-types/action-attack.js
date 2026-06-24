@@ -1,9 +1,9 @@
-import { applyEffect } from '../../effects/effects.js';
-import { getAttribute, Attributes } from '../../combat/attributes.js';
-import { gameLog } from '../../engine/game-log.js';
+import { applyEffect } from '../../effects/core/effects.js';
+import { getAttribute, Attributes } from '../../attributes/attributes.js';
+import { gameLog } from '../../engine/log/game-log.js';
 import { animations } from '../../render/animations.js';
-import { subject, object, conjugate } from '../../engine/log-text.js';
-import { emitSound } from '../../world/sounds.js';
+import { subject, object, conjugate } from '../../engine/log/log-text.js';
+import { emitSound } from '../../world/sense-systems/sounds.js';
 
 /**
  * Deals the actor's attack damage to the target entity. The amount comes from the attribute

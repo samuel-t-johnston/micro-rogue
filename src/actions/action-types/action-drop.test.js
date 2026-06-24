@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { executeDrop } from './action-drop.js';
-import { createEntityRegistry } from '../../engine/entity-component-system.js';
-import { createLevel } from '../../world/level.js';
-import { createHealingPotion, createDagger } from '../../world/items.js';
-import { components } from '../../world/components.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
+import { createLevel } from '../../world/map/level.js';
+import { createHealingPotion, createDagger } from '../../world/entities/items.js';
+import { components } from '../../world/entities/components.js';
 
 function makeLevel() {
   const level = createLevel();

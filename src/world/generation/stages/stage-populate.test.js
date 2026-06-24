@@ -8,9 +8,9 @@ import { run as runStairs } from './stage-stairs.js';
 import { run as runSpawn } from './stage-spawn.js';
 import { run as runPopulate, weightedPick, DEFAULTS } from './stage-populate.js';
 import { roomTiles, centermostRoomTile } from '../zone-tiles.js';
-import { createLevel } from '../../level.js';
-import { createEntityRegistry } from '../../../engine/entity-component-system.js';
-import { createRng } from '../../../engine/rng.js';
+import { createLevel } from '../../map/level.js';
+import { createEntityRegistry } from '../../../engine/core/entity-component-system.js';
+import { createRng } from '../../../engine/core/rng.js';
 
 // The whole realization+population pipeline, so corridors, doors, and stairs all exist when
 // populate runs — the conditions under which the "spawn on a door / in a hallway" bug appeared.

@@ -1,5 +1,5 @@
-import { gameLog } from '../../engine/game-log.js';
-import { subject, conjugate, itemName } from '../../engine/log-text.js';
+import { gameLog } from '../../engine/log/game-log.js';
+import { subject, conjugate, itemName } from '../../engine/log/log-text.js';
 
 /**
  * Removes an item from the level and places it in the actor's inventory.

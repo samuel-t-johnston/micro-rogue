@@ -1,5 +1,5 @@
-import { rng } from '../../engine/rng.js';
-import { passableNeighbors } from '../../world/geometry.js';
+import { rng } from '../../engine/core/rng.js';
+import { passableNeighbors } from '../../world/map/geometry.js';
 
 /**
  * Minimal NPC goal: step to a random passable adjacent tile each turn. If no adjacent tile is

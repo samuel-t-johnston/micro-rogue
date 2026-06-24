@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { run as runLabel } from './stage-label.js';
-import { createRng } from '../../../engine/rng.js';
+import { createRng } from '../../../engine/core/rng.js';
 
 // Hand-built zone set — the stage is geometry-agnostic, so it needn't come from the geometry stage.
 function makeZones(n) {

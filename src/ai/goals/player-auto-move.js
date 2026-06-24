@@ -1,4 +1,4 @@
-import { findPath } from '../../world/pathfinding.js';
+import { findPath } from '../../world/map/pathfinding.js';
 import { areHostile } from '../../combat/factions.js';
 
 // Delay between auto-move steps so each move is visible and the player has

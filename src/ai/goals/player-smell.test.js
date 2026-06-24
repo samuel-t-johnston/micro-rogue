@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { playerSmell } from './player-smell.js';
-import { gameLog } from '../../engine/game-log.js';
+import { gameLog } from '../../engine/log/game-log.js';
 
 function ctx(smells, memory = {}, factions = ['player']) {
   return { memory, selfState: { factions }, perception: { smells } };

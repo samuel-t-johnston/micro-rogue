@@ -9,7 +9,7 @@
  * an edge that's already wide open to the corridor. Collisions are otherwise tolerated (floor-over-wall
  * is harmless; connectivity is what matters). See docs/design/procedural-3x3-dungeon.md.
  */
-import { createDoor } from '../../furniture.js';
+import { createDoor } from '../../entities/furniture.js';
 
 const cellsAdjacent = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) === 1;
 const randIn = (lo, hi, rng) => lo + rng.nextInt(0, hi - lo + 1);

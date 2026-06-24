@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { executeEquip } from './action-equip.js';
-import { createEntityRegistry } from '../../engine/entity-component-system.js';
-import { createDagger } from '../../world/items.js';
-import { components } from '../../world/components.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
+import { createDagger } from '../../world/entities/items.js';
+import { components } from '../../world/entities/components.js';
 import { Slots, HUMANOID_SLOTS } from '../../../data/equipment-slots.js';
 
 describe('executeEquip', () => {

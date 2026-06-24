@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { run as runRoomGridGeometry } from './stage-room-grid-geometry.js';
 import { run as runCarveRooms } from './stage-carve-rooms.js';
-import { createLevel } from '../../level.js';
-import { createRng } from '../../../engine/rng.js';
+import { createLevel } from '../../map/level.js';
+import { createRng } from '../../../engine/core/rng.js';
 
 function carve(seed = 1, config = {}) {
   const level = createLevel();

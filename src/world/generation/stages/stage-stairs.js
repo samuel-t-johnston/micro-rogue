@@ -3,7 +3,7 @@
  * carry a `transition` with a null destination — a coordinator wires it once multi-floor levels exist.
  * See docs/design/procedural-3x3-dungeon.md.
  */
-import { createStairs } from '../../furniture.js';
+import { createStairs } from '../../entities/furniture.js';
 import { centermostRoomTile } from '../zone-tiles.js';
 
 /** Runs the stairs finishing stage (see the file overview). */

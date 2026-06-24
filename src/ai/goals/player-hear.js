@@ -1,5 +1,5 @@
-import { gameLog } from '../../engine/game-log.js';
-import { describeSound } from '../../engine/sound-text.js';
+import { gameLog } from '../../engine/log/game-log.js';
+import { describeSound } from '../../engine/log/sound-text.js';
 
 /**
  * Player goal that never acts — it surfaces heard sounds to the message log as a side effect, then

@@ -1,5 +1,5 @@
-import { computeFov } from '../../engine/fov.js';
-import { getTileType } from '../../world/tile-registry.js';
+import { computeFov } from '../../engine/core/fov.js';
+import { getTileType } from '../../world/map/tile-registry.js';
 
 /**
  * Creates the vision sense: line-of-sight FOV gated by tile and entity opacity (range from the

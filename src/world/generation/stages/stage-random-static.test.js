@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { run as runRandomStatic } from './stage-random-static.js';
-import { createLevel } from '../../level.js';
-import { createRng } from '../../../engine/rng.js';
+import { createLevel } from '../../map/level.js';
+import { createRng } from '../../../engine/core/rng.js';
 import * as spiral from '../../../../data/maps/maze-spiral.js';
 import * as zigzag from '../../../../data/maps/maze-zigzag.js';
 import * as pillars from '../../../../data/maps/maze-pillars.js';

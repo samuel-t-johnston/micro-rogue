@@ -1,4 +1,4 @@
-import { drawText, drawButton, hitTest } from '../canvas-ui.js';
+import { drawText, drawButton, hitTest } from '../core/canvas-ui.js';
 
 const DIALOG_W = 320;
 const HEADER_H = 44;

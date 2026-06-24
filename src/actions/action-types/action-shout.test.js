@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { executeShout } from './action-shout.js';
-import { createEntityRegistry } from '../../engine/entity-component-system.js';
-import { createLevel } from '../../world/level.js';
-import { components } from '../../world/components.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
+import { createLevel } from '../../world/map/level.js';
+import { components } from '../../world/entities/components.js';
 
 function makeLevel() {
   const level = createLevel();

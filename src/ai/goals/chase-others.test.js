@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { chaseOthers } from './chase-others.js';
-import { createLevel } from '../../world/level.js';
-import { chebyshevDistance } from '../../world/geometry.js';
+import { createLevel } from '../../world/map/level.js';
+import { chebyshevDistance } from '../../world/map/geometry.js';
 
 function openLevel(w = 9, h = 9) {
   const level = createLevel();

@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { wanderAimlessly } from './wander-aimlessly.js';
-import { rng } from '../../engine/rng.js';
-import { createLevel } from '../../world/level.js';
-import { createBoulder } from '../../world/furniture.js';
-import { createEntityRegistry } from '../../engine/entity-component-system.js';
+import { rng } from '../../engine/core/rng.js';
+import { createLevel } from '../../world/map/level.js';
+import { createBoulder } from '../../world/entities/furniture.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 
 // Builds a level filled with `tileId` (floor by default), bordered by walls.
 function makeLevel(w = 5, h = 5, fill = 'floor') {

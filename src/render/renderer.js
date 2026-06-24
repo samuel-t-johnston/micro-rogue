@@ -1,10 +1,10 @@
-import { getTileType } from '../world/tile-registry.js';
+import { getTileType } from '../world/map/tile-registry.js';
 import { createSpriteRenderer } from './sprite-renderer.js';
 import { SPRITES, SHEETS } from '../../data/sprites/sprite-catalog.js';
 import { RenderLayers } from './render-layers.js';
 import { animations } from './animations.js';
 import { createZoom, ZOOM_LEVELS } from './zoom.js';
-import { gameSettings } from '../engine/settings.js';
+import { gameSettings } from '../engine/config/settings.js';
 
 // ASCII mode: skip sprites and draw glyphs. Read live so the Settings toggle takes effect next frame.
 const glyphMode = () => gameSettings.get('renderMode') === 'glyph';

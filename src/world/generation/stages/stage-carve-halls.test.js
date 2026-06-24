@@ -3,9 +3,9 @@ import { run as runRoomGridGeometry } from './stage-room-grid-geometry.js';
 import { run as runLink } from './stage-link.js';
 import { run as runCarveRooms } from './stage-carve-rooms.js';
 import { run as runCarveHalls } from './stage-carve-halls.js';
-import { createLevel } from '../../level.js';
-import { createEntityRegistry } from '../../../engine/entity-component-system.js';
-import { createRng } from '../../../engine/rng.js';
+import { createLevel } from '../../map/level.js';
+import { createEntityRegistry } from '../../../engine/core/entity-component-system.js';
+import { createRng } from '../../../engine/core/rng.js';
 
 function generate(seed = 1) {
   const level = createLevel();

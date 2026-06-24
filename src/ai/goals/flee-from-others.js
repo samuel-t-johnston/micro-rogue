@@ -1,5 +1,5 @@
 import { areHostile } from '../../combat/factions.js';
-import { chebyshevDistance, passableNeighbors } from '../../world/geometry.js';
+import { chebyshevDistance, passableNeighbors } from '../../world/map/geometry.js';
 
 // Distance from `pos` to the nearest hostile.
 function nearestHostileDistance(pos, hostiles) {

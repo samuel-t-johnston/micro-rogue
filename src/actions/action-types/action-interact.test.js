@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { executeInteract } from './action-interact.js';
-import { createEntityRegistry } from '../../engine/entity-component-system.js';
-import { createLevel } from '../../world/level.js';
-import { createDoor } from '../../world/furniture.js';
-import { gameLog } from '../../engine/game-log.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
+import { createLevel } from '../../world/map/level.js';
+import { createDoor } from '../../world/entities/furniture.js';
+import { gameLog } from '../../engine/log/game-log.js';
 
 function makeLevel() {
   const level = createLevel();

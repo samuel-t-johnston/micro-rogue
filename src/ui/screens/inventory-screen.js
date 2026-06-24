@@ -1,5 +1,5 @@
-import { drawText, hitTest } from '../canvas-ui.js';
-import { createActionMenu } from '../action-menu.js';
+import { drawText, hitTest } from '../core/canvas-ui.js';
+import { createActionMenu } from '../menus/action-menu.js';
 
 const ROW_H = 44; // minimum tap target (ux-design.md accessibility)
 const PADDING = 12;

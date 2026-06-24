@@ -4,8 +4,8 @@
  * carries `contents` (item type names). Placement is exact and deterministic — no RNG. `stairsUp`
  * doubles as the player's entry point. See docs/howto/static-map-layouts.md.
  */
-import { ENTITY_PREFABS } from '../../entity-prefabs.js';
-import { components } from '../../components.js';
+import { ENTITY_PREFABS } from '../../entities/entity-prefabs.js';
+import { components } from '../../entities/components.js';
 
 // The up-stairs and dungeon exit double as the player's arrival tile, so static placement tags them
 // with entryPoint. This is a placement concern, not part of the prefab's identity, so it lives here.

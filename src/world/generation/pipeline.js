@@ -3,7 +3,7 @@
  * stage functions and runs each against a fresh level, threading a shared blackboard. Register a
  * stage type in STAGES to make it usable from a pipeline config.
  */
-import { createLevel } from '../level.js';
+import { createLevel } from '../map/level.js';
 import { run as runStatic } from './stages/stage-static.js';
 import { run as runRandomStatic } from './stages/stage-random-static.js';
 import { run as runPlaceStaticEntities } from './stages/stage-place-static-entities.js';

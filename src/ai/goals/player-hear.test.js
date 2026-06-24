@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { playerHear } from './player-hear.js';
-import { gameLog } from '../../engine/game-log.js';
+import { gameLog } from '../../engine/log/game-log.js';
 
 function ctx(sounds, memory = {}, visibleTiles = new Set()) {
   return { memory, perception: { sounds, visibleTiles } };

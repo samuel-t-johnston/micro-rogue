@@ -1,5 +1,5 @@
 import { areHostile } from '../../combat/factions.js';
-import { chebyshevDistance, cardinalDirection } from '../../world/geometry.js';
+import { chebyshevDistance, cardinalDirection } from '../../world/map/geometry.js';
 
 // How loud a shouted order is — how far it carries on top of the hearer's own range.
 const SHOUT_VOLUME = 8;

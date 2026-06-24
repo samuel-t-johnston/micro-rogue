@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { investigate } from './investigate.js';
-import { createLevel } from '../../world/level.js';
+import { createLevel } from '../../world/map/level.js';
 
 function openLevel(w = 12, h = 12) {
   const level = createLevel();

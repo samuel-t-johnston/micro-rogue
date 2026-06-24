@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { run as runPlace } from './stage-place-static-entities.js';
-import { createLevel } from '../../level.js';
-import { createEntityRegistry } from '../../../engine/entity-component-system.js';
-import { resolveSpawn } from '../../spawn.js';
+import { createLevel } from '../../map/level.js';
+import { createEntityRegistry } from '../../../engine/core/entity-component-system.js';
+import { resolveSpawn } from '../../map/spawn.js';
 
 function place(entities) {
   const level = createLevel();

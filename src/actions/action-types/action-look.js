@@ -1,5 +1,5 @@
-import { gameLog } from '../../engine/game-log.js';
-import { describeTile } from '../../world/describe-tile.js';
+import { gameLog } from '../../engine/log/game-log.js';
+import { describeTile } from '../../world/map/describe-tile.js';
 
 /**
  * Examines a tile: writes what the actor perceives there to the log. Logged with the actor as

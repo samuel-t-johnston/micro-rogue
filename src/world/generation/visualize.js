@@ -3,7 +3,7 @@
  * (scripts/visualize-generation.mjs) and unit tests. No DOM, no game runtime.
  * See docs/design/procedural-3x3-dungeon.md (Visualization & debug tooling).
  */
-import { getTileType } from '../tile-registry.js';
+import { getTileType } from '../map/tile-registry.js';
 
 function tileChar(id) {
   if (id == null) return ' ';

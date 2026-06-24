@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { levelToAscii, zonesToText, zonesToMermaid } from './visualize.js';
-import { createLevel } from '../level.js';
+import { createLevel } from '../map/level.js';
 
 describe('levelToAscii', () => {
   it('renders tiles by symbol with entity glyphs overlaid', () => {

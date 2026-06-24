@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { executeConsume } from './action-consume.js';
-import { createEntityRegistry } from '../../engine/entity-component-system.js';
-import { createLevel } from '../../world/level.js';
-import { createHealingPotion, createPotionOfPain } from '../../world/items.js';
-import { components } from '../../world/components.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
+import { createLevel } from '../../world/map/level.js';
+import { createHealingPotion, createPotionOfPain } from '../../world/entities/items.js';
+import { components } from '../../world/entities/components.js';
 
 describe('executeConsume', () => {
   let registry, actor, potion;

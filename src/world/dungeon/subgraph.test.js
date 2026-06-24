@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { createEntityRegistry } from '../../engine/entity-component-system.js';
-import { components } from '../components.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
+import { components } from '../entities/components.js';
 import { collectSubgraph } from './subgraph.js';
 
 // Builds an owner entity carrying `inventory` + `wearsEquipment`, plus the items it holds.
