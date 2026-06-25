@@ -1,3 +1,5 @@
+import { tileKey } from '../core/tile-key.js';
+
 /**
  * Pure visibility rule for game-log entries, kept separate from the game scene so the
  * FOV policy is unit-testable without a renderer. The scene supplies the lookups
@@ -27,5 +29,5 @@ export function isEntryVisible(entry, { playerId, visibleTiles, getPosition }) {
 
   if (positions.length === 0) return true;
 
-  return positions.some((p) => visibleTiles.has(`${p.x},${p.y}`));
+  return positions.some((p) => visibleTiles.has(tileKey(p.x, p.y)));
 }

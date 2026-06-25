@@ -1,4 +1,5 @@
 import { getTileType } from '../world/map/tile-registry.js';
+import { tileKey, parseTileKey } from '../engine/core/tile-key.js';
 import { createSpriteRenderer } from './sprite-renderer.js';
 import { SPRITES, SHEETS } from '../../data/sprites/sprite-catalog.js';
 import { RenderLayers } from './render-layers.js';
@@ -79,7 +80,7 @@ export function createRenderer({
 
     for (let ty = y0; ty <= y1; ty++) {
       for (let tx = x0; tx <= x1; tx++) {
-        const key = `${tx},${ty}`;
+        const key = tileKey(tx, ty);
         const isVisible = !tilePerception || tilePerception.visible.has(key);
         const isRemembered = tilePerception?.memory.has(key);
 
@@ -117,7 +118,7 @@ export function createRenderer({
     ctx.globalAlpha = 0.4;
     for (const [key, snapshots] of tilePerception.rememberedEntities) {
       if (tilePerception.visible.has(key)) continue;
-      const [tx, ty] = key.split(',').map(Number);
+      const { x: tx, y: ty } = parseTileKey(key);
       if (tx < x0 || tx > x1 || ty < y0 || ty > y1) continue;
       const { x, y } = worldToScreen(tx, ty);
       // Lower layers (items) under higher (furniture); a copy keeps the stored order intact.
@@ -148,7 +149,7 @@ export function createRenderer({
       const renderable = entity.components.get('renderable');
       if (!pos || !renderable) continue;
       if (pos.x < x0 || pos.x > x1 || pos.y < y0 || pos.y > y1) continue;
-      if (tilePerception && !tilePerception.visible.has(`${pos.x},${pos.y}`)) continue;
+      if (tilePerception && !tilePerception.visible.has(tileKey(pos.x, pos.y))) continue;
       visible.push({ entity, pos, renderable });
     }
     visible.sort(
@@ -199,7 +200,7 @@ export function createRenderer({
   // a death you can't see doesn't flash through the fog.
   function drawAnimations(ctx, tilePerception) {
     for (const anim of animations.detached()) {
-      if (tilePerception && !tilePerception.visible.has(`${anim.x},${anim.y}`)) continue;
+      if (tilePerception && !tilePerception.visible.has(tileKey(anim.x, anim.y))) continue;
       const { x, y } = worldToScreen(anim.x, anim.y);
       drawRenderable(ctx, anim.renderable, x, y, animations.sampleDetached(anim));
     }

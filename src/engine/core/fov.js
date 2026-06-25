@@ -1,3 +1,5 @@
+import { tileKey } from './tile-key.js';
+
 /**
  * Symmetric shadowcasting (Albert Ford's algorithm): the set of tiles visible from (ox, oy).
  * Coordinates are 0-indexed tile coordinates (origin top-left).
@@ -9,7 +11,7 @@
  */
 export function computeFov(ox, oy, maxRange, isOpaque) {
   const visible = new Set();
-  visible.add(`${ox},${oy}`);
+  visible.add(tileKey(ox, oy));
 
   // [row_x, row_y, col_x, col_y]: maps (depth, col) to world offset from origin.
   // 4 quadrants cover the full 360° around the origin.
@@ -41,7 +43,7 @@ export function computeFov(ox, oy, maxRange, isOpaque) {
         const opaque = isOpaque(wx, wy);
 
         if (inRange && (opaque || isSymmetric(depth, col, startSlope, endSlope))) {
-          visible.add(`${wx},${wy}`);
+          visible.add(tileKey(wx, wy));
         }
 
         if (prevOpaque === true && !opaque) {

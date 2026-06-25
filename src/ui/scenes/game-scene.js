@@ -5,6 +5,7 @@
  * level transitions, and the single endGame() seam where death and victory converge.
  */
 import { rng } from '../../engine/core/rng.js';
+import { tileKey } from '../../engine/core/tile-key.js';
 import { gameConfig } from '../../engine/config/game-config.js';
 import { createRenderer } from '../../render/renderer.js';
 import { panCamera } from '../../render/camera-pan.js';
@@ -620,8 +621,8 @@ export function createGameScene({
         tileSize: renderer.tileSize,
         bounds: renderer.getVisibleTileRange(level),
         isPassable: (x, y) => level.isPassable(x, y),
-        isVisible: (x, y) => !tp || tp.visible.has(`${x},${y}`),
-        isRemembered: (x, y) => tp?.memory.has(`${x},${y}`) ?? false,
+        isVisible: (x, y) => !tp || tp.visible.has(tileKey(x, y)),
+        isRemembered: (x, y) => tp?.memory.has(tileKey(x, y)) ?? false,
         // Non-zero scent at a tile, per profile (for the heatmap layer).
         getScent: (x, y) => {
           if (!level.scent) return [];
