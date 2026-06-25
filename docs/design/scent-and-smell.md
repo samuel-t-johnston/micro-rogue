@@ -151,7 +151,7 @@ so every existing creature is unchanged and the scuttler can opt into `range 3`.
 - **`player-smell`** ([`goals/player-smell.js`](../../src/ai/goals/player-smell.js)) — twin of
   `player-hear`. Logs cues for non-self profiles, deduped by profile so a lingering scent doesn't
   spam every turn.
-- **`smell-text.describeSmell`** ([`src/engine/log/smell-text.js`](../../src/engine/log/smell-text.js)) —
+- **`smell-text.describeSmell`** ([`src/engine/log/text/smell-text.js`](../../src/engine/log/text/smell-text.js)) —
   twin of `sound-text`.
 
 **Configurable standout scents.** Not every scent is worth a log line. A profile → flavor map gates

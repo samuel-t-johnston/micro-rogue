@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { obeyShouts } from './obey-shouts.js';
+import { obeyShouts, HEADING_PERSISTENCE } from './obey-shouts.js';
 
 function sound({ understood = true, kind = 'enemy-report', direction = 'E' } = {}) {
   return { understood, message: { kind, direction } };
@@ -43,8 +43,9 @@ describe('obeyShouts', () => {
 
   it('lapses the heading after its persistence runs out', () => {
     const memory = {};
-    obeyShouts.evaluate(ctx([sound({ direction: 'E' })], memory)); // sets headingTurns = 4
-    for (let i = 0; i < 4; i++) obeyShouts.evaluate(ctx([], memory)); // drain it
+    obeyShouts.evaluate(ctx([sound({ direction: 'E' })], memory)); // sets headingTurns = HEADING_PERSISTENCE
+    // The order call itself consumes one turn of persistence; drain the rest so the next call lapses.
+    for (let i = 0; i < HEADING_PERSISTENCE - 1; i++) obeyShouts.evaluate(ctx([], memory));
     expect(obeyShouts.evaluate(ctx([], memory))).toBeNull();
   });
 

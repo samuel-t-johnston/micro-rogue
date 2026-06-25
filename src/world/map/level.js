@@ -1,4 +1,5 @@
 import { getTileType } from './tile-registry.js';
+import { tileKey } from '../../engine/core/tile-key.js';
 
 /**
  * Creates an empty level object (grid + spatial index + entity list) and its place/move/remove/query
@@ -23,19 +24,19 @@ export function createLevel({ branch = null, depth = null, pipelineId = null, se
     spatialIndex: new Map(), // "x,y" -> Set<entity>
 
     getTile(x, y) {
-      return this.overrides.get(`${x},${y}`) ?? this.tiles[y]?.[x] ?? null;
+      return this.overrides.get(tileKey(x, y)) ?? this.tiles[y]?.[x] ?? null;
     },
 
     // Returns entities at the given tile coordinates.
     getEntitiesAt(x, y) {
-      return this.spatialIndex.get(`${x},${y}`) ?? new Set();
+      return this.spatialIndex.get(tileKey(x, y)) ?? new Set();
     },
 
     // Places an entity onto this level. The entity must already have a position component.
     placeEntity(entity) {
       const pos = entity.components.get('position');
       if (!pos) throw new Error('placeEntity: entity has no position component');
-      const key = `${pos.x},${pos.y}`;
+      const key = tileKey(pos.x, pos.y);
       if (!this.spatialIndex.has(key)) this.spatialIndex.set(key, new Set());
       this.spatialIndex.get(key).add(entity);
       this.entities.push(entity);
@@ -46,11 +47,11 @@ export function createLevel({ branch = null, depth = null, pipelineId = null, se
     moveEntity(entity, x, y) {
       const pos = entity.components.get('position');
       if (pos) {
-        this.spatialIndex.get(`${pos.x},${pos.y}`)?.delete(entity);
+        this.spatialIndex.get(tileKey(pos.x, pos.y))?.delete(entity);
         pos.x = x;
         pos.y = y;
       }
-      const key = `${x},${y}`;
+      const key = tileKey(x, y);
       if (!this.spatialIndex.has(key)) this.spatialIndex.set(key, new Set());
       this.spatialIndex.get(key).add(entity);
     },
@@ -58,7 +59,7 @@ export function createLevel({ branch = null, depth = null, pipelineId = null, se
     // Removes an entity from the level's entity list and spatial index.
     removeEntity(entity) {
       const pos = entity.components.get('position');
-      if (pos) this.spatialIndex.get(`${pos.x},${pos.y}`)?.delete(entity);
+      if (pos) this.spatialIndex.get(tileKey(pos.x, pos.y))?.delete(entity);
       const idx = this.entities.indexOf(entity);
       if (idx !== -1) this.entities.splice(idx, 1);
     },

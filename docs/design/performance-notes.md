@@ -27,7 +27,7 @@ Each acting entity runs its senses every turn (`src/ai/core/planning-context.js`
 ### 3. `"x,y"` string keys in hot paths
 The spatial index (`src/world/map/level.js`), FOV's `visibleTiles` (`src/engine/core/fov.js`), and `tilePerception.visible`/`memory` all key by `` `${x},${y}` `` strings. Every lookup allocates and hashes a string. The scent field already avoids this with integer indexing (`y * width + x`, `src/world/sense-systems/scent.js`).
 
-- **Fix direction:** adopt integer tile keys (`y * width + x`) more widely. Highest-leverage *representation* change; touches several systems, so do it deliberately.
+- **Fix direction:** adopt integer tile keys (`y * width + x`) more widely. Highest-leverage *representation* change; touches several systems, so do it deliberately. The encode/decode now lives in one place — `tileKey`/`parseTileKey` (`src/engine/core/tile-key.js`) — so switching the format is a single-file change rather than ~40 scattered string literals.
 
 ### 4. Per-call allocations in tight loops
 - `level.getEntitiesAt` returns a fresh `new Set()` on every miss (`src/world/map/level.js`) — called constantly by `isPassable`, FOV, and pathfinding. A shared frozen empty Set is a trivial win.

@@ -1,4 +1,5 @@
 import { computeFov } from '../../engine/core/fov.js';
+import { tileKey } from '../../engine/core/tile-key.js';
 import { getTileType } from '../../world/map/tile-registry.js';
 
 /**
@@ -28,7 +29,7 @@ export function createVisionSense() {
       if (e === entity) continue;
       const ePos = e.components.get('position');
       if (!ePos) continue;
-      if (!visibleTiles.has(`${ePos.x},${ePos.y}`)) continue;
+      if (!visibleTiles.has(tileKey(ePos.x, ePos.y))) continue;
       entities.push({
         entityId: e.id,
         position: { x: ePos.x, y: ePos.y },

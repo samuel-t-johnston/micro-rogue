@@ -1,6 +1,6 @@
 /**
- * @file Cold storage: freezing the active level into a serialized blob and thawing it back. This is
- * the "model (b)" runtime — only the *active* level's entities ever live in the registry, so the
+ * @file Cold storage: freezing the active level into a serialized blob and thawing it back.
+ * Only the *active* level's entities ever live in the registry, so the
  * registry-global turn manager and sense systems never tick or see frozen floors. The complexity of
  * multi-floor state is absorbed here at the transition boundary instead of being pushed into every
  * system. See docs/design/map-generation.md ("Level Lifecycle and Cold Storage").

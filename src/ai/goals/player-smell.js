@@ -1,5 +1,5 @@
 import { gameLog } from '../../engine/log/game-log.js';
-import { describeSmell } from '../../engine/log/smell-text.js';
+import { describeSmell } from '../../engine/log/text/smell-text.js';
 
 /**
  * Player goal that never acts — surfaces notable smells to the message log as a side effect, then

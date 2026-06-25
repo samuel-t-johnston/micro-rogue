@@ -1,4 +1,5 @@
 import { DIRECTIONS_8, passableNeighbors } from './geometry.js';
+import { tileKey } from '../../engine/core/tile-key.js';
 
 /**
  * BFS pathfinding over the level grid. Supports 8-directional movement.
@@ -9,7 +10,7 @@ export function findPath(from, to, level) {
   if (from.x === to.x && from.y === to.y) return [];
 
   const queue = [{ x: from.x, y: from.y, path: [] }];
-  const visited = new Set([`${from.x},${from.y}`]);
+  const visited = new Set([tileKey(from.x, from.y)]);
 
   while (queue.length > 0) {
     const { x, y, path } = queue.shift();
@@ -17,7 +18,7 @@ export function findPath(from, to, level) {
     for (const [dx, dy] of DIRECTIONS_8) {
       const nx = x + dx;
       const ny = y + dy;
-      const key = `${nx},${ny}`;
+      const key = tileKey(nx, ny);
 
       if (visited.has(key)) continue;
       if (!level.isPassable(nx, ny)) continue;

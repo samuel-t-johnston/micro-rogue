@@ -42,6 +42,7 @@ export const gameLog = {
   getDisplayEntries(count) {
     return log.getDisplayEntries(count);
   },
+
   getAll() {
     return log.getAll();
   },

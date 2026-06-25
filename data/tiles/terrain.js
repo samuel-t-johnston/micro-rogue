@@ -1,6 +1,7 @@
-// Tile types. `sprite` is a catalog name (data/sprites/sprite-catalog.js); `glyph`/`glyphColor`
-// are the ASCII-mode rendering (and the sprite-mode fallback). `symbol` is the legacy text-map
-// character used by generation/visualization tooling.
+// Tile types.
+// `sprite` is a catalog name (data/sprites/sprite-catalog.js);
+// `glyph`/`glyphColor` are the ASCII-mode rendering (and the sprite-mode fallback).
+// `symbol` is the legacy text-map character used by generation/visualization tooling.
 export default {
   floor: {
     name: 'Floor',

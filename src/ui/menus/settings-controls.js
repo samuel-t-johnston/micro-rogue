@@ -8,9 +8,9 @@ import {
 
 /**
  * @file Renders the Settings sub-page as a vertical list of rows, each a left-aligned label with an
- * optional wrapped description below it and a right-aligned segmented control beneath that (the
- * layout chosen in the settings rework). Distinct from menu-shell's centered action buttons:
- * settings are label + value, not buttons, and need room for explanatory text.
+ * optional wrapped description below it and a right-aligned segmented control beneath that.
+ * Distinct from menu-shell's centered action buttons: settings are label + value, not buttons, and
+ * need room for explanatory text.
  *
  * A row is { id, label, description?, options: [{label, value}], get(): value, set(value) }.
  * `get` is read every frame so the highlighted segment always reflects live state; segment taps

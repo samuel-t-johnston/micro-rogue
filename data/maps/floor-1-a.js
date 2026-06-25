@@ -4,9 +4,7 @@ export const legend = {
 };
 
 // Two rooms sharing a wall, with a door at the floor opening (col 5, row 3). The player starts on the
-// up-stairs (the dungeon exit) in the lower room; on the return trip from below they arrive on the
-// stairs-down in the upper room and must cross back to the exit to win. Entities are authored below
-// and placed by stage-place-static-entities.
+// up-stairs (the dungeon exit) in the lower room. Entities are authored below and placed by stage-place-static-entities.
 export const tiles = `\
 ############
 #..........#

@@ -11,6 +11,7 @@
  * they were last seen. Terrain in the remembered tier comes from the snapshot in `memory`.
  */
 import { getTileType } from './tile-registry.js';
+import { tileKey } from '../../engine/core/tile-key.js';
 
 const VOWELS = new Set(['a', 'e', 'i', 'o', 'u']);
 const withArticle = (noun) => `${VOWELS.has(noun[0]?.toLowerCase()) ? 'an' : 'a'} ${noun}`;
@@ -53,7 +54,7 @@ function terrainPhrase(tileId) {
  */
 export function describeTile(level, viewer, tile) {
   const { x, y } = tile;
-  const key = `${x},${y}`;
+  const key = tileKey(x, y);
   const tp = viewer?.components.get('tilePerception');
   const visible = !tp || tp.visible.has(key);
   const remembered = tp && !visible && tp.memory.has(key);

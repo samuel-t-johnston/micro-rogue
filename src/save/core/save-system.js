@@ -1,7 +1,7 @@
 /**
- * @file Save system — the persistence core (M4). Pure snapshot/restore plus the migration-chain
+ * @file Save system — the persistence core. Pure snapshot/restore plus the migration-chain
  * runner and thin localStorage I/O. No autosave triggers, visibilitychange handling, or UI
- * wiring lives here; those build on this foundation in a later phase.
+ * wiring lives here; those build on this foundation.
  *
  * See docs/design/save-system-design.md. Two divergences from that doc, forced by the code:
  *   - The serialization unit is the whole entity registry as one flat list (items inside
@@ -21,6 +21,7 @@ import {
 
 /** Save schema version. Bumped only on a breaking schema change (see the design doc). */
 export const SAVE_VERSION = 5;
+
 /** Game release version; independent of SAVE_VERSION, tracks releases and mirrors package.json. */
 export const GAME_VERSION = '0.0.0';
 

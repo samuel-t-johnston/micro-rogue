@@ -1,6 +1,7 @@
 import { resolveSenses } from '../senses/sense-registry.js';
 import { areHostile } from '../../combat/factions.js';
 import { chebyshevDistance, projectTile } from '../../world/map/geometry.js';
+import { parseTileKey } from '../../engine/core/tile-key.js';
 
 // An entity is remembered in the fog of war (snapshotted into tilePerception.rememberedEntities) if
 // it has any of these components. A list, not a single marker, so a whole class of entities can be
@@ -141,7 +142,7 @@ export function applySenses(entity, level, turnCount = 0) {
   if (tilePerception) {
     tilePerception.visible = currentVisible;
     for (const key of currentVisible) {
-      const [x, y] = key.split(',').map(Number);
+      const { x, y } = parseTileKey(key);
       const tileId = level.getTile(x, y);
       if (tileId !== null) tilePerception.memory.set(key, tileId);
       rememberEntities(tilePerception, level, key, x, y);

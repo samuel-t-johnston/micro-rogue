@@ -1,5 +1,6 @@
 import { DIRECTIONS_8, cardinalDirection } from '../map/geometry.js';
 import { getTileType } from '../map/tile-registry.js';
+import { tileKey, parseTileKey } from '../../engine/core/tile-key.js';
 
 /**
  * @file The scent field: per-profile scalar grids on `level.scent` (Map<profile, Float32Array>), one
@@ -126,7 +127,7 @@ export function serializeScent(level) {
   for (const [profile, grid] of level.scent) {
     const cells = {};
     for (let i = 0; i < grid.length; i++) {
-      if (grid[i] > 0) cells[`${i % level.width},${Math.floor(i / level.width)}`] = grid[i];
+      if (grid[i] > 0) cells[tileKey(i % level.width, Math.floor(i / level.width))] = grid[i];
     }
     if (Object.keys(cells).length > 0) out[profile] = cells;
   }
@@ -142,7 +143,7 @@ export function deserializeScent(data, width, height) {
   for (const [profile, cells] of Object.entries(data ?? {})) {
     const grid = new Float32Array(width * height);
     for (const [key, value] of Object.entries(cells)) {
-      const [x, y] = key.split(',').map(Number);
+      const { x, y } = parseTileKey(key);
       grid[y * width + x] = value;
     }
     scent.set(profile, grid);

@@ -1,5 +1,5 @@
 import { gameLog } from '../../engine/log/game-log.js';
-import { subject, conjugate, itemName } from '../../engine/log/log-text.js';
+import { subject, conjugate, itemName } from '../../engine/log/text/log-text.js';
 
 /**
  * Removes the item in the given slot (`action.slot`) from the actor's equipment back into inventory.
