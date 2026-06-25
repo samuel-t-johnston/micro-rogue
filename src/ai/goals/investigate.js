@@ -1,6 +1,7 @@
 import { findPath } from '../../world/map/pathfinding.js';
 
 // How many of the creature's own turns a cold lead survives before it gives up and forgets.
+// This could be made a parameter of the goal, but for now it's a constant.
 const GIVE_UP_TURNS = 8;
 
 /**

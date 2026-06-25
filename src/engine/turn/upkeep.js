@@ -2,7 +2,7 @@
  * @file The per-player-turn upkeep registry — "once per player turn, after the world has settled."
  *
  * This is the documented home for world updates that should happen exactly once each player turn:
- * scent diffusion and autosave today; status-effect ticks, regeneration, weather later. Rather than
+ * scent diffusion and autosave today; status-effect ticks, regeneration later. Rather than
  * burying each in the game-scene turn-start closure, they register here as ordered steps.
  *
  * Run order is load-bearing: scent must diffuse *before* autosave so a reload restores the

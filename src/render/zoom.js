@@ -1,5 +1,5 @@
 /**
- * @file Discrete zoom ladder for the map view (roadmap M7). Levels are on-screen tile sizes in CSS
+ * @file Discrete zoom ladder for the map view. Levels are on-screen tile sizes in CSS
  * pixels; sprites are sourced from the 16px sheet and scaled to these by integer factors (×1..×4), so
  * every level stays pixel-crisp. Index 0 is the widest view, the last index the closest. Pure state —
  * input (wheel/pinch) and the renderer drive it; nothing here is persisted.

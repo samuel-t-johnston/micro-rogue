@@ -3,7 +3,7 @@
  * and the travel operation that moves the player between them. It is the consumer side of the transit
  * map (data/transit-map.js) — it never decides topology, it executes it.
  *
- * Model (b): only the active floor's entities live in the registry. travel() freezes the floor being
+ * Only the active floor's entities live in the registry. travel() freezes the floor being
  * left (serializing its entities out and removing them), then generates or thaws the destination, so
  * the registry-global turn manager and senses always see exactly one floor + the player.
  * See docs/design/map-generation.md and docs/design/dungeon-planner.md.

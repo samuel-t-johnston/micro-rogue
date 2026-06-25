@@ -4,6 +4,12 @@
  *
  * The underlying generator is Mulberry32.
  * @see https://gist.github.com/tommyettinger/46a874533244883189143505d203312c
+ *
+ * The module is designed to be self-contained, so a different generator could be swapped in without
+ * touching the rest of the codebase. The API is designed to be deterministic and reproducible, so
+ * that given the same master seed and the same sequence of calls, the same random numbers will be
+ * produced. This is crucial for things like procedural generation and replaying game states from a
+ * specific seed.
  */
 
 // --- mixing primitives ---

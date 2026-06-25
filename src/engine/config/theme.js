@@ -1,3 +1,8 @@
+/**
+ * @file Color theme tokens and live CSS custom-property values. These are used across the UI for consistent theming,
+ * and can be read live from the DOM to support dynamic theme switching.
+ */
+
 const TOKEN_MAP = {
   bg: '--color-bg',
   surface: '--color-surface',

@@ -7,6 +7,7 @@ export const playerAutoPickup = {
   evaluate(context) {
     const { selfState, level, memory, hasPendingInput } = context;
 
+    // Unlikely timing, but if the player tapped or pressed something while auto-pickup was queued, cancel it.
     if (hasPendingInput()) return null;
 
     const { x, y } = selfState.position;
