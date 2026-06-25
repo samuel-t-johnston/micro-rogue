@@ -51,7 +51,17 @@ describe('fleeFromOthers', () => {
     expect(result).toEqual({ action: { type: 'move', x: 3, y: 2 } });
   });
 
-  it('waits when cornered (no neighbor improves distance)', () => {
+  it('slides to an equally-distant tile when no neighbor is farther', () => {
+    // Self against the south wall at (3,5), hostile far north at (3,1). Moving north closes the
+    // gap; the east/west tiles along the wall hold chebyshev distance 4. It should keep moving
+    // (to the first equally-distant tile) rather than wait.
+    const result = fleeFromOthers.evaluate(
+      ctx([obs(9, 3, 1, ['player'])], openLevel(), { x: 3, y: 5 }),
+    );
+    expect(result).toEqual({ action: { type: 'move', x: 2, y: 5 } });
+  });
+
+  it('waits when cornered (every neighbor is strictly closer)', () => {
     // Only (1,1) and (1,2) are passable; hostile sits at (1,2), so the lone exit moves
     // toward it. No neighbor increases distance → wait.
     const level = sparseLevel(['1,1', '1,2']);

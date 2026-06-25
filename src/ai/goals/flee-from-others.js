@@ -8,8 +8,9 @@ function nearestHostileDistance(pos, hostiles) {
 
 /**
  * NPC goal: moves away from hostile actors — steps to the adjacent tile that maximizes distance to
- * the nearest hostile. If no neighbor improves on the current distance (cornered), waits. Returns
- * null when no hostile is perceived.
+ * the nearest hostile. Will take an equally-distant tile when none is farther (e.g. sliding along a
+ * wall) so it keeps moving and may find a gap; only waits when every neighbor is strictly closer —
+ * truly cornered with a hostile closing in on the diagonal. Returns null when no hostile is perceived.
  */
 export const fleeFromOthers = {
   evaluate(context) {
@@ -23,7 +24,7 @@ export const fleeFromOthers = {
     const currentDistance = nearestHostileDistance(selfState.position, hostiles);
 
     let best = null;
-    let bestDistance = currentDistance;
+    let bestDistance = -Infinity;
     for (const tile of passableNeighbors(selfState.position, level)) {
       const distance = nearestHostileDistance(tile, hostiles);
       if (distance > bestDistance) {
@@ -32,7 +33,8 @@ export const fleeFromOthers = {
       }
     }
 
-    if (!best) return { action: { type: 'wait' } };
+    // Move if we can hold or improve our distance; wait only when every escape closes the gap.
+    if (!best || bestDistance < currentDistance) return { action: { type: 'wait' } };
     return { action: { type: 'move', x: best.x, y: best.y } };
   },
 };
