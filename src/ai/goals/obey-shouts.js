@@ -1,8 +1,9 @@
 import { DIRECTION_STEPS } from '../../world/map/geometry.js';
 
 // How many turns to keep advancing on a heard order after the sound itself has faded. Sounds decay
-// in a couple of turns; this lets a heading carry the orc onward between shouts.
-const HEADING_PERSISTENCE = 4;
+// in a couple of turns; this lets a heading carry the orc onward between shouts. Exported so tests
+// assert the lapse behavior against the actual value rather than a duplicated magic number.
+export const HEADING_PERSISTENCE = 6;
 
 /**
  * NPC goal: obey a shouted, understood enemy report by advancing in the reported direction. This is
