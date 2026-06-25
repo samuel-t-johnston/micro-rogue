@@ -25,7 +25,7 @@ const WIGGLE_MS = 150;
 const SMOOSH_MS = 260;
 
 // How far an attack lunge displaces the attacker toward its target, in tiles.
-const WIGGLE_AMP = 0.35;
+const WIGGLE_AMP = 0.5;
 
 const now = () => performance.now();
 
