@@ -1,5 +1,5 @@
 import { gameLog } from '../../engine/log/game-log.js';
-import { subject, conjugate, itemName } from '../../engine/log/log-text.js';
+import { subject, conjugate, itemName } from '../../engine/log/text/log-text.js';
 
 /**
  * Executes an interact action against an adjacent target entity, dispatching to container or door

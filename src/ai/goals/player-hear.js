@@ -1,5 +1,6 @@
 import { gameLog } from '../../engine/log/game-log.js';
-import { describeSound } from '../../engine/log/sound-text.js';
+import { describeSound } from '../../engine/log/text/sound-text.js';
+import { tileKey } from '../../engine/core/tile-key.js';
 
 /**
  * Player goal that never acts — it surfaces heard sounds to the message log as a side effect, then
@@ -17,7 +18,7 @@ export const playerHear = {
     // (its own log lines), so surfacing "you hear fighting" for a brawl in plain view is just noise.
     const visible = perception.visibleTiles ?? new Set();
     const sounds = (perception.sounds ?? []).filter(
-      (s) => !(s.position && visible.has(`${s.position.x},${s.position.y}`)),
+      (s) => !(s.position && visible.has(tileKey(s.position.x, s.position.y))),
     );
 
     const currentIds = new Set(sounds.map((s) => s.soundId));

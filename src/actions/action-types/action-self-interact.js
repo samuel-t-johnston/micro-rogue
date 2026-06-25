@@ -1,6 +1,6 @@
 import { executePickup } from './action-pickup.js';
 import { gameLog } from '../../engine/log/game-log.js';
-import { subject, conjugate, itemName } from '../../engine/log/log-text.js';
+import { subject, conjugate, itemName } from '../../engine/log/text/log-text.js';
 
 /**
  * Handles a tap on the actor's own tile: travel via stairs underfoot, or pick up item(s) here

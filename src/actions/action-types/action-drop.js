@@ -1,6 +1,6 @@
 import { components } from '../../world/entities/components.js';
 import { gameLog } from '../../engine/log/game-log.js';
-import { subject, conjugate, itemName } from '../../engine/log/log-text.js';
+import { subject, conjugate, itemName } from '../../engine/log/text/log-text.js';
 
 /**
  * Removes an item from the actor's inventory and places it on the map at the actor's tile.

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { isPlayer, subject, object, conjugate, itemName } from './log-text.js';
-import { createEntityRegistry } from '../core/entity-component-system.js';
-import { components } from '../../world/entities/components.js';
+import { createEntityRegistry } from '../../core/entity-component-system.js';
+import { components } from '../../../world/entities/components.js';
 
 function makeEntity(extra) {
   const registry = createEntityRegistry();

@@ -45,7 +45,7 @@ The player is a `scentSource('player')`, so the swarm hunts them through the lat
 
 ## The player's nose
 
-The player has the `smell` sense with a *dull* threshold — only strong, near scent registers. The [`player-smell`](../../src/ai/goals/player-smell.js) goal logs notable scents ("You smell the stench of orcs to the north"), deduped by profile. **What's noteworthy is configurable**: [`smell-text.js`](../../src/engine/log/smell-text.js) holds a profile→flavor table, and a profile with no entry produces no line (orcs reek; scuttlers don't register — they're heard, not smelled).
+The player has the `smell` sense with a *dull* threshold — only strong, near scent registers. The [`player-smell`](../../src/ai/goals/player-smell.js) goal logs notable scents ("You smell the stench of orcs to the north"), deduped by profile. **What's noteworthy is configurable**: [`smell-text.js`](../../src/engine/log/text/smell-text.js) holds a profile→flavor table, and a profile with no entry produces no line (orcs reek; scuttlers don't register — they're heard, not smelled).
 
 ## Debugging
 

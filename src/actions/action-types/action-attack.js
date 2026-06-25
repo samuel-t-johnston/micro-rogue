@@ -2,7 +2,7 @@ import { applyEffect } from '../../effects/core/effects.js';
 import { getAttribute, Attributes } from '../../attributes/attributes.js';
 import { gameLog } from '../../engine/log/game-log.js';
 import { animations } from '../../render/animations.js';
-import { subject, object, conjugate } from '../../engine/log/log-text.js';
+import { subject, object, conjugate } from '../../engine/log/text/log-text.js';
 import { emitSound } from '../../world/sense-systems/sounds.js';
 
 /**

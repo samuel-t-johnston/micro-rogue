@@ -1,9 +1,11 @@
 import { gameLog } from '../../engine/log/game-log.js';
-import { subject, conjugate, itemName } from '../../engine/log/log-text.js';
+import { subject, conjugate, itemName } from '../../engine/log/text/log-text.js';
 
 /**
  * Moves an equippable item from the actor's inventory into its equipment slot. If the slot is
  * already occupied, the previously equipped item is unequipped back into inventory first (atomic swap).
+ *
+ * In a system where unequipping costs a turn, this would need to become a two-turn action (unequip then equip).
  * @returns {boolean} Always `false` — equipping consumes the turn.
  */
 export function executeEquip(actor, action, _level, _registry) {

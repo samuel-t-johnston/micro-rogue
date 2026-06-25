@@ -16,7 +16,7 @@ It has no `renderable` (invisible), no `blocksMovement`, and crucially no `creat
 
 - **`volume`** extends how far the sound carries: a hearer perceives it within `hearing.range + volume`.
 - **`language`** is the vocalization's language (`null` for non-verbal noise like a clang or scream).
-- **`message`** is structured semantics the AI acts on — e.g. `{ kind: 'enemy-report', direction: 'NW' }`. Never free text; the player-facing string is *derived* from the message ([`sound-text.js`](../../src/engine/log/sound-text.js)).
+- **`message`** is structured semantics the AI acts on — e.g. `{ kind: 'enemy-report', direction: 'NW' }`. Never free text; the player-facing string is *derived* from the message ([`sound-text.js`](../../src/engine/log/text/sound-text.js)).
 
 ## Emitting a sound
 
