@@ -250,7 +250,7 @@ are additive fields with tolerant defaults, no migration needed.*
 - [x] Review the “how-to” documents, correct mistakes, add missing info.
 - [x] Replace/update original design docs
 - [x] Spiff up GitHub and readme.md
-- [ ] Update version to v0.1.0
+- [x] Update version to v0.1.0
 
 *At the end of this milestone we will move into Alpha with standard version numbers: Alpha v0.1.0.*
 
