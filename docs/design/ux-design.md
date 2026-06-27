@@ -38,7 +38,7 @@ Touch is the primary interaction model. See `mobile-roguelike-design.md` for ful
 
 - **Tap-to-move** with pathfinding as the primary interaction
 - **Context-sensitive tap** — tapping an enemy attacks, tapping an item picks up, tapping open space moves. Tapping your own tile takes its primary action (descend stairs, pick up) or, with nothing underfoot, waits one turn — a deliberate pass for tactical positioning.
-- **Long press** for secondary actions (examine, interact vs. move). On your own tile the menu always offers **Wait**, so passing a turn is reachable even when standing on stairs or an item.
+- **Long press** for secondary actions (examine, interact vs. move). On your own tile the menu always offers **Wait**, so passing a turn is reachable even when standing on stairs or an item. On an adjacent container the menu offers **Place items** alongside the default Open/take, so items move both ways (the same multi-select dialog, relabelled) without a separate transfer UI.
 - Pointer type (`coarse` vs. `fine`) is a more reliable signal than screen size for choosing input defaults
 
 **Mouse** maps cleanly onto the touch model — click where you would tap. The additional affordance is hover states: tile coordinates, enemy name and rough health, item identification preview. These are enhancements for pointer users; nothing should depend on them.

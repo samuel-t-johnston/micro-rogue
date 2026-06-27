@@ -105,7 +105,18 @@ export function resolveTileActions(level, playerPos, tile) {
         actions.push(interactRow('open', 'Open', door)); // closed door defaults to opening
       }
     }
-    if (container) actions.push(interactRow('open-container', 'Open', container));
+    if (container) {
+      actions.push(interactRow('open-container', 'Open', container));
+      // Secondary, menu-only: place items in. A raw tap takes the primary (open) row; storing is a
+      // deliberate choice. Always offered (no-op if the player is carrying nothing) — resolveTileActions
+      // is positional and doesn't see the inventory, and the store handler is free when there's nothing.
+      actions.push({
+        id: 'store',
+        label: 'Place items',
+        action: { type: 'interact', targetEntityId: container.id, mode: 'store' },
+        free: false,
+      });
+    }
     if (passable && !door) actions.push(moveRow());
   } else if (passable) {
     actions.push(moveRow()); // distant tile — the goal turns this into auto-move
