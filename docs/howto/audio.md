@@ -61,14 +61,7 @@ Three channel volumes (`masterVolume`, `sfxVolume`, `musicVolume`) live in [`gam
 
 The audio modules also support independent per-channel **mute** (`sfx.setMuted` etc.), kept separate from volume so unmute restores the slider position — but mute isn't surfaced in the UI yet; an "Off" volume covers silencing for now.
 
-## Testing
+## Worth Knowing
 
-Real audio output is browser-only and verified by ear. What *is* unit-tested (`src/audio/*.test.js`) is the **no-op degradation contract** under happy-dom (which has no `AudioContext`): nothing throws, `play`/`loop` always return a `{stop()}` handle, and volume/mute state round-trips. Don't reach for audio assertions beyond that — follow the canvas/feel guidance in [AGENTS.md](../../AGENTS.md) and listen.
-
-## Don't
-
-- Guard call sites with `if (audioEnabled)` — the facade no-ops; that's the point.
-- Import `audio-core` from gameplay — import `sfx` / `music`.
-- Let the audio modules read `localStorage` or config — the engine pushes values down through the setters.
-- Store audio settings in the save file — they're device-level.
-- Decode music into an `AudioBuffer` — it streams through an `<audio>` element.
+- Don't guard call sites with `if (audioEnabled)` — the facade no-ops; that's the point.
+- Don't import `audio-core` from gameplay — import `sfx` / `music`. `audio-core` only needs to receive the audio config settings.

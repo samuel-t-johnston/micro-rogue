@@ -36,6 +36,13 @@ No build step. Source files are served directly to the browser as ES modules. To
 
 Whenever you commit changes that impact what files the browser loads, bump the cache version in `serviceworker.js`.
 
+If you are explicitly asked to change the app's version number, do it in these places. Then remind the user to tag the release in GitHub.
+
+1. package.json — version
+2. package-lock.json — the two root version fields (not the dependency versions)
+3. src/save/core/save-system.js — GAME_VERSION (its comment says it mirrors package.json)
+4. service-worker.js — CACHE_VERSION (a changed loaded file requires a cache bump)
+
 ## Run Instructions
 
 Local dev (live-server on `http://127.0.0.1:8000` with auto-reload):
