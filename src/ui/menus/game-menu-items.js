@@ -79,6 +79,6 @@ export function buildSettingsPage() {
 export function buildCreditsPage() {
   return {
     title: 'Credits',
-    text: '-- Code --\nSam Johnston\n\n-- Pixel Art (and Inspiration) --\nProject Utumno/DCSS Artists\nELV Games\nMerchant-Shade\nGlionox\nCraftPix\nKenny Vleugels',
+    text: '-- Code --\nSam Johnston\n\n-- Music --\nSamuel F Johanns\n\n--SFX--\nFreesound Community\n\n-- Pixel Art (and Inspiration) --\nProject Utumno/DCSS Artists\nELV Games\nMerchant-Shade\nGlionox\nCraftPix\nKenny Vleugels',
   };
 }
