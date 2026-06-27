@@ -257,6 +257,9 @@ are additive fields with tolerant defaults, no migration needed.*
 ---
 
 ## Side Quest - Sound
+
+*A fun little side quest to get sound into the engine.*
+
 - [x] Audio modules - Core, music, SFX
 - [x] Menu SFX
 - [x] Start menu music
