@@ -12,6 +12,7 @@ const PASS_THROUGH = new Set([
   'attack',
   'selfInteract',
   'lookAt',
+  'wait',
 ]);
 
 /**

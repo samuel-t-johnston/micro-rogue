@@ -91,11 +91,17 @@ describe('playerGetInput', () => {
     expect(result).toEqual({ action: { type: 'interact', targetEntityId: 7 } });
   });
 
-  it('does not examine on a plain tap (look is menu-only); keeps waiting', async () => {
-    // The own (empty) tile resolves to only the free look row — a tap there must be a no-op.
-    const ctx = makeContext(level, [tap(2, 2), tap(3, 2)]);
+  it('waits one turn on a tap on the own (empty) tile', async () => {
+    // Nothing underfoot, so the self tile's primary action is Wait.
+    const ctx = makeContext(level, [tap(2, 2)]);
     const result = await playerGetInput.evaluate(ctx);
-    expect(result).toEqual({ action: { type: 'move', x: 3, y: 2 } });
+    expect(result).toEqual({ action: { type: 'wait' } });
+  });
+
+  it('passes a menu wait action straight through', async () => {
+    const ctx = makeContext(level, [{ type: 'wait' }]);
+    const result = await playerGetInput.evaluate(ctx);
+    expect(result).toEqual({ action: { type: 'wait' } });
   });
 
   it('passes a menu lookAt action straight through', async () => {
