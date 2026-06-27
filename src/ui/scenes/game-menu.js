@@ -4,6 +4,7 @@ import { createMenuShell } from '../menus/menu-shell.js';
 import { createActionMenu } from '../menus/action-menu.js';
 import { createNotice } from '../overlays/notice.js';
 import { buildSettingsPage, buildCreditsPage } from '../menus/game-menu-items.js';
+import { music } from '../../audio/music.js';
 
 /**
  * @file Main menu scene. The option list and Settings drill-down come from the shared menu-shell
@@ -72,6 +73,16 @@ export function createMenuScene({ theme, getViewport, onAction, notice = null })
   });
 
   return {
+    // Start the title theme on entry; the app-state machine calls exit() on teardown to fade it out
+    // when leaving for the game/instructions. Music is a no-op until audio unlocks (the splash OK
+    // button is the gesture), so a track requested here is stashed and starts the moment it can.
+    enter() {
+      music.play('menu-theme', { fade: 800 });
+    },
+    exit() {
+      music.stop({ fade: 400 });
+    },
+
     render(ctx) {
       const { width, height } = getViewport();
       ctx.fillStyle = theme.bg;

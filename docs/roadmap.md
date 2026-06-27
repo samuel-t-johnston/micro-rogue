@@ -256,6 +256,13 @@ are additive fields with tolerant defaults, no migration needed.*
 
 ---
 
+## Side Quest - Sound
+- [x] Audio modules - Core, music, SFX
+- [x] Menu SFX
+- [x] Start menu music
+
+---
+
 ## Alpha - v0.2.0 - Action Jackson
 
 *Done when the engine supports wait, drop, throw actions, and short range (spear) + long-range (bow) ranged attacks. Additional features to make these work: ammo item component, needs-ammo equipment property, stackable item component, ranged attack NPC goal, ranged attack player capability. Temporary map adjustments for testing.*

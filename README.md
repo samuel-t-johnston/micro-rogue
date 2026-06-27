@@ -31,7 +31,7 @@ Traditional roguelikes are great projects for brand new game devs, and equally f
 
 Traditional roguelikes rely on simple systems that interact with one another in interesting ways. They use randomization to ensure that no two playthroughs are the same. As a developer, you can start with simple systems and add complexity over time. Many popular roguelikes have been slowly developed over years, and even decades!
 
-Roguelikes also have an amazing community of players and developers. There are events like [7DRL](https://7drl.com) and great resources like [r/roguelikes](https://www.reddit.com/r/roguelikes), [r/roguelikedev](https://www.reddit.com/r/roguelikedev/), and [Rogue Basin](https://www.roguebasin.com/index.php/Roguelike_Dev_FAQ).
+Roguelikes also have an amazing community of players and developers. There are events like [7DRL](https://7drl.com) and great resources like [r/roguelikes](https://www.reddit.com/r/roguelikes), [r/roguelikedev](https://www.reddit.com/r/roguelikedev/), [Rogue Basin](https://www.roguebasin.com/index.php/Roguelike_Dev_FAQ), and [Rogue Temple](https://forums.roguetemple.com/index.php).
 
 ## Why ROGμE?
 

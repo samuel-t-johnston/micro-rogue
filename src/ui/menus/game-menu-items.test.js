@@ -13,7 +13,14 @@ describe('settings page', () => {
   it('exposes settings as rows (value lives in the control, not the label)', () => {
     const { title, rows } = buildSettingsPage();
     expect(title).toBe('Settings');
-    expect(rows.map((r) => r.id)).toEqual(['handedness', 'skipNewGameInstructions', 'renderMode']);
+    expect(rows.map((r) => r.id)).toEqual([
+      'handedness',
+      'skipNewGameInstructions',
+      'renderMode',
+      'masterVolume',
+      'sfxVolume',
+      'musicVolume',
+    ]);
     expect(row('skipNewGameInstructions').label).toBe('Skip new game instructions'); // no ": On/Off"
   });
 
@@ -44,6 +51,15 @@ describe('settings page', () => {
     expect(r.get()).toBe('sprite'); // default
     r.set('glyph');
     expect(gameSettings.get('renderMode')).toBe('glyph');
+  });
+
+  it('music volume row reflects the setting and persists a change', () => {
+    const r = row('musicVolume');
+    expect(r.options.map((o) => o.value)).toEqual([0, 0.33, 0.66, 1]);
+    expect(r.get()).toBe(0.66); // default
+    r.set(0.33);
+    expect(gameSettings.get('musicVolume')).toBe(0.33);
+    expect(row('musicVolume').get()).toBe(0.33); // a freshly-built page reflects it
   });
 });
 

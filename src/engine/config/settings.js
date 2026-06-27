@@ -24,7 +24,18 @@ export const DEFAULT_SETTINGS = Object.freeze({
   // Map rendering style: 'sprite' draws sheet art (default); 'glyph' draws ASCII characters
   // (the classic roguelike look). Read live by the renderer, so toggling takes effect next frame.
   renderMode: 'sprite',
+
+  // Audio channel volumes (0..1), device-level like the rest of this store and outside the save.
+  // The audio modules own playback; the settings glue (src/audio/audio-settings.js) pushes these
+  // values into their setters at boot and on change. Per-channel mute exists in the modules but isn't
+  // surfaced here yet — an "Off" volume covers silencing for now. See docs/howto/audio.md.
+  masterVolume: 1,
+  sfxVolume: 1,
+  musicVolume: 0.66,
 });
+
+// Settings whose value is a volume in [0,1]; validated/clamped together below.
+const VOLUME_KEYS = ['masterVolume', 'sfxVolume', 'musicVolume'];
 
 /**
  * Merges a parsed object over the defaults, dropping unknown keys and invalid values. Any
@@ -40,6 +51,12 @@ export function normalizeSettings(raw) {
   }
   if (raw && (raw.renderMode === 'sprite' || raw.renderMode === 'glyph')) {
     out.renderMode = raw.renderMode;
+  }
+  for (const key of VOLUME_KEYS) {
+    const v = raw?.[key];
+    if (typeof v === 'number' && Number.isFinite(v)) {
+      out[key] = v < 0 ? 0 : v > 1 ? 1 : v; // clamp into [0,1]
+    }
   }
   return out;
 }
