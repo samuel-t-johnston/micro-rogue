@@ -10,8 +10,9 @@
 
 const nameOf = (e) => e.components.get('name') ?? 'thing';
 
-// The actor's own tile: pick up / take stairs. Returns null when there's nothing to do, so a tap on
-// an empty self-tile resolves to no action (the goal keeps waiting) rather than a misleading row.
+// The actor's own tile's *primary* interaction: pick up / take stairs. Returns null when there's
+// nothing underfoot; the self tile then falls back to Wait (added by the caller), which is always
+// offered so the player can deliberately pass a turn.
 function selfAction(occupants) {
   const stairs = occupants.find((e) => e.components.has('transition'));
   if (stairs) {
@@ -84,6 +85,9 @@ export function resolveTileActions(level, playerPos, tile) {
   if (isSelf) {
     const self = selfAction(occupants);
     if (self) actions.push(self);
+    // Wait is always offered on the player's own tile: it's the tap fallback when there's nothing
+    // else underfoot, and a deliberate "pass the turn" option in the contextual menu either way.
+    actions.push({ id: 'wait', label: 'Wait', action: { type: 'wait' }, free: false });
   } else if (isAdjacent) {
     if (creature) {
       actions.push({

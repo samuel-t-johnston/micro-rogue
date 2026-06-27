@@ -106,20 +106,22 @@ describe('resolveTileActions', () => {
     level.placeEntity(item);
 
     const rows = resolve(level, 2, 2);
-    expect(ids(rows)).toEqual(['self']);
+    expect(ids(rows)).toEqual(['self', 'wait']);
     expect(rows[0].label).toBe('Pick up the Dagger');
     expect(rows[0].action).toEqual({ type: 'selfInteract' });
   });
 
-  it('labels stairs underfoot by direction', () => {
+  it('labels stairs underfoot by direction, with Wait offered second', () => {
     level.placeEntity(createStairs(registry, 2, 2, 'down'));
     const rows = resolve(level, 2, 2);
-    expect(ids(rows)).toEqual(['self']);
+    expect(ids(rows)).toEqual(['self', 'wait']);
     expect(rows[0].label).toBe('Descend');
   });
 
-  it('offers nothing but Look on an empty self tile', () => {
-    expect(gameplay(resolve(level, 2, 2))).toEqual([]);
+  it('offers Wait as the only gameplay action on an empty self tile', () => {
+    const rows = resolve(level, 2, 2);
+    expect(ids(rows)).toEqual(['wait']);
+    expect(rows[0].action).toEqual({ type: 'wait' });
   });
 
   it('offers Look last on every tile, as a free action', () => {
