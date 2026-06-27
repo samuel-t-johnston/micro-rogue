@@ -21,6 +21,7 @@ ROGμE is designed to be an easy way to jump into game development, even if you 
 > - Goal-based, flexible AI system
 > - Expandable map generation system - pipelines and stages - supporting static and randomly generated maps
 > - Complete game loop with win and loss conditions
+> - Web audio SFX and background music
 > - Extensive documentation via short "how-to" guides
 
 (For a peek at what's coming up next, check out `/docs/roadmap.md`)
