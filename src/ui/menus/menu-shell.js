@@ -4,6 +4,7 @@ import {
   drawSettingsRows,
   handleSettingsRowsInput,
 } from './settings-controls.js';
+import { sfx } from '../../audio/sfx.js';
 
 /**
  * @file Reusable drill-down menu: a centered vertical list of buttons with optional sub-pages.
@@ -194,18 +195,23 @@ export function createMenuShell({ theme, getViewport, getItems, onClose = null }
 
       const corner = cornerButton();
       if (corner && hitTest(corner, event.x, event.y)) {
+        sfx.play('menu-select');
         if (isRoot()) onClose();
         else back();
         return true;
       }
 
       if (settingsRows()) {
-        if (settingsLayout && handleSettingsRowsInput(settingsLayout, event)) return true;
+        if (settingsLayout && handleSettingsRowsInput(settingsLayout, event)) {
+          sfx.play('menu-select');
+          return true;
+        }
         return onClose !== null; // modal in overlay mode; swallow stray taps
       }
 
       for (const r of buttonRects()) {
         if (r.item.enabled === false || !hitTest(r, event.x, event.y)) continue;
+        sfx.play('menu-select');
         if (r.item.submenu) {
           pages.push(r.item.submenu);
           hoverId = null;

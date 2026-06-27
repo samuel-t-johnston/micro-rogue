@@ -5,6 +5,26 @@
  */
 
 import { gameSettings } from '../../engine/config/settings.js';
+import { setAudioVolume } from '../../audio/audio-settings.js';
+
+// Discrete volume steps for the audio segmented controls (the settings UI has no slider). Values must
+// match the stored setting exactly so the active segment highlights.
+const VOLUME_OPTIONS = [
+  { label: 'Off', value: 0 },
+  { label: 'Low', value: 0.33 },
+  { label: 'Med', value: 0.66 },
+  { label: 'Full', value: 1 },
+];
+
+// One audio volume row, bound to its gameSettings key and re-pushed to the audio layer on change.
+const volumeRow = (id, label, description) => ({
+  id,
+  label,
+  description,
+  options: VOLUME_OPTIONS,
+  get: () => gameSettings.get(id),
+  set: (v) => setAudioVolume(id, v),
+});
 
 /**
  * Builds the Settings sub-page: rows (label + optional description + a segmented control), rendered
@@ -48,6 +68,9 @@ export function buildSettingsPage() {
         get: () => gameSettings.get('renderMode'),
         set: (v) => gameSettings.set('renderMode', v),
       },
+      volumeRow('masterVolume', 'Master volume', 'Overall audio level.'),
+      volumeRow('sfxVolume', 'Sound effects', 'Volume of interface and gameplay sounds.'),
+      volumeRow('musicVolume', 'Music', 'Volume of background music.'),
     ],
   };
 }

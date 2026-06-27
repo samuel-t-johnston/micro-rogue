@@ -42,6 +42,19 @@ describe('normalizeSettings', () => {
   it('falls back to the default for an invalid renderMode value', () => {
     expect(normalizeSettings({ renderMode: 'ascii' }).renderMode).toBe('sprite');
   });
+
+  it('keeps an in-range volume', () => {
+    expect(normalizeSettings({ musicVolume: 0.33 }).musicVolume).toBe(0.33);
+  });
+
+  it('clamps an out-of-range volume into [0,1]', () => {
+    expect(normalizeSettings({ sfxVolume: 5 }).sfxVolume).toBe(1);
+    expect(normalizeSettings({ masterVolume: -2 }).masterVolume).toBe(0);
+  });
+
+  it('falls back to the default volume for a non-numeric value', () => {
+    expect(normalizeSettings({ musicVolume: 'loud' }).musicVolume).toBe(0.66);
+  });
 });
 
 describe('gameSettings store', () => {

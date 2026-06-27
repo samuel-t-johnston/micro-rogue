@@ -9,6 +9,7 @@ import { createInstructionsScene } from './ui/scenes/instructions-scene.js';
 import { createResultsScene } from './ui/scenes/results-scene.js';
 import { createDebugOverlay } from './debug/debug-overlay.js';
 import { clearSave } from './save/core/save-system.js';
+import { initAudio } from './audio/audio-settings.js';
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -36,6 +37,7 @@ function getViewport() {
 
 const theme = readTheme();
 gameSettings.load(); // restore UI preferences (handedness, …) before any scene mounts
+initAudio(); // load the sfx/music manifests and push persisted volumes into the audio layer
 const appState = createAppStateMachine();
 const debugOverlay = gameConfig.debugEnabled ? createDebugOverlay({ getViewport }) : null;
 

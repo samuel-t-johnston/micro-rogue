@@ -15,7 +15,7 @@
 // thing to hand-maintain is that list (add a line when you add a new data/maps/*.js file);
 // there is no generator and no build step.
 
-const CACHE_VERSION = 'rogue-v13';
+const CACHE_VERSION = 'rogue-v14';
 
 // The app shell — enough to boot the game offline. Everything else self-caches at runtime.
 const SHELL_ASSETS = [
@@ -42,6 +42,8 @@ const DYNAMIC_ASSETS = [
   'data/maps/maze-spiral.js',
   'data/maps/maze-zigzag.js',
   'data/maps/maze-pillars.js',
+  'assets/sfx/freesound_community-menu-selection-102220.mp3',
+  'assets/music/samuelfjohanns-crawling-danger-303228.mp3',
 ];
 
 self.addEventListener('install', (event) => {
