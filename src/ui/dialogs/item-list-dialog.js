@@ -10,11 +10,19 @@ const BTN_W = 110;
 const BTN_H = 44; // minimum tap target (ux-design.md accessibility)
 
 /**
- * Creates a modal multi-select item-list dialog (used for containers and floor pickups). All items
- * start selected; the footer Take button reflects the count. `onClose` receives
- * `{ confirmed, taken }` — Cancel/Escape yields `{ confirmed: false, taken: [] }`.
+ * Creates a modal multi-select item-list dialog (used for container/floor pickups and placing items
+ * into a container). All items start selected; the footer confirm button (label per `confirmLabel`,
+ * default 'Take') reflects the count. `onClose` receives `{ confirmed, taken }` — `taken` is the set
+ * of selected items to move; Cancel/Escape yields `{ confirmed: false, taken: [] }`.
  */
-export function createItemListDialog({ theme, getViewport, title, items, onClose }) {
+export function createItemListDialog({
+  theme,
+  getViewport,
+  title,
+  items,
+  confirmLabel = 'Take',
+  onClose,
+}) {
   const selected = new Set(items.map((i) => i.id));
 
   function layout() {
@@ -40,13 +48,13 @@ export function createItemListDialog({ theme, getViewport, title, items, onClose
     };
   }
 
-  function takeBtn(dlgX, dlgY, dialogH) {
+  function confirmBtn(dlgX, dlgY, dialogH) {
     return {
       x: dlgX + DIALOG_W - PADDING - BTN_W,
       y: dlgY + dialogH - FOOTER_H + Math.round((FOOTER_H - BTN_H) / 2),
       w: BTN_W,
       h: BTN_H,
-      label: selected.size > 0 ? `Take (${selected.size})` : 'Take',
+      label: selected.size > 0 ? `${confirmLabel} (${selected.size})` : confirmLabel,
       enabled: selected.size > 0,
     };
   }
@@ -114,7 +122,7 @@ export function createItemListDialog({ theme, getViewport, title, items, onClose
       ctx.fillRect(dlgX, dlgY + HEADER_H + 1 + items.length * ROW_H, DIALOG_W, 1);
 
       drawButton(ctx, theme, cancelBtn(dlgX, dlgY, dialogH));
-      drawButton(ctx, theme, takeBtn(dlgX, dlgY, dialogH));
+      drawButton(ctx, theme, confirmBtn(dlgX, dlgY, dialogH));
     },
 
     handleInput(event) {
@@ -131,8 +139,8 @@ export function createItemListDialog({ theme, getViewport, title, items, onClose
           return true;
         }
 
-        const tb = takeBtn(dlgX, dlgY, dialogH);
-        if (tb.enabled && hitTest(tb, event.x, event.y)) {
+        const cb = confirmBtn(dlgX, dlgY, dialogH);
+        if (cb.enabled && hitTest(cb, event.x, event.y)) {
           onClose({ confirmed: true, taken: items.filter((i) => selected.has(i.id)) });
           return true;
         }

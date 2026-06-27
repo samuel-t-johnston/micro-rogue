@@ -12,7 +12,7 @@ export async function executeInteract(actor, action, level, registry, dialogCont
   if (!target) return false;
 
   if (target.components.has('container')) {
-    return executeContainerInteract(actor, target, dialogController);
+    return executeContainerInteract(actor, target, dialogController, action.mode);
   }
 
   if (target.components.has('openable')) {
@@ -77,7 +77,12 @@ function doorOccupant(door, level) {
   return null;
 }
 
-async function executeContainerInteract(actor, target, dialogController) {
+// Interacting with a container is two-faceted: the default (a tap, or the menu's "Open") takes items
+// out; `mode === 'store'` (the menu's "Place items") puts the actor's own items in. Both share the
+// multi-select dialog and the same turn rule: moving ≥1 item consumes the turn, cancel/empty is free.
+async function executeContainerInteract(actor, target, dialogController, mode) {
+  if (mode === 'store') return storeInContainer(actor, target, dialogController);
+
   // Debug-only (no `display`): the interaction itself, logged whenever the player
   // opens the container — even if it's empty or they cancel without taking anything.
   gameLog.add({
@@ -87,10 +92,22 @@ async function executeContainerInteract(actor, target, dialogController) {
     interaction: 'container',
   });
 
-  const containerInventory = target.components.get('inventory');
-  if (!containerInventory || containerInventory.items.length === 0) return true;
+  const name = target.components.get('name') ?? 'Container';
 
-  const title = target.components.get('name') ?? 'Container';
+  const containerInventory = target.components.get('inventory');
+  if (!containerInventory || containerInventory.items.length === 0) {
+    // Player-facing feedback so opening an empty container isn't a silent no-op (tap or menu alike).
+    gameLog.add({
+      actor: actor.id,
+      action: 'interact',
+      target: target.id,
+      interaction: 'container',
+      display: `The ${name.toLowerCase()} is empty.`,
+    });
+    return true;
+  }
+
+  const title = name;
   const result = await dialogController.showItemList({ title, items: containerInventory.items });
 
   if (!result.confirmed || result.taken.length === 0) return true;
@@ -111,6 +128,52 @@ async function executeContainerInteract(actor, target, dialogController) {
       item: item.id,
       container: target.id,
       display: `${subject(actor)} ${conjugate(actor, 'take', 'takes')} the ${itemName(item)}.`,
+    });
+  }
+
+  return false;
+}
+
+// Places selected items from the actor's inventory into the container. Mirror of the take path:
+// the dialog lists the *actor's* items, and only an actual transfer spends the turn.
+async function storeInContainer(actor, target, dialogController) {
+  const actorInventory = actor.components.get('inventory');
+  if (!actorInventory || actorInventory.items.length === 0) {
+    // Empty-handed: a little feedback so the menu choice isn't a silent no-op.
+    gameLog.add({
+      actor: actor.id,
+      action: 'store',
+      target: target.id,
+      display: 'You have nothing to put in.',
+    });
+    return true;
+  }
+
+  const containerName = target.components.get('name') ?? 'Container';
+  const result = await dialogController.showItemList({
+    title: `Place in ${containerName}`,
+    items: actorInventory.items,
+    confirmLabel: 'Place',
+  });
+
+  if (!result.confirmed || result.taken.length === 0) return true;
+
+  const containerInventory = target.components.get('inventory');
+  if (!containerInventory) return false;
+
+  for (const item of result.taken) {
+    const idx = actorInventory.items.indexOf(item);
+    if (idx >= 0) actorInventory.items.splice(idx, 1);
+    item.components.get('item').location = { type: 'container', containerId: target.id };
+    containerInventory.items.push(item);
+
+    // Player-facing: each item placed into the container is its own line.
+    gameLog.add({
+      actor: actor.id,
+      action: 'store',
+      item: item.id,
+      container: target.id,
+      display: `${subject(actor)} ${conjugate(actor, 'put', 'puts')} the ${itemName(item)} into the ${containerName.toLowerCase()}.`,
     });
   }
 

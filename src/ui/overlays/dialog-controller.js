@@ -8,14 +8,16 @@ export function createDialogController({ theme, getViewport }) {
   let active = null;
 
   return {
-    // Show an item list dialog. Resolves with { confirmed, taken } when closed.
-    showItemList({ title, items }) {
+    // Show an item list dialog. Resolves with { confirmed, taken } when closed. `confirmLabel`
+    // sets the confirm button text ('Take' for pickups, 'Place' for storing into a container).
+    showItemList({ title, items, confirmLabel }) {
       return new Promise((resolve) => {
         active = createItemListDialog({
           theme,
           getViewport,
           title,
           items,
+          confirmLabel,
           onClose: (result) => {
             active = null;
             resolve(result);

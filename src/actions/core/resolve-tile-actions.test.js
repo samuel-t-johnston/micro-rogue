@@ -79,12 +79,13 @@ describe('resolveTileActions', () => {
     expect(rows[1].action).toEqual({ type: 'interact', targetEntityId: door.id });
   });
 
-  it('opens an adjacent container (a chest)', () => {
+  it('opens an adjacent container (a chest), with Place items offered second', () => {
     const chest = createChest(registry, 2, 1);
     level.placeEntity(chest);
     const rows = resolve(level, 2, 1);
-    expect(ids(rows)).toEqual(['open-container']);
+    expect(ids(rows)).toEqual(['open-container', 'store']);
     expect(rows[0].action).toEqual({ type: 'interact', targetEntityId: chest.id });
+    expect(rows[1].action).toEqual({ type: 'interact', targetEntityId: chest.id, mode: 'store' });
   });
 
   it('offers a move to a distant passable tile (the goal handles pathing)', () => {
