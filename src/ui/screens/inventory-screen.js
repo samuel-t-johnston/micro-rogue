@@ -12,6 +12,9 @@ function actionsForItem(item) {
     out.push({ label: 'Use', action: { type: 'consume', itemEntityId: item.id } });
   if (item.components.has('equippable'))
     out.push({ label: 'Equip', action: { type: 'equip', itemEntityId: item.id } });
+  // Any carried item can be thrown; the coordinates are filled in by the scene's targeting mode
+  // after the player picks a tile, so the action leaves the menu without an x/y.
+  out.push({ label: 'Throw', action: { type: 'throw', itemEntityId: item.id } });
   out.push({ label: 'Drop', action: { type: 'drop', itemEntityId: item.id } });
   out.push({ label: 'Cancel', action: null });
   return out;

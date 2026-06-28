@@ -20,7 +20,7 @@ import {
 } from './serialize.js';
 
 /** Save schema version. Bumped only on a breaking schema change (see the design doc). */
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 
 /** Game release version; independent of SAVE_VERSION, tracks releases and mirrors package.json. */
 export const GAME_VERSION = '0.1.0';
@@ -125,6 +125,34 @@ export const migrations = [
       fixSprites(save.entities);
       for (const floor of Object.values(save.frozenLevels ?? {})) {
         fixSprites(floor.entities);
+      }
+      return save;
+    },
+  },
+  {
+    from: 5,
+    to: 6,
+    // v6 adds the throw action: potions gained a `throwable` component (an on-hit effect + a
+    // breakChance). Saves through v5 created potions before it existed, so an old thrown potion
+    // applied no splash and never broke. Backfill the canonical thrown behavior by item name — the
+    // values mirror items.js at v6 and are frozen here. Only potions are throwable-with-effect; every
+    // other item is throwable-as-act but carries no component, so it needs no migration.
+    migrate(save) {
+      const THROWABLE_BY_NAME = {
+        'Healing Potion': { effectType: 'heal', params: { amount: 5 }, breakChance: 1 },
+        'Potion of Pain': { effectType: 'damage', params: { amount: 5 }, breakChance: 1 },
+      };
+      const backfill = (entities) => {
+        for (const entity of entities ?? []) {
+          const spec = THROWABLE_BY_NAME[entity.components?.name];
+          if (spec && !entity.components.throwable) {
+            entity.components.throwable = { ...spec, params: { ...spec.params } };
+          }
+        }
+      };
+      backfill(save.entities);
+      for (const floor of Object.values(save.frozenLevels ?? {})) {
+        backfill(floor.entities);
       }
       return save;
     },

@@ -195,8 +195,8 @@ describe('character menu — full equip/unequip flow', () => {
     expect(submitted).toHaveLength(0); // menu just opened
     controller.render(ctx);
 
-    // Tap Use button (button 0 of 3-action menu Use/Drop/Cancel).
-    controller.handleInput({ type: 'pointerdown', x: 400, y: 270 });
+    // Tap Use button (button 0 of 4-action menu Use/Throw/Drop/Cancel). Button 0 center y = 244.
+    controller.handleInput({ type: 'pointerdown', x: 400, y: 244 });
 
     expect(submitted).toHaveLength(1);
     expect(submitted[0]).toEqual({ type: 'consume', itemEntityId: potion.id });
@@ -226,8 +226,8 @@ describe('character menu — full equip/unequip flow', () => {
     controller.handleInput({ type: 'pointerdown', x: 200, y: 142 }); // Potion row → menu
     controller.render(ctx);
 
-    // Tap Drop (button 1 of 3-action menu Use/Drop/Cancel): y = 270 + 52 = 322.
-    controller.handleInput({ type: 'pointerdown', x: 400, y: 322 });
+    // Tap Drop (button 2 of 4-action menu Use/Throw/Drop/Cancel): button 2 center y = 348.
+    controller.handleInput({ type: 'pointerdown', x: 400, y: 348 });
 
     expect(submitted).toHaveLength(1);
     expect(submitted[0]).toEqual({ type: 'drop', itemEntityId: potion.id });
@@ -250,8 +250,8 @@ describe('character menu — full equip/unequip flow', () => {
     controller.handleInput({ type: 'pointerdown', x: 200, y: 106 });
     controller.render(ctx);
 
-    // Equippable item menu has 3 actions (Equip/Drop/Cancel). Tap Equip (button 0).
-    controller.handleInput({ type: 'pointerdown', x: 400, y: 270 });
+    // Equippable item menu has 4 actions (Equip/Throw/Drop/Cancel). Tap Equip (button 0), center y = 244.
+    controller.handleInput({ type: 'pointerdown', x: 400, y: 244 });
 
     expect(submitted).toHaveLength(1);
     expect(submitted[0]).toEqual({ type: 'equip', itemEntityId: dagger.id });

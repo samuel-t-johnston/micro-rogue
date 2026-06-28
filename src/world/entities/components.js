@@ -230,6 +230,14 @@ export const components = {
     return { sourceId, volume, language, message, sourceFactions };
   },
 
+  // Marks an item as throwable with an effect. Same data shape as `consumable` (effectType is a key
+  // into the effects registry; params is the effect-specific payload), plus `breakChance` (0..1): the
+  // odds the item shatters on impact rather than landing on the target tile to be retrieved. Any item
+  // can be thrown; only one with this component has an on-hit effect.
+  throwable(effectType, params = {}, breakChance = 0) {
+    return { effectType, params, breakChance };
+  },
+
   // Tile-level perception. visible: tiles seen this turn. memory: all ever-seen tiles → tileId.
   // rememberedEntities: ever-seen tiles → array of renderable snapshots of the persistVisible
   // entities there at last sighting (fog-of-war furniture). Goals may read memory for navigation;

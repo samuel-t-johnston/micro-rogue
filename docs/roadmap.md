@@ -270,10 +270,10 @@ are additive fields with tolerant defaults, no migration needed.*
 
 *Done when the engine supports wait, drop, throw actions, and short range (spear) + long-range (bow) ranged attacks. Additional features to make these work: ammo item component, needs-ammo equipment property, stackable item component, ranged attack NPC goal, ranged attack player capability. Temporary map adjustments for testing.*
 
-- [ ] Wait - UI hook for existing action
+- [x] Wait - UI hook for existing action
 - [x] Drop item - UI hook for existing action
-- [ ] Drop/swap items to container - action
-- [ ] Throw item - action - perform the `effect` on executeConsume's target
+- [x] Drop/swap items to container - action
+- [x] Throw item - action - perform the `effect` on executeConsume's target
 - [ ] Ranged attack - 2 tile - spear weapon - player
 - [ ] Ranged attack - ♾️ - bow weapon (no miss mechanic yet) - player
 - [ ] Ammunition - arrows - required for bow, stackable
