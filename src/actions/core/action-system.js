@@ -7,6 +7,7 @@ import { executeUnequip } from '../action-types/action-unequip.js';
 import { executeConsume } from '../action-types/action-consume.js';
 import { executeDrop } from '../action-types/action-drop.js';
 import { executeWait } from '../action-types/action-wait.js';
+import { executeThrow } from '../action-types/action-throw.js';
 import { executeAttack } from '../action-types/action-attack.js';
 import { executeLookAt } from '../action-types/action-look.js';
 import { executeShout } from '../action-types/action-shout.js';
@@ -36,6 +37,7 @@ export function createActionSystem({ level, inputController, registry, dialogCon
     consume: (entity, action) => executeConsume(entity, action, level, registry),
     drop: (entity, action) => executeDrop(entity, action, level, registry),
     wait: () => executeWait(),
+    throw: (entity, action) => executeThrow(entity, action, level, registry),
     attack: (entity, action) => executeAttack(entity, action, level, registry),
     lookAt: (entity, action) => executeLookAt(entity, action, level),
     shout: (entity, action) => executeShout(entity, action, level, registry),

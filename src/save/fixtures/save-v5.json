@@ -1,0 +1,118 @@
+{
+  "saveVersion": 5,
+  "gameVersion": "0.1.0",
+  "versionHistory": [
+    { "saveVersion": 5, "gameVersion": "0.1.0", "savedAt": "2026-06-26T00:00:00.000Z" }
+  ],
+  "savedAt": "2026-06-26T00:00:00.000Z",
+  "meta": {
+    "seed": 12345,
+    "streams": { "gameplay": 987654321 },
+    "turnCount": 7,
+    "nextEntityId": 5
+  },
+  "playerId": 1,
+  "currentNodeId": "floor-1",
+  "currentLevel": {
+    "branch": "main",
+    "depth": 1,
+    "pipelineId": "static",
+    "seed": 111,
+    "width": 3,
+    "height": 3,
+    "tiles": [
+      ["wall", "wall", "wall"],
+      ["wall", "floor", "wall"],
+      ["wall", "wall", "wall"]
+    ],
+    "overrides": [],
+    "blackboard": {},
+    "entityIds": [1, 2, 3]
+  },
+  "frozenLevels": {
+    "floor-2": {
+      "level": {
+        "branch": "main",
+        "depth": 2,
+        "pipelineId": "static",
+        "seed": 222,
+        "width": 1,
+        "height": 1,
+        "tiles": [["floor"]],
+        "overrides": [],
+        "blackboard": {},
+        "entityIds": [4]
+      },
+      "entities": [
+        {
+          "id": 4,
+          "components": {
+            "name": "Potion of Pain",
+            "position": { "x": 0, "y": 0 },
+            "renderable": {
+              "sprite": "potion-of-pain",
+              "color": "#e0352f",
+              "glyph": "!",
+              "glyphColor": "#e0352f",
+              "layer": 1
+            },
+            "item": { "location": { "type": "map" } },
+            "consumable": { "effectType": "damage", "params": { "amount": 5 } }
+          }
+        }
+      ]
+    }
+  },
+  "entities": [
+    {
+      "id": 1,
+      "components": {
+        "name": "Player",
+        "position": { "x": 1, "y": 1 },
+        "playerControlled": {},
+        "creature": {},
+        "turnTaker": { "speed": 1, "accumulator": 0 },
+        "health": { "current": 18, "max": 20 },
+        "renderable": {
+          "sprite": null,
+          "color": "#0a1a0a",
+          "glyph": "@",
+          "glyphColor": "#00cc44",
+          "layer": 0
+        }
+      }
+    },
+    {
+      "id": 2,
+      "components": {
+        "name": "Dagger",
+        "position": { "x": 1, "y": 1 },
+        "renderable": {
+          "sprite": "dagger",
+          "color": "#cccccc",
+          "glyph": "/",
+          "glyphColor": "#cccccc",
+          "layer": 1
+        },
+        "item": { "location": { "type": "map" } },
+        "equippable": { "slot": "weapon" }
+      }
+    },
+    {
+      "id": 3,
+      "components": {
+        "name": "Healing Potion",
+        "position": { "x": 1, "y": 1 },
+        "renderable": {
+          "sprite": "healing-potion",
+          "color": "#07fe49ff",
+          "glyph": "!",
+          "glyphColor": "#07fe49ff",
+          "layer": 1
+        },
+        "item": { "location": { "type": "map" } },
+        "consumable": { "effectType": "heal", "params": { "amount": 10 } }
+      }
+    }
+  ]
+}

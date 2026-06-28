@@ -35,6 +35,7 @@ import { createGameMenuController } from '../menus/game-menu-controller.js';
 import { createGameMenuButton } from '../widgets/game-menu-button.js';
 import { createOutcomePopup } from '../overlays/outcome-popup.js';
 import { createContextMenu } from '../menus/context-menu.js';
+import { drawText, drawButton, hitTest } from '../core/canvas-ui.js';
 import { resolveTileActions } from '../../actions/core/resolve-tile-actions.js';
 import { commitSave, loadSavedGame, clearSave } from '../../save/core/save-system.js';
 import {
@@ -87,6 +88,9 @@ export function createGameScene({
   const LONGPRESS_MS = 450; // press-and-hold that raises the contextual tile menu (touch)
   let longPressTimer = null;
   let contextMenu = null; // the open contextual tile menu (modal popover), or null
+  // Targeting mode for ranged actions (throw now; wands/spells later): { prompt, onPick, hoverTile }.
+  // While set, a map tap resolves a target tile instead of moving, and the rest of the UI is inert.
+  let targeting = null;
 
   function clearLongPress() {
     if (longPressTimer) {
@@ -134,6 +138,80 @@ export function createGameScene({
     });
   }
 
+  // Enters targeting mode: the next clean map tap inside the player's FOV resolves a target tile and
+  // calls onPick; the on-screen Cancel button or Escape backs out. Reusable by any future targeted action.
+  function beginTargeting({ prompt, onPick }) {
+    resetGestures();
+    contextMenu = null;
+    targeting = { prompt, onPick, hoverTile: null };
+  }
+
+  function cancelTargeting() {
+    targeting = null;
+  }
+
+  // True if a tile is currently visible to the player (targeting is restricted to FOV).
+  function isTileVisible(x, y) {
+    return !!player?.components.get('tilePerception')?.visible.has(tileKey(x, y));
+  }
+
+  // Draws the targeting overlay: a crosshair box on the hovered tile (red when out of FOV / invalid)
+  // and a prompt banner near the top. No-op when not targeting.
+  function renderTargeting(ctx) {
+    if (!targeting) return;
+    const tileSize = renderer.tileSize;
+    const tile = targeting.hoverTile;
+    if (tile) {
+      const { x, y } = renderer.worldToScreen(tile.x, tile.y);
+      ctx.save();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = isTileVisible(tile.x, tile.y) ? theme.primary : '#e0352f';
+      ctx.strokeRect(x + 1, y + 1, tileSize - 2, tileSize - 2);
+      ctx.restore();
+    }
+    const { width } = getViewport();
+    const bw = Math.min(width - 32, targeting.prompt.length * 9 + 48);
+    const bx = Math.round((width - bw) / 2);
+    const by = 16;
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.65)';
+    ctx.fillRect(bx, by, bw, 32);
+    ctx.strokeStyle = theme.primary;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bx + 0.5, by + 0.5, bw - 1, 31);
+    ctx.restore();
+    drawText(ctx, targeting.prompt, width / 2, by + 16, {
+      color: theme.text,
+      size: 14,
+      align: 'center',
+      baseline: 'middle',
+    });
+
+    // A Cancel button under the banner so the action can be backed out by touch (Escape covers desktop).
+    // Its screen rect is stashed for onPointerUp to hit-test before treating a tap as a target pick.
+    const cw = 120;
+    const ch = 36;
+    const rect = { x: Math.round((width - cw) / 2), y: by + 40, w: cw, h: ch };
+    drawButton(ctx, theme, { ...rect, label: 'Cancel' });
+    targeting.cancelRect = rect;
+  }
+
+  // Routes an action submitted by the character menu. A throw arrives without coordinates: it opens
+  // targeting and is submitted (with the picked tile) only once the player chooses a target. Every
+  // other action goes straight to the input controller as before.
+  function handleMenuAction(action) {
+    if (action?.type === 'throw' && action.x == null) {
+      const { itemEntityId } = action;
+      beginTargeting({
+        prompt: 'Choose a target',
+        onPick: (tile) =>
+          inputController?.submit({ type: 'throw', itemEntityId, x: tile.x, y: tile.y }),
+      });
+      return;
+    }
+    inputController?.submit(action);
+  }
+
   function pinchDistance() {
     const [a, b] = pointers.values();
     return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0;
@@ -148,13 +226,16 @@ export function createGameScene({
     pointers.set(event.pointerId, { x: event.x, y: event.y });
     if (pointers.size === 1) {
       tapCandidate = { id: event.pointerId, x: event.x, y: event.y };
-      // Hold this press still long enough and it becomes a contextual menu instead of a move.
+      // Hold this press still long enough and it becomes a contextual menu instead of a move — but
+      // not while targeting, where a press can only resolve (or miss) a target tile.
       const { x, y, pointerId } = event;
       clearLongPress();
-      longPressTimer = setTimeout(() => {
-        longPressTimer = null;
-        if (tapCandidate?.id === pointerId) openContextMenu(x, y); // resetGestures() clears tapCandidate
-      }, LONGPRESS_MS);
+      if (!targeting) {
+        longPressTimer = setTimeout(() => {
+          longPressTimer = null;
+          if (tapCandidate?.id === pointerId) openContextMenu(x, y); // resetGestures() clears tapCandidate
+        }, LONGPRESS_MS);
+      }
     } else if (pointers.size === 2) {
       tapCandidate = null;
       pan = null; // a second finger ends the drag and begins a pinch; the view stays where panned
@@ -207,8 +288,21 @@ export function createGameScene({
     if (releasingTap) {
       tapCandidate = null;
       const world = renderer.screenToWorld(event.x, event.y);
-      // A raw tile tap; the player-get-input goal interprets it (move / attack / interact / pick up).
-      inputController.submit({ type: 'tap', x: Math.floor(world.x), y: Math.floor(world.y) });
+      const tile = { x: Math.floor(world.x), y: Math.floor(world.y) };
+      if (targeting) {
+        // A tap on the Cancel button backs out; otherwise it's a target pick — resolve the tile if
+        // it's in view, else ignore and keep targeting.
+        if (targeting.cancelRect && hitTest(targeting.cancelRect, event.x, event.y)) {
+          cancelTargeting();
+        } else if (isTileVisible(tile.x, tile.y)) {
+          const { onPick } = targeting;
+          cancelTargeting();
+          onPick(tile);
+        }
+      } else {
+        // A raw tile tap; the player-get-input goal interprets it (move / attack / interact / pick up).
+        inputController.submit({ type: 'tap', x: tile.x, y: tile.y });
+      }
     }
     return true;
   }
@@ -232,7 +326,7 @@ export function createGameScene({
     theme,
     getViewport,
     getPlayer: () => player,
-    onAction: (action) => inputController?.submit(action),
+    onAction: (action) => handleMenuAction(action),
   });
   const characterMenuButton = createCharacterMenuButton({
     theme,
@@ -334,6 +428,7 @@ export function createGameScene({
     renderer.setCamera(ppos.x, ppos.y);
 
     inputController = createInputController();
+    targeting = null;
     resetGestures();
     const actionSystem = createActionSystem({ level, inputController, registry, dialogController });
 
@@ -430,6 +525,25 @@ export function createGameScene({
 
     // The contextual tile menu is modal while open — it swallows input and dismisses on tap-outside.
     if (contextMenu) return contextMenu.handleInput(event);
+
+    // Targeting mode is modal over the map: taps pick a target (handled in onPointerUp), drags still
+    // pan, the crosshair tracks the pointer, and Escape cancels. Everything else is swallowed.
+    if (targeting) {
+      if (event.type === 'keydown' && event.key === 'Escape') {
+        cancelTargeting();
+        return true;
+      }
+      if (event.type === 'pointermove') {
+        const w = renderer.screenToWorld(event.x, event.y);
+        targeting.hoverTile = { x: Math.floor(w.x), y: Math.floor(w.y) };
+        onPointerMove(event); // keep drag-to-pan available while aiming
+        return true;
+      }
+      if (event.type === 'pointerdown') return onPointerDown(event);
+      if (event.type === 'pointerup' || event.type === 'pointercancel') return onPointerUp(event);
+      if (event.type === 'wheel') return onWheel(event.deltaY);
+      return true;
+    }
 
     if (characterMenuController.isOpen) {
       return characterMenuController.handleInput(event);
@@ -579,6 +693,7 @@ export function createGameScene({
       characterMenuController.render(ctx);
       gameMenuController.render(ctx);
       contextMenu?.render(ctx);
+      renderTargeting(ctx);
       outcomePopup.render(ctx);
     },
 
@@ -653,6 +768,7 @@ export function createGameScene({
       turnManager = null;
       inputController = null;
       contextMenu = null;
+      targeting = null;
       resetGestures();
       levelManager = null;
       transitioning = false;

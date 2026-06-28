@@ -25,7 +25,7 @@ export function resolveItemLocation(registry, x, y, entityId) {
   throw new Error(`Entity ${entityId} has neither container nor inventory component`);
 }
 
-/** Creates a Healing Potion (consumable: heal 10). */
+/** Creates a Healing Potion (consumable: heal 10; thrown: heal 5 — a lesser splash — always shatters). */
 export function createHealingPotion(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
@@ -41,13 +41,18 @@ export function createHealingPotion(registry, x, y, entityId) {
     'consumable',
     components.consumable(EffectTypes.HEAL, { amount: 10 }),
   );
+  registry.addComponent(
+    entity,
+    'throwable',
+    components.throwable(EffectTypes.HEAL, { amount: 5 }, 1),
+  );
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));
   }
   return entity;
 }
 
-/** Creates a Potion of Pain (consumable: damage 5 — a hostile drink). */
+/** Creates a Potion of Pain (consumable: damage 5 — a hostile drink; thrown: damage 5, always shatters). */
 export function createPotionOfPain(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
@@ -62,6 +67,11 @@ export function createPotionOfPain(registry, x, y, entityId) {
     entity,
     'consumable',
     components.consumable(EffectTypes.DAMAGE, { amount: 5 }),
+  );
+  registry.addComponent(
+    entity,
+    'throwable',
+    components.throwable(EffectTypes.DAMAGE, { amount: 5 }, 1),
   );
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));

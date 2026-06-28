@@ -8,7 +8,9 @@ import { effectDamage } from '../effect-types/effect-damage.js';
  * @param {object} params - Effect parameters (e.g. `{ amount }`).
  * @param {object} level
  * @param {object} registry
- * @returns {void}
+ * @returns {{applied: boolean, reaction?: string}} Whether the effect did anything (false when the
+ *   subject lacks the component it needs) and optional flavor for the affected entity. Callers that
+ *   don't care (drinking, melee) ignore it; throw uses it to decide what to log.
  */
 
 // Effect type → handler registry. Add new effect types here.
@@ -19,12 +21,13 @@ const EFFECTS = {
 
 /**
  * Applies a registered effect by type to (user, target). Dispatches to the matching EffectHandler.
+ * @returns {{applied: boolean, reaction?: string}} The handler's result (see EffectHandler).
  * @throws {Error} On an unknown effect type.
  */
 export function applyEffect(effectType, user, target, params, level, registry) {
   const handler = EFFECTS[effectType];
   if (!handler) throw new Error(`Unknown effect type: ${effectType}`);
-  handler(user, target, params, level, registry);
+  return handler(user, target, params, level, registry);
 }
 
 /** Canonical effect type names. */

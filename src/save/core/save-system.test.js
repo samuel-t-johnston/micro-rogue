@@ -32,6 +32,7 @@ import saveV1 from '../fixtures/save-v1.json';
 import saveV2 from '../fixtures/save-v2.json';
 import saveV3 from '../fixtures/save-v3.json';
 import saveV4 from '../fixtures/save-v4.json';
+import saveV5 from '../fixtures/save-v5.json';
 
 // Builds a realistic game directly (the pipeline's static stage does a dynamic file:// import
 // that vitest's resolver mangles on Windows): a chest with contained items, creatures, map
@@ -358,6 +359,68 @@ describe('v4 → v5 migration (real, from a fixture)', () => {
     const restored = deserializeGame(loadSave(saveV4));
     expect(restored.player.id).toBe(saveV4.playerId);
     expect(restored.player.components.get('renderable').sprite).toBeNull();
+  });
+});
+
+describe('v5 → v6 migration (real, from a fixture)', () => {
+  const findEntity = (entities, id) => entities.find((e) => e.id === id);
+
+  it('backfills throwable on a potion that predates the throw action', () => {
+    const migrated = loadSave(saveV5);
+    expect(migrated.saveVersion).toBe(SAVE_VERSION);
+    // Healing Potion (id 3) gets the canonical thrown splash: heal 5, always shatters.
+    expect(findEntity(migrated.entities, 3).components.throwable).toEqual({
+      effectType: 'heal',
+      params: { amount: 5 },
+      breakChance: 1,
+    });
+  });
+
+  it('leaves a non-potion item (a dagger) without a throwable component', () => {
+    const migrated = loadSave(saveV5);
+    expect(findEntity(migrated.entities, 2).components.throwable).toBeUndefined();
+  });
+
+  it('also backfills potions inside frozen floors', () => {
+    const frozenPotion = findEntity(loadSave(saveV5).frozenLevels['floor-2'].entities, 4);
+    expect(frozenPotion.components.throwable).toEqual({
+      effectType: 'damage',
+      params: { amount: 5 },
+      breakChance: 1,
+    });
+  });
+
+  it('does not overwrite a throwable that already exists', () => {
+    const raw = {
+      saveVersion: 5,
+      versionHistory: [{ saveVersion: 5 }],
+      entities: [
+        {
+          id: 1,
+          components: {
+            name: 'Healing Potion',
+            throwable: { effectType: 'heal', params: { amount: 99 }, breakChance: 0 },
+          },
+        },
+      ],
+    };
+    const migrated = loadSave(raw);
+    expect(migrated.entities[0].components.throwable.params.amount).toBe(99);
+    expect(migrated.entities[0].components.throwable.breakChance).toBe(0);
+  });
+
+  it('does not mutate the source fixture', () => {
+    loadSave(saveV5);
+    expect(saveV5.entities[2].components.throwable).toBeUndefined();
+  });
+
+  it('a migrated v5 save deserializes into a live game', () => {
+    const restored = deserializeGame(loadSave(saveV5));
+    expect(restored.player.id).toBe(saveV5.playerId);
+    const potion = restored.registry
+      .getAllEntities()
+      .find((e) => e.components.get('name') === 'Healing Potion');
+    expect(potion.components.has('throwable')).toBe(true);
   });
 });
 

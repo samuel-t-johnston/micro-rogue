@@ -65,6 +65,36 @@ export function projectTile(level, from, direction, maxDist) {
   return target;
 }
 
+/**
+ * The tiles a straight line passes through from (x0, y0) to (x1, y1), inclusive of both endpoints and
+ * ordered from start to end (integer Bresenham). Used to trace a thrown item's physical flight path —
+ * unlike shadowcasting FOV, a line can't curve around a corner, so it may stop short of a visible tile.
+ */
+export function lineTiles(x0, y0, x1, y1) {
+  const tiles = [];
+  const dx = Math.abs(x1 - x0);
+  const dy = Math.abs(y1 - y0);
+  const sx = x0 < x1 ? 1 : -1;
+  const sy = y0 < y1 ? 1 : -1;
+  let err = dx - dy;
+  let x = x0;
+  let y = y0;
+  for (;;) {
+    tiles.push({ x, y });
+    if (x === x1 && y === y1) break;
+    const e2 = 2 * err;
+    if (e2 > -dy) {
+      err -= dy;
+      x += sx;
+    }
+    if (e2 < dx) {
+      err += dx;
+      y += sy;
+    }
+  }
+  return tiles;
+}
+
 /** The passable tiles orthogonally or diagonally adjacent to `pos`. */
 export function passableNeighbors(pos, level) {
   return DIRECTIONS_8.map(([dx, dy]) => ({ x: pos.x + dx, y: pos.y + dy })).filter((tile) =>
