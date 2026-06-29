@@ -67,6 +67,30 @@ Define a `sprite` **and** a `glyph` for every visible entity. The catalog's own 
 ([`sprite-catalog.test.js`](../../data/sprites/sprite-catalog.test.js)) checks every entry resolves
 to a declared sheet; an entity-level audit keeps both fields present on each renderable.
 
+## Finding coordinates
+
+Two dev-only tools help you turn "the sprite I want" into a `col`/`row`, especially on big sheets
+like `ProjectUtumnoFull-DCSS-32.png` (a 64×95 grid) where counting cells by eye is painful.
+
+- **Find** with [`sprite-finder.html`](../../sprite-finder.html). Run `npm run dev` and open
+  `http://127.0.0.1:8000/sprite-finder.html`. Pick a sheet from the dropdown (the list is derived
+  from `SHEETS`, so it always matches the real art), then mouse-wheel to zoom, drag to pan, and hover
+  to read the `col`/`row` of any cell — the cell size comes from the `-${size}` suffix in the
+  filename. Click a sprite to collect it into the left panel (with a thumbnail and its coordinates);
+  **Clear** empties the list. Good for discovering coordinates from scratch.
+- **Confirm** with the `sprite:preview` script. Once you have a candidate cell, crop and upscale it
+  to eyeball it:
+
+  ```
+  npm run sprite:preview -- assets/sprites/ProjectUtumnoFull-DCSS-32.png 26 42
+  ```
+
+  It writes a magnified PNG to `sprite-previews/` (gitignored). Pass a second col/row pair for a
+  block, and `--grid` to draw cell separators. See the header of
+  [`scripts/sprite-preview.mjs`](../../scripts/sprite-preview.mjs) for all options.
+
+Both use the same 0-indexed `col`/`row` convention as the catalog.
+
 ## Add art
 
 1. Drop the sheet at `assets/sprites/${name}-${size}.png`.
