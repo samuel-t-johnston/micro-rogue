@@ -8,6 +8,7 @@
 export const Slots = Object.freeze({
   WEAPON: 'weapon',
   ARMOR: 'armor',
+  AMMUNITION: 'ammunition',
 });
 
-export const HUMANOID_SLOTS = Object.freeze([Slots.WEAPON, Slots.ARMOR]);
+export const HUMANOID_SLOTS = Object.freeze([Slots.WEAPON, Slots.ARMOR, Slots.AMMUNITION]);

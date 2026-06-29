@@ -124,9 +124,9 @@ describe('character menu — full equip/unequip flow', () => {
     controller.render(ctx);
 
     // Tap the dagger row in the "Equippable in Inventory" section.
-    // Body y = 88. Rows: Equipped section (28) + 2 slot rows (80) + section (28) = 136 offset.
-    // Dagger row center: y = 88 + 136 + 20 = 244.
-    controller.handleInput({ type: 'pointerdown', x: 200, y: 244 });
+    // Body y = 88. Rows: Equipped section (28) + 3 slot rows of ROW_H=44 (132) + section (28) = 188
+    // offset, so the dagger row spans [276, 320). Tap inside it.
+    controller.handleInput({ type: 'pointerdown', x: 200, y: 290 });
     expect(submitted).toHaveLength(0); // menu just opened, nothing submitted yet
     controller.render(ctx);
 
@@ -168,7 +168,7 @@ describe('character menu — full equip/unequip flow', () => {
     controller.render(ctx);
     controller.handleInput({ type: 'pointerdown', x: 240, y: 300 }); // Equipment
     controller.render(ctx);
-    controller.handleInput({ type: 'pointerdown', x: 200, y: 244 }); // Dagger row → menu
+    controller.handleInput({ type: 'pointerdown', x: 200, y: 290 }); // Dagger row → menu
     controller.render(ctx);
     // Tap Cancel button (button 1 of 2-action menu): y = 296 + 52 = 348
     controller.handleInput({ type: 'pointerdown', x: 400, y: 348 });

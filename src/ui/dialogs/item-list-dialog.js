@@ -1,4 +1,5 @@
 import { drawText, drawButton, hitTest } from '../core/canvas-ui.js';
+import { displayName } from '../../engine/log/text/log-text.js';
 
 const DIALOG_W = 320;
 const HEADER_H = 44;
@@ -86,7 +87,7 @@ export function createItemListDialog({
       items.forEach((item, i) => {
         const rowY = dlgY + HEADER_H + 1 + i * ROW_H;
         const isSelected = selected.has(item.id);
-        const name = item.components.get('name') ?? 'Unknown';
+        const name = displayName(item);
 
         if (isSelected) {
           ctx.fillStyle = 'rgba(255,255,255,0.05)';

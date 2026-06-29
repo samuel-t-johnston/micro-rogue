@@ -1,8 +1,6 @@
 import { applyEffect } from '../../effects/core/effects.js';
-import { rng } from '../../engine/core/rng.js';
-import { components } from '../../world/entities/components.js';
-import { getTileType } from '../../world/map/tile-registry.js';
-import { lineTiles } from '../../world/map/geometry.js';
+import { traceFlight, settleProjectile } from '../core/projectile-flight.js';
+import { animations } from '../../render/animations.js';
 import { gameLog } from '../../engine/log/game-log.js';
 import { subject, object, conjugate, itemName } from '../../engine/log/text/log-text.js';
 
@@ -13,62 +11,6 @@ function joinNames(names) {
 }
 
 const capitalize = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
-
-// True if a tile stops a thrown item's flight: solid terrain (a wall) or any entity that blocks
-// movement — a fixture (boulder, chest, closed door) or a creature, all of which the item slams into.
-function stopsFlight(level, x, y) {
-  const tileId = level.getTile(x, y);
-  if (!tileId || getTileType(tileId).blocksMovement) return true;
-  for (const e of level.getEntitiesAt(x, y)) {
-    if (e.components.has('blocksMovement')) return true;
-  }
-  return false;
-}
-
-// True if a dropped item can come to rest on a tile (and be retrieved later). Solid terrain and solid
-// fixtures fill the tile and reject it; a creature does not — the item lands at its feet, recoverable
-// once the creature moves or dies. This is `blocksMovement` minus the `creature` exception, derived
-// rather than tracked as its own component (see docs/howto/item.md).
-function tileHoldsItem(level, x, y) {
-  const tileId = level.getTile(x, y);
-  if (!tileId || getTileType(tileId).blocksMovement) return false;
-  for (const e of level.getEntitiesAt(x, y)) {
-    if (e.components.has('blocksMovement') && !e.components.has('creature')) return false;
-  }
-  return true;
-}
-
-// Places a thrown item that didn't break onto the map at the resting tile, so it can be retrieved
-// (mirrors executeDrop's placement). The item already left the actor's inventory.
-function landItem(item, x, y, level, registry) {
-  item.components.get('item').location = { type: 'map' };
-  if (item.components.has('position')) {
-    const p = item.components.get('position');
-    p.x = x;
-    p.y = y;
-  } else {
-    registry.addComponent(item, 'position', components.position(x, y));
-  }
-  level.placeEntity(item);
-}
-
-/**
- * Traces a thrown item's straight-line flight from the actor's tile toward (tx, ty). Returns the
- * `impact` tile — the first tile along the line that stops the item (a wall, fixture, or creature), or
- * the target if the line is clear — and `before`, the last clear tile the item passed (the fallback
- * resting spot when the impact tile can't hold it). `before` defaults to the actor's own tile, so an
- * item thrown straight into an adjacent obstacle drops at the thrower's feet.
- */
-function traceFlight(level, ox, oy, tx, ty) {
-  const path = lineTiles(ox, oy, tx, ty);
-  let before = path[0]; // the actor's tile
-  for (let i = 1; i < path.length; i++) {
-    const tile = path[i];
-    if (stopsFlight(level, tile.x, tile.y)) return { impact: tile, before };
-    before = tile;
-  }
-  return { impact: path[path.length - 1], before };
-}
 
 /**
  * Throws an item from the actor's inventory toward a target tile. The item flies in a straight line and
@@ -93,6 +35,17 @@ export function executeThrow(actor, action, level, registry) {
   const itemId = item.id;
   const thrownName = itemName(item); // captured before a lethal hit / break can clear components
 
+  // Fly the item to its impact tile, using its plain (non-directional) sprite. Snapshotted now because
+  // a break destroys the item before the frame draws. Purely cosmetic — the throw already resolved.
+  const r = item.components.get('renderable');
+  if (r) {
+    animations.projectile({
+      from: origin,
+      to: impact,
+      renderable: { sprite: r.sprite, color: r.color, glyph: r.glyph, glyphColor: r.glyphColor },
+    });
+  }
+
   // Candidates on the impact tile we can hit — creatures/doors/chests, not loose floor items. Capture
   // their names up front: a lethal hit clears the target's name component (see executeAttack).
   const targetInfos = [...level.getEntitiesAt(impact.x, impact.y)]
@@ -114,15 +67,15 @@ export function executeThrow(actor, action, level, registry) {
     }
   }
 
-  const broke = throwable ? rng.random() < throwable.breakChance : false;
-  if (broke) {
-    registry.destroyEntity(item);
-  } else {
-    // Rest on the impact tile if it can hold the item (floor, open door, a creature's feet); otherwise
-    // it bounces back to the last clear tile so it never strands inside a wall, boulder, or chest.
-    const rest = tileHoldsItem(level, impact.x, impact.y) ? impact : before;
-    landItem(item, rest.x, rest.y, level, registry);
-  }
+  // An item without a throwable component cannot break (breakChance: null skips the roll); one with
+  // throwable breaks per its breakChance, else lands on the impact tile or bounces back to the last
+  // clear tile so it never strands inside a wall, boulder, or chest.
+  const broke = settleProjectile(
+    item,
+    { impact, before, breakChance: throwable ? throwable.breakChance : null },
+    level,
+    registry,
+  );
 
   // Impact line, item-subject. Mention the affected; if none landed, name an unaffected one we hit;
   // if the tile was empty, just narrate the throw / shatter.

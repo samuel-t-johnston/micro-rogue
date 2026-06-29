@@ -4,6 +4,10 @@ import {
   createPotionOfPain,
   createDagger,
   createSword,
+  createSpear,
+  createJavelin,
+  createBow,
+  createArrow,
   createLeatherArmor,
   createScroll,
   createAmulet,
@@ -45,6 +49,12 @@ export const ENTITY_PREFABS = {
   leatherArmor: { kind: 'item', make: createLeatherArmor },
   scroll: { kind: 'item', make: createScroll },
   amulet: { kind: 'item', make: createAmulet },
+  // Ranged-weapon set, appended to keep the existing procedural-pool order (and thus seeded
+  // determinism) stable. See docs/design/ranged-weapons.md.
+  spear: { kind: 'item', make: createSpear },
+  javelin: { kind: 'item', make: createJavelin },
+  bow: { kind: 'item', make: createBow },
+  arrow: { kind: 'item', make: createArrow },
 
   // Furniture. Stairs are two prefabs from one factory because the up/down variants render
   // differently and the map data refers to them by distinct ids.

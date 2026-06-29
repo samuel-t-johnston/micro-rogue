@@ -17,7 +17,13 @@ export function chebyshevDistance(a, b) {
   return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 }
 
-const OCTANTS = ['E', 'SE', 'S', 'SW', 'W', 'NW', 'N', 'NE'];
+/**
+ * The 8 compass directions, in bearing-sector order (E, then clockwise on the y-down grid). The order
+ * is load-bearing: `cardinalDirection` indexes this by the 45° sector of `atan2`. The canonical list of
+ * direction names — anything that needs the set (e.g. directional projectile sprites) reads it here.
+ */
+export const COMPASS_DIRECTIONS = ['E', 'SE', 'S', 'SW', 'W', 'NW', 'N', 'NE'];
+
 /**
  * The 8-way compass direction from `from` to `to` (e.g. 'N', 'SE'), or null when they coincide.
  * Buckets the bearing into eight 45° sectors. The grid is y-down (tiles[y][x]), so a smaller y is
@@ -28,7 +34,7 @@ export function cardinalDirection(from, to) {
   const dy = to.y - from.y;
   if (dx === 0 && dy === 0) return null;
   const sector = ((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8) + 8) % 8;
-  return OCTANTS[sector];
+  return COMPASS_DIRECTIONS[sector];
 }
 
 /**

@@ -23,6 +23,8 @@ const PLAYER = { x: 2, y: 2 };
 const gameplay = (rows) => rows.filter((r) => r.id !== 'look');
 const ids = (rows) => gameplay(rows).map((r) => r.id);
 const resolve = (level, x, y) => resolveTileActions(level, PLAYER, { x, y });
+const resolveWith = (level, x, y, capability) =>
+  resolveTileActions(level, PLAYER, { x, y }, capability);
 
 describe('resolveTileActions', () => {
   let registry, level;
@@ -56,6 +58,40 @@ describe('resolveTileActions', () => {
     level.placeEntity(creature);
 
     const rows = resolve(level, 2, 1);
+    expect(ids(rows)).toEqual(['attack']);
+    expect(rows[0].action).toEqual({ type: 'attack', targetEntityId: creature.id });
+  });
+
+  function makeCreature(x, y) {
+    const c = registry.createEntity();
+    registry.addComponent(c, 'position', components.position(x, y));
+    registry.addComponent(c, 'health', components.health(5, 5));
+    registry.addComponent(c, 'blocksMovement', components.blocksMovement());
+    level.placeEntity(c);
+    return c;
+  }
+
+  it('offers a ranged attack on a distant creature within range and line of sight', () => {
+    const creature = makeCreature(4, 2); // two tiles east, clear floor between
+    const rows = resolveWith(level, 4, 2, { range: 15, meleeRange: 1 });
+    expect(ids(rows)).toEqual(['attack']);
+    expect(rows[0].action).toEqual({ type: 'attack', targetEntityId: creature.id });
+  });
+
+  it('does not offer an attack on a creature beyond weapon range', () => {
+    makeCreature(4, 2); // distance 2
+    expect(gameplay(resolveWith(level, 4, 2, { range: 1, meleeRange: 1 }))).toEqual([]);
+  });
+
+  it('does not offer a ranged attack when a wall blocks the line of sight', () => {
+    makeCreature(4, 2);
+    level.tiles[2][3] = 'wall'; // between the player (2,2) and the creature (4,2)
+    expect(gameplay(resolveWith(level, 4, 2, { range: 15, meleeRange: 1 }))).toEqual([]);
+  });
+
+  it('fires point-blank when meleeRange is 0 (a bow has no free melee)', () => {
+    const creature = makeCreature(2, 1); // adjacent
+    const rows = resolveWith(level, 2, 1, { range: 15, meleeRange: 0 });
     expect(ids(rows)).toEqual(['attack']);
     expect(rows[0].action).toEqual({ type: 'attack', targetEntityId: creature.id });
   });

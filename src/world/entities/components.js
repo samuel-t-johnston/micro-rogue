@@ -19,6 +19,16 @@ export const components = {
     return { goals: [...goalNames], lastGoal: null };
   },
 
+  // Marks an item as ammunition for a ranged weapon. `ammoType` must match the firing weapon's
+  // ammoType (e.g. an arrow is 'arrow', fired by a bow whose weapon.ammoType is 'arrow'). `breakChance`
+  // (0..1) is the odds the projectile shatters on impact instead of landing to be retrieved.
+  // `attackSprites` maps an 8-way compass direction (N, NE, E, SE, S, SW, W, NW — the keys
+  // cardinalDirection returns) to a sprite-catalog name; the flying projectile draws the one nearest
+  // its flight vector. Stored as data so ammunition serializes cleanly. See docs/design/ranged-weapons.md.
+  ammunition(ammoType, breakChance = 0, attackSprites = {}) {
+    return { ammoType, breakChance, attackSprites: { ...attackSprites } };
+  },
+
   // Marks an entity as able to take the attack action. `damage` is the unarmed/base
   // attack damage; equipment and effects add to it via attributeModifiers (see the
   // attribute resolver in src/attributes/attributes.js).
@@ -230,6 +240,14 @@ export const components = {
     return { sourceId, volume, language, message, sourceFactions };
   },
 
+  // A stack of identical items represented as one entity with a count (a quiver of 100 arrows, a bundle
+  // of javelins). `maxStackSize` is the cap (data, for a future merge/split UI); `count` is the live
+  // quantity. Consuming decrements `count`; the entity is destroyed when it hits 0. A single (possibly
+  // stacked) entity occupies one inventory slot or equipment slot. See docs/design/ranged-weapons.md.
+  stackable(maxStackSize = 1, count = 1) {
+    return { maxStackSize, count };
+  },
+
   // Marks an item as throwable with an effect. Same data shape as `consumable` (effectType is a key
   // into the effects registry; params is the effect-specific payload), plus `breakChance` (0..1): the
   // odds the item shatters on impact rather than landing on the target tile to be retrieved. Any item
@@ -278,6 +296,17 @@ export const components = {
   // (silence) cleanly disables coordination without special-casing.
   voice(language) {
     return { language };
+  },
+
+  // Marks an item as a weapon. `range` is the max attack distance (Chebyshev). `meleeRange` (0..range)
+  // is the distance at/under which an attack is a no-ammo melee; above it, up to `range`, the attack is
+  // ranged/reach. `ammoType`: null = consumes nothing (melee/reach only, e.g. spear); 'self' = the
+  // weapon throws itself (javelin); any other tag = consumes matching ammunition from the ammunition
+  // slot (bow → 'arrow'). `breakChance` (0..1) applies to a self-thrown weapon's flight. `attackSprites`
+  // maps an 8-way compass direction to a sprite name for the projectile/thrust; empty falls back to a
+  // melee wiggle. Additive to equippable + attributeModifiers. See docs/design/ranged-weapons.md.
+  weapon(range = 1, { meleeRange = 1, ammoType = null, breakChance = 0, attackSprites = {} } = {}) {
+    return { range, meleeRange, ammoType, breakChance, attackSprites: { ...attackSprites } };
   },
 
   // An entity that wears equipment. slotNames defines the named slots available on this entity.

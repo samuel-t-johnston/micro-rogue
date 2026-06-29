@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { isPlayer, subject, object, conjugate, itemName } from './log-text.js';
+import {
+  isPlayer,
+  subject,
+  object,
+  conjugate,
+  possessive,
+  quantitySuffix,
+  itemName,
+  displayName,
+} from './log-text.js';
 import { createEntityRegistry } from '../../core/entity-component-system.js';
 import { components } from '../../../world/entities/components.js';
 
@@ -49,5 +58,38 @@ describe('log-text', () => {
       r.addComponent(e, 'name', components.name('Healing Potion')),
     );
     expect(itemName(potion)).toBe('healing potion');
+  });
+
+  it('renders the possessive in agreement with the actor', () => {
+    expect(possessive(player())).toBe('your');
+    expect(possessive(goblin())).toBe('its');
+  });
+
+  const stack = (count) =>
+    makeEntity((r, e) => {
+      r.addComponent(e, 'name', components.name('Arrow'));
+      r.addComponent(e, 'stackable', components.stackable(100, count));
+    });
+
+  it('suffixes a stack quantity only when more than one', () => {
+    expect(quantitySuffix(stack(20))).toBe(' (20)');
+    expect(quantitySuffix(stack(1))).toBe('');
+    expect(quantitySuffix(goblin())).toBe(''); // no stackable component
+  });
+
+  it('appends the stack quantity to item names', () => {
+    expect(itemName(stack(20))).toBe('arrow (20)');
+    expect(itemName(stack(1))).toBe('arrow');
+  });
+
+  it('displayName keeps authored casing and appends the quantity', () => {
+    expect(displayName(stack(20))).toBe('Arrow (20)');
+    expect(displayName(goblin())).toBe('Goblin');
+  });
+
+  it('displayName uses the given fallback when unnamed', () => {
+    const nameless = makeEntity(() => {});
+    expect(displayName(nameless, 'Item')).toBe('Item');
+    expect(displayName(nameless)).toBe('Unknown');
   });
 });

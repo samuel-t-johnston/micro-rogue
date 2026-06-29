@@ -15,7 +15,8 @@
  *     Keyed by entity id; the normal entity pass still draws the sprite, transformed.
  *   - Detached: own their visual (a snapshot of sprite + position) and draw in a
  *     separate pass. Needed when there's no live entity to attach to — death smoosh
- *     (the entity is removed before it could animate), and projectiles later.
+ *     (the entity is removed before it could animate), and projectiles/thrusts (the
+ *     flying thing is an effect, not a world entity).
  */
 
 // Motion durations (ms). Movement slide is kept short (ux-design: 80–120ms) so turn
@@ -23,9 +24,17 @@
 const SLIDE_MS = 110;
 const WIGGLE_MS = 150;
 const SMOOSH_MS = 260;
+const THRUST_MS = 150; // reach-weapon lunge, matched to the melee wiggle
+
+// Projectile flight time scales with distance (so a long shot doesn't look instantaneous) but is
+// capped so a full-range bow shot still feels snappy.
+const PROJECTILE_MS_PER_TILE = 18;
+const PROJECTILE_MAX_MS = 260;
 
 // How far an attack lunge displaces the attacker toward its target, in tiles.
 const WIGGLE_AMP = 0.5;
+// How far a reach-weapon thrust extends toward its target, as a fraction of the gap (it never lands).
+const THRUST_REACH = 0.6;
 
 const now = () => performance.now();
 
@@ -182,6 +191,50 @@ function createAnimationManager() {
           alpha: 1 - e,
           anchor: 'bottom',
         }),
+      });
+    },
+
+    // Detached: a projectile flying in a straight line from `from` to `to` (ranged attacks, thrown
+    // items). Anchored at the origin tile, with an offset that eases from zero to the full delta so
+    // the sprite travels to the impact tile and stops. Carries its own renderable snapshot since the
+    // flying thing isn't a live world entity. Game state already resolved — this is pure cosmetics.
+    projectile({ from, to, renderable, duration } = {}) {
+      if (!enabled || !from || !to || !renderable) return;
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const dist = Math.hypot(dx, dy);
+      add({
+        entityId: null,
+        kind: 'projectile',
+        x: from.x,
+        y: from.y,
+        renderable,
+        duration:
+          duration ?? Math.min(PROJECTILE_MAX_MS, PROJECTILE_MS_PER_TILE * Math.max(dist, 1)),
+        ease: linear,
+        sample: (p) => ({ dx: dx * p, dy: dy * p }),
+      });
+    },
+
+    // Detached: a reach weapon's thrust (the spear) — the sprite lunges from `from` toward `to` and
+    // retracts, never landing. Like wiggle but for a standalone sprite; peaks partway to the target.
+    thrust({ from, to, renderable, duration } = {}) {
+      if (!enabled || !from || !to || !renderable) return;
+      const dx = (to.x - from.x) * THRUST_REACH;
+      const dy = (to.y - from.y) * THRUST_REACH;
+      add({
+        entityId: null,
+        kind: 'thrust',
+        x: from.x,
+        y: from.y,
+        renderable,
+        duration: duration ?? THRUST_MS,
+        ease: linear,
+        // sin(πp) rises to the peak at the halfway point and returns to zero.
+        sample: (p) => {
+          const k = Math.sin(p * Math.PI);
+          return { dx: dx * k, dy: dy * k };
+        },
       });
     },
 

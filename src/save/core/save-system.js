@@ -20,7 +20,7 @@ import {
 } from './serialize.js';
 
 /** Save schema version. Bumped only on a breaking schema change (see the design doc). */
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 
 /** Game release version; independent of SAVE_VERSION, tracks releases and mirrors package.json. */
 export const GAME_VERSION = '0.1.0';
@@ -153,6 +153,44 @@ export const migrations = [
       backfill(save.entities);
       for (const floor of Object.values(save.frozenLevels ?? {})) {
         backfill(floor.entities);
+      }
+      return save;
+    },
+  },
+  {
+    from: 6,
+    to: 7,
+    // v7 makes weapons first-class — a `weapon` component carrying range/ammo — and adds an
+    // `ammunition` equipment slot. Saves through v6 predate both: their weapon-slot items have no
+    // `weapon` component (the resolver tolerates that as unarmed melee, but we normalize the data so
+    // the "every weapon-slot item is a weapon" invariant holds), and their humanoids have no quiver
+    // slot, so they could never equip ammo. Backfill both. Frozen string literals on purpose — a
+    // migration must never depend on the mutable Slots enum or items.js. See docs/design/ranged-weapons.md.
+    migrate(save) {
+      const upgrade = (entities) => {
+        for (const entity of entities ?? []) {
+          const c = entity.components;
+          if (!c) continue;
+          // 1. A weapon-slot equippable becomes a range-1 melee weapon if it isn't already one.
+          if (c.equippable?.slot === 'weapon' && !c.weapon) {
+            c.weapon = {
+              range: 1,
+              meleeRange: 1,
+              ammoType: null,
+              breakChance: 0,
+              attackSprites: {},
+            };
+          }
+          // 2. A humanoid loadout (weapon + armor) gains an empty ammunition slot.
+          const slots = c.wearsEquipment?.slots;
+          if (slots && 'weapon' in slots && 'armor' in slots && !('ammunition' in slots)) {
+            slots.ammunition = null;
+          }
+        }
+      };
+      upgrade(save.entities);
+      for (const floor of Object.values(save.frozenLevels ?? {})) {
+        upgrade(floor.entities);
       }
       return save;
     },

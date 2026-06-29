@@ -33,6 +33,7 @@ import saveV2 from '../fixtures/save-v2.json';
 import saveV3 from '../fixtures/save-v3.json';
 import saveV4 from '../fixtures/save-v4.json';
 import saveV5 from '../fixtures/save-v5.json';
+import saveV6 from '../fixtures/save-v6.json';
 
 // Builds a realistic game directly (the pipeline's static stage does a dynamic file:// import
 // that vitest's resolver mangles on Windows): a chest with contained items, creatures, map
@@ -421,6 +422,87 @@ describe('v5 → v6 migration (real, from a fixture)', () => {
       .getAllEntities()
       .find((e) => e.components.get('name') === 'Healing Potion');
     expect(potion.components.has('throwable')).toBe(true);
+  });
+});
+
+describe('v6 → v7 migration (real, from a fixture)', () => {
+  const findEntity = (entities, id) => entities.find((e) => e.id === id);
+
+  it('backfills a range-1 melee weapon component on a weapon-slot item that predates it', () => {
+    const migrated = loadSave(saveV6);
+    expect(migrated.saveVersion).toBe(SAVE_VERSION);
+    // Dagger (id 2) had only equippable(weapon); it becomes a melee weapon.
+    expect(findEntity(migrated.entities, 2).components.weapon).toEqual({
+      range: 1,
+      meleeRange: 1,
+      ammoType: null,
+      breakChance: 0,
+      attackSprites: {},
+    });
+  });
+
+  it('does not give a non-weapon-slot equippable (armor) a weapon component', () => {
+    const migrated = loadSave(saveV6);
+    expect(findEntity(migrated.entities, 3).components.weapon).toBeUndefined();
+  });
+
+  it('adds an empty ammunition slot to a weapon+armor loadout', () => {
+    const player = findEntity(loadSave(saveV6).entities, 1);
+    expect(player.components.wearsEquipment.slots).toEqual({
+      weapon: 2,
+      armor: 3,
+      ammunition: null,
+    });
+  });
+
+  it('also backfills weapon components inside frozen floors', () => {
+    const sword = findEntity(loadSave(saveV6).frozenLevels['floor-2'].entities, 5);
+    expect(sword.components.weapon).toMatchObject({ range: 1, ammoType: null });
+  });
+
+  it('does not overwrite an existing weapon component or ammunition slot', () => {
+    const raw = {
+      saveVersion: 6,
+      versionHistory: [{ saveVersion: 6 }],
+      entities: [
+        {
+          id: 1,
+          components: {
+            equippable: { slot: 'weapon' },
+            weapon: {
+              range: 9,
+              meleeRange: 0,
+              ammoType: 'arrow',
+              breakChance: 0,
+              attackSprites: {},
+            },
+          },
+        },
+        {
+          id: 2,
+          components: {
+            wearsEquipment: { slots: { weapon: null, armor: null, ammunition: 7 } },
+          },
+        },
+      ],
+    };
+    const migrated = loadSave(raw);
+    expect(migrated.entities[0].components.weapon.range).toBe(9);
+    expect(migrated.entities[1].components.wearsEquipment.slots.ammunition).toBe(7);
+  });
+
+  it('does not mutate the source fixture', () => {
+    loadSave(saveV6);
+    expect(saveV6.entities[1].components.weapon).toBeUndefined();
+    expect(saveV6.entities[0].components.wearsEquipment.slots.ammunition).toBeUndefined();
+  });
+
+  it('a migrated v6 save deserializes into a live game with a quiver and a real weapon', () => {
+    const restored = deserializeGame(loadSave(saveV6));
+    expect(restored.player.id).toBe(saveV6.playerId);
+    expect(Slots.AMMUNITION in restored.player.components.get('wearsEquipment').slots).toBe(true);
+    const dagger = restored.player.components.get('wearsEquipment').slots[Slots.WEAPON];
+    expect(dagger.components.get('weapon').range).toBe(1);
   });
 });
 

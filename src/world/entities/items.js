@@ -2,6 +2,13 @@ import { components } from './components.js';
 import { Slots } from '../../../data/equipment-slots.js';
 import { EffectTypes } from '../../effects/core/effects.js';
 import { RenderLayers } from '../../render/render-layers.js';
+import { COMPASS_DIRECTIONS } from '../map/geometry.js';
+
+// Builds a projectile's directional attack-sprite map, keyed by the compass names cardinalDirection
+// returns → catalog name `${prefix}-<dir lowercase>`. The flight animation picks the entry nearest its
+// bearing; weapons/ammo without one fall back to the melee wiggle. See docs/design/ranged-weapons.md.
+const directionalAttackSprites = (prefix) =>
+  Object.fromEntries(COMPASS_DIRECTIONS.map((d) => [d, `${prefix}-${d.toLowerCase()}`]));
 
 /**
  * Resolves an item's `location` from (x, y) for map items or `entityId` for contained items. x and y
@@ -91,6 +98,7 @@ export function createDagger(registry, x, y, entityId) {
   );
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
+  registry.addComponent(entity, 'weapon', components.weapon(1)); // melee, range 1
   registry.addComponent(
     entity,
     'attributeModifiers',
@@ -114,11 +122,134 @@ export function createSword(registry, x, y, entityId) {
   );
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
+  registry.addComponent(entity, 'weapon', components.weapon(1)); // melee, range 1
   registry.addComponent(
     entity,
     'attributeModifiers',
     components.attributeModifiers({ attackDamage: 3 }),
   );
+  if (location.type === 'map') {
+    registry.addComponent(entity, 'position', components.position(x, y));
+  }
+  return entity;
+}
+
+/**
+ * Creates a Spear — a reach weapon: range 2 (melee at adjacent, a thrust at distance 2), no ammunition,
+ * +2 attack damage. Nothing leaves the hand. See docs/design/ranged-weapons.md.
+ */
+export function createSpear(registry, x, y, entityId) {
+  const location = resolveItemLocation(registry, x, y, entityId);
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name('Spear'));
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('spear', '#101010', '/', '#b5c7d8', RenderLayers.ITEM),
+  );
+  registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
+  registry.addComponent(entity, 'weapon', components.weapon(2, { meleeRange: 1 }));
+  registry.addComponent(
+    entity,
+    'attributeModifiers',
+    components.attributeModifiers({ attackDamage: 2 }),
+  );
+  if (location.type === 'map') {
+    registry.addComponent(entity, 'position', components.position(x, y));
+  }
+  return entity;
+}
+
+/**
+ * Creates a stack of Javelins — a self-thrown weapon: melee at range 1 (no consume), thrown out to
+ * range 15 beyond that (consuming one of itself), +2 attack damage. Stacks small (max 5). Spawns as 3.
+ */
+export function createJavelin(registry, x, y, entityId) {
+  const location = resolveItemLocation(registry, x, y, entityId);
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name('Javelin'));
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('javelin', '#101010', '|', '#c8b78a', RenderLayers.ITEM),
+  );
+  registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
+  registry.addComponent(
+    entity,
+    'weapon',
+    components.weapon(15, {
+      meleeRange: 1,
+      ammoType: 'self',
+      breakChance: 0.25,
+      attackSprites: directionalAttackSprites('javelin'),
+    }),
+  );
+  registry.addComponent(
+    entity,
+    'attributeModifiers',
+    components.attributeModifiers({ attackDamage: 2 }),
+  );
+  registry.addComponent(entity, 'stackable', components.stackable(5, 3));
+  if (location.type === 'map') {
+    registry.addComponent(entity, 'position', components.position(x, y));
+  }
+  return entity;
+}
+
+/**
+ * Creates a Bow — a ranged weapon firing arrows from the ammunition slot out to range 15. meleeRange 0,
+ * so it always fires (no point-blank stab); the bow itself never flies. +2 attack damage.
+ */
+export function createBow(registry, x, y, entityId) {
+  const location = resolveItemLocation(registry, x, y, entityId);
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name('Bow'));
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('bow', '#101010', '}', '#c8a36a', RenderLayers.ITEM),
+  );
+  registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
+  registry.addComponent(
+    entity,
+    'weapon',
+    components.weapon(15, { meleeRange: 0, ammoType: 'arrow' }),
+  );
+  registry.addComponent(
+    entity,
+    'attributeModifiers',
+    components.attributeModifiers({ attackDamage: 2 }),
+  );
+  if (location.type === 'map') {
+    registry.addComponent(entity, 'position', components.position(x, y));
+  }
+  return entity;
+}
+
+/**
+ * Creates a stack of Arrows — ammunition for the bow (ammoType 'arrow'), often breaking on impact
+ * (breakChance 0.5). Stacks large (max 100). Spawns as 20. No passive stat bonus.
+ */
+export function createArrow(registry, x, y, entityId) {
+  const location = resolveItemLocation(registry, x, y, entityId);
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name('Arrow'));
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('arrow', '#101010', '↑', '#d8d2b8', RenderLayers.ITEM),
+  );
+  registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(entity, 'equippable', components.equippable(Slots.AMMUNITION));
+  registry.addComponent(
+    entity,
+    'ammunition',
+    components.ammunition('arrow', 0.5, directionalAttackSprites('arrow')),
+  );
+  registry.addComponent(entity, 'stackable', components.stackable(100, 20));
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));
   }
