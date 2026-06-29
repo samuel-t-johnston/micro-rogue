@@ -36,7 +36,34 @@ export function conjugate(entity, youForm, otherForm) {
   return isPlayer(entity) ? youForm : otherForm;
 }
 
-/** An item's name lowercased for mid-sentence use: "the healing potion". */
+/** Possessive determiner agreeing with the actor: 'your' or 'its'. */
+export function possessive(entity) {
+  return isPlayer(entity) ? 'your' : 'its';
+}
+
+/**
+ * A trailing " (N)" for a stack of more than one, else "". Appended to item names everywhere they're
+ * shown (log lines, inventory, equipment, pickup labels) so quantity is always visible. A single item
+ * (count 1 or no `stackable` component) gets no suffix, keeping ordinary names — and lone projectiles —
+ * clean.
+ */
+export function quantitySuffix(item) {
+  const count = item.components.get('stackable')?.count;
+  return count > 1 ? ` (${count})` : '';
+}
+
+/** An item's name lowercased for mid-sentence use, with a stack quantity: "the arrow (20)". */
 export function itemName(item) {
-  return (item.components.get('name') ?? 'item').toLowerCase();
+  return (item.components.get('name') ?? 'item').toLowerCase() + quantitySuffix(item);
+}
+
+/**
+ * The canonical on-screen name for an entity — its name as authored (unlike the lowercased,
+ * mid-sentence `itemName`) with a stack quantity appended for stacks of more than one ("Arrow (20)").
+ * The single place UI lists, menus, and tile labels should render an item/entity name; `fallback`
+ * names the entity when it has no `name` component. Works for any entity (a non-stackable creature or
+ * door simply gets no suffix).
+ */
+export function displayName(entity, fallback = 'Unknown') {
+  return (entity.components.get('name') ?? fallback) + quantitySuffix(entity);
 }

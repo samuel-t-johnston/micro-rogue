@@ -1,5 +1,6 @@
 import { resolveSenses } from '../senses/sense-registry.js';
 import { areHostile } from '../../combat/factions.js';
+import { getAttackCapability } from '../../combat/weapons.js';
 import { chebyshevDistance, projectTile } from '../../world/map/geometry.js';
 import { parseTileKey } from '../../engine/core/tile-key.js';
 
@@ -155,7 +156,7 @@ export function applySenses(entity, level, turnCount = 0) {
 /**
  * @typedef {object} PlanningContext
  * @property {object} memory - The entity's `memory` component (undefined for memoryless entities).
- * @property {{ position: {x: number, y: number}, factions: string[] }} selfState - The acting entity's own state.
+ * @property {{ position: {x: number, y: number}, factions: string[], attackCapability: {range: number, meleeRange: number} }} selfState - The acting entity's own state.
  * @property {{ entities: object[], sounds: object[], smells: object[], visibleTiles: Set<string>, knownTiles: Map<string, number> }} perception - Merged, reconciled output of all the entity's senses.
  * @property {object} level - The current level.
  * @property {number} turnCount - The entity's per-entity action clock.
@@ -178,6 +179,7 @@ export function buildPlanningContext({ entity, level, inputController, turnCount
   const selfState = {
     position: { x: pos.x, y: pos.y },
     factions: entity.components.get('faction') ?? [],
+    attackCapability: getAttackCapability(entity),
   };
   const perception = {
     entities: mergeSenseResults(rawResults),

@@ -29,6 +29,31 @@ export const SPRITES = {
   dagger: { sheet: 'ProjectUtumnoFull-DCSS', col: 4, row: 45 },
   'leather-armor': { sheet: 'ProjectUtumnoFull-DCSS', col: 51, row: 37 },
   sword: { sheet: 'ProjectUtumnoFull-DCSS', col: 3, row: 46 },
+  arrow: { sheet: 'ProjectUtumnoFull-DCSS', col: 14, row: 29 },
+  javelin: { sheet: 'ProjectUtumnoFull-DCSS', col: 38, row: 30 },
+  spear: { sheet: 'ProjectUtumnoFull-DCSS', col: 27, row: 47 },
+  bow: { sheet: 'ProjectUtumnoFull-DCSS', col: 38, row: 49 },
+
+  // Projectiles — directional attack sprites for ranged-weapon flight. Named `<projectile>-<dir>`
+  // for the 8 compass bearings cardinalDirection returns; an attack picks the one nearest its flight
+  // vector. See docs/design/ranged-weapons.md.
+  'arrow-n': { sheet: 'ProjectUtumnoFull-DCSS', col: 11, row: 24 },
+  'arrow-ne': { sheet: 'ProjectUtumnoFull-DCSS', col: 12, row: 24 },
+  'arrow-e': { sheet: 'ProjectUtumnoFull-DCSS', col: 13, row: 24 },
+  'arrow-se': { sheet: 'ProjectUtumnoFull-DCSS', col: 14, row: 24 },
+  'arrow-s': { sheet: 'ProjectUtumnoFull-DCSS', col: 15, row: 24 },
+  'arrow-sw': { sheet: 'ProjectUtumnoFull-DCSS', col: 16, row: 24 },
+  'arrow-w': { sheet: 'ProjectUtumnoFull-DCSS', col: 17, row: 24 },
+  'arrow-nw': { sheet: 'ProjectUtumnoFull-DCSS', col: 18, row: 24 },
+  // Javelin orientations interleave with another weapon on row 25, hence the non-contiguous columns.
+  'javelin-n': { sheet: 'ProjectUtumnoFull-DCSS', col: 20, row: 25 },
+  'javelin-ne': { sheet: 'ProjectUtumnoFull-DCSS', col: 21, row: 25 },
+  'javelin-e': { sheet: 'ProjectUtumnoFull-DCSS', col: 22, row: 25 },
+  'javelin-se': { sheet: 'ProjectUtumnoFull-DCSS', col: 24, row: 25 },
+  'javelin-s': { sheet: 'ProjectUtumnoFull-DCSS', col: 26, row: 25 },
+  'javelin-sw': { sheet: 'ProjectUtumnoFull-DCSS', col: 28, row: 25 },
+  'javelin-w': { sheet: 'ProjectUtumnoFull-DCSS', col: 30, row: 25 },
+  'javelin-nw': { sheet: 'ProjectUtumnoFull-DCSS', col: 32, row: 25 },
 
   // Furniture
   boulder: { sheet: 'sprite-sheet', col: 16, row: 12 },

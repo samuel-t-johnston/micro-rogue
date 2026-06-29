@@ -1,5 +1,6 @@
 import { drawText, hitTest } from '../core/canvas-ui.js';
 import { createActionMenu } from '../menus/action-menu.js';
+import { displayName } from '../../engine/log/text/log-text.js';
 
 const ROW_H = 44; // minimum tap target (ux-design.md accessibility)
 const SECTION_H = 28;
@@ -66,7 +67,7 @@ export function createEquipmentScreenBody({
     menu = createActionMenu({
       theme,
       getViewport,
-      title: `${item.components.get('name') ?? 'Item'} — Actions`,
+      title: `${displayName(item, 'Item')} — Actions`,
       actions: [
         { label: 'Unequip', action: { type: 'unequip', slot: slotName } },
         { label: 'Cancel', action: null },
@@ -84,7 +85,7 @@ export function createEquipmentScreenBody({
     menu = createActionMenu({
       theme,
       getViewport,
-      title: `${item.components.get('name') ?? 'Item'} — Actions`,
+      title: `${displayName(item, 'Item')} — Actions`,
       actions: [
         { label: 'Equip', action: { type: 'equip', itemEntityId: item.id } },
         { label: 'Cancel', action: null },
@@ -133,7 +134,7 @@ export function createEquipmentScreenBody({
 
         if (r.kind === 'slot') {
           const slotLabel = r.slotName.toUpperCase();
-          const itemLabel = r.item ? (r.item.components.get('name') ?? 'Unknown') : '—';
+          const itemLabel = r.item ? displayName(r.item) : '—';
           drawText(ctx, slotLabel, rect.x + PADDING, rect.y + rect.h / 2, {
             color: dimColor,
             size: 12,
@@ -146,7 +147,7 @@ export function createEquipmentScreenBody({
             baseline: 'middle',
           });
         } else if (r.kind === 'equippable') {
-          const name = r.item.components.get('name') ?? 'Unknown';
+          const name = displayName(r.item);
           const slot = r.item.components.get('equippable').slot;
           drawText(ctx, name, rect.x + PADDING, rect.y + rect.h / 2, {
             color: labelColor,

@@ -26,7 +26,13 @@ export const entities = [
   { type: 'potionOfPain', x: 4, y: 5 },
   { type: 'healingPotion', x: 4, y: 5 },
   { type: 'dagger', x: 3, y: 4 },
-  { type: 'chest', x: 9, y: 5, contents: ['healingPotion', 'potionOfPain', 'dagger'] },
+  // Ranged-weapon set added for manual testing (docs/design/ranged-weapons.md, step 9).
+  {
+    type: 'chest',
+    x: 9,
+    y: 5,
+    contents: ['healingPotion', 'potionOfPain', 'dagger', 'spear', 'javelin', 'bow', 'arrow'],
+  },
   { type: 'goblin', x: 3, y: 2 },
   { type: 'orc', x: 8, y: 2 },
 ];

@@ -274,9 +274,10 @@ are additive fields with tolerant defaults, no migration needed.*
 - [x] Drop item - UI hook for existing action
 - [x] Drop/swap items to container - action
 - [x] Throw item - action - perform the `effect` on executeConsume's target
-- [ ] Ranged attack - 2 tile - spear weapon - player
-- [ ] Ranged attack - ♾️ - bow weapon (no miss mechanic yet) - player
-- [ ] Ammunition - arrows - required for bow, stackable
+- [x] Ranged attack - 2 tile - spear weapon - player
+- [x] Ranged attack - ♾️ - bow weapon (no miss mechanic yet) - player
+- [x] Ranged attack - javelin weapon (self-ammo, stackable, melee at range 1) - player
+- [x] Ammunition - arrows - required for bow, stackable
 - [ ] Ranged attack - NPC Goal
 - [ ] Monsters use equipment - equip/unequip NPC goals?
 - [ ] Orc commander spawns with bow, arrows. Ranged attack goal.

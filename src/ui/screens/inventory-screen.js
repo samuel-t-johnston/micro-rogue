@@ -1,5 +1,6 @@
 import { drawText, hitTest } from '../core/canvas-ui.js';
 import { createActionMenu } from '../menus/action-menu.js';
+import { displayName } from '../../engine/log/text/log-text.js';
 
 const ROW_H = 44; // minimum tap target (ux-design.md accessibility)
 const PADDING = 12;
@@ -37,7 +38,7 @@ export function createInventoryScreenBody({ theme, getViewport, getItems, onActi
     menu = createActionMenu({
       theme,
       getViewport,
-      title: `${item.components.get('name') ?? 'Item'} — Actions`,
+      title: `${displayName(item, 'Item')} — Actions`,
       actions: actionsForItem(item),
       onSelect: (action) => {
         activeItem = null;
@@ -67,7 +68,7 @@ export function createInventoryScreenBody({ theme, getViewport, getItems, onActi
             ctx.fillStyle = theme.surface;
             ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
           }
-          const name = item.components.get('name') ?? 'Unknown';
+          const name = displayName(item);
           drawText(ctx, name, rect.x + PADDING, rect.y + ROW_H / 2, {
             color: isActive ? theme.bg : theme.text,
             size: 14,

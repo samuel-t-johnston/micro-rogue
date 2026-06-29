@@ -1,6 +1,6 @@
 # Items
 
-*How items work and how to add a new one. For the two specializations, see [equipment.md](equipment.md) and [consumable.md](consumable.md).*
+*How items work and how to add a new one. For the specializations, see [equipment.md](equipment.md), [consumable.md](consumable.md), and [weapons.md](weapons.md) (range, ammunition, stacking).*
 
 ## How it works
 
@@ -56,7 +56,7 @@ Finally, register it in the prefab catalog [`src/world/entities/entity-prefabs.j
 registry.addComponent(entity, 'throwable', components.throwable(EffectTypes.DAMAGE, { amount: 5 }, 1));
 ```
 
-`executeThrow` ([action-throw.js](../../src/actions/action-types/action-throw.js)) traces the item's flight as a **straight line** (Bresenham, `lineTiles` in [geometry.js](../../src/world/map/geometry.js)) from the thrower toward the aimed tile. Because that's a physical line — not the symmetric-shadowcast FOV used for *aiming* — it stops at the first tile that blocks it (a wall, a fixture, or a creature), which may be short of the aimed tile. On the **impact** tile it applies the effect to each non-item entity that can receive it (e.g. damage/heal need `health`), then either destroys the item (it broke) or comes to rest:
+`executeThrow` ([action-throw.js](../../src/actions/action-types/action-throw.js)) traces the item's flight as a **straight line** (Bresenham, `lineTiles` in [geometry.js](../../src/world/map/geometry.js)) from the thrower toward the aimed tile. The trace/land/break mechanics live in the shared [`projectile-flight.js`](../../src/actions/core/projectile-flight.js) so ranged attacks ([weapons.md](weapons.md)) fly the same way. Because that's a physical line — not the symmetric-shadowcast FOV used for *aiming* — it stops at the first tile that blocks it (a wall, a fixture, or a creature), which may be short of the aimed tile. On the **impact** tile it applies the effect to each non-item entity that can receive it (e.g. damage/heal need `health`), then either destroys the item (it broke) or comes to rest:
 
 - on the impact tile if that tile can **hold** an item, or
 - bouncing back to the last clear tile otherwise — so a thrown item never strands somewhere it can't be retrieved.

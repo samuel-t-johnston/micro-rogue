@@ -162,7 +162,9 @@ Animations are sparse but purposeful. All are cosmetic — game state resolves b
 
 **Dialogue** — structured NPC conversation with player responses warrants a bottom sheet or modal, distinct from the log. Ambient barks go to the log; spatial treatment (speech icon on the map near the speaker) is a future enhancement.
 
-**Particles and projectiles (future)** — projectile animations for ranged attacks and spells add legibility for little cost. The animation system should leave a hook for them.
+**Projectiles and thrusts** — ranged attacks and thrown items fly a detached sprite from attacker to impact (one-way), and reach weapons (the spear) lunge out-and-back; both pick an 8-way directional sprite and fall back to the action wiggle when art is missing. Implemented in the animation system's detached pass alongside the death smoosh. See [ranged-weapons.md](ranged-weapons.md).
+
+**Particles (future)** — particle effects for spells/impacts add legibility for little cost; the detached-animation hook that carries projectiles is the place to build them.
 
 ---
 

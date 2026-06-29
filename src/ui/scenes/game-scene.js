@@ -37,6 +37,7 @@ import { createOutcomePopup } from '../overlays/outcome-popup.js';
 import { createContextMenu } from '../menus/context-menu.js';
 import { drawText, drawButton, hitTest } from '../core/canvas-ui.js';
 import { resolveTileActions } from '../../actions/core/resolve-tile-actions.js';
+import { getAttackCapability } from '../../combat/weapons.js';
 import { commitSave, loadSavedGame, clearSave } from '../../save/core/save-system.js';
 import {
   buildSupportBundle,
@@ -123,7 +124,7 @@ export function createGameScene({
     if (!level || !inputController) return;
     const world = renderer.screenToWorld(screenX, screenY);
     const tile = { x: Math.floor(world.x), y: Math.floor(world.y) };
-    const rows = resolveTileActions(level, getPlayerPos(), tile);
+    const rows = resolveTileActions(level, getPlayerPos(), tile, getAttackCapability(player));
     if (rows.length === 0) return;
     resetGestures();
     contextMenu = createContextMenu({
