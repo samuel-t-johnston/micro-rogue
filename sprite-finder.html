@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sprite Finder — ROGµE dev</title>
+    <style>
+      /* Dev-only tool; self-contained styling that borrows the game's terminal palette. */
+      :root {
+        --color-bg: #0a0e0a;
+        --color-surface: #111811;
+        --color-primary: #00ff41;
+        --color-accent: #39ff7a;
+        --color-text: #00ff41;
+        --color-text-dim: #4a7a4a;
+        --color-border: #1f3a1f;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font:
+          13px/1.4 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          monospace;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 0.5rem 0.75rem;
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border);
+      }
+      header h1 {
+        margin: 0;
+        font-size: 1rem;
+        letter-spacing: 0.08em;
+      }
+      header label {
+        color: var(--color-text-dim);
+      }
+      select,
+      button {
+        font: inherit;
+        color: var(--color-text);
+        background: var(--color-bg);
+        border: 1px solid var(--color-border);
+        border-radius: 3px;
+        padding: 0.25rem 0.5rem;
+        cursor: pointer;
+      }
+      select:focus,
+      button:focus {
+        outline: 1px solid var(--color-primary);
+      }
+      .hint {
+        color: var(--color-text-dim);
+        margin-left: auto;
+      }
+
+      main {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+      }
+
+      /* Left: collected sprites */
+      #picks {
+        width: 200px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--color-border);
+        background: var(--color-surface);
+      }
+      #picks .picks-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid var(--color-border);
+      }
+      #picks .picks-head span {
+        color: var(--color-text-dim);
+      }
+      .picks-actions {
+        display: flex;
+        gap: 0.25rem;
+      }
+      #picks-list {
+        flex: 1;
+        overflow-y: auto;
+        list-style: none;
+        margin: 0;
+        padding: 0.5rem;
+      }
+      #picks-list:empty::after {
+        content: 'Click a sprite in the sheet to collect it here.';
+        display: block;
+        color: var(--color-text-dim);
+        padding: 0.25rem;
+      }
+      .pick {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        padding: 0.4rem;
+        border: 1px solid var(--color-border);
+        border-radius: 3px;
+        margin-bottom: 0.4rem;
+      }
+      .pick canvas {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        background: #000;
+        image-rendering: pixelated;
+        border: 1px solid var(--color-border);
+      }
+      .pick .meta {
+        min-width: 0;
+      }
+      .pick .coord {
+        color: var(--color-accent);
+      }
+      .pick .name {
+        color: var(--color-text-dim);
+        word-break: break-all;
+      }
+
+      /* Right: the sheet viewer */
+      #viewer {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        cursor: grab;
+      }
+      #viewer.panning {
+        cursor: grabbing;
+      }
+      #sheet-canvas {
+        display: block;
+        image-rendering: pixelated;
+      }
+      #readout {
+        position: absolute;
+        top: 0.5rem;
+        left: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        background: rgba(10, 14, 10, 0.85);
+        border: 1px solid var(--color-border);
+        border-radius: 3px;
+        pointer-events: none;
+      }
+      #readout .coord {
+        color: var(--color-accent);
+      }
+
+      /* Export popup */
+      #export-dialog {
+        width: min(640px, 90vw);
+        color: var(--color-text);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+      }
+      #export-dialog::backdrop {
+        background: rgba(0, 0, 0, 0.6);
+      }
+      #export-dialog p {
+        margin: 0 0 0.5rem;
+        color: var(--color-text-dim);
+      }
+      #export-dialog code {
+        color: var(--color-accent);
+      }
+      #export-text {
+        width: 100%;
+        resize: vertical;
+        font: inherit;
+        color: var(--color-text);
+        background: var(--color-bg);
+        border: 1px solid var(--color-border);
+        border-radius: 3px;
+        padding: 0.5rem;
+      }
+      .dialog-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>SPRITE&nbsp;FINDER</h1>
+      <label for="sheet-select">Sheet:</label>
+      <select id="sheet-select"></select>
+      <label><input type="checkbox" id="grid-toggle" checked /> grid</label>
+      <span class="hint">wheel = zoom · drag = pan · click = collect</span>
+    </header>
+    <main>
+      <aside id="picks">
+        <div class="picks-head">
+          <span id="picks-count">0 collected</span>
+          <div class="picks-actions">
+            <button id="export-btn" type="button">Export</button>
+            <button id="clear-btn" type="button">Clear</button>
+          </div>
+        </div>
+        <ul id="picks-list"></ul>
+      </aside>
+      <section id="viewer">
+        <canvas id="sheet-canvas"></canvas>
+        <div id="readout">—</div>
+      </section>
+    </main>
+
+    <dialog id="export-dialog">
+      <p>
+        Catalog-ready entries — rename the placeholder keys, then paste into <code>SPRITES</code>.
+      </p>
+      <textarea id="export-text" readonly rows="10" spellcheck="false"></textarea>
+      <div class="dialog-actions">
+        <button id="export-copy" type="button">Copy</button>
+        <button id="export-close" type="button">Close</button>
+      </div>
+    </dialog>
+
+    <script type="module">
+      import { SHEETS } from './data/sprites/sprite-catalog.js';
+
+      // ---- Sheet list (derived from the catalog, so this page never drifts from the real art) ----
+      // Every (name, size) pair is a concrete file: assets/sprites/${name}-${size}.png. The size in
+      // the filename is also the grid cell size, which is what makes col/row counting possible.
+      const sheetOptions = Object.entries(SHEETS).flatMap(([name, sizes]) =>
+        sizes.map((size) => ({
+          name,
+          size,
+          file: `assets/sprites/${name}-${size}.png`,
+          label: `${name}-${size}.png`,
+        })),
+      );
+
+      const selectEl = document.getElementById('sheet-select');
+      for (const opt of sheetOptions) {
+        const o = document.createElement('option');
+        o.value = opt.file;
+        o.textContent = opt.label;
+        selectEl.append(o);
+      }
+
+      const viewer = document.getElementById('viewer');
+      const canvas = document.getElementById('sheet-canvas');
+      const ctx = canvas.getContext('2d');
+      const readout = document.getElementById('readout');
+      const gridToggle = document.getElementById('grid-toggle');
+
+      // ---- View state ----
+      let sheet = null; // { img, name, size, cols, rows }
+      let scale = 1; // image px -> screen px
+      let offsetX = 0;
+      let offsetY = 0;
+      let hover = null; // { col, row }
+
+      function loadSheet(opt) {
+        const img = new Image();
+        img.addEventListener('load', () => {
+          sheet = {
+            img,
+            name: opt.name,
+            size: opt.size,
+            cols: Math.floor(img.naturalWidth / opt.size),
+            rows: Math.floor(img.naturalHeight / opt.size),
+          };
+          fitToView();
+          draw();
+        });
+        img.addEventListener('error', () => {
+          sheet = null;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          readout.textContent = `Could not load ${opt.file}`;
+        });
+        img.src = opt.file;
+      }
+
+      function resizeCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        const w = viewer.clientWidth;
+        const h = viewer.clientHeight;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        canvas.style.width = `${w}px`;
+        canvas.style.height = `${h}px`;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in CSS pixels
+      }
+
+      // Center the sheet and scale it so the whole thing fits with a little margin.
+      function fitToView() {
+        if (!sheet) return;
+        const w = viewer.clientWidth;
+        const h = viewer.clientHeight;
+        const fit = Math.min(w / sheet.img.naturalWidth, h / sheet.img.naturalHeight) * 0.95;
+        scale = fit > 0 ? fit : 1;
+        offsetX = (w - sheet.img.naturalWidth * scale) / 2;
+        offsetY = (h - sheet.img.naturalHeight * scale) / 2;
+      }
+
+      function draw() {
+        ctx.imageSmoothingEnabled = false;
+        ctx.clearRect(0, 0, viewer.clientWidth, viewer.clientHeight);
+        if (!sheet) return;
+        const { img, size, cols, rows } = sheet;
+        const sw = img.naturalWidth * scale;
+        const sh = img.naturalHeight * scale;
+        ctx.drawImage(img, offsetX, offsetY, sw, sh);
+
+        // Grid: only worth drawing once cells are big enough to read between.
+        if (gridToggle.checked && size * scale >= 6) {
+          ctx.strokeStyle = 'rgba(0, 255, 65, 0.25)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          for (let c = 0; c <= cols; c++) {
+            const x = Math.round(offsetX + c * size * scale) + 0.5;
+            ctx.moveTo(x, offsetY);
+            ctx.lineTo(x, offsetY + sh);
+          }
+          for (let r = 0; r <= rows; r++) {
+            const y = Math.round(offsetY + r * size * scale) + 0.5;
+            ctx.moveTo(offsetX, y);
+            ctx.lineTo(offsetX + sw, y);
+          }
+          ctx.stroke();
+        }
+
+        // Hovered cell highlight.
+        if (hover) {
+          ctx.strokeStyle = '#39ff7a';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(
+            offsetX + hover.col * size * scale,
+            offsetY + hover.row * size * scale,
+            size * scale,
+            size * scale,
+          );
+        }
+      }
+
+      // Screen (CSS px within viewer) -> grid cell, or null if outside the sheet.
+      function cellAt(clientX, clientY) {
+        if (!sheet) return null;
+        const rect = viewer.getBoundingClientRect();
+        const ix = (clientX - rect.left - offsetX) / scale;
+        const iy = (clientY - rect.top - offsetY) / scale;
+        const col = Math.floor(ix / sheet.size);
+        const row = Math.floor(iy / sheet.size);
+        if (col < 0 || row < 0 || col >= sheet.cols || row >= sheet.rows) return null;
+        return { col, row };
+      }
+
+      // ---- Interaction: pan, zoom, hover, click ----
+      let drag = null; // { startX, startY, baseX, baseY, moved }
+      const DRAG_THRESHOLD = 4; // px before a press counts as a pan rather than a click
+
+      viewer.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        drag = {
+          startX: e.clientX,
+          startY: e.clientY,
+          baseX: offsetX,
+          baseY: offsetY,
+          moved: false,
+        };
+        viewer.classList.add('panning');
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (drag) {
+          const dx = e.clientX - drag.startX;
+          const dy = e.clientY - drag.startY;
+          if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) drag.moved = true;
+          offsetX = drag.baseX + dx;
+          offsetY = drag.baseY + dy;
+          draw();
+          return;
+        }
+        const cell = cellAt(e.clientX, e.clientY);
+        hover = cell;
+        readout.innerHTML = cell
+          ? `<span class="coord">col ${cell.col}, row ${cell.row}</span>`
+          : '—';
+        draw();
+      });
+
+      window.addEventListener('mouseup', (e) => {
+        if (!drag) return;
+        const wasClick = !drag.moved;
+        drag = null;
+        viewer.classList.remove('panning');
+        if (wasClick) {
+          const cell = cellAt(e.clientX, e.clientY);
+          if (cell) addPick(cell);
+        }
+      });
+
+      // Wheel zoom anchored at the cursor, so the sprite under the pointer stays put.
+      viewer.addEventListener(
+        'wheel',
+        (e) => {
+          if (!sheet) return;
+          e.preventDefault();
+          const rect = viewer.getBoundingClientRect();
+          const mx = e.clientX - rect.left;
+          const my = e.clientY - rect.top;
+          const ix = (mx - offsetX) / scale;
+          const iy = (my - offsetY) / scale;
+          const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+          scale = Math.min(64, Math.max(0.05, scale * factor));
+          offsetX = mx - ix * scale;
+          offsetY = my - iy * scale;
+          draw();
+        },
+        { passive: false },
+      );
+
+      gridToggle.addEventListener('change', draw);
+
+      // ---- Left panel: collected picks ----
+      const picksList = document.getElementById('picks-list');
+      const picksCount = document.getElementById('picks-count');
+      const picks = []; // { sheet, col, row }
+
+      function addPick(cell) {
+        const entry = { sheet: sheet.name, col: cell.col, row: cell.row };
+        // De-dupe on sheet+col+row so repeated clicks on the same cell don't pile up.
+        if (
+          picks.some((p) => p.sheet === entry.sheet && p.col === entry.col && p.row === entry.row)
+        )
+          return;
+        picks.push(entry);
+        renderPick(entry);
+        updateCount();
+      }
+
+      function renderPick(entry) {
+        const li = document.createElement('li');
+        li.className = 'pick';
+
+        // A crisp thumbnail of just this cell, cut from the live sheet image.
+        const thumb = document.createElement('canvas');
+        thumb.width = sheet.size;
+        thumb.height = sheet.size;
+        const tctx = thumb.getContext('2d');
+        tctx.imageSmoothingEnabled = false;
+        tctx.drawImage(
+          sheet.img,
+          entry.col * sheet.size,
+          entry.row * sheet.size,
+          sheet.size,
+          sheet.size,
+          0,
+          0,
+          sheet.size,
+          sheet.size,
+        );
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.innerHTML =
+          `<div class="coord">col ${entry.col}, row ${entry.row}</div>` +
+          `<div class="name">${entry.sheet}</div>`;
+
+        li.append(thumb, meta);
+        picksList.append(li);
+      }
+
+      function updateCount() {
+        picksCount.textContent = `${picks.length} collected`;
+      }
+
+      document.getElementById('clear-btn').addEventListener('click', () => {
+        picks.length = 0;
+        picksList.replaceChildren();
+        updateCount();
+      });
+
+      // ---- Export: catalog-ready text the user renames and pastes into SPRITES ----
+      const exportDialog = document.getElementById('export-dialog');
+      const exportText = document.getElementById('export-text');
+
+      // Mirror the catalog's `'name': { sheet, col, row },` shape. Keys are placeholders since the
+      // tool only knows coordinates, not what the sprite should be called.
+      function buildExport() {
+        return picks
+          .map(
+            (p, i) => `'sprite-${i + 1}': { sheet: '${p.sheet}', col: ${p.col}, row: ${p.row} },`,
+          )
+          .join('\n');
+      }
+
+      document.getElementById('export-btn').addEventListener('click', () => {
+        exportText.value = picks.length ? buildExport() : '// No sprites collected yet.';
+        exportDialog.showModal();
+        exportText.select();
+      });
+
+      document.getElementById('export-copy').addEventListener('click', async () => {
+        const btn = document.getElementById('export-copy');
+        try {
+          await navigator.clipboard.writeText(exportText.value);
+          btn.textContent = 'Copied!';
+        } catch {
+          // Clipboard API needs a secure context; fall back to selecting for a manual copy.
+          exportText.select();
+          btn.textContent = 'Press Ctrl+C';
+        }
+        setTimeout(() => (btn.textContent = 'Copy'), 1500);
+      });
+
+      document.getElementById('export-close').addEventListener('click', () => exportDialog.close());
+
+      // ---- Wiring ----
+      selectEl.addEventListener('change', () => {
+        const opt = sheetOptions.find((o) => o.file === selectEl.value);
+        if (opt) loadSheet(opt);
+      });
+
+      window.addEventListener('resize', () => {
+        resizeCanvas();
+        draw();
+      });
+
+      resizeCanvas();
+      if (sheetOptions.length) loadSheet(sheetOptions[0]);
+    </script>
+  </body>
+</html>
