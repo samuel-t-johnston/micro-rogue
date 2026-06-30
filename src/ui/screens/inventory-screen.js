@@ -1,13 +1,20 @@
 import { drawText, hitTest } from '../core/canvas-ui.js';
 import { createActionMenu } from '../menus/action-menu.js';
+import { createQuantityStepper } from '../dialogs/quantity-stepper.js';
 import { displayName } from '../../engine/log/text/log-text.js';
+import { hasStackablePeers } from '../../world/entities/inventory-stacking.js';
 
 const ROW_H = 44; // minimum tap target (ux-design.md accessibility)
 const PADDING = 12;
 
-// Builds the list of actions available for a given inventory item.
-// Cancel is always last and always submits null (close the menu, no action).
-function actionsForItem(item) {
+// A stack's live count, or 1 for a non-stackable item.
+const stackCount = (item) => item.components.get('stackable')?.count ?? 1;
+
+// Builds the list of actions available for a given inventory item, given the full inventory (needed to
+// decide whether "Stack all" can consolidate anything). Cancel is always last and submits null (close
+// the menu, no action). The 'split' row carries no quantity — selecting it opens a quantity stepper,
+// which submits the real `split` action; both Split and Stack all are free, turn-less actions.
+function actionsForItem(item, items) {
   const out = [];
   if (item.components.has('consumable'))
     out.push({ label: 'Use', action: { type: 'consume', itemEntityId: item.id } });
@@ -16,6 +23,10 @@ function actionsForItem(item) {
   // Any carried item can be thrown; the coordinates are filled in by the scene's targeting mode
   // after the player picks a tile, so the action leaves the menu without an x/y.
   out.push({ label: 'Throw', action: { type: 'throw', itemEntityId: item.id } });
+  if (stackCount(item) > 1)
+    out.push({ label: 'Split', action: { type: 'split', itemEntityId: item.id } });
+  if (hasStackablePeers(items, item))
+    out.push({ label: 'Stack all', action: { type: 'stackAll', itemEntityId: item.id } });
   out.push({ label: 'Drop', action: { type: 'drop', itemEntityId: item.id } });
   out.push({ label: 'Cancel', action: null });
   return out;
@@ -39,11 +50,41 @@ export function createInventoryScreenBody({ theme, getViewport, getItems, onActi
       theme,
       getViewport,
       title: `${displayName(item, 'Item')} — Actions`,
-      actions: actionsForItem(item),
+      actions: actionsForItem(item, getItems()),
       onSelect: (action) => {
+        // Split needs a quantity first: swap the action menu for a stepper, staying on this item.
+        // It only submits the real `split` action once the player confirms a quantity.
+        if (action?.type === 'split' && action.quantity == null) {
+          openSplitPickerFor(item);
+          return;
+        }
         activeItem = null;
         menu = null;
         if (action) onAction(action);
+      },
+    });
+  }
+
+  // The quantity picker for Split: clamped 1..count-1 (you can't split off the whole stack — that's
+  // just the stack itself). Confirm submits the split; Cancel returns to the inventory list.
+  function openSplitPickerFor(item) {
+    const count = stackCount(item);
+    menu = createQuantityStepper({
+      theme,
+      getViewport,
+      title: `Split ${displayName(item)}`,
+      min: 1,
+      max: count - 1,
+      initial: Math.floor(count / 2), // halving is the conventional "split" default
+      confirmLabel: 'Split',
+      onConfirm: (quantity) => {
+        activeItem = null;
+        menu = null;
+        onAction({ type: 'split', itemEntityId: item.id, quantity });
+      },
+      onCancel: () => {
+        activeItem = null;
+        menu = null;
       },
     });
   }

@@ -1,6 +1,7 @@
 import { executePickup } from './action-pickup.js';
 import { gameLog } from '../../engine/log/game-log.js';
 import { subject, conjugate, itemName } from '../../engine/log/text/log-text.js';
+import { addToInventory } from '../../world/entities/inventory-stacking.js';
 
 /**
  * Handles a tap on the actor's own tile: travel via stairs underfoot, or pick up item(s) here
@@ -38,16 +39,14 @@ export async function executeSelfInteract(actor, _action, level, registry, dialo
   for (const item of result.taken) {
     level.removeEntity(item);
     item.components.get('item').location = { type: 'inventory', ownerId: actor.id };
-    inventory.items.push(item);
+
+    // Built before merging: a fully-absorbed stack is destroyed (its name cleared) by addToInventory.
+    const display = `${subject(actor)} ${conjugate(actor, 'pick up', 'picks up')} the ${itemName(item)}.`;
+    addToInventory(inventory, item, registry);
 
     // Player-facing: each item lifted off the floor is its own pickup line,
     // mirroring the single-item path's executePickup log.
-    gameLog.add({
-      actor: actor.id,
-      action: 'pickup',
-      item: item.id,
-      display: `${subject(actor)} ${conjugate(actor, 'pick up', 'picks up')} the ${itemName(item)}.`,
-    });
+    gameLog.add({ actor: actor.id, action: 'pickup', item: item.id, display });
   }
 
   return false;

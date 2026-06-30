@@ -6,6 +6,8 @@ import { executeEquip } from '../action-types/action-equip.js';
 import { executeUnequip } from '../action-types/action-unequip.js';
 import { executeConsume } from '../action-types/action-consume.js';
 import { executeDrop } from '../action-types/action-drop.js';
+import { executeSplit } from '../action-types/action-split.js';
+import { executeStackAll } from '../action-types/action-stack-all.js';
 import { executeWait } from '../action-types/action-wait.js';
 import { executeThrow } from '../action-types/action-throw.js';
 import { executeAttack } from '../action-types/action-attack.js';
@@ -36,6 +38,8 @@ export function createActionSystem({ level, inputController, registry, dialogCon
     unequip: (entity, action) => executeUnequip(entity, action, level, registry),
     consume: (entity, action) => executeConsume(entity, action, level, registry),
     drop: (entity, action) => executeDrop(entity, action, level, registry),
+    split: (entity, action) => executeSplit(entity, action, level, registry),
+    stackAll: (entity, action) => executeStackAll(entity, action, level, registry),
     wait: () => executeWait(),
     throw: (entity, action) => executeThrow(entity, action, level, registry),
     attack: (entity, action) => executeAttack(entity, action, level, registry),

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { executePickup } from './action-pickup.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { createLevel } from '../../world/map/level.js';
-import { createHealingPotion } from '../../world/entities/items.js';
+import { createHealingPotion, createArrow } from '../../world/entities/items.js';
 
 function makeLevel() {
   const level = createLevel();
@@ -47,6 +47,23 @@ describe('executePickup', () => {
 
   it('returns false (consumes a turn)', () => {
     expect(executePickup(actor, { itemEntityId: potion.id }, level, registry)).toBe(false);
+  });
+
+  it('merges a picked-up stack into an existing inventory stack of the same type', () => {
+    const carried = createArrow(registry, null, null, actor.id);
+    carried.components.get('stackable').count = 5;
+    actor.components.get('inventory').items.push(carried);
+
+    const onFloor = createArrow(registry, 2, 2);
+    onFloor.components.get('stackable').count = 8;
+    level.placeEntity(onFloor);
+
+    executePickup(actor, { itemEntityId: onFloor.id }, level, registry);
+
+    const items = actor.components.get('inventory').items;
+    expect(items).toEqual([carried]); // no second arrow stack
+    expect(carried.components.get('stackable').count).toBe(13);
+    expect(registry.getEntity(onFloor.id)).toBe(null);
   });
 
   it('returns false and leaves the item on the level when item not found', () => {
