@@ -10,7 +10,8 @@ loadout) is explicitly **out of scope here** and lands as an immediate follow-up
 infrastructure exists.
 
 > **As-built status.** Implemented as designed (steps 1–11). The player can wield the spear, javelin,
-> and bow with ammo, stacking, and the save v6→v7 migration. Notes where the build refined the plan:
+> and bow with ammo, stacking — including merge-on-pickup and the inventory split / stack-all actions
+> (§7) — and the save v6→v7 migration. Notes where the build refined the plan:
 >
 > - **Bow `meleeRange: 0`** (always fires; no point-blank stab) — resolved from the §2 open question.
 > - **Spear stays on the melee wiggle** by choice (its 1-tile reach makes a thrust sprite barely
@@ -18,8 +19,7 @@ infrastructure exists.
 > - **`flightStyle` seam not built** — thrust-vs-projectile is still inferred from `ammoType`; see §9.
 > - **Player-facing how-to:** [docs/howto/weapons.md](../howto/weapons.md).
 >
-> Still pending: the **NPC ranged goal + orc-commander loadout** (the named follow-up), and the
-> deferred **stack merge / split UI** (§7).
+> The **NPC ranged goal + orc-commander loadout** (the named follow-up) is not yet built.
 
 ---
 
@@ -239,14 +239,14 @@ A stack is **one entity with a `stackable.count`**. A weapon or ammunition slot 
      plain-data components (`name`, `renderable`, `item`, `weapon`/`ammunition`, `stackable`) — which
      becomes the projectile while the source stack keeps the rest.
 
-**Design the split helper for reuse.** The "take N off a stack as a new entity" operation is exactly
-what a future user-facing stack split needs, so we build it once as the general primitive and let the
-ranged/throw path call it with `N = 1`:
+**One split helper, shared.** The "take N off a stack as a new entity" operation is the same primitive
+the user-facing stack split needs, so it lives once as a general helper and the ranged/throw path calls
+it with `N = 1`:
 
 ```js
 // Splits `n` units off `source` into a new entity (count n); decrements source by n, destroying it
 // (and clearing its slot) if it empties. Copies the source's plain-data components into the clone.
-// The ranged/throw path calls splitStack(source, 1, registry); a future split UI calls it with n>1.
+// The ranged/throw path calls splitStack(source, 1, registry); the split UI calls it with n>1.
 splitStack(source, n, registry) // → the new count-n entity
 ```
 
@@ -254,11 +254,23 @@ It only ever copies serializable component data (no entity-reference components 
 so a structured copy per component suffices. The "last of stack" optimization (reuse the source entity
 itself when `count === n`) lives inside `splitStack`, so callers don't special-case it.
 
-**Deferred: merge (and the split *UI*).** Picking arrows/javelins back up does **not** restack them
-into the quiver yet — retrieved ammo sits as separate count-1 stacks until merge-on-pickup is
-implemented. The `splitStack` primitive above ships now; exposing split/merge in the inventory is the
-deferred follow-up. This is a known, accepted limitation for this chunk; throw/land already produces
-retrievable floor items, so nothing is lost, just not auto-combined.
+**Merge and the split/stack-all UI.** `src/world/entities/inventory-stacking.js` is the complement to
+`splitStack`:
+
+- **Merge on pickup.** `addToInventory(inventory, item, registry)` pours a picked-up stack into
+  existing below-max stacks of the same type before creating a new entry, fully absorbing and
+  destroying the incoming entity when it fits. All three pickup paths route through it (auto/manual
+  pickup, the multi-item floor dialog, and taking from a container).
+- **Stack identity.** Two stacks merge iff both are `stackable` with the same `maxStackSize` and an
+  equal `stackSignature` — every component except the volatile `stackable`/`item`/`position` (count,
+  location, coordinates). Correct for arrows/javelins today and safe for future per-instance data
+  (dissimilar instances simply won't merge).
+- **Inventory actions** (`Split`, `Stack all`), both **free** (no turn cost) and inventory-only — an
+  equipped stack must be unequipped first, which falls out naturally since equipped items live in
+  equipment slots, not `inventory.items`. *Split* (`action-split.js`) takes 1..count−1 off via a
+  quantity stepper; *Stack all* (`action-stack-all.js`) consolidates one item type (pour smallest into
+  largest, destroy emptied stacks). There is deliberately no split-on-drop/throw/store — split first,
+  then act.
 
 ---
 

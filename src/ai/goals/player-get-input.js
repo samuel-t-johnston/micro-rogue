@@ -8,6 +8,8 @@ const PASS_THROUGH = new Set([
   'unequip',
   'consume',
   'drop',
+  'split',
+  'stackAll',
   'interact',
   'attack',
   'selfInteract',

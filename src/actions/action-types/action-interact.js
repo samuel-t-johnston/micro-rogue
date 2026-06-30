@@ -1,5 +1,6 @@
 import { gameLog } from '../../engine/log/game-log.js';
 import { subject, conjugate, itemName } from '../../engine/log/text/log-text.js';
+import { addToInventory } from '../../world/entities/inventory-stacking.js';
 
 /**
  * Executes an interact action against an adjacent target entity, dispatching to container or door
@@ -12,7 +13,7 @@ export async function executeInteract(actor, action, level, registry, dialogCont
   if (!target) return false;
 
   if (target.components.has('container')) {
-    return executeContainerInteract(actor, target, dialogController, action.mode);
+    return executeContainerInteract(actor, target, registry, dialogController, action.mode);
   }
 
   if (target.components.has('openable')) {
@@ -80,7 +81,7 @@ function doorOccupant(door, level) {
 // Interacting with a container is two-faceted: the default (a tap, or the menu's "Open") takes items
 // out; `mode === 'store'` (the menu's "Place items") puts the actor's own items in. Both share the
 // multi-select dialog and the same turn rule: moving ≥1 item consumes the turn, cancel/empty is free.
-async function executeContainerInteract(actor, target, dialogController, mode) {
+async function executeContainerInteract(actor, target, registry, dialogController, mode) {
   if (mode === 'store') return storeInContainer(actor, target, dialogController);
 
   // Debug-only (no `display`): the interaction itself, logged whenever the player
@@ -119,16 +120,13 @@ async function executeContainerInteract(actor, target, dialogController, mode) {
     const idx = containerInventory.items.indexOf(item);
     if (idx >= 0) containerInventory.items.splice(idx, 1);
     item.components.get('item').location = { type: 'inventory', ownerId: actor.id };
-    actorInventory.items.push(item);
+
+    // Built before merging: a fully-absorbed stack is destroyed (its name cleared) by addToInventory.
+    const display = `${subject(actor)} ${conjugate(actor, 'take', 'takes')} the ${itemName(item)}.`;
+    addToInventory(actorInventory, item, registry);
 
     // Player-facing: each item pulled out of the container is its own pickup line.
-    gameLog.add({
-      actor: actor.id,
-      action: 'take',
-      item: item.id,
-      container: target.id,
-      display: `${subject(actor)} ${conjugate(actor, 'take', 'takes')} the ${itemName(item)}.`,
-    });
+    gameLog.add({ actor: actor.id, action: 'take', item: item.id, container: target.id, display });
   }
 
   return false;

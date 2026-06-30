@@ -30,6 +30,16 @@ component describing how it attacks. Melee and ranged are the same system — me
 **`stackable` component** — `stackable(maxStackSize, count)`. A stack is one entity with a `count`;
 firing/throwing decrements it (and destroys it at 0). Arrows stack to 100, javelins to 5.
 
+**Merging, splitting, combining** — [`src/world/entities/inventory-stacking.js`](../../src/world/entities/inventory-stacking.js):
+- **Merge on pickup** is automatic. `addToInventory` pours a picked-up stack into existing below-max
+  stacks of the same type before adding a new entry, so retrieved arrows/javelins refill the quiver.
+  "Same type" = same `maxStackSize` and an equal `stackSignature` (all components except the volatile
+  `stackable`/`item`/`position`).
+- **Split** (inventory row, stacks of >1) takes a chosen 1..count−1 off into a new stack via a quantity
+  stepper. **Stack all** (inventory row, when ≥2 below-max stacks of that type exist) consolidates one
+  type into as few stacks as possible. Both are **free** (no turn) and operate only on carried items —
+  unequip a stack first to split/combine it. No splitting on drop/throw/store: split first, then act.
+
 **The resolver** — [`src/combat/weapons.js`](../../src/combat/weapons.js) is the single place that
 answers "what can this actor do with its weapon", derived on demand (never cached), tolerating absent
 data (an entity with no weapon, or an old item with no `weapon` component, reads as unarmed range-1
@@ -95,9 +105,8 @@ Register the factory in [`entity-prefabs.js`](../../src/world/entities/entity-pr
   `attributeModifiers` ([equipment.md](equipment.md)); arrows deliberately carry no modifiers. Note
   `getAttribute` sums **all** equipment slots, so any modifier you put on ammo would also boost melee —
   intentional non-special-casing, documented in the design doc.
-- **Stacking is one entity with a count; merge/split UI is deferred.** Retrieved arrows/javelins land
-  as separate count-1 stacks for now — they don't refill the quiver yet. `splitStack` is the general
-  primitive a future split UI will reuse.
+- **Stacking is one entity with a count.** `splitStack` peels units off a stack; `inventory-stacking.js`
+  merges on pickup and powers the Split / Stack all inventory actions (see above).
 - **Old saves are migrated.** Save v7 backfills a range-1 `weapon` component onto pre-existing
   weapon-slot items and adds the ammunition slot to humanoid loadouts; the resolver also tolerates the
   un-migrated shape. See the design doc and [saving.md](saving.md).

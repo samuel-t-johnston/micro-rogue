@@ -287,6 +287,7 @@ are additive fields with tolerant defaults, no migration needed.*
 - [x] Ranged attack - ♾️ - bow weapon (no miss mechanic yet) - player
 - [x] Ranged attack - javelin weapon (self-ammo, stackable, melee at range 1) - player
 - [x] Ammunition - arrows - required for bow, stackable
+- [x] Stacking - split and combine
 - [ ] Ranged attack - NPC Goal
 - [ ] Monsters use equipment - equip/unequip NPC goals?
 - [ ] Orc commander spawns with bow, arrows. Ranged attack goal.
