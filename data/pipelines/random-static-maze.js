@@ -7,7 +7,7 @@ export default {
     { type: 'randomStatic', layouts: ['maze-spiral', 'maze-zigzag', 'maze-pillars'] },
     { type: 'placeStaticEntities' },
     // Arms placed creatures from item tables (orcs → spear). No-op on the scuttler 'maze-pillars'
-    // layout — they match no rule and carry no inventory. See stage-loadout.js.
+    // layout — they match no rule and carry no inventory.
     { type: 'loadout' },
   ],
 };
