@@ -291,7 +291,21 @@ are additive fields with tolerant defaults, no migration needed.*
 - [x] Ranged attack - NPC Goal
 - [x] Monsters use equipment - equip/unequip NPC goals?
 - [x] Orc commander spawns with bow, arrows. Ranged attack goal.
-- [ ] NPC open-door goal
+- [x] NPC open-door goal
+
+*NPC open-door note (landed): the `explore-doors-eager` goal makes wandering creatures seek out closed
+doors and pass through them, spreading a squad across a level instead of milling in one room. It sits
+just above `wander-aimlessly` in the orc and orc-commander stacks. Prerequisite: sight observations now
+carry `tags.isOpenable` + `isOpen` (a shared `describeObservedEntity` helper, `src/ai/senses/observation-utils.js`,
+keeps `vision` and `mega-vision` from drifting) so goals can reason about doors — previously a door
+appeared in perception untagged. The goal keeps private state in `memory.exploreDoors` (a pursued door's
+`targetId`/`targetPos` plus recently `explored` tiles that decay after 5 of the creature's turns): doors
+are **acquired** only through perception, but a chosen target's open/closed state is read straight off the
+entity so losing line of sight mid-approach doesn't strand it. It approaches a tile *beside* a closed door
+(the door tile isn't passable), opens it when adjacent, marks its side, steps onto the door, then steps off
+the far side away from where it came — the explored marks are what carry it *through* rather than back.
+Gives up on unreachable, vanished, or externally-opened targets. No save-version bump — `memory.exploreDoors`
+is additive with tolerant defaults.*
 
 *NPC ranged note (landed): the ranged-combat infrastructure was already creature-agnostic, so NPC use
 needed only AI + content. A stamped `entityTypeId` gives every prefab a stable content identity; a new

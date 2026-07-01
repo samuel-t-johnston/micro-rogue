@@ -66,6 +66,7 @@ export function createOrc(registry, x, y) {
       'chase-others',
       'obey-shouts',
       'investigate',
+      'explore-doors-eager',
       'wander-aimlessly',
     ]),
   );
@@ -117,6 +118,7 @@ export function createOrcCommander(registry, x, y) {
       'chase-others',
       'obey-shouts',
       'investigate',
+      'explore-doors-eager',
       'wander-aimlessly',
     ]),
   );
