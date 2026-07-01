@@ -288,10 +288,21 @@ are additive fields with tolerant defaults, no migration needed.*
 - [x] Ranged attack - javelin weapon (self-ammo, stackable, melee at range 1) - player
 - [x] Ammunition - arrows - required for bow, stackable
 - [x] Stacking - split and combine
-- [ ] Ranged attack - NPC Goal
-- [ ] Monsters use equipment - equip/unequip NPC goals?
-- [ ] Orc commander spawns with bow, arrows. Ranged attack goal.
+- [x] Ranged attack - NPC Goal
+- [x] Monsters use equipment - equip/unequip NPC goals?
+- [x] Orc commander spawns with bow, arrows. Ranged attack goal.
 - [ ] NPC open-door goal
+
+*NPC ranged note (landed): the ranged-combat infrastructure was already creature-agnostic, so NPC use
+needed only AI + content. A stamped `entityTypeId` gives every prefab a stable content identity; a new
+**loadout stage** (`stage-loadout.js`) fills placed creatures' inventories from **item tables**
+(`item-tables.js`) — orcs get a spear, the orc commander a bow + arrows — running after placement so it
+disturbs no seeded determinism. Eager `equip-weapon`/`equip-ammo` goals wield the kit (introspecting the
+creature's own body via a new `context.self`), and a unified **`attack-in-range`** goal replaces the
+melee-only `attack-adjacent`, covering melee and ranged off the creature's own weapon reach. Its
+clear-line test (`src/combat/targeting.js`) is shared with the player's tile-action resolver. No kiting
+yet — a ranged attacker stands and shoots, with `chase-others` (ranked below) closing when out of reach.
+See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/ranged-weapons.md) §13.*
 
 ---
 

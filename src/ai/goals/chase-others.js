@@ -26,7 +26,7 @@ export const chaseOthers = {
       }
     }
 
-    if (targetDistance === 1) return null; // adjacent — let attack-adjacent fire
+    if (targetDistance === 1) return null; // adjacent — let attack-in-range fire
 
     const path = findPathToAdjacent(selfState.position, target.position, level);
     if (!path || path.length === 0) return null;

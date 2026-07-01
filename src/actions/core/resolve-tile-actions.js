@@ -8,25 +8,12 @@
  * "Close" offered second; a *closed* door defaults to opening it. See docs/design/ux-design.md.
  */
 import { chebyshevDistance } from '../../world/map/geometry.js';
-import { traceFlight } from './projectile-flight.js';
+import { isAttackable } from '../../combat/targeting.js';
 import { displayName } from '../../engine/log/text/log-text.js';
 
 // A tile occupant's display name for pickup/interact labels — `displayName` appends a stack quantity
 // for stackable items ("Arrow (20)"); a door or creature gets just its name.
 const nameOf = (e) => displayName(e, 'thing');
-
-// Whether the player can attack a creature on `tile` from `playerPos`, given the equipped weapon's
-// reach (`capability` from getAttackCapability). A target within meleeRange is always reachable (you're
-// on top of it, no line check); beyond that, out to range, it needs a clear straight line — the same
-// flight trace a ranged attack flies, so "can I shoot it" and "where does the shot land" never disagree
-// (traceFlight reaches the target tile only when nothing blocks the way short of it). See
-// docs/design/ranged-weapons.md.
-function isAttackable(level, playerPos, tile, distance, { range, meleeRange }) {
-  if (distance === 0 || distance > range) return false;
-  if (distance <= meleeRange) return true;
-  const { impact } = traceFlight(level, playerPos.x, playerPos.y, tile.x, tile.y);
-  return impact.x === tile.x && impact.y === tile.y;
-}
 
 // The actor's own tile's *primary* interaction: pick up / take stairs. Returns null when there's
 // nothing underfoot; the self tile then falls back to Wait (added by the caller), which is always
@@ -117,7 +104,7 @@ export function resolveTileActions(
     // Attack a creature within reach — melee when adjacent, or a clear-line shot out to weapon range.
     // Offered at any distance (not just adjacent), so a tap on an in-range enemy fires. It's the
     // primary action, listed before the adjacent door/container/move interactions below.
-    if (creature && isAttackable(level, playerPos, tile, distance, capability)) {
+    if (creature && isAttackable(level, playerPos, tile, capability)) {
       actions.push({
         id: 'attack',
         label: `Attack the ${nameOf(creature)}`,

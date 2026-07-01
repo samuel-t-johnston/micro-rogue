@@ -9,6 +9,7 @@ A creature is not a class — it's an **entity built from a recipe of components
 | Component | Role |
 |---|---|
 | `name` | display name |
+| `entityTypeId` | stable prefab id (e.g. `'orc'`) — a content identity independent of `name`, stamped by the factory; loadout/loot rules filter on it ([loadouts.md](loadouts.md)) |
 | `position` | location on the level |
 | `health` | current / max HP |
 | `attacker` | base (unarmed) attack damage |
@@ -16,7 +17,7 @@ A creature is not a class — it's an **entity built from a recipe of components
 | `creature` | marks it as an actor (a living thing with agency) — the source of the `isActor` sense tag goals use to tell creatures from inert scenery and floor items |
 | `turnTaker` | puts it in the turn queue at a given speed ([turn-order.md](turn-order.md)) |
 | `blocksMovement` | occupies its tile |
-| `inventory` + `wearsEquipment` | can carry and wear items ([item.md](item.md), [equipment.md](equipment.md)) |
+| `inventory` + `wearsEquipment` | can carry and wear items ([item.md](item.md), [equipment.md](equipment.md)); a creature with these can be given a loadout and equip it via the `equip-weapon`/`equip-ammo` goals ([loadouts.md](loadouts.md)) |
 | `memory` | per-entity scratch store for goals |
 | `senses` + `tilePerception` | perception ([ai-senses.md](ai-senses.md)) |
 | `ai` | the ordered goal stack that drives behaviour ([ai-goals.md](ai-goals.md)) |
@@ -34,12 +35,14 @@ Optional perception/communication add-ons (the orcs and the scuttler use these; 
 | `scentSource` | lays a scent trail others can track ([scent-and-smell.md](../design/scent-and-smell.md)) |
 | `noisyMovement` | sometimes emits a sound when moving (vermin scrabble, clanking armor) |
 
-The **goal stack is where behaviour lives.** A goblin and an orc share the same component set; the goblin *flees* and the orc *chases* purely because their `ai` lists differ:
+The **goal stack is where behaviour lives.** A goblin and an orc share the same component set; the goblin *flees* and the orc *chases* (and arms itself) purely because their `ai` lists differ:
 
 ```js
-ai: ['attack-adjacent', 'flee-from-others', 'wander-aimlessly']  // goblin
-ai: ['attack-adjacent', 'chase-others',     'wander-aimlessly']  // orc
+ai: ['attack-in-range', 'flee-from-others', 'wander-aimlessly']                 // goblin
+ai: ['equip-weapon', 'attack-in-range', 'chase-others', 'wander-aimlessly']     // orc (abbreviated)
 ```
+
+`attack-in-range` is the single combat goal for melee *and* ranged — it reads the creature's own weapon reach (`selfState.attackCapability`) and attacks the nearest hostile within it (a clear line is required beyond melee), so a dagger-wielder strikes only when adjacent while a bow-wielder fires across the room. The `equip-weapon`/`equip-ammo` goals sit above it: a creature given a loadout ([loadouts.md](loadouts.md)) wields it before engaging.
 
 ## Add a new creature
 
@@ -60,6 +63,10 @@ Add an entry to [`src/world/entities/entity-prefabs.js`](../../src/world/entitie
 ### 3. Place it on the level
 
 Call the factory and `level.placeEntity(...)`. This happens in a generation stage — procedurally in [`stage-populate.js`](../../src/world/generation/stages/stage-populate.js), or from a static layout's authored entities via [`stage-place-static-entities.js`](../../src/world/generation/stages/stage-place-static-entities.js). Having a `turnTaker` is what gets it into the turn queue automatically.
+
+### 4. (Optional) give it a loadout
+
+To have a creature spawn carrying gear, add a rule to the loadout stage rather than putting items in the factory — that keeps "what creatures exist" separate from "what they carry." See [loadouts.md](loadouts.md).
 
 ## Worth knowing
 

@@ -105,13 +105,23 @@ function consumeOneProjectile(actor, ammo, registry) {
   return { projectile, depleted };
 }
 
+// A failed attack — a misfire (no usable ammo) or a target out of range — is a *free* action only for
+// the player: a discoverability affordance so a wasted shot doesn't burn the turn and they can choose
+// again. For an NPC it must consume the turn. A goal re-proposes the same impossible attack every
+// evaluation, and a free action re-runs the entity's turn immediately (see turn-manager), so a free
+// failure would spin into an infinite loop. (Ranged NPCs also stow a dry weapon via equip-weapon, which
+// keeps them off this path entirely; this is the belt-and-suspenders guard for any that don't.)
+const freeOnFailedAttack = (actor) => actor.components.has('playerControlled');
+
 /**
  * A reach or ranged attack on a target beyond melee but within weapon range. A weapon with no ammoType
  * (a reach weapon, e.g. the spear) deals damage along a clear line with nothing leaving the hand. An
  * ammo-using weapon (bow → arrows, javelin → itself) consumes one unit, which flies as a projectile and
  * lands or breaks on impact (shared with throwing). When the actor has no usable ammunition it misfires:
- * a logged message and a free action (the turn is not spent), so a failed shot doesn't punish the player.
- * @returns {boolean} `false` (turn consumed) on a resolved attack; `true` (free) on a misfire.
+ * a logged message and — for the player — a free action (the turn is not spent), so a failed shot
+ * doesn't punish them; an NPC's misfire consumes the turn (see freeOnFailedAttack).
+ * @returns {boolean} `false` (turn consumed) on a resolved attack or an NPC misfire; `true` (free) only
+ *   on a player misfire.
  */
 function projectileAttack(actor, target, actorPos, targetPos, weapon, level, registry) {
   // Captured before consuming ammo: a self-thrown weapon (javelin) clears the weapon slot when its last
@@ -128,7 +138,7 @@ function projectileAttack(actor, target, actorPos, targetPos, weapon, level, reg
         action: 'attack',
         display: `${subject(actor)} ${conjugate(actor, 'have', 'has')} no ${weapon.ammoType}s.`,
       });
-      return true; // misfire — free action, turn not consumed
+      return freeOnFailedAttack(actor); // free for the player; consumes an NPC's turn (no retry loop)
     }
     const consumed = consumeOneProjectile(actor, ammo, registry);
     projectile = consumed.projectile;
@@ -178,8 +188,8 @@ function projectileAttack(actor, target, actorPos, targetPos, weapon, level, reg
  * a melee swing within meleeRange, otherwise a reach/ranged attack out to the weapon's range (see
  * projectileAttack). Damage is the attribute-resolved attack damage (unarmed base + worn modifiers).
  * @returns {boolean} `false` when the turn is consumed (the normal case, including a swing at a target
- *   that died before resolution); `true` only on a ranged misfire (no usable ammo) or an out-of-range
- *   target, neither of which spends the turn.
+ *   that died before resolution, and any failed attack by an NPC); `true` only when the *player* misses
+ *   on no ammo or an out-of-range target — a free affordance that doesn't spend their turn.
  */
 export function executeAttack(actor, action, level, registry) {
   const target = registry.getEntity(action.targetEntityId);
@@ -193,8 +203,8 @@ export function executeAttack(actor, action, level, registry) {
 
   if (distance <= weapon.meleeRange) return meleeAttack(actor, target, level, registry);
   // Out of range: an impossible attack (the tile resolver gates the player; NPC goals gate
-  // themselves). Treat as a free no-op rather than spending the turn on a swing at nothing.
-  if (distance > weapon.range) return true;
+  // themselves). A free no-op for the player; an NPC spends the turn rather than retry-looping.
+  if (distance > weapon.range) return freeOnFailedAttack(actor);
 
   return projectileAttack(actor, target, actorPos, targetPos, weapon, level, registry);
 }

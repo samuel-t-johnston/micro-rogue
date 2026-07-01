@@ -155,6 +155,9 @@ export function applySenses(entity, level, turnCount = 0) {
 
 /**
  * @typedef {object} PlanningContext
+ * @property {object} self - The acting entity itself, for goals that introspect their own body —
+ *   reading inventory/equipment to decide what to wield (equip goals). World perception still flows
+ *   only through `perception`; `self` is the agent reasoning about itself, not about the world.
  * @property {object} memory - The entity's `memory` component (undefined for memoryless entities).
  * @property {{ position: {x: number, y: number}, factions: string[], attackCapability: {range: number, meleeRange: number} }} selfState - The acting entity's own state.
  * @property {{ entities: object[], sounds: object[], smells: object[], visibleTiles: Set<string>, knownTiles: Map<string, number> }} perception - Merged, reconciled output of all the entity's senses.
@@ -192,6 +195,7 @@ export function buildPlanningContext({ entity, level, inputController, turnCount
   updateEnemyMemory({ memory, selfState, perception, level, turnCount });
 
   return {
+    self: entity,
     memory,
     selfState,
     perception,

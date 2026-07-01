@@ -44,10 +44,16 @@ export const components = {
     return { ...mods };
   },
 
+  // Marks an entity as blocking movement. The pathfinder treats it as impassable terrain.
+  // Kept separate from `opaque` so a transparent entity can still block movement (e.g. a
+  // force field).
   blocksMovement() {
     return {};
   },
 
+  // Marks an entity as a container (e.g. a chest). The container holds an inventory of items
+  // (see the `inventory` component). The container itself is a world entity with a position, so
+  // it can be placed in the level and opened by a creature. See docs/design/container-inventory.md.
   container() {
     return {};
   },
@@ -86,6 +92,16 @@ export const components = {
     return {};
   },
 
+  // The stable prefab id an entity was spawned from (the key in ENTITY_PREFABS, e.g. 'orc',
+  // 'orcCommander', 'arrow'). A content identity independent of the display `name`, so generation and
+  // gameplay rules (the loadout stage's creature filters; future loot tables) can match a type without
+  // keying on a fragile, possibly-renamed display string. Each factory stamps its own id; a bare string
+  // like `name`, so it serializes with no special handling. Absent on hand-built/legacy entities, which
+  // simply match no type filter.
+  entityTypeId(id) {
+    return id;
+  },
+
   // Marks an entity (which also has a position) as a place the player can arrive on this level.
   // The game scene places the player on the entryPoint entity (see src/world/map/spawn.js); if several
   // exist, one is chosen. Generation drops it (e.g. on the up-stairs); kept separate from the stairs
@@ -108,6 +124,10 @@ export const components = {
     return [...names];
   },
 
+  // Current and maximum hit points. HP is a derived stat: the sum of the base HP from the entity's
+  // prefab, plus any attributeModifiers from equipment or effects. The HP component stores the live
+  // current and max values, which the combat system updates on damage/healing. The attribute resolver
+  // derives the base HP from prefab + modifiers; the combat system writes it to this component.
   health(current, max) {
     return { current, max };
   },
@@ -120,6 +140,9 @@ export const components = {
     return { range };
   },
 
+  // An inventory of items. The inventory is a list of entity ids (the items themselves are world
+  // entities with their own position, renderable, etc.). The inventory is a property of the
+  // entity (a creature, a chest, etc.) and is not a world position.
   inventory(items = []) {
     return { items };
   },
@@ -138,10 +161,14 @@ export const components = {
     return [...languages];
   },
 
+  // A creature's memory of the world. Stored as a plain object so it serializes cleanly; the AI reads
+  // it as a lookup. The AI may store any data it wants here, but the renderer expects a specific
+  // shape for remembered tiles (see tilePerception).
   memory(initial = {}) {
     return { ...initial };
   },
 
+  // The display name of an entity.
   name(str) {
     return str;
   },
@@ -154,6 +181,8 @@ export const components = {
     return { chance, volume, message };
   },
 
+  // Marks an entity as opaque: it blocks vision. The pathfinder ignores it for movement, so a
+  // Kept separate from `blocksMovement` so a transparent entity can still block movement.
   opaque() {
     return {};
   },
@@ -165,6 +194,7 @@ export const components = {
     return { isOpen: false, closedSprite, openSprite };
   },
 
+  // Marks an entity as player-controlled. The player can issue commands to it; the AI does not.
   playerControlled() {
     return {};
   },
@@ -177,6 +207,7 @@ export const components = {
     return {};
   },
 
+  // A world position. The entity is at tile (x, y) in its level.
   position(x, y) {
     return { x, y };
   },
@@ -277,8 +308,9 @@ export const components = {
     return { to, port };
   },
 
-  // accumulator: stored energy (see turn-order.md). actCount: how many turns this entity has taken,
-  // bumped by the turn manager — a per-entity clock the AI uses to age perceptions and memory.
+  // A per-entity clock the AI uses to age perceptions and memory.
+  // accumulator: stored energy (see turn-order.md).
+  // actCount: how many turns this entity has taken, bumped by the turn manager.
   turnTaker(speed = 1) {
     return { speed, accumulator: 0, actCount: 0 };
   },

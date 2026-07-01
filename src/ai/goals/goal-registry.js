@@ -3,7 +3,9 @@ import { playerAutoPickup } from './player-auto-pickup.js';
 import { playerHear } from './player-hear.js';
 import { playerGetInput } from './player-get-input.js';
 import { wanderAimlessly } from './wander-aimlessly.js';
-import { attackAdjacent } from './attack-adjacent.js';
+import { attackInRange } from './attack-in-range.js';
+import { equipWeapon } from './equip-weapon.js';
+import { equipAmmo } from './equip-ammo.js';
 import { fleeFromOthers } from './flee-from-others.js';
 import { chaseOthers } from './chase-others.js';
 import { shoutEnemyReport } from './shout-enemy-report.js';
@@ -22,7 +24,9 @@ const goals = {
   'player-smell': playerSmell, // Player goal: log notable smells (side effect, never acts)
   'player-get-input': playerGetInput, // Player goal: wait for player input and execute it
   'wander-aimlessly': wanderAimlessly, // NPC goal: pick a random adjacent tile and move there
-  'attack-adjacent': attackAdjacent, // NPC goal: attack a hostile actor in an adjacent tile
+  'attack-in-range': attackInRange, // NPC goal: attack the nearest hostile actor within weapon reach
+  'equip-weapon': equipWeapon, // NPC goal: equip the best weapon from inventory
+  'equip-ammo': equipAmmo, // NPC goal: load matching ammo for an equipped ranged weapon
   'flee-from-others': fleeFromOthers, // NPC goal: move away from the nearest hostile actor
   'chase-others': chaseOthers, // NPC goal: move toward the nearest hostile actor
   'shout-enemy-report': shoutEnemyReport, // NPC goal: shout the direction of a newly-seen hostile

@@ -458,6 +458,19 @@ export function createGameScene({
         if (entity.components.has('playerControlled')) upkeep.run({ level, registry, player });
       },
       onTurnEnd: handleTurnEnd,
+      // Emergency breaker tripped: a creature's goal stack kept returning free actions. Surface it
+      // loudly (console) and in the debug log so the offending entity is findable; the turn loop has
+      // already force-consumed the turn to stay responsive.
+      onFreeActionLimit: (entity, count) => {
+        const name = entity.components.get('name') ?? `#${entity.id}`;
+        console.warn(`[turn] ${name} hit the free-action limit (${count}); forcing turn consumed.`);
+        gameLog.add({
+          actor: entity.id,
+          action: 'freeActionLimit',
+          count,
+          name,
+        });
+      },
       initialTurnCount,
     });
     gameLog.setTurnProvider(() => turnManager?.playerTurnCount ?? 0);

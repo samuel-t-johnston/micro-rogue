@@ -1,3 +1,10 @@
+// Emergency circuit breaker: the most consecutive free actions a non-player entity may take in one
+// turn burst before the loop force-consumes its turn. A free action re-adds the energy it just spent
+// (see the inner loop), so a goal stack that deterministically emits a free action — a misfire, a free
+// no-op — every evaluation would spin forever. This cap makes that a logged, recoverable hiccup instead
+// of a frozen tab. Set high enough that no legitimate burst of free actions reaches it.
+export const MAX_CONSECUTIVE_FREE_ACTIONS = 50;
+
 /**
  * Creates the turn loop using the energy accumulator model (see docs/design/turn-order.md).
  * Entities act when their accumulator reaches 1. Speed < 1 acts less than once per round;
@@ -9,6 +16,8 @@
  *   resolved since it last acted, so the world is fully settled. The autosave hook snapshots here.
  * - `onTurnEnd(entity, { free })` fires symmetrically the instant after the entity's action
  *   resolves (`free` is the action's free-action flag); the win-condition check rides it.
+ * - `onFreeActionLimit(entity, count)` fires when the emergency breaker trips (see
+ *   MAX_CONSECUTIVE_FREE_ACTIONS) — a hook for logging the misbehaving entity.
  * - `initialTurnCount` seeds the player turn count when loading a save (fresh games pass 0).
  */
 export function createTurnManager({
@@ -16,6 +25,7 @@ export function createTurnManager({
   invokeAction,
   onTurnStart,
   onTurnEnd,
+  onFreeActionLimit,
   initialTurnCount = 0,
 }) {
   const queue = []; // ordered list of entities
@@ -54,15 +64,30 @@ export function createTurnManager({
         turnTaker.accumulator += turnTaker.speed;
 
         if (turnTaker.accumulator >= 1) {
+          let consecutiveFree = 0;
           while (turnTaker.accumulator >= 1) {
             turnTaker.accumulator -= 1;
             turnTaker.actCount = (turnTaker.actCount ?? 0) + 1; // per-entity clock; ?? guards old saves
             onTurnStart?.(entity);
             const free = await invokeAction(entity);
+            const isPlayer = entity.components.has('playerControlled');
+
+            // Emergency breaker. A free action re-adds the energy just spent, re-running the turn; a
+            // non-player whose goals keep returning free actions would loop forever. Cap it: force the
+            // turn consumed and report it, so one misbehaving creature degrades to a wasted turn instead
+            // of freezing the loop. The player is exempt — its free actions (look, misfire) await fresh
+            // input between iterations, so they never spin.
+            if (free && !isPlayer && ++consecutiveFree >= MAX_CONSECUTIVE_FREE_ACTIONS) {
+              onFreeActionLimit?.(entity, consecutiveFree);
+              onTurnEnd?.(entity, { free: false }); // force-consume the turn to break the loop
+              break;
+            }
+
             if (free) {
               turnTaker.accumulator += 1;
-            } else if (entity.components.has('playerControlled')) {
-              playerTurnCount++;
+            } else {
+              consecutiveFree = 0;
+              if (isPlayer) playerTurnCount++;
             }
             onTurnEnd?.(entity, { free });
           }

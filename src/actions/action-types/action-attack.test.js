@@ -164,8 +164,9 @@ describe('executeAttack', () => {
       expect(arrows.components.get('stackable').count).toBe(4);
     });
 
-    it('misfires as a free action when no ammo is available', () => {
+    it('misfires as a free action for the player when no ammo is available', () => {
       const actor = makeRangedActor({ x: 1, y: 1, damage: 2 });
+      registry.addComponent(actor, 'playerControlled', components.playerControlled());
       equipWeapon(actor, 15, { meleeRange: 0, ammoType: 'arrow' }); // no quiver equipped
       const target = makeTarget(10, 4, 1);
 
@@ -174,6 +175,17 @@ describe('executeAttack', () => {
       expect(free).toBe(true); // turn not consumed
       expect(target.components.get('health').current).toBe(10); // no damage
       expect(gameLog.getDisplayEntries(1)[0].display).toMatch(/no arrows/i);
+    });
+
+    it("consumes an NPC's turn on a misfire (no free retry loop)", () => {
+      const actor = makeRangedActor({ x: 1, y: 1, damage: 2 }); // no playerControlled
+      equipWeapon(actor, 15, { meleeRange: 0, ammoType: 'arrow' });
+      const target = makeTarget(10, 4, 1);
+
+      const free = executeAttack(actor, { targetEntityId: target.id }, level, registry);
+
+      expect(free).toBe(false); // turn spent — breaks the would-be infinite loop
+      expect(target.components.get('health').current).toBe(10);
     });
 
     it('clears the ammunition slot when the last arrow is fired', () => {
@@ -257,8 +269,9 @@ describe('executeAttack', () => {
       expect(arrows.components.get('stackable').count).toBe(4);
     });
 
-    it('is a free no-op against a target beyond weapon range', () => {
+    it('is a free no-op for the player against a target beyond weapon range', () => {
       const actor = makeRangedActor({ x: 1, y: 1, damage: 2 });
+      registry.addComponent(actor, 'playerControlled', components.playerControlled());
       equipWeapon(actor, 2, { meleeRange: 1 }); // spear: range 2
       const target = makeTarget(10, 5, 1); // distance 4
 
@@ -266,6 +279,14 @@ describe('executeAttack', () => {
 
       expect(free).toBe(true);
       expect(target.components.get('health').current).toBe(10);
+    });
+
+    it("consumes an NPC's turn against a target beyond weapon range", () => {
+      const actor = makeRangedActor({ x: 1, y: 1, damage: 2 }); // no playerControlled
+      equipWeapon(actor, 2, { meleeRange: 1 });
+      const target = makeTarget(10, 5, 1); // distance 4
+
+      expect(executeAttack(actor, { targetEntityId: target.id }, level, registry)).toBe(false);
     });
   });
 

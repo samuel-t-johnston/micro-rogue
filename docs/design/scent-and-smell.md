@@ -200,7 +200,7 @@ backward-compatible pattern `deserializeLevel` already uses for `branch`/`depth`
 | `senses` | `['vision', 'smell']` |
 | `smell` | low `threshold` (keen tracker) |
 | `noisyMovement` | `{ chance, volume, message: { kind: 'vermin-scrabble' } }` |
-| `ai` | `['attack-adjacent', 'chase-others', 'track-scent', 'wander-aimlessly']` |
+| `ai` | `['attack-in-range', 'chase-others', 'track-scent', 'wander-aimlessly']` |
 | `renderable` | glyph `s` |
 
 The handoff is the point: in the open within 3 tiles it **sees and chases**; the instant you slip

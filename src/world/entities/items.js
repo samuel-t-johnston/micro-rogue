@@ -37,6 +37,7 @@ export function createHealingPotion(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Healing Potion'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('healingPotion'));
   registry.addComponent(
     entity,
     'renderable',
@@ -64,6 +65,7 @@ export function createPotionOfPain(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Potion of Pain'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('potionOfPain'));
   registry.addComponent(
     entity,
     'renderable',
@@ -91,6 +93,7 @@ export function createDagger(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Dagger'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('dagger'));
   registry.addComponent(
     entity,
     'renderable',
@@ -115,6 +118,7 @@ export function createSword(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Sword'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('sword'));
   registry.addComponent(
     entity,
     'renderable',
@@ -142,6 +146,7 @@ export function createSpear(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Spear'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('spear'));
   registry.addComponent(
     entity,
     'renderable',
@@ -169,6 +174,7 @@ export function createJavelin(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Javelin'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('javelin'));
   registry.addComponent(
     entity,
     'renderable',
@@ -206,6 +212,7 @@ export function createBow(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Bow'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('bow'));
   registry.addComponent(
     entity,
     'renderable',
@@ -237,6 +244,7 @@ export function createArrow(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Arrow'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('arrow'));
   registry.addComponent(
     entity,
     'renderable',
@@ -261,6 +269,7 @@ export function createLeatherArmor(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Leather Armor'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('leatherArmor'));
   registry.addComponent(
     entity,
     'renderable',
@@ -283,6 +292,7 @@ export function createAmulet(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Amulet of Yendor'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('amulet'));
   registry.addComponent(
     entity,
     'renderable',
@@ -301,6 +311,7 @@ export function createScroll(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Scroll of Healing'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('scroll'));
   registry.addComponent(
     entity,
     'renderable',

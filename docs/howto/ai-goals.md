@@ -9,7 +9,7 @@ For the design rationale (GOAP inspiration, priority model, memory), see [ai-arc
 Every active entity — **player and NPC alike** — carries an ordered goal stack on its `ai` component, stored as string keys:
 
 ```js
-ai: ['attack-adjacent', 'flee-from-others', 'wander-aimlessly']            // a goblin
+ai: ['attack-in-range', 'flee-from-others', 'wander-aimlessly']            // a goblin
 ai: ['player-hear', 'player-auto-move', 'player-auto-pickup', 'player-get-input'] // the player
 ```
 
@@ -28,7 +28,7 @@ Maps each string key to its goal object. Names (not function references) are sto
 Runs the stack top-down each turn; the **first goal to return an action wins** and evaluation stops there. Order *is* priority.
 
 **The context** — [`src/ai/core/planning-context.js`](../../src/ai/core/planning-context.js)
-Built fresh each turn: `selfState` (position, factions), `perception` (what the senses reported — see [ai-senses.md](ai-senses.md)), `memory`, `level`, and `awaitInput`/`hasPendingInput` for player goals.
+Built fresh each turn: `selfState` (position, factions, `attackCapability`), `perception` (what the senses reported — see [ai-senses.md](ai-senses.md)), `memory`, `level`, `self` (the acting entity, for goals that introspect their own inventory/equipment — see the equip goals), and `awaitInput`/`hasPendingInput` for player goals. World perception flows only through `perception`; `self` is the agent reasoning about its own body, not the world.
 
 ## Add a new goal
 
