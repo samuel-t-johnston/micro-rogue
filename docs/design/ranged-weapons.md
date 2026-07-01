@@ -19,7 +19,8 @@ infrastructure exists.
 > - **`flightStyle` seam not built** — thrust-vs-projectile is still inferred from `ammoType`; see §9.
 > - **Player-facing how-to:** [docs/howto/weapons.md](../howto/weapons.md).
 >
-> The **NPC ranged goal + orc-commander loadout** (the named follow-up) is not yet built.
+> The **NPC ranged goal + orc-commander loadout** (the named follow-up) is now built — see the
+> follow-up note at the end of this document and [docs/howto/loadouts.md](../howto/loadouts.md).
 
 ---
 
@@ -430,4 +431,36 @@ Ordered so the tree stays green and each step is independently reviewable.
 12. **Docs + roadmap.** Update `equipment.md`/`item.md` (the weapon/ammunition/stackable additions),
     check off the roadmap items, and note this doc as as-built.
 
-Follow-up (separate chunk): NPC ranged goal + orc-commander loadout (bow + arrows).
+## 13. Follow-up: NPC ranged behaviour (as-built)
+
+The named follow-up — NPCs wielding weapons, including ranged — landed on top of this infrastructure,
+which (as designed) needed no combat changes: `executeAttack` and the weapon resolver are already
+creature-agnostic. The additions are AI and content:
+
+- **`entityTypeId`** — every prefab stamps its stable catalog id (a content identity independent of the
+  display `name`), so generation/loot rules can match a creature type. Each factory stamps its own.
+- **Item tables + loadout stage** — `src/world/entities/item-tables.js` (item generators) and
+  `stage-loadout.js` (a post-placement stage that fills matching creatures' inventories). Orcs carry a
+  spear; the orc commander carries a bow + arrows. The stage runs after placement and draws no RNG the
+  placement stages depend on, so their determinism is untouched. See
+  [docs/howto/loadouts.md](../howto/loadouts.md).
+- **`equip-weapon` / `equip-ammo` goals** — eager goals that wield the best weapon and load matching
+  ammo from inventory, reading the creature's own body via `context.self`. Placed above the combat goal.
+  `equip-weapon` also **stows a dry ranged weapon** (a bow out of ammo scores below bare hands), so an
+  out-of-ammo creature drops to melee instead of dry-firing — important because a bow reports range 15
+  regardless of ammo, and a misfiring ranged attack is a *free* action that would otherwise spin the
+  turn loop. Since this goal sits above `attack-in-range`, the stow happens before any misfire can.
+- **Failed-attack guard (defense in depth).** Independently of the stow, a *failed* attack — a misfire
+  with no ammo, or a target out of range — is a free action **only for the player** (a discoverability
+  affordance); for an NPC it consumes the turn. This makes the free-action loop structurally impossible
+  for any ranged creature, even one misconfigured without `equip-weapon`. See `freeOnFailedAttack` in
+  `action-attack.js`.
+- **`attack-in-range` goal** — replaces the old melee-only `attack-adjacent`. One goal for melee and
+  ranged: it targets the nearest hostile within the creature's own weapon reach
+  (`selfState.attackCapability`), requiring a clear line beyond melee. The clear-line test
+  (`src/combat/targeting.js`, `isAttackable`) is shared with the player's tile-action resolver, so NPC
+  and player targeting agree by construction.
+
+There is intentionally **no kiting** yet: a ranged attacker stands and shoots when a target is in reach
+and otherwise lets `chase-others` (ranked below it) close the distance. A flee-to-range goal is a
+natural future addition.

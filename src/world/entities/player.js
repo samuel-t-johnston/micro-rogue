@@ -8,6 +8,7 @@ import { HUMANOID_SLOTS } from '../../../data/equipment-slots.js';
 export async function createPlayer(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Player'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('player'));
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'health', components.health(20, 20));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));

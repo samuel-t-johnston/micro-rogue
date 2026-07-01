@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createTurnManager } from './turn-manager.js';
+import { createTurnManager, MAX_CONSECUTIVE_FREE_ACTIONS } from './turn-manager.js';
 
 function makeEntity(id, speed = 1, isPlayer = false) {
   const components = new Map([['turnTaker', { speed, accumulator: 0 }]]);
@@ -109,6 +109,53 @@ describe('createTurnManager', () => {
       tm.start();
       await runUntil(tm, () => expect(tm.playerTurnCount).toBeGreaterThanOrEqual(1));
       expect(tm.playerTurnCount).toBeLessThan(call);
+    });
+  });
+
+  describe('emergency free-action breaker', () => {
+    it('force-consumes a non-player turn after too many consecutive free actions', async () => {
+      const npc = makeEntity(1, 1, false);
+      const limits = [];
+      const tm = createTurnManager({
+        getActiveEntities: () => [npc],
+        invokeAction: async () => true, // always free — would otherwise loop forever
+        onFreeActionLimit: (e, count) => limits.push({ id: e.id, count }),
+      });
+      tm.start();
+      await runUntil(tm, () => expect(limits.length).toBeGreaterThanOrEqual(1));
+      expect(limits[0]).toEqual({ id: 1, count: MAX_CONSECUTIVE_FREE_ACTIONS });
+    });
+
+    it('does not trip when non-free actions reset the streak', async () => {
+      const npc = makeEntity(1, 1, false);
+      let acts = 0;
+      let tripped = 0;
+      const tm = createTurnManager({
+        getActiveEntities: () => [npc],
+        invokeAction: async () => ++acts % 5 !== 0, // a non-free every 5th resets the counter
+        onFreeActionLimit: () => tripped++,
+      });
+      tm.start();
+      await runUntil(tm, () =>
+        expect(acts).toBeGreaterThanOrEqual(MAX_CONSECUTIVE_FREE_ACTIONS + 10),
+      );
+      expect(tripped).toBe(0);
+    });
+
+    it('never trips for the player (its free actions await input)', async () => {
+      const player = makeEntity(1, 1, true);
+      let acts = 0;
+      let tripped = 0;
+      const tm = createTurnManager({
+        getActiveEntities: () => [player],
+        invokeAction: async () => ++acts <= MAX_CONSECUTIVE_FREE_ACTIONS + 5, // a long free streak
+        onFreeActionLimit: () => tripped++,
+      });
+      tm.start();
+      await runUntil(tm, () =>
+        expect(acts).toBeGreaterThanOrEqual(MAX_CONSECUTIVE_FREE_ACTIONS + 6),
+      );
+      expect(tripped).toBe(0);
     });
   });
 

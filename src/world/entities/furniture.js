@@ -4,6 +4,7 @@ import { components } from './components.js';
 export function createBoulder(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Boulder'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('boulder'));
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'opaque', components.opaque());
@@ -20,6 +21,7 @@ export function createBoulder(registry, x, y) {
 export function createChest(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Chest'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('chest'));
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(
@@ -42,6 +44,11 @@ export function createStairs(registry, x, y, direction = 'up', to = null) {
   const up = direction === 'up';
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name(up ? 'Stairs Up' : 'Stairs Down'));
+  registry.addComponent(
+    entity,
+    'entityTypeId',
+    components.entityTypeId(up ? 'stairsUp' : 'stairsDown'),
+  );
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(
     entity,
@@ -61,6 +68,8 @@ export function createStairs(registry, x, y, direction = 'up', to = null) {
  */
 export function createDungeonExit(registry, x, y) {
   const entity = createStairs(registry, x, y, 'up');
+  // Overwrites the 'stairsUp' id createStairs stamped: the dungeon exit is its own prefab id.
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('dungeonExit'));
   registry.addComponent(entity, 'dungeonExit', components.dungeonExit());
   return entity;
 }
@@ -69,6 +78,7 @@ export function createDungeonExit(registry, x, y) {
 export function createDoor(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Door'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('door'));
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'opaque', components.opaque());

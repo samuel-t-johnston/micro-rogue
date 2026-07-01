@@ -45,7 +45,7 @@ A creature hears if it has the `hearing` sense (in its `senses` list) and a `hea
 1. **Commander spots the player.** Its `shout-enemy-report` goal (top of its stack) sees a hostile via `vision`, and on the *first* sighting emits a `shout`: `message = { kind: 'enemy-report', direction: <bearing to the foe> }`, language `orcish`. It records the enemy as reported (in memory) so it shouts once, then falls through to its combat goals.
 2. **Nearby orcs hear it.** Their `hearing` sense surfaces the percept; because they have `knownLanguages: ['orcish']`, `understood` is true.
 3. **Orcs converge.** Their `obey-shouts` goal (below chase/attack) reads the understood `enemy-report`, sets a heading, and steps in that direction — persisting for a few turns so they keep moving between shouts.
-4. **Vision takes over.** Once an orc sees the player, `chase-others`/`attack-adjacent` (higher priority) fire and `obey-shouts` goes quiet.
+4. **Vision takes over.** Once an orc sees the player, `chase-others`/`attack-in-range` (higher priority) fire and `obey-shouts` goes quiet.
 5. **The player hears it too** — but knows no orcish, so the `player-hear` goal logs *"You hear guttural orcish shouting to the …"* (the perceived direction), not the meaning.
 
 Because comprehension is just `knownLanguages` ∩ `sound.language`, the levers come for free: **deafen** = drop `hearing`; **silence** = drop `voice`; **translate / learn orcish** = add to the player's `knownLanguages` (then the log starts decoding the message, and a player `shout` could spoof orders).

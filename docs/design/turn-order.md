@@ -63,14 +63,14 @@ Speed changes mid-combat (haste, slow, etc.) require no special handling. The ac
 
 ## Free Actions
 
-An entity's `act()` invocation returns a boolean indicating whether the action consumed a tick.
+An entity's `act()` invocation returns a boolean indicating whether the action was *free*. (Note the polarity: `true` means free — the tick is **not** consumed.)
 
-- `true` (consumed): normal path. The accumulator was decremented and the entity used its action.
-- `false` (free): the action did not consume the tick. The accumulator increment is restored; the entity acts again immediately in the same loop iteration.
+- `false` (consumed): normal path. The accumulator stays decremented and the entity used its action.
+- `true` (free): the action did not consume the tick. The accumulator increment is restored; the entity acts again immediately in the same loop iteration.
 
 Free actions do not advance the entity's position in the queue. They do not trigger a rescan. They do not increment the player turn counter.
 
-Use free actions sparingly. Infinite free action loops are possible if `act()` consistently returns false — guard against this at the action level, not in the turn loop.
+Use free actions sparingly. A goal stack that consistently returns a free action would loop forever, so guard against it **primarily at the action/goal level** — e.g. an NPC's failed attack (a misfire, an out-of-range swing) consumes its turn rather than going free, and a ranged creature stows a spent weapon before it can dry-fire (see ranged-weapons.md). As a **backstop**, the turn loop enforces an emergency breaker: a non-player that takes more than `MAX_CONSECUTIVE_FREE_ACTIONS` (50) free actions in a single turn burst has that turn force-consumed and the event reported through the injected `onFreeActionLimit` hook (the game scene logs it). This degrades a buggy goal stack to a wasted turn instead of a frozen tab. The player is exempt — its free actions (look, a misfire) await fresh input between iterations, so they never spin.
 
 ---
 

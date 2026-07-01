@@ -3,6 +3,7 @@ import * as creatures from './creatures.js';
 import * as items from './items.js';
 import * as furniture from './furniture.js';
 import { ENTITY_PREFABS } from './entity-prefabs.js';
+import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 
 // Guards against the classic "added a factory, forgot the prefab" slip: every create* factory a
 // content module exports must be reachable from ENTITY_PREFABS. By convention a factory createFooBar
@@ -28,6 +29,19 @@ describe('entity prefab coverage', () => {
         ENTITY_PREFABS[id],
         `${name} has no prefab (expected id "${id}" in entity-prefabs.js, or add it to INDIRECT)`,
       ).toBeDefined();
+    });
+  }
+});
+
+// Each factory stamps its own entityTypeId; this guards that the stamped id matches the catalog key
+// it's registered under, so the loadout stage's type filters (and future loot tables) can trust it.
+// Covers the one-factory-two-ids case (stairsUp/stairsDown) and the dungeonExit override.
+describe('entityTypeId stamping', () => {
+  for (const id of Object.keys(ENTITY_PREFABS)) {
+    it(`${id} stamps entityTypeId === '${id}'`, () => {
+      const registry = createEntityRegistry();
+      const entity = ENTITY_PREFABS[id].make(registry, 0, 0);
+      expect(entity.components.get('entityTypeId')).toBe(id);
     });
   }
 });

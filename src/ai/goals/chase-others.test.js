@@ -33,7 +33,7 @@ describe('chaseOthers', () => {
     expect(chaseOthers.evaluate(ctx(entities, openLevel()))).toBeNull();
   });
 
-  it('returns null when already adjacent (attack-adjacent takes over)', () => {
+  it('returns null when already adjacent (attack-in-range takes over)', () => {
     expect(chaseOthers.evaluate(ctx([obs(9, 2, 3, ['player'])], openLevel()))).toBeNull();
   });
 

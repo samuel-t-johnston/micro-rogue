@@ -5,6 +5,7 @@ import { HUMANOID_SLOTS } from '../../../data/equipment-slots.js';
 export function createGoblin(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Goblin'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('goblin'));
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'health', components.health(5, 5));
   registry.addComponent(entity, 'attacker', components.attacker(1));
@@ -20,7 +21,7 @@ export function createGoblin(registry, x, y) {
   registry.addComponent(
     entity,
     'ai',
-    components.ai(['attack-adjacent', 'flee-from-others', 'wander-aimlessly']),
+    components.ai(['attack-in-range', 'flee-from-others', 'wander-aimlessly']),
   );
   registry.addComponent(
     entity,
@@ -34,6 +35,7 @@ export function createGoblin(registry, x, y) {
 export function createOrc(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Orc'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('orc'));
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'health', components.health(9, 9));
   registry.addComponent(entity, 'attacker', components.attacker(1));
@@ -53,12 +55,14 @@ export function createOrc(registry, x, y) {
     components.scentSource({ profile: 'orcs', intensity: 10 }),
   );
   registry.addComponent(entity, 'tilePerception', components.tilePerception());
-  // Below chase/attack: hears an understood report and converges; investigates a lost trail before giving up.
+  // equip-weapon arms it from inventory (a spear) before combat; below chase/attack: hears an
+  // understood report and converges; investigates a lost trail before giving up.
   registry.addComponent(
     entity,
     'ai',
     components.ai([
-      'attack-adjacent',
+      'equip-weapon',
+      'attack-in-range',
       'chase-others',
       'obey-shouts',
       'investigate',
@@ -81,6 +85,7 @@ export function createOrc(registry, x, y) {
 export function createOrcCommander(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Orc Commander'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('orcCommander'));
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'health', components.health(12, 12));
   registry.addComponent(entity, 'attacker', components.attacker(2));
@@ -106,7 +111,9 @@ export function createOrcCommander(registry, x, y) {
     'ai',
     components.ai([
       'shout-enemy-report',
-      'attack-adjacent',
+      'equip-weapon',
+      'equip-ammo',
+      'attack-in-range',
       'chase-others',
       'obey-shouts',
       'investigate',
@@ -129,6 +136,7 @@ export function createOrcCommander(registry, x, y) {
 export function createScuttler(registry, x, y) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Scuttler'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('scuttler'));
   registry.addComponent(entity, 'position', components.position(x, y));
   registry.addComponent(entity, 'health', components.health(2, 2));
   registry.addComponent(entity, 'attacker', components.attacker(1));
@@ -150,7 +158,7 @@ export function createScuttler(registry, x, y) {
     entity,
     'ai',
     components.ai([
-      'attack-adjacent',
+      'attack-in-range',
       'chase-others',
       'track-scent',
       'investigate',

@@ -18,7 +18,7 @@ So two entities are **friendly if they share at least one tag**, and **hostile i
 
 Senses never decide hostility — they only report each observed entity's `factions`. **Goals** make the call, comparing the observation's factions against the actor's own via `areHostile`:
 
-- [`attack-adjacent`](../../src/ai/goals/attack-adjacent.js), [`chase-others`](../../src/ai/goals/chase-others.js), [`flee-from-others`](../../src/ai/goals/flee-from-others.js) — target/avoid hostiles.
+- [`attack-in-range`](../../src/ai/goals/attack-in-range.js), [`chase-others`](../../src/ai/goals/chase-others.js), [`flee-from-others`](../../src/ai/goals/flee-from-others.js) — target/avoid hostiles.
 - [`shout-enemy-report`](../../src/ai/goals/shout-enemy-report.js), [`investigate`](../../src/ai/goals/investigate.js), [`track-scent`](../../src/ai/goals/track-scent.js) — react to hostiles seen, lost, or smelled.
 
 Two adjacent uses of the same tags:
