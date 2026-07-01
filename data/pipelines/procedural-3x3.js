@@ -15,8 +15,7 @@ export default {
     { type: 'stairs' },
     { type: 'spawn' },
     { type: 'populate' },
-    // Arms the placed creatures from item tables (orcs → spear, commander → bow + arrows). Runs after
-    // populate so it draws no RNG populate depends on. See src/world/generation/stages/stage-loadout.js.
+    // Arms the placed creatures from item tables (orcs → spear, commander → bow + arrows).
     { type: 'loadout' },
   ],
 };
