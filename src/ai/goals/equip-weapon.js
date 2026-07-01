@@ -33,7 +33,7 @@ function weaponUsable(self, item) {
  */
 export const equipWeapon = {
   evaluate(context) {
-    const self = context.self;
+    const self = context.selfEntity;
     const inventory = self.components.get('inventory');
     const wears = self.components.get('wearsEquipment');
     if (!inventory || !wears) return null;

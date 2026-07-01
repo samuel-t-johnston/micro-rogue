@@ -155,11 +155,13 @@ export function applySenses(entity, level, turnCount = 0) {
 
 /**
  * @typedef {object} PlanningContext
- * @property {object} self - The acting entity itself, for goals that introspect their own body —
- *   reading inventory/equipment to decide what to wield (equip goals). World perception still flows
- *   only through `perception`; `self` is the agent reasoning about itself, not about the world.
+ * @property {object} selfEntity - The acting entity itself (the live component graph), for goals that
+ *   introspect their own body — walking inventory/equipment to decide what to wield (equip goals).
+ *   Prefer `selfState` for reasoning about oneself in the world; reach for `selfEntity` only when you
+ *   need to traverse live components `selfState` doesn't project. World perception still flows only
+ *   through `perception`; `selfEntity` is the agent reasoning about itself, not about the world.
  * @property {object} memory - The entity's `memory` component (undefined for memoryless entities).
- * @property {{ position: {x: number, y: number}, factions: string[], attackCapability: {range: number, meleeRange: number} }} selfState - The acting entity's own state.
+ * @property {{ position: {x: number, y: number}, factions: string[], attackCapability: {range: number, meleeRange: number} }} selfState - A read-only value snapshot of the acting entity's own world state. Unlike `selfEntity` it holds copied/derived values (position is copied; `attackCapability` is computed, not a component), so it's cheap to build and to fake in tests.
  * @property {{ entities: object[], sounds: object[], smells: object[], visibleTiles: Set<string>, knownTiles: Map<string, number> }} perception - Merged, reconciled output of all the entity's senses.
  * @property {object} level - The current level.
  * @property {number} turnCount - The entity's per-entity action clock.
@@ -195,7 +197,7 @@ export function buildPlanningContext({ entity, level, inputController, turnCount
   updateEnemyMemory({ memory, selfState, perception, level, turnCount });
 
   return {
-    self: entity,
+    selfEntity: entity,
     memory,
     selfState,
     perception,

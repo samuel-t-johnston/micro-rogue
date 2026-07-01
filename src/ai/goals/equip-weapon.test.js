@@ -23,7 +23,7 @@ describe('equip-weapon goal', () => {
   it('equips a weapon from inventory when unarmed', () => {
     const orc = armedOrc(registry, createSpear);
     const spear = orc.components.get('inventory').items[0];
-    expect(equipWeapon.evaluate({ self: orc })).toEqual({
+    expect(equipWeapon.evaluate({ selfEntity: orc })).toEqual({
       action: { type: 'equip', itemEntityId: spear.id },
     });
   });
@@ -33,20 +33,20 @@ describe('equip-weapon goal', () => {
     const spear = orc.components.get('inventory').items[0];
     executeEquip(orc, { itemEntityId: spear.id }, null, registry);
     expect(orc.components.get('wearsEquipment').slots[Slots.WEAPON]).toBe(spear);
-    expect(equipWeapon.evaluate({ self: orc })).toBeNull();
+    expect(equipWeapon.evaluate({ selfEntity: orc })).toBeNull();
   });
 
   it('picks the highest-damage weapon among several', () => {
     const orc = armedOrc(registry, createDagger, createSpear); // dagger +1, spear +2
     const spear = orc.components.get('inventory').items[1];
-    expect(equipWeapon.evaluate({ self: orc })).toEqual({
+    expect(equipWeapon.evaluate({ selfEntity: orc })).toEqual({
       action: { type: 'equip', itemEntityId: spear.id },
     });
   });
 
   it('returns null when inventory holds no weapon', () => {
     const orc = createOrc(registry, 0, 0);
-    expect(equipWeapon.evaluate({ self: orc })).toBeNull();
+    expect(equipWeapon.evaluate({ selfEntity: orc })).toBeNull();
   });
 
   // Equips a weapon from inventory and returns the entity (for follow-up assertions).
@@ -60,7 +60,7 @@ describe('equip-weapon goal', () => {
   it('stows an equipped bow once its ammo is gone', () => {
     const orc = createOrc(registry, 0, 0);
     equipFromInventory(orc, createBow); // no arrows anywhere → the bow can never fire
-    expect(equipWeapon.evaluate({ self: orc })).toEqual({
+    expect(equipWeapon.evaluate({ selfEntity: orc })).toEqual({
       action: { type: 'unequip', slot: Slots.WEAPON },
     });
   });
@@ -69,13 +69,13 @@ describe('equip-weapon goal', () => {
     const orc = createOrc(registry, 0, 0);
     equipFromInventory(orc, createBow);
     equipFromInventory(orc, createArrow); // loads the ammunition slot
-    expect(equipWeapon.evaluate({ self: orc })).toBeNull();
+    expect(equipWeapon.evaluate({ selfEntity: orc })).toBeNull();
   });
 
   it('does not re-equip a dry bow sitting in inventory', () => {
     const orc = createOrc(registry, 0, 0);
     orc.components.get('inventory').items.push(createBow(registry, null, null, orc.id));
-    expect(equipWeapon.evaluate({ self: orc })).toBeNull();
+    expect(equipWeapon.evaluate({ selfEntity: orc })).toBeNull();
   });
 
   it('equips a usable weapon over a dry equipped bow', () => {
@@ -83,7 +83,7 @@ describe('equip-weapon goal', () => {
     equipFromInventory(orc, createBow); // dry → worth less than bare hands
     const spear = createSpear(registry, null, null, orc.id);
     orc.components.get('inventory').items.push(spear);
-    expect(equipWeapon.evaluate({ self: orc })).toEqual({
+    expect(equipWeapon.evaluate({ selfEntity: orc })).toEqual({
       action: { type: 'equip', itemEntityId: spear.id },
     });
   });
