@@ -42,6 +42,11 @@ describe('vision entity reporting', () => {
     if (extra.player) registry.addComponent(e, 'playerControlled', components.playerControlled());
     if (extra.creature) registry.addComponent(e, 'creature', components.creature());
     if (extra.opaque) registry.addComponent(e, 'opaque', components.opaque());
+    if (extra.openable) {
+      const openable = components.openable('door-closed', 'door-open');
+      openable.isOpen = extra.open ?? false;
+      registry.addComponent(e, 'openable', openable);
+    }
     level.placeEntity(e);
     return e;
   }
@@ -69,6 +74,45 @@ describe('vision entity reporting', () => {
     });
   });
 
+  it('reports an openable door with its open/closed state', () => {
+    const registry = createEntityRegistry();
+    const level = createLevel();
+    level.width = 21;
+    level.height = 21;
+    level.tiles = Array.from({ length: 21 }, () => Array(21).fill('floor'));
+    const seer = registry.createEntity();
+    registry.addComponent(seer, 'position', components.position(10, 10));
+    level.placeEntity(seer);
+
+    addEntity(level, registry, 11, 10, { openable: true, open: false }); // closed door
+    addEntity(level, registry, 9, 10, { openable: true, open: true }); // open door
+    const byId = new Map(
+      vision(seer, level, 0).entities.map((o) => [`${o.position.x},${o.position.y}`, o]),
+    );
+
+    expect(byId.get('11,10')).toMatchObject({
+      tags: { isOpenable: true, isActor: false },
+      isOpen: false,
+    });
+    expect(byId.get('9,10')).toMatchObject({ tags: { isOpenable: true }, isOpen: true });
+  });
+
+  it('reports a non-openable entity with isOpenable false and no isOpen', () => {
+    const registry = createEntityRegistry();
+    const level = createLevel();
+    level.width = 21;
+    level.height = 21;
+    level.tiles = Array.from({ length: 21 }, () => Array(21).fill('floor'));
+    const seer = registry.createEntity();
+    registry.addComponent(seer, 'position', components.position(10, 10));
+    level.placeEntity(seer);
+
+    addEntity(level, registry, 11, 10, { creature: true });
+    const [obs] = vision(seer, level, 0).entities;
+    expect(obs.tags.isOpenable).toBe(false);
+    expect(obs.isOpen).toBeUndefined();
+  });
+
   it('tags a player-controlled entity as the player', () => {
     const registry = createEntityRegistry();
     const level = createLevel();
@@ -81,7 +125,7 @@ describe('vision entity reporting', () => {
 
     addEntity(level, registry, 11, 10, { player: true, creature: true });
     const { entities } = vision(seer, level, 0);
-    expect(entities[0].tags).toEqual({ isPlayer: true, isActor: true });
+    expect(entities[0].tags).toEqual({ isPlayer: true, isActor: true, isOpenable: false });
     expect(entities[0].factions).toEqual([]); // no faction component -> empty
   });
 

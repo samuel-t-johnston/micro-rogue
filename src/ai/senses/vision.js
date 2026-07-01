@@ -1,6 +1,7 @@
 import { computeFov } from '../../engine/core/fov.js';
 import { tileKey } from '../../engine/core/tile-key.js';
 import { getTileType } from '../../world/map/tile-registry.js';
+import { describeObservedEntity } from './observation-utils.js';
 
 /**
  * Creates the vision sense: line-of-sight FOV gated by tile and entity opacity (range from the
@@ -30,19 +31,7 @@ export function createVisionSense() {
       const ePos = e.components.get('position');
       if (!ePos) continue;
       if (!visibleTiles.has(tileKey(ePos.x, ePos.y))) continue;
-      entities.push({
-        entityId: e.id,
-        position: { x: ePos.x, y: ePos.y },
-        confidence: 100,
-        turnObserved: turnCount,
-        factions: e.components.get('faction') ?? [],
-        tags: {
-          isPlayer: e.components.has('playerControlled'),
-          // An actor (creature) vs. inert scenery/items — lets goals ignore floor items.
-          // Hostility is decided by all goals via the faction list above (see areHostile).
-          isActor: e.components.has('creature'),
-        },
-      });
+      entities.push(describeObservedEntity(e, ePos, turnCount));
     }
 
     return { entities, visibleTiles };
