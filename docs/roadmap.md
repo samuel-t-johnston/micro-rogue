@@ -298,7 +298,7 @@ needed only AI + content. A stamped `entityTypeId` gives every prefab a stable c
 **loadout stage** (`stage-loadout.js`) fills placed creatures' inventories from **item tables**
 (`item-tables.js`) — orcs get a spear, the orc commander a bow + arrows — running after placement so it
 disturbs no seeded determinism. Eager `equip-weapon`/`equip-ammo` goals wield the kit (introspecting the
-creature's own body via a new `context.self`), and a unified **`attack-in-range`** goal replaces the
+creature's own body via a new `context.selfEntity`), and a unified **`attack-in-range`** goal replaces the
 melee-only `attack-adjacent`, covering melee and ranged off the creature's own weapon reach. Its
 clear-line test (`src/combat/targeting.js`) is shared with the player's tile-action resolver. No kiting
 yet — a ranged attacker stands and shoots, with `chase-others` (ranked below) closing when out of reach.

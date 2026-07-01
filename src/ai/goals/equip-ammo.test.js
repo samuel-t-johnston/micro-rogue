@@ -28,19 +28,19 @@ describe('equip-ammo goal', () => {
   it('equips matching ammo when a bow is wielded', () => {
     const cmd = setup(registry, { equip: createBow, carry: [createArrow] });
     const arrow = cmd.components.get('inventory').items[0];
-    expect(equipAmmo.evaluate({ self: cmd })).toEqual({
+    expect(equipAmmo.evaluate({ selfEntity: cmd })).toEqual({
       action: { type: 'equip', itemEntityId: arrow.id },
     });
   });
 
   it('returns null when no weapon needs external ammo', () => {
     const cmd = setup(registry, { equip: createSpear, carry: [createArrow] });
-    expect(equipAmmo.evaluate({ self: cmd })).toBeNull();
+    expect(equipAmmo.evaluate({ selfEntity: cmd })).toBeNull();
   });
 
   it('returns null when unarmed', () => {
     const cmd = setup(registry, { carry: [createArrow] });
-    expect(equipAmmo.evaluate({ self: cmd })).toBeNull();
+    expect(equipAmmo.evaluate({ selfEntity: cmd })).toBeNull();
   });
 
   it('returns null when the quiver already holds the right ammo', () => {
@@ -48,11 +48,11 @@ describe('equip-ammo goal', () => {
     const arrow = cmd.components.get('inventory').items[0];
     executeEquip(cmd, { itemEntityId: arrow.id }, null, registry);
     expect(cmd.components.get('wearsEquipment').slots[Slots.AMMUNITION]).toBe(arrow);
-    expect(equipAmmo.evaluate({ self: cmd })).toBeNull();
+    expect(equipAmmo.evaluate({ selfEntity: cmd })).toBeNull();
   });
 
   it('returns null when no matching ammo is carried', () => {
     const cmd = setup(registry, { equip: createBow });
-    expect(equipAmmo.evaluate({ self: cmd })).toBeNull();
+    expect(equipAmmo.evaluate({ selfEntity: cmd })).toBeNull();
   });
 });

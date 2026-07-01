@@ -28,7 +28,7 @@ Maps each string key to its goal object. Names (not function references) are sto
 Runs the stack top-down each turn; the **first goal to return an action wins** and evaluation stops there. Order *is* priority.
 
 **The context** — [`src/ai/core/planning-context.js`](../../src/ai/core/planning-context.js)
-Built fresh each turn: `selfState` (position, factions, `attackCapability`), `perception` (what the senses reported — see [ai-senses.md](ai-senses.md)), `memory`, `level`, `self` (the acting entity, for goals that introspect their own inventory/equipment — see the equip goals), and `awaitInput`/`hasPendingInput` for player goals. World perception flows only through `perception`; `self` is the agent reasoning about its own body, not the world.
+Built fresh each turn: `selfState` (a read-only value snapshot — position, factions, computed `attackCapability`), `perception` (what the senses reported — see [ai-senses.md](ai-senses.md)), `memory`, `level`, `selfEntity` (the acting entity's live component graph, for goals that introspect their own inventory/equipment — see the equip goals), and `awaitInput`/`hasPendingInput` for player goals. Prefer `selfState` for reasoning about oneself in the world; reach for `selfEntity` only to walk live components `selfState` doesn't project. World perception flows only through `perception`; `selfEntity` is the agent reasoning about its own body, not the world.
 
 ## Add a new goal
 

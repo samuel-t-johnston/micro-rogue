@@ -10,11 +10,11 @@ import { getWeaponStats } from '../../combat/weapons.js';
  */
 export const equipAmmo = {
   evaluate(context) {
-    const wears = context.self.components.get('wearsEquipment');
-    const inventory = context.self.components.get('inventory');
+    const wears = context.selfEntity.components.get('wearsEquipment');
+    const inventory = context.selfEntity.components.get('inventory');
     if (!wears || !inventory) return null;
 
-    const { ammoType } = getWeaponStats(context.self);
+    const { ammoType } = getWeaponStats(context.selfEntity);
     if (ammoType == null || ammoType === 'self') return null;
 
     const current = wears.slots[Slots.AMMUNITION];

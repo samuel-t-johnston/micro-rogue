@@ -445,7 +445,7 @@ creature-agnostic. The additions are AI and content:
   placement stages depend on, so their determinism is untouched. See
   [docs/howto/loadouts.md](../howto/loadouts.md).
 - **`equip-weapon` / `equip-ammo` goals** — eager goals that wield the best weapon and load matching
-  ammo from inventory, reading the creature's own body via `context.self`. Placed above the combat goal.
+  ammo from inventory, reading the creature's own body via `context.selfEntity`. Placed above the combat goal.
   `equip-weapon` also **stows a dry ranged weapon** (a bow out of ammo scores below bare hands), so an
   out-of-ammo creature drops to melee instead of dry-firing — important because a bow reports range 15
   regardless of ammo, and a misfiring ranged attack is a *free* action that would otherwise spin the
