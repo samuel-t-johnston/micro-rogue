@@ -196,6 +196,8 @@ Game-specific tutorialization is a concern for downstream projects, not for micr
 
 ## Notification and Interruption
 
+Detecting *when* the world has changed enough to notify or interrupt is factored into a shared salience monitor, reused by auto-move, the in-menu warning, and future auto-actions. See [state-change-alerts.md](state-change-alerts.md).
+
 ### Three Tiers
 
 - **Silent** — written to the log only. Background events, minor state changes.
