@@ -44,6 +44,16 @@ export const components = {
     return { ...mods };
   },
 
+  // Per-entity attribute state: a flat map of attribute name (lowercase kebab-case) → the one mutable
+  // number that attribute owns — a score's base, a pool's current, or an accumulator's value. Effective
+  // values are DERIVED on read by the attribute accessors (src/attributes/attribute-access.js) from
+  // these plus equipment attributeModifiers; derived attributes (e.g. level) store nothing here, and a
+  // missing key resolves to the definition's default. Plain data, serializes cleanly. See
+  // docs/design/attribute-system.md and data/attribute-set.js for the default set.
+  attributes(initial = {}) {
+    return { ...initial };
+  },
+
   // Marks an entity as blocking movement. The pathfinder treats it as impassable terrain.
   // Kept separate from `opaque` so a transparent entity can still block movement (e.g. a
   // force field).
