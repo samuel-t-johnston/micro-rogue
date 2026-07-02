@@ -25,7 +25,7 @@ function makeItem(registry, name, { throwable } = {}) {
 function makeCreature(registry, level, x, y, { name = 'orc', hp = 10 } = {}) {
   const e = registry.createEntity();
   registry.addComponent(e, 'name', components.name(name));
-  registry.addComponent(e, 'health', components.health(hp, hp));
+  registry.addComponent(e, 'attributes', components.attributes({ hp, con: hp })); // maxHP = con
   registry.addComponent(e, 'position', components.position(x, y));
   registry.addComponent(e, 'creature', components.creature());
   registry.addComponent(e, 'blocksMovement', components.blocksMovement());
@@ -81,19 +81,19 @@ describe('executeThrow', () => {
     const result = throwAt(potion, 3, 2);
 
     expect(result).toBe(false);
-    expect(orc.components.get('health').current).toBe(5);
+    expect(orc.components.get('attributes').hp).toBe(5);
     expect(inventory.items).toHaveLength(0);
   });
 
   it('heals a creature when thrown with a heal effect', () => {
     const ally = makeCreature(registry, level, 3, 2, { hp: 10 });
-    ally.components.get('health').current = 4;
+    ally.components.get('attributes').hp = 4;
     const potion = makeItem(registry, 'Healing Potion', { throwable: ['heal', { amount: 5 }, 1] });
     inventory.items.push(potion);
 
     throwAt(potion, 3, 2);
 
-    expect(ally.components.get('health').current).toBe(9);
+    expect(ally.components.get('attributes').hp).toBe(9);
   });
 
   it('shatters (and destroys the item) when breakChance is 1', () => {
@@ -125,7 +125,7 @@ describe('executeThrow', () => {
 
     throwAt(dagger, 3, 2);
 
-    expect(orc.components.get('health').current).toBe(10); // unharmed
+    expect(orc.components.get('attributes').hp).toBe(10); // unharmed
     expect([...level.getEntitiesAt(3, 2)]).toContain(dagger); // landed, not destroyed
   });
 
@@ -225,8 +225,8 @@ describe('executeThrow', () => {
 
     throwAt(potion, 4, 2); // aimed past the near creature
 
-    expect(near.components.get('health').current).toBe(5); // hit
-    expect(far.components.get('health').current).toBe(10); // untouched
+    expect(near.components.get('attributes').hp).toBe(5); // hit
+    expect(far.components.get('attributes').hp).toBe(10); // untouched
   });
 
   it('stops at a wall and bounces back rather than resting on it', () => {

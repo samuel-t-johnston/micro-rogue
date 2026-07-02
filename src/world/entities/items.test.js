@@ -71,13 +71,13 @@ describe('new items', () => {
   it('sword is a weapon with an attack bonus', () => {
     const sword = createSword(registry, 1, 1);
     expect(sword.components.get('equippable').slot).toBe(Slots.WEAPON);
-    expect(sword.components.get('attributeModifiers').attackDamage).toBe(3);
+    expect(sword.components.get('attributeModifiers').attack).toBe(3);
   });
 
   it('leather armor is equippable in the armor slot with an HP bonus', () => {
     const armor = createLeatherArmor(registry, 1, 1);
     expect(armor.components.get('equippable').slot).toBe(Slots.ARMOR);
-    expect(armor.components.get('attributeModifiers').HP).toBe(5);
+    expect(armor.components.get('attributeModifiers').hp).toBe(5);
   });
 
   it('scroll is consumable with a heal effect', () => {
@@ -127,7 +127,7 @@ describe('ranged weapons and ammunition', () => {
       meleeRange: 1,
       ammoType: null,
     });
-    expect(spear.components.get('attributeModifiers').attackDamage).toBe(2);
+    expect(spear.components.get('attributeModifiers').attack).toBe(2);
   });
 
   it('javelin is a self-thrown stackable weapon', () => {

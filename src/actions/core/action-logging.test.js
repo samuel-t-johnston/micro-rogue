@@ -46,7 +46,8 @@ describe('action logging', () => {
     registry.addComponent(e, 'position', components.position(x, y));
     registry.addComponent(e, 'inventory', components.inventory());
     registry.addComponent(e, 'wearsEquipment', components.wearsEquipment(HUMANOID_SLOTS));
-    registry.addComponent(e, 'attacker', components.attacker(1));
+    registry.addComponent(e, 'attributes', components.attributes({ attack: 1 }));
+    registry.addComponent(e, 'attacker', components.attacker());
     level.placeEntity(e);
     return e;
   }
@@ -55,8 +56,8 @@ describe('action logging', () => {
     const e = registry.createEntity();
     registry.addComponent(e, 'name', components.name('Goblin'));
     registry.addComponent(e, 'position', components.position(x, y));
-    registry.addComponent(e, 'health', components.health(hp, hp));
-    registry.addComponent(e, 'attacker', components.attacker(1));
+    registry.addComponent(e, 'attributes', components.attributes({ hp, con: hp, attack: 1 }));
+    registry.addComponent(e, 'attacker', components.attacker());
     level.placeEntity(e);
     return e;
   }
@@ -210,8 +211,7 @@ describe('action logging', () => {
   it('logs player death in second person when an NPC lands the killing blow', () => {
     const goblin = makeGoblin(3, 2);
     const player = makePlayer(2, 2);
-    player.components.get('health') ??
-      registry.addComponent(player, 'health', components.health(1, 1));
+    Object.assign(player.components.get('attributes'), { hp: 1, con: 1 }); // one hit is lethal
 
     executeAttack(goblin, { targetEntityId: player.id }, level, registry);
 

@@ -177,7 +177,7 @@ describe('character menu — full equip/unequip flow', () => {
   });
 
   it('end-to-end: inventory → tap potion → Use → HP restored, potion destroyed', () => {
-    registry.addComponent(player, 'health', components.health(8, 20));
+    registry.addComponent(player, 'attributes', components.attributes({ hp: 8, con: 20 }));
     const potion = createHealingPotion(registry, null, null, player.id);
     player.components.get('inventory').items.push(potion);
 
@@ -203,7 +203,7 @@ describe('character menu — full equip/unequip flow', () => {
     expect(controller.isOpen).toBe(false);
 
     executeConsume(player, submitted[0], null, registry);
-    expect(player.components.get('health').current).toBe(18);
+    expect(player.components.get('attributes').hp).toBe(18);
     expect(player.components.get('inventory').items).not.toContain(potion);
     expect(registry.getEntity(potion.id)).toBeNull();
   });

@@ -12,7 +12,7 @@ describe('executeConsume', () => {
     registry = createEntityRegistry();
     actor = registry.createEntity();
     registry.addComponent(actor, 'inventory', components.inventory());
-    registry.addComponent(actor, 'health', components.health(10, 20));
+    registry.addComponent(actor, 'attributes', components.attributes({ hp: 10, con: 20 })); // maxHP = con
 
     potion = createHealingPotion(registry, null, null, actor.id);
     actor.components.get('inventory').items.push(potion);
@@ -20,7 +20,7 @@ describe('executeConsume', () => {
 
   it('applies the healing effect to the actor', () => {
     executeConsume(actor, { itemEntityId: potion.id }, null, registry);
-    expect(actor.components.get('health').current).toBe(20);
+    expect(actor.components.get('attributes').hp).toBe(20);
   });
 
   it('removes the item from the actor inventory', () => {
@@ -39,25 +39,25 @@ describe('executeConsume', () => {
   });
 
   it('clamps healing at health.max — no overheal', () => {
-    actor.components.get('health').current = 18;
+    actor.components.get('attributes').hp = 18;
     executeConsume(actor, { itemEntityId: potion.id }, null, registry);
-    expect(actor.components.get('health').current).toBe(20);
+    expect(actor.components.get('attributes').hp).toBe(20);
   });
 
   it('potion of pain damages the actor', () => {
     const pain = createPotionOfPain(registry, null, null, actor.id);
     const dmg = pain.components.get('consumable').params.amount;
     actor.components.get('inventory').items.push(pain);
-    const before = actor.components.get('health').current;
+    const before = actor.components.get('attributes').hp;
     executeConsume(actor, { itemEntityId: pain.id }, null, registry);
-    expect(actor.components.get('health').current).toBe(before - dmg);
+    expect(actor.components.get('attributes').hp).toBe(before - dmg);
   });
 
   it('a lethal potion of pain kills the consumer', () => {
     const level = createLevel();
     const pain = createPotionOfPain(registry, null, null, actor.id);
     actor.components.get('inventory').items.push(pain);
-    actor.components.get('health').current = 1; // below the pain potion's damage — lethal
+    actor.components.get('attributes').hp = 1; // below the pain potion's damage — lethal
     executeConsume(actor, { itemEntityId: pain.id }, level, registry);
     expect(registry.getEntity(actor.id)).toBeNull();
   });
@@ -66,7 +66,7 @@ describe('executeConsume', () => {
     const result = executeConsume(actor, { itemEntityId: 9999 }, null, registry);
     expect(result).toBe(false);
     expect(actor.components.get('inventory').items).toContain(potion);
-    expect(actor.components.get('health').current).toBe(10);
+    expect(actor.components.get('attributes').hp).toBe(10);
   });
 
   it('returns false and does nothing when item is not consumable', () => {
@@ -76,6 +76,6 @@ describe('executeConsume', () => {
     const result = executeConsume(actor, { itemEntityId: rock.id }, null, registry);
     expect(result).toBe(false);
     expect(actor.components.get('inventory').items).toContain(rock);
-    expect(actor.components.get('health').current).toBe(10);
+    expect(actor.components.get('attributes').hp).toBe(10);
   });
 });

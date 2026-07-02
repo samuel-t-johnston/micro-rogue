@@ -10,11 +10,17 @@ export async function createPlayer(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Player'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('player'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  registry.addComponent(entity, 'health', components.health(20, 20));
+  // Placeholder stat block: con=20 reproduces the old max HP (maxHP = con), attack=1 the old unarmed
+  // damage. Real ability-score values arrive with progression tuning (see docs/design/attribute-system.md).
+  registry.addComponent(
+    entity,
+    'attributes',
+    components.attributes({ hp: 20, con: 20, attack: 1 }),
+  );
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
   registry.addComponent(entity, 'creature', components.creature());
   registry.addComponent(entity, 'playerControlled', components.playerControlled());
-  registry.addComponent(entity, 'attacker', components.attacker(1));
+  registry.addComponent(entity, 'attacker', components.attacker()); // can-attack marker
   registry.addComponent(entity, 'faction', components.faction(['player']));
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'inventory', components.inventory());

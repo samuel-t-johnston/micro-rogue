@@ -1,5 +1,5 @@
 import { applyEffect } from '../../effects/core/effects.js';
-import { getAttribute, Attributes } from '../../attributes/attributes.js';
+import { getScore, hasAttribute } from '../../attributes/attribute-access.js';
 import { getWeaponStats, resolveAmmo, getEquippedWeapon } from '../../combat/weapons.js';
 import { traceFlight, settleProjectile } from '../core/projectile-flight.js';
 import { splitStack } from '../../world/entities/stacking.js';
@@ -45,7 +45,7 @@ function dealDamage(actor, struck, amount, level, registry) {
 // the unchanged original attack path; it does not require the actor to have a position (the wiggle and
 // the combat sound are each guarded), so a bare attacker still deals damage.
 function meleeAttack(actor, target, level, registry) {
-  const amount = getAttribute(actor, Attributes.ATTACK_DAMAGE);
+  const amount = getScore(actor, 'attack');
   const targetPos = target.components.get('position');
   if (targetPos) animations.wiggle(actor, { x: targetPos.x, y: targetPos.y });
   dealDamage(actor, target, amount, level, registry);
@@ -125,8 +125,8 @@ const freeOnFailedAttack = (actor) => actor.components.has('playerControlled');
  */
 function projectileAttack(actor, target, actorPos, targetPos, weapon, level, registry) {
   // Captured before consuming ammo: a self-thrown weapon (javelin) clears the weapon slot when its last
-  // unit flies, which would otherwise drop its attackDamage modifier from the resolved total.
-  const amount = getAttribute(actor, Attributes.ATTACK_DAMAGE);
+  // unit flies, which would otherwise drop its attack modifier from the resolved total.
+  const amount = getScore(actor, 'attack');
 
   let projectile = null;
   let usedLastName = null;
@@ -147,9 +147,7 @@ function projectileAttack(actor, target, actorPos, targetPos, weapon, level, reg
   }
 
   const { impact, before } = traceFlight(level, actorPos.x, actorPos.y, targetPos.x, targetPos.y);
-  const struck = [...level.getEntitiesAt(impact.x, impact.y)].find((e) =>
-    e.components.has('health'),
-  );
+  const struck = [...level.getEntitiesAt(impact.x, impact.y)].find((e) => hasAttribute(e, 'hp'));
 
   animateAttack(actor, actorPos, targetPos, impact, weapon, projectile);
 
@@ -193,7 +191,7 @@ function projectileAttack(actor, target, actorPos, targetPos, weapon, level, reg
  */
 export function executeAttack(actor, action, level, registry) {
   const target = registry.getEntity(action.targetEntityId);
-  if (!target?.components.has('health')) return false;
+  if (!target || !hasAttribute(target, 'hp')) return false;
 
   const weapon = getWeaponStats(actor);
   const actorPos = actor.components.get('position');

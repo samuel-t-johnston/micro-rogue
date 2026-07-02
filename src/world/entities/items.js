@@ -102,11 +102,7 @@ export function createDagger(registry, x, y, entityId) {
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
   registry.addComponent(entity, 'weapon', components.weapon(1)); // melee, range 1
-  registry.addComponent(
-    entity,
-    'attributeModifiers',
-    components.attributeModifiers({ attackDamage: 1 }),
-  );
+  registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ attack: 1 }));
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));
   }
@@ -127,11 +123,7 @@ export function createSword(registry, x, y, entityId) {
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
   registry.addComponent(entity, 'weapon', components.weapon(1)); // melee, range 1
-  registry.addComponent(
-    entity,
-    'attributeModifiers',
-    components.attributeModifiers({ attackDamage: 3 }),
-  );
+  registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ attack: 3 }));
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));
   }
@@ -155,11 +147,7 @@ export function createSpear(registry, x, y, entityId) {
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
   registry.addComponent(entity, 'weapon', components.weapon(2, { meleeRange: 1 }));
-  registry.addComponent(
-    entity,
-    'attributeModifiers',
-    components.attributeModifiers({ attackDamage: 2 }),
-  );
+  registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ attack: 2 }));
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));
   }
@@ -192,11 +180,7 @@ export function createJavelin(registry, x, y, entityId) {
       attackSprites: directionalAttackSprites('javelin'),
     }),
   );
-  registry.addComponent(
-    entity,
-    'attributeModifiers',
-    components.attributeModifiers({ attackDamage: 2 }),
-  );
+  registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ attack: 2 }));
   registry.addComponent(entity, 'stackable', components.stackable(5, 3));
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));
@@ -225,11 +209,7 @@ export function createBow(registry, x, y, entityId) {
     'weapon',
     components.weapon(15, { meleeRange: 0, ammoType: 'arrow' }),
   );
-  registry.addComponent(
-    entity,
-    'attributeModifiers',
-    components.attributeModifiers({ attackDamage: 2 }),
-  );
+  registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ attack: 2 }));
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));
   }
@@ -277,7 +257,7 @@ export function createLeatherArmor(registry, x, y, entityId) {
   );
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'equippable', components.equippable(Slots.ARMOR));
-  registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ HP: 5 }));
+  registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ hp: 5 }));
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));
   }

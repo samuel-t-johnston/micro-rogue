@@ -11,6 +11,7 @@ import {
   createPotionOfPain,
 } from '../../world/entities/items.js';
 import { Slots } from '../../../data/equipment-slots.js';
+import { getPool, getScore } from '../../attributes/attribute-access.js';
 import {
   serializeGame,
   deserializeGame,
@@ -34,6 +35,7 @@ import saveV3 from '../fixtures/save-v3.json';
 import saveV4 from '../fixtures/save-v4.json';
 import saveV5 from '../fixtures/save-v5.json';
 import saveV6 from '../fixtures/save-v6.json';
+import saveV7 from '../fixtures/save-v7.json';
 
 // Builds a realistic game directly (the pipeline's static stage does a dynamic file:// import
 // that vitest's resolver mangles on Windows): a chest with contained items, creatures, map
@@ -119,7 +121,7 @@ describe('serializeGame / deserializeGame round-trip', () => {
 
     const p = restored.player;
     expect(p.id).toBe(player.id);
-    expect(p.components.get('health')).toEqual(player.components.get('health'));
+    expect(p.components.get('attributes')).toEqual(player.components.get('attributes'));
     expect(p.components.get('position')).toEqual(player.components.get('position'));
 
     // Inventory + equipment rehydrate to the correct instances in the new registry.
@@ -273,7 +275,8 @@ describe('v1 → … migration chain (real, from a fixture)', () => {
     const restored = deserializeGame(loadSave(saveV1));
     expect(restored.player.id).toBe(saveV1.playerId);
     expect(restored.turnCount).toBe(saveV1.meta.turnCount);
-    expect(restored.player.components.get('health')).toEqual({ current: 18, max: 20 });
+    // health {18,20} folded to the hp pool + con (maxHP = con) by the v7→v8 migration.
+    expect(restored.player.components.get('attributes')).toEqual({ hp: 18, con: 20 });
     expect(rng.getMasterSeed()).toBe(saveV1.meta.seed);
   });
 });
@@ -506,6 +509,71 @@ describe('v6 → v7 migration (real, from a fixture)', () => {
   });
 });
 
+describe('v7 → v8 migration (real, from a fixture)', () => {
+  const findEntity = (entities, id) => entities.find((e) => e.id === id);
+
+  it('folds health into the hp pool + con, and removes the health component', () => {
+    const player = findEntity(loadSave(saveV7).entities, 1).components;
+    expect(player.health).toBeUndefined();
+    // health {current: 18, max: 20} -> hp 18, con 20 (maxHP = con preserves the old max).
+    expect(player.attributes).toMatchObject({ hp: 18, con: 20 });
+  });
+
+  it('folds attacker.damage into the attack score, keeping attacker as a bare marker', () => {
+    const player = findEntity(loadSave(saveV7).entities, 1).components;
+    expect(player.attributes.attack).toBe(1);
+    expect(player.attacker).toEqual({});
+  });
+
+  it('renames item attributeModifiers keys to the new attribute names', () => {
+    const entities = loadSave(saveV7).entities;
+    expect(findEntity(entities, 2).components.attributeModifiers).toEqual({ attack: 1 }); // dagger
+    expect(findEntity(entities, 3).components.attributeModifiers).toEqual({ hp: 5 }); // leather armor
+  });
+
+  it('leaves an entity without health or attacker untouched', () => {
+    const potion = findEntity(loadSave(saveV7).entities, 4).components;
+    expect(potion.attributes).toBeUndefined();
+  });
+
+  it('also folds entities inside frozen floors', () => {
+    const goblin = findEntity(loadSave(saveV7).frozenLevels['floor-2'].entities, 5).components;
+    expect(goblin.health).toBeUndefined();
+    expect(goblin.attributes).toMatchObject({ hp: 3, con: 5, attack: 1 });
+    expect(goblin.attacker).toEqual({});
+  });
+
+  it('merges into a pre-existing attributes component rather than replacing it', () => {
+    const raw = {
+      saveVersion: 7,
+      versionHistory: [{ saveVersion: 7 }],
+      entities: [
+        {
+          id: 1,
+          components: {
+            attributes: { str: 14 },
+            health: { current: 4, max: 6 },
+          },
+        },
+      ],
+    };
+    expect(loadSave(raw).entities[0].components.attributes).toEqual({ str: 14, hp: 4, con: 6 });
+  });
+
+  it('does not mutate the source fixture', () => {
+    loadSave(saveV7);
+    expect(saveV7.entities[0].components.health).toEqual({ current: 18, max: 20 });
+    expect(saveV7.entities[1].components.attributeModifiers).toEqual({ attackDamage: 1 });
+  });
+
+  it('a migrated v7 save deserializes into a live game with a working hp pool', () => {
+    const restored = deserializeGame(loadSave(saveV7));
+    expect(restored.player.id).toBe(saveV7.playerId);
+    expect(getPool(restored.player, 'hp')).toEqual({ current: 18, max: 25 }); // con 20 + armor hp 5
+    expect(getScore(restored.player, 'attack')).toBe(2); // unarmed 1 + dagger 1
+  });
+});
+
 describe('commitSave / loadSavedGame orchestration', () => {
   it('returns null when there is no save', () => {
     expect(loadSavedGame()).toBeNull();
@@ -519,7 +587,9 @@ describe('commitSave / loadSavedGame orchestration', () => {
     const restored = loadSavedGame();
     expect(restored.turnCount).toBe(9);
     expect(restored.player.id).toBe(player.id);
-    expect(restored.player.components.get('health')).toEqual(player.components.get('health'));
+    expect(restored.player.components.get('attributes')).toEqual(
+      player.components.get('attributes'),
+    );
     expect(restored.level.getTile(0, 0)).toBe(level.getTile(0, 0));
   });
 });

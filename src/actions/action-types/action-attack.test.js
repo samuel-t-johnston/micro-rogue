@@ -24,7 +24,8 @@ describe('executeAttack', () => {
 
   function makeActor(damage) {
     const e = registry.createEntity();
-    registry.addComponent(e, 'attacker', components.attacker(damage));
+    registry.addComponent(e, 'attributes', components.attributes({ attack: damage }));
+    registry.addComponent(e, 'attacker', components.attacker());
     registry.addComponent(e, 'wearsEquipment', components.wearsEquipment(HUMANOID_SLOTS));
     return e;
   }
@@ -32,7 +33,7 @@ describe('executeAttack', () => {
   function makeTarget(hp, x = 2, y = 2) {
     const e = registry.createEntity();
     registry.addComponent(e, 'position', components.position(x, y));
-    registry.addComponent(e, 'health', components.health(hp, hp));
+    registry.addComponent(e, 'attributes', components.attributes({ hp, con: hp })); // maxHP = con
     level.placeEntity(e);
     return e;
   }
@@ -87,7 +88,7 @@ describe('executeAttack', () => {
     const free = executeAttack(actor, { targetEntityId: target.id }, level, registry);
 
     expect(free).toBe(false); // consumes the turn
-    expect(target.components.get('health').current).toBe(4);
+    expect(target.components.get('attributes').hp).toBe(4);
   });
 
   it('includes worn-weapon modifiers in the damage', () => {
@@ -96,14 +97,14 @@ describe('executeAttack', () => {
     registry.addComponent(
       dagger,
       'attributeModifiers',
-      components.attributeModifiers({ attackDamage: 1 }),
+      components.attributeModifiers({ attack: 1 }),
     );
     actor.components.get('wearsEquipment').slots[Slots.WEAPON] = dagger;
     const target = makeTarget(5);
 
     executeAttack(actor, { targetEntityId: target.id }, level, registry);
 
-    expect(target.components.get('health').current).toBe(3); // 1 base + 1 weapon
+    expect(target.components.get('attributes').hp).toBe(3); // 1 base + 1 weapon
   });
 
   it('kills the target when damage reaches its HP, removing it', () => {
@@ -148,7 +149,7 @@ describe('executeAttack', () => {
       const free = executeAttack(actor, { targetEntityId: target.id }, level, registry);
 
       expect(free).toBe(false);
-      expect(target.components.get('health').current).toBe(2);
+      expect(target.components.get('attributes').hp).toBe(2);
     });
 
     it('fires a bow: consumes one arrow and damages the target', () => {
@@ -160,7 +161,7 @@ describe('executeAttack', () => {
       const free = executeAttack(actor, { targetEntityId: target.id }, level, registry);
 
       expect(free).toBe(false);
-      expect(target.components.get('health').current).toBe(8);
+      expect(target.components.get('attributes').hp).toBe(8);
       expect(arrows.components.get('stackable').count).toBe(4);
     });
 
@@ -173,7 +174,7 @@ describe('executeAttack', () => {
       const free = executeAttack(actor, { targetEntityId: target.id }, level, registry);
 
       expect(free).toBe(true); // turn not consumed
-      expect(target.components.get('health').current).toBe(10); // no damage
+      expect(target.components.get('attributes').hp).toBe(10); // no damage
       expect(gameLog.getDisplayEntries(1)[0].display).toMatch(/no arrows/i);
     });
 
@@ -185,7 +186,7 @@ describe('executeAttack', () => {
       const free = executeAttack(actor, { targetEntityId: target.id }, level, registry);
 
       expect(free).toBe(false); // turn spent — breaks the would-be infinite loop
-      expect(target.components.get('health').current).toBe(10);
+      expect(target.components.get('attributes').hp).toBe(10);
     });
 
     it('clears the ammunition slot when the last arrow is fired', () => {
@@ -241,7 +242,7 @@ describe('executeAttack', () => {
 
       executeAttack(actor, { targetEntityId: target.id }, level, registry);
 
-      expect(target.components.get('health').current).toBe(8);
+      expect(target.components.get('attributes').hp).toBe(8);
       expect(javelin.components.get('stackable').count).toBe(2);
     });
 
@@ -252,7 +253,7 @@ describe('executeAttack', () => {
 
       executeAttack(actor, { targetEntityId: target.id }, level, registry);
 
-      expect(target.components.get('health').current).toBe(8);
+      expect(target.components.get('attributes').hp).toBe(8);
       expect(javelin.components.get('stackable').count).toBe(3); // melee does not consume
     });
 
@@ -265,7 +266,7 @@ describe('executeAttack', () => {
 
       executeAttack(actor, { targetEntityId: target.id }, level, registry);
 
-      expect(target.components.get('health').current).toBe(10);
+      expect(target.components.get('attributes').hp).toBe(10);
       expect(arrows.components.get('stackable').count).toBe(4);
     });
 
@@ -278,7 +279,7 @@ describe('executeAttack', () => {
       const free = executeAttack(actor, { targetEntityId: target.id }, level, registry);
 
       expect(free).toBe(true);
-      expect(target.components.get('health').current).toBe(10);
+      expect(target.components.get('attributes').hp).toBe(10);
     });
 
     it("consumes an NPC's turn against a target beyond weapon range", () => {

@@ -2,7 +2,7 @@
  * @file Weapon capability resolver — the single place that answers "what can this actor do with its
  * equipped weapon": its range, the melee/ranged threshold, and which ammunition (if any) a ranged
  * attack consumes. Derived on demand from the equipped items, never cached (mirrors the attribute
- * resolver in src/attributes/attributes.js).
+ * accessors in src/attributes/attribute-access.js).
  *
  * Tolerates absent data so old saves and hand-built entities never crash: an entity with no weapon —
  * or a weapon-slot item that predates the `weapon` component — reads as unarmed (range 1, melee only),
