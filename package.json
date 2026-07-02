@@ -1,6 +1,6 @@
 {
   "name": "rogue",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Micro-Rogue (stylized ROGµE) — a game engine for traditional roguelike games written in vanilla JavaScript and HTML.",
