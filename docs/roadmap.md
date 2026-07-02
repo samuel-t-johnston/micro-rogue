@@ -9,250 +9,52 @@ Open questions and deferred decisions are noted inline where they land on the ro
 
 ---
 
-## M0 — Scaffolding
-*Done when: a static room renders correctly on a phone browser, the PRNG is wired in, and the project structure is established.*
+## Pre-Alpha
 
-- [x] Project structure: directory layout, ES module setup, no bundler initially
-- [x] PRNG: Mulberry32 implementation, single shared instance, seeded from a fixed value
-- [x] Renderer interface stub: `renderer` abstraction that owns tile geometry; sprite implementation only
-- [x] Canvas setup: sized to viewport, multiplied by `devicePixelRatio`, resize/orientation handlers
-- [x] Static level loader: hardcoded room, base tile array, no overrides, no entities
-- [x] Render the room: floor and wall tiles visible, camera centered, correct DPR
-- [x] PWA basics: manifest.json, viewport meta tag, service worker registration stub only (no caching yet — that lands in M7).
-- [x] Debug overlay canvas: separate layer, togglable, tile coordinates on hover/tap
+*Condensed summary of completed pre-alpha features*
 
----
-
-## M1 — The Player Exists
-*Done when: a player entity appears on the map, moves via tap-to-move, and the turn loop ticks.*
-
-- [x] Entity model: base entity structure, component system, spatial index (`Map<"x,y", Entity[]>`)
-- [x] Player entity: position, `health` component, `TurnTaker` component
-- [x] Turn loop: player turn → resolve → next turn; action queue
-- [x] Tap-to-move: tap a tile, pathfinder navigates there (A* or similar); cancel on re-tap
-- [x] Context-sensitive tap: distinguish floor tap (move) from entity tap (placeholder)
-- [x] Camera follows player
-- [x] Minimal HUD: HP number, turn count — anchored, stateless presentational component
-- [x] Event log: in-memory ring buffer, structured entries with `display` strings; last 1–2 lines ghost-visible at map edge
-
----
-
-## M2 — The World Has Rules
-*Done when: walls block movement and sight, items exist on the map and can be picked up, and the tile override layer works.*
-
-- [x] FOV: shadowcasting; remembered tiles vs. visible tiles vs. dark. Uses senses (and possibly memory?) for tile perception.
-- [x] Tile passability enforced in movement
-- [x] Tile opacity enforced in FOV
-- [x] `openable` component: doors open on tap, block movement and light when closed
-- [x] Passive entities: items on the map with `usable` or `equippable` components
-- [x] Item location model: discriminated union (`map`, `inventory`, `equipped`, `container`)
-- [x] Pick up: tap item → moves to inventory
-- [x] Inventory screen: full-screen modal, item list, basic use/equip/drop actions
-- [x] Character menu shell: card grid, back navigation, inventory as first card
-- [x] Debug overlay: FOV boundary layer, passability grid layer
-
-*Note: the blackboard is not needed until map generation has stages that communicate. Stub it as an empty object in the level structure so the save format is correct, but don't implement it yet.*
-
----
-
-## M3 — Something Wants to Kill You
-*Done when: at least one enemy type exists, pursues the player, and combat resolves.*
-
-- [x] Active entity: `AI` component, `TurnTaker`, `health`, `combatStats`
-- [x] Turn order: player and enemies take turns in order; dead entities removed cleanly
-- [x] Basic AI goal stack: `attackThreat` (target visible), `patrol` (always), no GOAP yet — simple reactive behavior
-- [x] Vision sense: shadowcasting-based, light-gated, exact position + full detail
+Core Features
+- [x] Sprite or Glyph (ASCII) rendering mode. Complete sprite and glyph sets for all visible entities
+- [x] Entity model: base entity structure, component system, spatial index (`Map<"x,y", Entity[]>`), Player entity
+- [x] Turn loop: player and enemies take turns in order; dead entities removed cleanly
+- [x] Context-sensitive tap, Tap-to-move, Pick up/auto-pick-up, attack
+- [x] Contextual action menu: Click/Tap-and-hold
 - [x] Melee combat: attack action, damage calculation, health reduction, death
-- [x] Context-sensitive tap: tapping an enemy issues attack action
-- [x] Combat log entries: display strings at resolution site
-- [x] Action wiggle animation: attacker lunges toward target and returns
-- [x] Movement slide animation: entities slide between tiles, 80–120ms
-- [x] Enemy death: entity removed, optional item drop
+- [x] Win conditions - Amulet of Yendor + top stairs
 - [x] Player death: death screen shown
-- [x] AI goal inspector (debug): hover an entity → tooltip lists its goal stack in priority order, with the last-activated goal marked (`**`)
-- [x] Interruption system: player goal stack, "return control" base goal, invalidation on FOV event
 
-*Deferred to M4+: GOAP planner, hearing/smell senses, squad coordination. Basic reactive AI is sufficient to make the game playable and testable.*
-
----
-
-## M4 — It Can Be Saved
-*Done when: the game saves on turn-start, survives a browser close and reload, and the migration chain is in place.*
-
-- [x] Save system: JSON to `localStorage`, full structure per save-system.md
-- [x] Autosave on turn-start (after state is fully settled)
-- [x] `visibilitychange` handler: save on background/tab close
-- [x] Load on startup: detect existing save, offer continue vs. new game
-- [x] Death: delete save before showing death screen (not after)
-- [x] Migration chain: `loadSave()` with version check, chain runner, per-step error wrapping
-- [x] Save version 1 defined; first migration infrastructure in place (no migrations needed yet)
+Modules/QoL
+- [x] Event log: in-memory ring buffer, structured entries with `display` strings; last 1–2 lines ghost-visible at map edge
+- [x] PRNG: Mulberry32 implementation, single shared instance, seeded from a fixed value
+- [x] PWA/Service worker: offline caching of all assets
+- [x] Save system: JSON to `localStorage`. Autosave on turn-start. Save migration chain.
 - [x] Support bundle: save snapshot + event log + device info, downloadable on demand
-- [x] Game menu shell: drill-down list, settings placeholder, new game / quit
+- [x] Animations - attacker lunge, Movement slide
 
-*Persistence-core note (landed): the serialize/deserialize engine, migration runner, and
-localStorage I/O live in `src/save/core/save-system.js` + `src/save/core/serialize.js`. Two adjustments to
-`save-system-design.md`, forced by the code: (1) the serialization unit is the **whole entity
-registry as one flat list** referenced by id — not `level.entities` — because items in
-chests/inventories/equipment are entities that live only in the registry; (2) the **player is
-serialized inline** like any other entity (with a top-level `playerId` pointer), not hoisted to a
-top-level `player` key. The remaining M4 items (autosave hooks, visibilitychange, continue-from-menu,
-death-delete, support bundle, in-game menu) wire this core into the running game.*
+Screens/Widgets
+- [x] Onboarding splash: dismissable, controls summary, hook for downstream content
+- [x] Canvas map view, Camera follows player. Discrete zoom snap points. Drag to pan
+- [x] Inventory screen
+- [x] Character menu
+- [x] Message log widget: expandable overlay, full scrollable history
+- [x] Debug overlay, AI goal inspector
+- [x] Minimal HUD widget
+- [x] Credits page
 
-*Quit behavior note: `window.close()` is blocked in regular browser tabs (it only sometimes works in standalone PWA mode), so the M0 implementation tries it silently and accepts the no-op. A future polish pass could show a brief "you can close this tab now" message for the regular-tab case.*
-
----
-
-## M5 — A Real Level
-*Done when: a level is generated by the pipeline (even from a static layout set), the blackboard is functional, and level transitions work.*
-
-- [x] Map generation pipeline: stage runner, blackboard, seed threading through all stages
-- [x] Static structure stage: loads one of N fixed layouts, selection seeded (`randomStatic`)
-- [x] Population stage: places enemies and items based on blackboard tags
-- [x] Finishing stage: entrance/exit placement, ambient detail (rubble, stains)
+Map Gen
+- [x] Map generation pipeline: stage runner, blackboard
+- [x] Static structure stage: loads one of N fixed layouts
 - [x] Level transitions: stairs, freeze current level, load or generate next
 - [x] Frozen level serialization: full level state including blackboard, restored on return
-- [x] Multiple floors: at least 3, each generated independently
 
-*Open question: when to introduce procedural structure stages. Validate the pipeline with static layouts first; add procedural generation once the pipeline is stable.*
-
-*Transitions/cold-storage note (landed): a **dungeon planner** ties the floors together. A plain-data
-**transit map** (`data/transit-map.js`) assigns each floor its `(branch, depth)` + pipeline and wires
-the stairs; the **level manager** (`src/world/dungeon/level-manager.js`) freezes the floor you leave, thaws or
-generates the one you enter, and carries the player (with carried/equipped items) between them. The
-shipped dungeon is a linear 3-floor stack — floor 1 static, floor 2 the random-static mazes, floor 3
-the procedural 3×3 — connected by tap-to-travel stairs. Cold storage uses **model (b)**: only the
-active floor's entities live in the registry. The general connection-contract system (named-port
-capabilities, validation, branching, a transit-map visualizer) is designed in
-[dungeon-planner.md](dungeon-planner.md) but deferred. Save schema bumped v2→v3 (current node +
-frozen floors).*
-
----
-
-## M6 — Smart Enemies
-*Done when: Planner is in place, multiple sense types work, and squad coordination via barks is functional.*
-
-- [x] Goal memory: per-goal memory payload with confidence and decay
+AI/Senses/Goals
+- [x] Basic AI goals. Goal memory
+- [x] FOV: shadowcasting; remembered tiles vs. visible tiles vs. dark. Uses senses (and memory) for player/AI tile perception.
+- [x] Vision sense: shadowcasting-based, exact position + full detail
 - [x] Hearing sense: sound entities emitted into world, propagation, approximate position result
 - [x] Smell sense: scent trail field, decay over turns, trail-following behavior
 - [x] Bark system: NPC shouts route through hearing, other NPCs respond via goal evaluation
 - [x] `investigate` goal: pursue uncertain position, decay to patrol
-
-*Hearing/bark note (landed): sounds are invisible, short-lived entities (`sound` + `decay` + `position`)
-emitted explicitly by actions (the `shout` action). The turn loop ages `decay` entities one tick per
-round and destroys them — sounds need no `turnTaker` (decoupled from `creature`, the new actor
-marker). The `hearing` sense reports **located noise percepts** into `perception.sounds` (a new,
-additive SenseResult channel) — never entity sightings — carrying an imprecise compass **direction**
-(not a position), the sound's structured `message`, and whether the hearer's `knownLanguages` decode
-its `language`. Barks are just this: an orc commander's `shout-enemy-report` goal emits an orcish
-enemy report; regular orcs `obey-shouts` toward the understood direction until vision hands off to
-chase/attack; the player logs un-understood shouts as "guttural orcish shouting to the …". Two
-deferrals from the spec: the result is a **direction, not an approximate position** (deliberate — see
-the Echolocation entry under Deferred / Not Scheduled for the precise variant), and propagation is **straight-line
-range** for now — walking-distance + `muffling` (walls block, doors leak) is an internal upgrade to
-the sense that changes no contract. Save schema bumped v3→v4 (the `creature` marker).*
-
-*Smell/scent note (landed): a per-profile **scent field** lives on the level (`level.scent`,
-`src/world/sense-systems/scent.js`); creatures with a `scentSource` deposit each round, and the field **diffuses +
-decays** so a moving emitter trails a fading wake and the gradient homes on where it is *now*. The
-`smell` sense reports gradient **direction + profile + intensity** into a new `perception.smells`
-channel; the `track-scent` goal climbs the gradient (sits below chase/attack — vision takes over once
-the quarry is seen), and `player-smell` logs notable scents. Diffusion runs in a new first-class
-**per-player-turn upkeep** registry (`src/engine/turn/upkeep.js`) — ordered so scent diffuses before the
-autosave; scent is **saved** with the level (sparse). The centerpiece is that the **player is a
-trackable emitter**: `scuttlers` (a fast, weak, 3-tile-sighted swarm that replaces the goblins in the
-pillars maze) hunt the player's scent through the lattice, silent to smell but noisy to hearing.
-Smell completes a consistency pass — all three senses now read an acuity component
-(`vision`/`hearing`/`smell`). Deferred: scent masking, single-minded trackers, non-faction scents,
-doors-block-scent (see [scent-and-smell.md](scent-and-smell.md)).*
-
----
-
-## M7 — Polish and PWA
-*Done when: the game is complete enough for external playtesting, runs well on a real phone, and installs as a PWA.*
-
-- [x] Service worker: offline caching of all assets
-- [x] Discrete zoom snap points: 3–4 levels, phone default closer, desktop default wider
-- [x] Message log: expandable overlay, full scrollable history
-- [x] Accessibility: 44×44px tap targets audit, color-not-sole-signal audit, handedness swap setting
-- [x] Onboarding splash: dismissable, controls summary, hook for downstream content
-- [x] Win condition - Amulet of Yendor + top stairs
-
-*Service-worker/PWA note (landed): the M0 registration stub is now a real **network-first**
-service worker (`service-worker.js`) — online loads always fetch fresh and update the cache,
-offline serves from cache, navigations fall back to the cached shell. There is **no build step
-and no generated file manifest**: the static-import module graph self-caches on first online
-load, so the only hand-maintained list is `DYNAMIC_ASSETS` (the lazily-loaded map files +
-alternate sprite-sheet size). Bump `CACHE_VERSION` to force-evict stale caches. Icons: the empty
-manifest `icons` and missing `apple-touch-icon` were why iOS showed a generated white-"R"
-placeholder; the green-µ favicon art is now rendered crisp to `icons/icon-{180,192,512}.png` +
-a maskable 512, wired into the manifest and an `apple-touch-icon` link. See
-[pwa-and-offline.md](../howto/pwa-and-offline.md). Update-reliability hardening (after an installed
-iOS PWA stuck on old code): the worker now fetches with `cache: 'no-cache'` (revalidates past the
-browser HTTP cache so it can't serve a stale on-device copy), and `src/main.js` auto-reloads on
-`controllerchange` (guarded against the first install) so a newly-activated worker's assets take
-effect immediately. `CACHE_VERSION` must be bumped per deploy — the changed bytes are what make
-iOS install the new worker.*
-
-*Zoom note (landed): a discrete zoom ladder (`src/render/zoom.js`, on-screen tile sizes
-`[16, 32, 48, 64]`) replaces the fixed `gameConfig.tileSize`. Sprites source from whichever sheet
-(16px/32px) scales crispest for the level **and device pixel ratio** (`pickSheetSize` — largest
-sheet that upscales by a whole number to `tile × dpr`), so a dpr-2 phone uses the 32px sheet at
-every level; the renderer reads `zoom.tileSize` each frame for all geometry, so the debug overlay
-scales for free. Touch starts closer (48px), desktop wider (32px); session-only, not persisted.
-Pinch (ratcheted) and scroll-wheel drive it. Tap-to-move moved from `pointerdown` to **release** so
-pinch can coexist with tapping and drag-to-pan has a hook; a tap only starts when a press clears the
-whole UI widget chain. See [zoom.md](../howto/zoom.md).*
-
----
-
-## M8 — Quality of Life
-
-- [x] Freeze and thaw previously-seen tiles on level transition
-- [x] Remember furniture in previously-seen tiles (fog of war)
-- [x] Click/Tap-and-hold: contextual action menu
-- [x] "Look at" action - outputs to log, free action
-- [x] Prevent door close when blocked
-- [x] Drag to pan
-- [x] Fix layout bug with hall generation in level 3
-- [x] Complete sprite and glyph sets for all visible entities
-- [x] Config: Sprite or Glyph (ASCII) rendering mode
-- [x] Credits page
-
-*Fog-of-war note (landed): tile memory was already per-creature on `tilePerception` (`visible` this
-turn, `memory` of ever-seen tile ids). Two additions complete the fog. (1) **Furniture memory** — a
-`persistVisible` marker on doors/chests/boulders/stairs marks an entity as rememberable; `applySenses`
-snapshots the *appearance* (renderable) of such entities on each visible tile into
-`tilePerception.rememberedEntities`, so they persist dimmed at their last-seen state (an open door
-stays open until re-seen) while live actors never ghost. The rememberable test is a component list
-(`REMEMBERABLE_COMPONENTS` in `planning-context.js`), open to whole classes later. (2) **Per-floor
-freeze/thaw** — the player isn't frozen, so `level-manager.travel()` lifts the player's remembered
-tiles + furniture into the departed floor's cold-storage record and lays the destination's back down
-(empty for a never-visited floor); `cold-storage.js` stays player-agnostic. No save-version bump: both
-are additive fields with tolerant defaults, no migration needed.*
-
----
-
-## Pre-Alpha Checklist — Alpha v0.1.0
-
-*Done when the engine supports a complete (simple) game experience; the codebase has been fully reviewed, and is a clean baseline for further expansion and new features.*
-
-- [x] Full human code review and cleanup
-- [x] Delete all stubs, empty dirs, unused assets
-- [x] JS best practices
-  - modules vs classes?
-  - JS Doc comments
-  - ESLint + Prettier
-- [x] General Design Review
-  - Unit test gaps: tests cover function/edges, avoid tests fragile to change
-  - Code smells
-  - Design for easy replacement and modification of systems. Design for easy modification of content.
-- [x] Rearrange data modules - consider pulling out data files?
-- [x] Review the “how-to” documents, correct mistakes, add missing info.
-- [x] Replace/update original design docs
-- [x] Spiff up GitHub and readme.md
-- [x] Update version to v0.1.0
-
-*At the end of this milestone we will move into Alpha with standard version numbers: Alpha v0.1.0.*
 
 ---
 

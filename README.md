@@ -13,12 +13,12 @@ ROGμE is designed to be an easy way to jump into game development, even if you 
 > - "Install" as a [PWA](https://web.dev/articles/what-are-pwas) via "Add to Home Screen"
 > - Sprite and glyph-based (ASCII) graphics, swappable on the fly
 > - Zoom and pan
-> - Auto-save and load
-> - Items, equipment, and a simple inventory
+> - Auto-save and load, save version migration
+> - Inventory, containers, items, equipment, ammunition
 > - Creatures/monsters
-> - Combat
+> - Melee and ranged combat
 > - Expandable "senses" system for creature and player perception (vision, hearing, smell)
-> - Goal-based, flexible AI system
+> - Goal-based, flexible AI system. Monsters use equipment.
 > - Expandable map generation system - pipelines and stages - supporting static and randomly generated maps
 > - Complete game loop with win and loss conditions
 > - Web audio SFX and background music
