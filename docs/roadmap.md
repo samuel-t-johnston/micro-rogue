@@ -338,7 +338,7 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
   - Throw/ranged miss chance?
   - Attack damage
   - Equip requirements
-  - Auto-move stops on HP drop — watch current HP (read via the attribute resolver, not `health.current`) and cancel auto-move when it falls. Seed an HP watermark in `player-get-input` when arming auto-move, parallel to `knownEnemyIds` (baseline must be captured at arming time to catch damage taken before the first auto-move step); compare/refresh it in `player-auto-move` and clear it in `cancelAutoMove`. Needs HP exposed on `selfState` in `planning-context.js`. Catches already-known and out-of-vision attackers, which the new-enemy check misses.
+  - Auto-move stops on HP drop — watch current HP (read via the attribute resolver, not `health.current`) and cancel auto-move when it falls. Seed an HP watermark in `player-get-input` when arming auto-move, parallel to `knownEnemyIds` (baseline must be captured at arming time to catch damage taken before the first auto-move step); compare/refresh it in `player-auto-move` and clear it in `cancelAutoMove`. Needs HP exposed on `selfState` in `planning-context.js`. Catches already-known and out-of-vision attackers, which the new-enemy check misses. Fold this into the shared salience monitor rather than building it standalone — see [state-change-alerts.md](design/state-change-alerts.md), which also covers the in-menu warning that reuses the same HP watermark.
 
 ---
 
