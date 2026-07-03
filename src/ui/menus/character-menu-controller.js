@@ -2,15 +2,8 @@ import { createCharacterMenuRoot, createCharacterMenuSubScreen } from './charact
 import { createInventoryScreenBody } from '../screens/inventory-screen.js';
 import { createEquipmentScreenBody } from '../screens/equipment-screen.js';
 import { createStatsScreenBody } from '../screens/stats-screen.js';
-import { getScore, describeAttribute } from '../../attributes/attribute-access.js';
-
-// Curated character-sheet attributes and their display order. Not driven by listAttributes because
-// Level is derived (never stored) and we choose the order deliberately. `con` is omitted: it currently
-// just backs max HP (maxHP = con placeholder), so showing it would duplicate the HP row; it returns as
-// its own line when it becomes a real ability score. mp/hunger are omitted until they have gameplay.
-// Per-attribute display config (order/visibility) is the deferred display-metadata work — see
-// docs/design/attribute-system.md.
-const CHARACTER_SHEET = ['level', 'hp', 'str', 'dex', 'int', 'spd', 'attack', 'xp'];
+import { getScore, getPool, getAccumulator } from '../../attributes/attribute-access.js';
+import { levelProgress } from '../../../data/attribute-set.js';
 
 /**
  * Creates the full-screen character menu overlay (a root card grid drilling into Inventory and
@@ -63,7 +56,7 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
         },
         {
           id: 'stats',
-          label: 'Stats',
+          label: 'Character',
           glyph: '📊',
           badge: player ? `Lv ${getScore(player, 'level')}` : null,
         },
@@ -129,16 +122,29 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
   function buildStats() {
     const body = createStatsScreenBody({
       theme,
-      getAttributes: () => {
+      getStats: () => {
         const player = getPlayer();
-        if (!player) return [];
-        return CHARACTER_SHEET.map((name) => describeAttribute(player, name));
+        if (!player) return null;
+        const xp = levelProgress(getAccumulator(player, 'xp'));
+        return {
+          level: xp.level,
+          xp,
+          hp: getPool(player, 'hp'),
+          mp: getPool(player, 'mp'),
+          hunger: getPool(player, 'hunger'),
+          str: getScore(player, 'str'),
+          dex: getScore(player, 'dex'),
+          int: getScore(player, 'int'),
+          con: getScore(player, 'con'),
+          spd: getScore(player, 'spd'),
+          attack: getScore(player, 'attack'),
+        };
       },
     });
     return createCharacterMenuSubScreen({
       theme,
       getViewport,
-      title: 'Stats',
+      title: 'Character',
       onBack: openRoot,
       renderBody: body.render,
       handleBodyInput: body.handleInput,
