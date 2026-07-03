@@ -24,7 +24,7 @@ function joinList(parts) {
 }
 
 // Examination order on a tile: creatures, then items, then furniture.
-const rank = (e) => (e.components.has('health') ? 0 : e.components.has('item') ? 1 : 2);
+const rank = (e) => (e.components.has('creature') ? 0 : e.components.has('item') ? 1 : 2);
 
 // A complete noun phrase for one entity, e.g. "an Orc", "an open door", "stairs leading down".
 function entityPhrase(e) {
@@ -32,7 +32,7 @@ function entityPhrase(e) {
     return `stairs leading ${e.components.get('transition').port === 'down' ? 'down' : 'up'}`;
   }
   const raw = e.components.get('name') ?? 'thing';
-  const noun = e.components.has('health') ? raw : raw.toLowerCase(); // creatures keep their name's case
+  const noun = e.components.has('creature') ? raw : raw.toLowerCase(); // creatures keep their name's case
   const openable = e.components.get('openable');
   return withArticle(openable ? `${openable.isOpen ? 'open' : 'closed'} ${noun}` : noun);
 }

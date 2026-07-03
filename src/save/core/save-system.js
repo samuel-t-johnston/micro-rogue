@@ -20,7 +20,7 @@ import {
 } from './serialize.js';
 
 /** Save schema version. Bumped only on a breaking schema change (see the design doc). */
-export const SAVE_VERSION = 7;
+export const SAVE_VERSION = 8;
 
 /** Game release version; independent of SAVE_VERSION, tracks releases and mirrors package.json. */
 export const GAME_VERSION = '0.2.0';
@@ -191,6 +191,52 @@ export const migrations = [
       upgrade(save.entities);
       for (const floor of Object.values(save.frozenLevels ?? {})) {
         upgrade(floor.entities);
+      }
+      return save;
+    },
+  },
+  {
+    from: 7,
+    to: 8,
+    // v8 folds the proto-attributes into one `attributes` component (see docs/design/attribute-system.md).
+    // health {current,max} becomes hp (current) + con (=max, the placeholder maxHP=con formula, so the
+    // effective max is preserved); attacker {damage} becomes the attack score while attacker stays as a
+    // bare "can attack" marker. Item attributeModifiers keys rename to the new lowercase attribute names
+    // (attackDamage→attack, HP→hp). Frozen literals on purpose — a migration never depends on live code.
+    migrate(save) {
+      const fold = (entities) => {
+        for (const entity of entities ?? []) {
+          const c = entity.components;
+          if (!c) continue;
+          if (c.health || c.attacker) {
+            const attrs = { ...(c.attributes ?? {}) };
+            if (c.health) {
+              attrs.hp = c.health.current;
+              attrs.con = c.health.max;
+              delete c.health;
+            }
+            if (c.attacker) {
+              attrs.attack = c.attacker.damage ?? 0;
+              c.attacker = {};
+            }
+            c.attributes = attrs;
+          }
+          const mods = c.attributeModifiers;
+          if (mods) {
+            if ('attackDamage' in mods) {
+              mods.attack = mods.attackDamage;
+              delete mods.attackDamage;
+            }
+            if ('HP' in mods) {
+              mods.hp = mods.HP;
+              delete mods.HP;
+            }
+          }
+        }
+      };
+      fold(save.entities);
+      for (const floor of Object.values(save.frozenLevels ?? {})) {
+        fold(floor.entities);
       }
       return save;
     },

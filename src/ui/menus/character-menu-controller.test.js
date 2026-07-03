@@ -80,6 +80,40 @@ describe('character menu — full equip/unequip flow', () => {
     expect(() => controller.render(makeCtx())).not.toThrow();
   });
 
+  it('tapping the Stats card opens the read-only stats sub-screen', () => {
+    registry.addComponent(
+      player,
+      'attributes',
+      components.attributes({ hp: 20, con: 20, attack: 1, xp: 10 }), // level 2
+    );
+    controller.open();
+    const ctx = makeCtx();
+    controller.render(ctx);
+
+    // Stats is the third card (index 2), same row as Inventory/Equipment; center x ≈ 398.
+    controller.handleInput({ type: 'pointerdown', x: 398, y: 300 });
+    expect(controller.isOpen).toBe(true);
+    expect(() => controller.render(ctx)).not.toThrow();
+
+    // Tapping the top-left affordance now hits the sub-screen's Back (→ root, stays open). Had the
+    // Stats tap missed, we'd still be on root and this would hit ✕ (close) instead — so staying open
+    // proves we navigated into Stats and back.
+    controller.handleInput({ type: 'pointerdown', x: 38, y: 38 });
+    expect(controller.isOpen).toBe(true);
+  });
+
+  it('openStats() deep-links straight to the stats sub-screen', () => {
+    registry.addComponent(player, 'attributes', components.attributes({ hp: 20, con: 20, xp: 10 }));
+    controller.openStats();
+    expect(controller.isOpen).toBe(true);
+    expect(() => controller.render(makeCtx())).not.toThrow();
+
+    // Top-left is the sub-screen's Back (→ root, stays open); had it opened root instead, this would
+    // hit ✕ (close). Staying open proves we landed on Stats, not the root grid.
+    controller.handleInput({ type: 'pointerdown', x: 38, y: 38 });
+    expect(controller.isOpen).toBe(true);
+  });
+
   it('tapping the Equipment card navigates to the equipment screen', () => {
     controller.open();
     const ctx = makeCtx();
@@ -177,7 +211,7 @@ describe('character menu — full equip/unequip flow', () => {
   });
 
   it('end-to-end: inventory → tap potion → Use → HP restored, potion destroyed', () => {
-    registry.addComponent(player, 'health', components.health(8, 20));
+    registry.addComponent(player, 'attributes', components.attributes({ hp: 8, con: 20 }));
     const potion = createHealingPotion(registry, null, null, player.id);
     player.components.get('inventory').items.push(potion);
 
@@ -203,7 +237,7 @@ describe('character menu — full equip/unequip flow', () => {
     expect(controller.isOpen).toBe(false);
 
     executeConsume(player, submitted[0], null, registry);
-    expect(player.components.get('health').current).toBe(18);
+    expect(player.components.get('attributes').hp).toBe(18);
     expect(player.components.get('inventory').items).not.toContain(potion);
     expect(registry.getEntity(potion.id)).toBeNull();
   });

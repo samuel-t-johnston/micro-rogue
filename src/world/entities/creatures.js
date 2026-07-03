@@ -7,8 +7,14 @@ export function createGoblin(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Goblin'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('goblin'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  registry.addComponent(entity, 'health', components.health(5, 5));
-  registry.addComponent(entity, 'attacker', components.attacker(1));
+  // Full stat block. Ability scores (str/dex/int/spd) are thematic placeholders — nimble but weak — and
+  // are inert until the progression-tuning pass. xp seeds the level (data/attribute-set.js): 0 → level 1.
+  registry.addComponent(
+    entity,
+    'attributes',
+    components.attributes({ str: 8, dex: 12, int: 9, con: 5, spd: 11, attack: 1, hp: 5, xp: 0 }),
+  );
+  registry.addComponent(entity, 'attacker', components.attacker());
   registry.addComponent(entity, 'faction', components.faction(['goblins']));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
   registry.addComponent(entity, 'creature', components.creature());
@@ -37,8 +43,13 @@ export function createOrc(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Orc'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('orc'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  registry.addComponent(entity, 'health', components.health(9, 9));
-  registry.addComponent(entity, 'attacker', components.attacker(1));
+  // Brawny, slower; xp seeds level 2. Ability scores placeholder (see createGoblin).
+  registry.addComponent(
+    entity,
+    'attributes',
+    components.attributes({ str: 13, dex: 9, int: 8, con: 9, spd: 9, attack: 1, hp: 9, xp: 10 }),
+  );
+  registry.addComponent(entity, 'attacker', components.attacker());
   registry.addComponent(entity, 'faction', components.faction(['orcs']));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
   registry.addComponent(entity, 'creature', components.creature());
@@ -88,8 +99,22 @@ export function createOrcCommander(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Orc Commander'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('orcCommander'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  registry.addComponent(entity, 'health', components.health(12, 12));
-  registry.addComponent(entity, 'attacker', components.attacker(2));
+  registry.addComponent(
+    entity,
+    'attributes',
+    // Brawny and tactical; xp seeds level 3. Ability scores placeholder (see createGoblin).
+    components.attributes({
+      str: 14,
+      dex: 10,
+      int: 12,
+      con: 12,
+      spd: 9,
+      attack: 2,
+      hp: 12,
+      xp: 30,
+    }),
+  );
+  registry.addComponent(entity, 'attacker', components.attacker());
   registry.addComponent(entity, 'faction', components.faction(['orcs']));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
   registry.addComponent(entity, 'creature', components.creature());
@@ -140,8 +165,13 @@ export function createScuttler(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Scuttler'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('scuttler'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  registry.addComponent(entity, 'health', components.health(2, 2));
-  registry.addComponent(entity, 'attacker', components.attacker(1));
+  // Tiny, fast, mindless; xp seeds level 1. Ability scores placeholder (see createGoblin).
+  registry.addComponent(
+    entity,
+    'attributes',
+    components.attributes({ str: 4, dex: 14, int: 3, con: 2, spd: 15, attack: 1, hp: 2, xp: 0 }),
+  );
+  registry.addComponent(entity, 'attacker', components.attacker());
   registry.addComponent(entity, 'faction', components.faction(['scuttlers']));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1.4)); // above average — scuttles
   registry.addComponent(entity, 'creature', components.creature());

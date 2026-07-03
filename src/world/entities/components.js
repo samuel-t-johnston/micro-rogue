@@ -29,19 +29,30 @@ export const components = {
     return { ammoType, breakChance, attackSprites: { ...attackSprites } };
   },
 
-  // Marks an entity as able to take the attack action. `damage` is the unarmed/base
-  // attack damage; equipment and effects add to it via attributeModifiers (see the
-  // attribute resolver in src/attributes/attributes.js).
-  attacker(damage = 0) {
-    return { damage };
+  // Marks an entity as able to take the attack action. A bare marker: the attack value itself is the
+  // `attack` attribute (unarmed base + equipment `attack` modifiers), resolved via the attribute
+  // accessors (src/attributes/attribute-access.js). Kept as a distinct tag from having an `attack`
+  // attribute so "can act to attack" stays separable from "has attack power".
+  attacker() {
+    return {};
   },
 
-  // Flat stat contributions a worn/held item grants its owner. Keys are attribute names
-  // (currently 'attackDamage' and 'HP') summed by the attribute resolver. Stored as data
-  // so items serialize cleanly; the resolver derives totals on demand — values are never
-  // added to or subtracted from the owner's stored stats on equip/unequip.
+  // Flat stat contributions a worn/held item grants its owner. Keys are attribute names (lowercase
+  // kebab-case, e.g. 'attack' and 'hp') summed by the attribute accessors. Stored as data so items
+  // serialize cleanly; effective totals are derived on demand — values are never added to or subtracted
+  // from the owner's stored stats on equip/unequip.
   attributeModifiers(mods = {}) {
     return { ...mods };
+  },
+
+  // Per-entity attribute state: a flat map of attribute name (lowercase kebab-case) → the one mutable
+  // number that attribute owns — a score's base, a pool's current, or an accumulator's value. Effective
+  // values are DERIVED on read by the attribute accessors (src/attributes/attribute-access.js) from
+  // these plus equipment attributeModifiers; derived attributes (e.g. level) store nothing here, and a
+  // missing key resolves to the definition's default. Plain data, serializes cleanly. See
+  // docs/design/attribute-system.md and data/attribute-set.js for the default set.
+  attributes(initial = {}) {
+    return { ...initial };
   },
 
   // Marks an entity as blocking movement. The pathfinder treats it as impassable terrain.
@@ -122,14 +133,6 @@ export const components = {
   // A factionless entity shares nothing, so it reads as hostile to everyone.
   faction(names = []) {
     return [...names];
-  },
-
-  // Current and maximum hit points. HP is a derived stat: the sum of the base HP from the entity's
-  // prefab, plus any attributeModifiers from equipment or effects. The HP component stores the live
-  // current and max values, which the combat system updates on damage/healing. The attribute resolver
-  // derives the base HP from prefab + modifiers; the combat system writes it to this component.
-  health(current, max) {
-    return { current, max };
   },
 
   // Hearing acuity, paired with the `hearing` sense (in the `senses` list). `range` is how far this

@@ -1,0 +1,146 @@
+{
+  "saveVersion": 7,
+  "gameVersion": "0.2.0",
+  "versionHistory": [
+    { "saveVersion": 7, "gameVersion": "0.2.0", "savedAt": "2026-07-02T00:00:00.000Z" }
+  ],
+  "savedAt": "2026-07-02T00:00:00.000Z",
+  "meta": {
+    "seed": 12345,
+    "streams": { "gameplay": 987654321 },
+    "turnCount": 7,
+    "nextEntityId": 6
+  },
+  "playerId": 1,
+  "currentNodeId": "floor-1",
+  "currentLevel": {
+    "branch": "main",
+    "depth": 1,
+    "pipelineId": "static",
+    "seed": 111,
+    "width": 3,
+    "height": 3,
+    "tiles": [
+      ["wall", "wall", "wall"],
+      ["wall", "floor", "wall"],
+      ["wall", "wall", "wall"]
+    ],
+    "overrides": [],
+    "blackboard": {},
+    "entityIds": [1, 4]
+  },
+  "frozenLevels": {
+    "floor-2": {
+      "level": {
+        "branch": "main",
+        "depth": 2,
+        "pipelineId": "static",
+        "seed": 222,
+        "width": 1,
+        "height": 1,
+        "tiles": [["floor"]],
+        "overrides": [],
+        "blackboard": {},
+        "entityIds": [5]
+      },
+      "entities": [
+        {
+          "id": 5,
+          "components": {
+            "name": "Goblin",
+            "position": { "x": 0, "y": 0 },
+            "creature": {},
+            "turnTaker": { "speed": 1, "accumulator": 0 },
+            "health": { "current": 3, "max": 5 },
+            "attacker": { "damage": 1 },
+            "renderable": {
+              "sprite": "goblin",
+              "color": "#0a1a0a",
+              "glyph": "g",
+              "glyphColor": "#2ecc40",
+              "layer": 0
+            }
+          }
+        }
+      ]
+    }
+  },
+  "entities": [
+    {
+      "id": 1,
+      "components": {
+        "name": "Player",
+        "position": { "x": 1, "y": 1 },
+        "playerControlled": {},
+        "creature": {},
+        "turnTaker": { "speed": 1, "accumulator": 0 },
+        "health": { "current": 18, "max": 20 },
+        "attacker": { "damage": 1 },
+        "wearsEquipment": { "slots": { "weapon": 2, "armor": 3, "ammunition": null } },
+        "renderable": {
+          "sprite": null,
+          "color": "#0a1a0a",
+          "glyph": "@",
+          "glyphColor": "#00cc44",
+          "layer": 0
+        }
+      }
+    },
+    {
+      "id": 2,
+      "components": {
+        "name": "Dagger",
+        "renderable": {
+          "sprite": "dagger",
+          "color": "#101010",
+          "glyph": "/",
+          "glyphColor": "#cccccc",
+          "layer": 1
+        },
+        "item": { "location": { "type": "equipped", "ownerId": 1, "slot": "weapon" } },
+        "equippable": { "slot": "weapon" },
+        "weapon": {
+          "range": 1,
+          "meleeRange": 1,
+          "ammoType": null,
+          "breakChance": 0,
+          "attackSprites": {}
+        },
+        "attributeModifiers": { "attackDamage": 1 }
+      }
+    },
+    {
+      "id": 3,
+      "components": {
+        "name": "Leather Armor",
+        "renderable": {
+          "sprite": "leather-armor",
+          "color": "#101010",
+          "glyph": "[",
+          "glyphColor": "#c8a36a",
+          "layer": 1
+        },
+        "item": { "location": { "type": "equipped", "ownerId": 1, "slot": "armor" } },
+        "equippable": { "slot": "armor" },
+        "attributeModifiers": { "HP": 5 }
+      }
+    },
+    {
+      "id": 4,
+      "components": {
+        "name": "Healing Potion",
+        "position": { "x": 1, "y": 1 },
+        "renderable": {
+          "sprite": "healing-potion",
+          "color": "#07fe49ff",
+          "glyph": "!",
+          "glyphColor": "#07fe49ff",
+          "layer": 1
+        },
+        "item": { "location": { "type": "map" } },
+        "consumable": { "effectType": "heal", "params": { "amount": 10 } },
+        "throwable": { "effectType": "heal", "params": { "amount": 5 }, "breakChance": 1 }
+      }
+    }
+  ]
+}

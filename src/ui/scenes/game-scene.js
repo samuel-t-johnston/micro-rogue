@@ -38,6 +38,8 @@ import { createContextMenu } from '../menus/context-menu.js';
 import { drawText, drawButton, hitTest } from '../core/canvas-ui.js';
 import { resolveTileActions } from '../../actions/core/resolve-tile-actions.js';
 import { getAttackCapability } from '../../combat/weapons.js';
+import { getPool, getAccumulator } from '../../attributes/attribute-access.js';
+import { levelProgress } from '../../../data/attribute-set.js';
 import { commitSave, loadSavedGame, clearSave } from '../../save/core/save-system.js';
 import {
   buildSupportBundle,
@@ -314,7 +316,6 @@ export function createGameScene({
     else if (deltaY > 0) renderer.zoomOut();
     return true;
   }
-  const hudWidget = createHudWidget({ theme, getViewport });
   const messageLogWidget = createMessageLogWidget({
     theme,
     getViewport,
@@ -328,6 +329,11 @@ export function createGameScene({
     getViewport,
     getPlayer: () => player,
     onAction: (action) => handleMenuAction(action),
+  });
+  const hudWidget = createHudWidget({
+    theme,
+    getViewport,
+    onOpen: () => characterMenuController.openStats(),
   });
   const characterMenuButton = createCharacterMenuButton({
     theme,
@@ -568,6 +574,7 @@ export function createGameScene({
 
     if (dialogController.handleInput(event)) return true;
     if (messageLogWidget.handleInput(event)) return true;
+    if (hudWidget.handleInput(event)) return true;
     if (characterMenuButton.handleInput(event)) return true;
     if (gameMenuButton.handleInput(event)) return true;
 
@@ -696,8 +703,12 @@ export function createGameScene({
       renderer.drawEntities(ctx, level, tilePerception);
       renderer.drawAnimations(ctx, tilePerception);
 
-      const hp = player ? registry.getComponent(player, 'health') : { current: 0, max: 0 };
-      hudWidget.render(ctx, { hp, turn: turnManager?.playerTurnCount ?? 0 });
+      const hp = player ? getPool(player, 'hp') : { current: 0, max: 0 };
+      const mp = player ? getPool(player, 'mp') : { current: 0, max: 0 };
+      const exp = player
+        ? levelProgress(getAccumulator(player, 'xp'))
+        : { level: 1, into: 0, forNext: 0 };
+      hudWidget.render(ctx, { level: exp.level, hp, mp, exp });
 
       characterMenuButton.render(ctx);
       gameMenuButton.render(ctx);

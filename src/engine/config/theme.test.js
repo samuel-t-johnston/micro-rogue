@@ -12,6 +12,9 @@ describe('readTheme', () => {
       --color-text-dim: #4a7a4a;
       --color-text-disabled: #1f3a1f;
       --color-debug: #ff6b6b;
+      --color-health: #ff5555;
+      --color-magic: #4db2ff;
+      --color-experience: #ffcc33;
     `;
   });
 
@@ -25,6 +28,9 @@ describe('readTheme', () => {
       'textDim',
       'textDisabled',
       'debug',
+      'health',
+      'magic',
+      'experience',
     ]);
   });
 
@@ -38,6 +44,9 @@ describe('readTheme', () => {
     expect(theme.textDim).toBe('#4a7a4a');
     expect(theme.textDisabled).toBe('#1f3a1f');
     expect(theme.debug).toBe('#ff6b6b');
+    expect(theme.health).toBe('#ff5555');
+    expect(theme.magic).toBe('#4db2ff');
+    expect(theme.experience).toBe('#ffcc33');
   });
 
   it('trims whitespace from CSS values', () => {

@@ -19,7 +19,7 @@ function makeGame() {
   const player = registry.createEntity();
   registry.addComponent(player, 'position', components.position(1, 1));
   registry.addComponent(player, 'playerControlled', components.playerControlled());
-  registry.addComponent(player, 'health', components.health(20, 20));
+  registry.addComponent(player, 'attributes', components.attributes({ hp: 20, con: 20 }));
   level.placeEntity(player);
   return { registry, level, player };
 }

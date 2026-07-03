@@ -27,7 +27,7 @@ function placeCreature(registry, level, x, y, name) {
   const c = registry.createEntity();
   registry.addComponent(c, 'position', components.position(x, y));
   registry.addComponent(c, 'name', components.name(name));
-  registry.addComponent(c, 'health', components.health(5, 5));
+  registry.addComponent(c, 'creature', components.creature());
   level.placeEntity(c);
   return c;
 }

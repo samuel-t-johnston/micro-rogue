@@ -12,6 +12,9 @@ const TOKEN_MAP = {
   textDim: '--color-text-dim',
   textDisabled: '--color-text-disabled',
   debug: '--color-debug',
+  health: '--color-health',
+  magic: '--color-magic',
+  experience: '--color-experience',
 };
 
 /** Reads the live CSS custom-property theme values into a plain `{ token: value }` object. */

@@ -53,7 +53,7 @@ describe('resolveTileActions', () => {
   it('attacks an adjacent creature (entity with health) as the primary action', () => {
     const creature = registry.createEntity();
     registry.addComponent(creature, 'position', components.position(2, 1));
-    registry.addComponent(creature, 'health', components.health(5, 5));
+    registry.addComponent(creature, 'attributes', components.attributes({ hp: 5, con: 5 }));
     registry.addComponent(creature, 'blocksMovement', components.blocksMovement());
     level.placeEntity(creature);
 
@@ -65,7 +65,7 @@ describe('resolveTileActions', () => {
   function makeCreature(x, y) {
     const c = registry.createEntity();
     registry.addComponent(c, 'position', components.position(x, y));
-    registry.addComponent(c, 'health', components.health(5, 5));
+    registry.addComponent(c, 'attributes', components.attributes({ hp: 5, con: 5 }));
     registry.addComponent(c, 'blocksMovement', components.blocksMovement());
     level.placeEntity(c);
     return c;

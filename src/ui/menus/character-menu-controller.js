@@ -1,6 +1,9 @@
 import { createCharacterMenuRoot, createCharacterMenuSubScreen } from './character-menu.js';
 import { createInventoryScreenBody } from '../screens/inventory-screen.js';
 import { createEquipmentScreenBody } from '../screens/equipment-screen.js';
+import { createStatsScreenBody } from '../screens/stats-screen.js';
+import { getScore, getPool, getAccumulator } from '../../attributes/attribute-access.js';
+import { levelProgress } from '../../../data/attribute-set.js';
 
 /**
  * Creates the full-screen character menu overlay (a root card grid drilling into Inventory and
@@ -22,6 +25,9 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
   }
   function openEquipment() {
     screen = buildEquipment();
+  }
+  function openStats() {
+    screen = buildStats();
   }
 
   function buildRoot() {
@@ -48,11 +54,18 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
           glyph: '⚔',
           badge: totalSlots > 0 ? `${equippedCount}/${totalSlots}` : null,
         },
+        {
+          id: 'stats',
+          label: 'Stats',
+          glyph: '📊',
+          badge: player ? `Lv ${getScore(player, 'level')}` : null,
+        },
       ],
       onClose: close,
       onSelect: (id) => {
         if (id === 'inventory') openInventory();
         else if (id === 'equipment') openEquipment();
+        else if (id === 'stats') openStats();
       },
     });
   }
@@ -106,11 +119,44 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
     });
   }
 
+  function buildStats() {
+    const body = createStatsScreenBody({
+      theme,
+      getStats: () => {
+        const player = getPlayer();
+        if (!player) return null;
+        const xp = levelProgress(getAccumulator(player, 'xp'));
+        return {
+          level: xp.level,
+          xp,
+          hp: getPool(player, 'hp'),
+          mp: getPool(player, 'mp'),
+          hunger: getPool(player, 'hunger'),
+          str: getScore(player, 'str'),
+          dex: getScore(player, 'dex'),
+          int: getScore(player, 'int'),
+          con: getScore(player, 'con'),
+          spd: getScore(player, 'spd'),
+          attack: getScore(player, 'attack'),
+        };
+      },
+    });
+    return createCharacterMenuSubScreen({
+      theme,
+      getViewport,
+      title: 'Stats',
+      onBack: openRoot,
+      renderBody: body.render,
+      handleBodyInput: body.handleInput,
+    });
+  }
+
   return {
     get isOpen() {
       return screen !== null;
     },
     open: openRoot,
+    openStats, // deep-link: the HUD taps straight into the stats screen
     close,
     render(ctx) {
       screen?.render(ctx);

@@ -7,4 +7,8 @@
   --color-text-dim: #4a7a4a;
   --color-text-disabled: #1f3a1f;
   --color-debug: #ff6b6b;
+  /* Stat colors — used for HP/MP/EXP readouts and any health/magic/experience UI. */
+  --color-health: #ff5555;
+  --color-magic: #4db2ff;
+  --color-experience: #ffcc33;
 }

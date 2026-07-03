@@ -7,7 +7,7 @@ import { components } from '../../world/entities/components.js';
 function makeSubject() {
   const registry = createEntityRegistry();
   const e = registry.createEntity();
-  registry.addComponent(e, 'health', components.health(10, 20));
+  registry.addComponent(e, 'attributes', components.attributes({ hp: 10, con: 20 })); // maxHP = con
   return { registry, e };
 }
 
@@ -15,28 +15,28 @@ describe('effectHeal', () => {
   it('adds HP to the target', () => {
     const { e } = makeSubject();
     applyEffect(EffectTypes.HEAL, e, null, { amount: 5 });
-    expect(e.components.get('health').current).toBe(15);
+    expect(e.components.get('attributes').hp).toBe(15);
   });
 
   it('clamps at health.max — no overheal', () => {
     const { e } = makeSubject();
     applyEffect(EffectTypes.HEAL, e, null, { amount: 999 });
-    expect(e.components.get('health').current).toBe(20);
+    expect(e.components.get('attributes').hp).toBe(20);
   });
 
   it('defaults target to user when target is null', () => {
     const { e: user } = makeSubject();
     applyEffect(EffectTypes.HEAL, user, null, { amount: 3 });
-    expect(user.components.get('health').current).toBe(13);
+    expect(user.components.get('attributes').hp).toBe(13);
   });
 
   it('targets the explicit target when provided', () => {
     const { e: user } = makeSubject();
     const { e: target } = makeSubject();
-    target.components.get('health').current = 5;
+    target.components.get('attributes').hp = 5;
     applyEffect(EffectTypes.HEAL, user, target, { amount: 4 });
-    expect(user.components.get('health').current).toBe(10); // unchanged
-    expect(target.components.get('health').current).toBe(9);
+    expect(user.components.get('attributes').hp).toBe(10); // unchanged
+    expect(target.components.get('attributes').hp).toBe(9);
   });
 
   it('is a no-op when subject has no health', () => {
@@ -50,7 +50,7 @@ describe('effectDamage', () => {
   it('subtracts HP from the target', () => {
     const { e } = makeSubject();
     applyEffect(EffectTypes.DAMAGE, e, null, { amount: 4 });
-    expect(e.components.get('health').current).toBe(6);
+    expect(e.components.get('attributes').hp).toBe(6);
   });
 
   it('reduces HP to 0 and triggers death, destroying the entity', () => {
@@ -63,7 +63,7 @@ describe('effectDamage', () => {
   it('defaults target to user when target is null', () => {
     const { e: user } = makeSubject();
     applyEffect(EffectTypes.DAMAGE, user, null, { amount: 2 });
-    expect(user.components.get('health').current).toBe(8);
+    expect(user.components.get('attributes').hp).toBe(8);
   });
 });
 

@@ -126,15 +126,15 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 
 *Done when the engine supports different types of numeric attributes and pools for player and monsters, XP, and leveling up.*
 
-- [ ] Track attributes via the component
+- [x] Track attributes via the component (registry-driven; see docs/design/attribute-system.md)
   - "Score" type - STR, DEX, INT, CON, SPD, Level
   - "Pool" type - HP, MP, Hunger
   - "Accumulator" type - XP
-- [ ] Attributes set for Player and monsters
-- [ ] Gain XP on kill
-- [ ] Level up at XP tiers
-- [ ] Player attributes screen
-- [ ] Attributes added to HUD widget
+- [x] Attributes set for Player and monsters (full stat block seeded; ability-score *values* are placeholders until tuning)
+- [x] Gain XP on kill (scales with the defeated creature's level; all creatures earn)
+- [ ] Level up at XP tiers (Level derives + displays; rewards/crossing deferred to the tuning pass)
+- [x] Player attributes screen (Stats card in the character menu; curated set pending display metadata)
+- [x] Attributes added to HUD widget (Level line; HP already shown)
 - [ ] New game Player stat allocation
 - [ ] Attributes used in other systems
   - Throw/ranged miss chance?

@@ -10,11 +10,28 @@ export async function createPlayer(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Player'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('player'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  registry.addComponent(entity, 'health', components.health(20, 20));
+  // Full stat block. The ability scores (str/dex/int/spd) are placeholders — nothing reads them yet;
+  // they gain mechanical weight (attack scaling, etc.) in the progression-tuning pass. con=20 reproduces
+  // the old max HP (maxHP = con), attack=1 the old unarmed damage, xp=0 starts at level 1. See
+  // docs/design/attribute-system.md.
+  registry.addComponent(
+    entity,
+    'attributes',
+    components.attributes({
+      str: 12,
+      dex: 12,
+      int: 10,
+      con: 20,
+      spd: 10,
+      attack: 1,
+      hp: 20,
+      xp: 0,
+    }),
+  );
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
   registry.addComponent(entity, 'creature', components.creature());
   registry.addComponent(entity, 'playerControlled', components.playerControlled());
-  registry.addComponent(entity, 'attacker', components.attacker(1));
+  registry.addComponent(entity, 'attacker', components.attacker()); // can-attack marker
   registry.addComponent(entity, 'faction', components.faction(['player']));
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'inventory', components.inventory());

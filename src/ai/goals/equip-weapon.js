@@ -1,8 +1,8 @@
 import { Slots } from '../../../data/equipment-slots.js';
 import { resolveAmmo } from '../../combat/weapons.js';
 
-// A weapon item's attack-damage modifier (0 if it carries none) — the "best weapon" yardstick.
-const damageOf = (item) => item?.components.get('attributeModifiers')?.attackDamage ?? 0;
+// A weapon item's attack modifier (0 if it carries none) — the "best weapon" yardstick.
+const damageOf = (item) => item?.components.get('attributeModifiers')?.attack ?? 0;
 
 // Whether `item` can currently attack at all for `self`. A weapon that fires external ammo (a bow) is
 // usable only while matching ammo is reachable — already in the quiver (resolveAmmo) or carried in

@@ -9,6 +9,7 @@
  */
 import { chebyshevDistance } from '../../world/map/geometry.js';
 import { isAttackable } from '../../combat/targeting.js';
+import { hasAttribute } from '../../attributes/attribute-access.js';
 import { displayName } from '../../engine/log/text/log-text.js';
 
 // A tile occupant's display name for pickup/interact labels — `displayName` appends a stack quantity
@@ -74,7 +75,7 @@ export function resolveTileActions(
   const isAdjacent = distance === 1;
 
   const occupants = [...level.getEntitiesAt(x, y)];
-  const creature = occupants.find((e) => e.components.has('health'));
+  const creature = occupants.find((e) => hasAttribute(e, 'hp'));
   const door = occupants.find((e) => e.components.has('openable'));
   const container = occupants.find((e) => e.components.has('container'));
   const passable = level.isPassable(x, y);
