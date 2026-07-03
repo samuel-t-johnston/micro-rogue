@@ -16,9 +16,26 @@
 import { Flavors } from '../src/attributes/attribute-flavors.js';
 
 // Placeholder level curve: xp to REACH level L is 5·L·(L−1) → 0, 10, 30, 60, 100, … so each level
-// costs more than the last. This is the closed-form inverse; level is never below 1.
-function xpToLevel(xp) {
+// costs more than the last. Two directions plus a progress helper for the HUD's EXP readout.
+
+/** The xp threshold to reach `level` (the forward curve). */
+export function xpForLevel(level) {
+  return 5 * level * (level - 1);
+}
+
+/** The level a given xp total has reached — the closed-form inverse of xpForLevel; never below 1. */
+export function levelForXp(xp) {
   return Math.floor((5 + Math.sqrt(25 + 20 * xp)) / 10);
+}
+
+/**
+ * Progress within the current level: `{ level, into, forNext }` — `into` is xp earned past this
+ * level's start, `forNext` is the xp span from this level to the next. Drives the HUD's "EXP a/b".
+ */
+export function levelProgress(xp) {
+  const level = levelForXp(xp);
+  const base = xpForLevel(level);
+  return { level, into: xp - base, forNext: xpForLevel(level + 1) - base };
 }
 
 // The default score resolver: stored base plus equipment modifiers.
@@ -85,7 +102,7 @@ export const ATTRIBUTE_SET = [
     flavor: Flavors.SCORE,
     shortLabel: 'Lvl',
     longLabel: 'Level',
-    resolve: ({ accumulated }) => xpToLevel(accumulated('xp')),
+    resolve: ({ accumulated }) => levelForXp(accumulated('xp')),
   },
 
   // Pools: store `current`; max is derived (an absent current reads as full).

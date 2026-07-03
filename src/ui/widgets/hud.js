@@ -1,41 +1,59 @@
-import { drawText } from '../core/canvas-ui.js';
+import { drawPanel, drawText } from '../core/canvas-ui.js';
 import { Anchor, resolveAnchor, applyHandedness } from '../core/anchor-system.js';
 import { gameSettings } from '../../engine/config/settings.js';
 
 const MARGIN = 12;
 const ANCHOR = Anchor.TOP_LEFT;
 
-/** Creates the HUD widget: HP, level, and turn count, anchored top-left (mirrored for left-handedness). */
+const BOX = 46; // level box side
+const GAP = 8; // between the box and the stat lines
+const LINE_H = 15;
+
+/**
+ * Creates the HUD widget: a level box in the corner with HP/MP/EXP stat lines beside it, anchored
+ * top-left (mirrored to top-right for left-handedness — the box hugs the corner either way and the
+ * lines read inward). EXP shows progress within the current level (into / span to next).
+ */
 export function createHudWidget({ theme, getViewport }) {
   return {
     render(ctx, state) {
       const vp = getViewport();
       const anchor = applyHandedness(ANCHOR, gameSettings.get('handedness'));
       const { x, y } = resolveAnchor(anchor, vp);
-      const { hp, level, turn } = state;
+      const { level, hp, mp, exp } = state;
 
-      // When mirrored to the right edge the text reads outward off-screen unless it's
-      // right-aligned against the edge instead of left-aligned from it.
-      const right = x === vp.width;
-      const tx = right ? x - MARGIN : x + MARGIN;
+      const right = x === vp.width; // mirrored to the right edge
+      const top = y + MARGIN;
+
+      // Level box in the corner: surface fill, primary border, level number in the normal text color.
+      const boxX = right ? x - MARGIN - BOX : x + MARGIN;
+      drawPanel(ctx, theme, { x: boxX, y: top, w: BOX, h: BOX });
+      ctx.strokeStyle = theme.primary;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(boxX + 0.5, top + 0.5, BOX - 1, BOX - 1);
+      drawText(ctx, `${level}`, boxX + BOX / 2, top + BOX / 2, {
+        color: theme.text,
+        size: 26,
+        weight: '700',
+        align: 'center',
+        baseline: 'middle',
+      });
+
+      // Stat lines beside the box: HP over MP over EXP, each in its stat color.
+      const textX = right ? boxX - GAP : boxX + BOX + GAP;
       const align = right ? 'right' : 'left';
-
-      drawText(ctx, `HP ${hp.current}/${hp.max}`, tx, y + MARGIN, {
-        color: theme.text,
-        size: 16,
-        weight: '600',
-        align,
-      });
-      drawText(ctx, `Lv ${level}`, tx, y + MARGIN + 22, {
-        color: theme.text,
-        size: 14,
-        weight: '600',
-        align,
-      });
-      drawText(ctx, `T${turn}`, tx, y + MARGIN + 42, {
-        color: theme.textDim,
-        size: 14,
-        align,
+      const lines = [
+        { text: `HP: ${hp.current}/${hp.max}`, color: theme.health },
+        { text: `MP: ${mp.current}/${mp.max}`, color: theme.magic },
+        { text: `EXP: ${exp.into}/${exp.forNext}`, color: theme.experience },
+      ];
+      lines.forEach((line, i) => {
+        drawText(ctx, line.text, textX, top + 3 + i * LINE_H, {
+          color: line.color,
+          size: 13,
+          weight: '600',
+          align,
+        });
       });
     },
   };
