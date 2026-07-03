@@ -316,7 +316,6 @@ export function createGameScene({
     else if (deltaY > 0) renderer.zoomOut();
     return true;
   }
-  const hudWidget = createHudWidget({ theme, getViewport });
   const messageLogWidget = createMessageLogWidget({
     theme,
     getViewport,
@@ -330,6 +329,11 @@ export function createGameScene({
     getViewport,
     getPlayer: () => player,
     onAction: (action) => handleMenuAction(action),
+  });
+  const hudWidget = createHudWidget({
+    theme,
+    getViewport,
+    onOpen: () => characterMenuController.openStats(),
   });
   const characterMenuButton = createCharacterMenuButton({
     theme,
@@ -570,6 +574,7 @@ export function createGameScene({
 
     if (dialogController.handleInput(event)) return true;
     if (messageLogWidget.handleInput(event)) return true;
+    if (hudWidget.handleInput(event)) return true;
     if (characterMenuButton.handleInput(event)) return true;
     if (gameMenuButton.handleInput(event)) return true;
 

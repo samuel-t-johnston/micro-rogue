@@ -150,6 +150,7 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
       return screen !== null;
     },
     open: openRoot,
+    openStats, // deep-link: the HUD taps straight into the stats screen
     close,
     render(ctx) {
       screen?.render(ctx);

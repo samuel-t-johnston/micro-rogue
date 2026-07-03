@@ -102,6 +102,18 @@ describe('character menu — full equip/unequip flow', () => {
     expect(controller.isOpen).toBe(true);
   });
 
+  it('openStats() deep-links straight to the stats sub-screen', () => {
+    registry.addComponent(player, 'attributes', components.attributes({ hp: 20, con: 20, xp: 10 }));
+    controller.openStats();
+    expect(controller.isOpen).toBe(true);
+    expect(() => controller.render(makeCtx())).not.toThrow();
+
+    // Top-left is the sub-screen's Back (→ root, stays open); had it opened root instead, this would
+    // hit ✕ (close). Staying open proves we landed on Stats, not the root grid.
+    controller.handleInput({ type: 'pointerdown', x: 38, y: 38 });
+    expect(controller.isOpen).toBe(true);
+  });
+
   it('tapping the Equipment card navigates to the equipment screen', () => {
     controller.open();
     const ctx = makeCtx();
