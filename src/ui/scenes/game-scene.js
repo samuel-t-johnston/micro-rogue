@@ -38,7 +38,7 @@ import { createContextMenu } from '../menus/context-menu.js';
 import { drawText, drawButton, hitTest } from '../core/canvas-ui.js';
 import { resolveTileActions } from '../../actions/core/resolve-tile-actions.js';
 import { getAttackCapability } from '../../combat/weapons.js';
-import { getPool } from '../../attributes/attribute-access.js';
+import { getPool, getScore } from '../../attributes/attribute-access.js';
 import { commitSave, loadSavedGame, clearSave } from '../../save/core/save-system.js';
 import {
   buildSupportBundle,
@@ -698,7 +698,8 @@ export function createGameScene({
       renderer.drawAnimations(ctx, tilePerception);
 
       const hp = player ? getPool(player, 'hp') : { current: 0, max: 0 };
-      hudWidget.render(ctx, { hp, turn: turnManager?.playerTurnCount ?? 0 });
+      const playerLevel = player ? getScore(player, 'level') : 1;
+      hudWidget.render(ctx, { hp, level: playerLevel, turn: turnManager?.playerTurnCount ?? 0 });
 
       characterMenuButton.render(ctx);
       gameMenuButton.render(ctx);

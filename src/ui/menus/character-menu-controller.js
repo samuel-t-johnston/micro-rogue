@@ -1,6 +1,14 @@
 import { createCharacterMenuRoot, createCharacterMenuSubScreen } from './character-menu.js';
 import { createInventoryScreenBody } from '../screens/inventory-screen.js';
 import { createEquipmentScreenBody } from '../screens/equipment-screen.js';
+import { createStatsScreenBody } from '../screens/stats-screen.js';
+import { getScore, describeAttribute } from '../../attributes/attribute-access.js';
+
+// Curated character-sheet attributes: the Level headline plus the currently meaningful stats. Not
+// driven by listAttributes because Level is derived (never stored) and we intentionally omit the
+// not-yet-seeded ability scores. Per-attribute display config (order/visibility) is the deferred
+// display-metadata work — see docs/design/attribute-system.md.
+const CHARACTER_SHEET = ['level', 'hp', 'attack', 'con', 'xp'];
 
 /**
  * Creates the full-screen character menu overlay (a root card grid drilling into Inventory and
@@ -22,6 +30,9 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
   }
   function openEquipment() {
     screen = buildEquipment();
+  }
+  function openStats() {
+    screen = buildStats();
   }
 
   function buildRoot() {
@@ -48,11 +59,18 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
           glyph: '⚔',
           badge: totalSlots > 0 ? `${equippedCount}/${totalSlots}` : null,
         },
+        {
+          id: 'stats',
+          label: 'Stats',
+          glyph: '📊',
+          badge: player ? `Lv ${getScore(player, 'level')}` : null,
+        },
       ],
       onClose: close,
       onSelect: (id) => {
         if (id === 'inventory') openInventory();
         else if (id === 'equipment') openEquipment();
+        else if (id === 'stats') openStats();
       },
     });
   }
@@ -100,6 +118,25 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
       theme,
       getViewport,
       title: 'Equipment',
+      onBack: openRoot,
+      renderBody: body.render,
+      handleBodyInput: body.handleInput,
+    });
+  }
+
+  function buildStats() {
+    const body = createStatsScreenBody({
+      theme,
+      getAttributes: () => {
+        const player = getPlayer();
+        if (!player) return [];
+        return CHARACTER_SHEET.map((name) => describeAttribute(player, name));
+      },
+    });
+    return createCharacterMenuSubScreen({
+      theme,
+      getViewport,
+      title: 'Stats',
       onBack: openRoot,
       renderBody: body.render,
       handleBodyInput: body.handleInput,

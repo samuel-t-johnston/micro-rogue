@@ -80,6 +80,28 @@ describe('character menu — full equip/unequip flow', () => {
     expect(() => controller.render(makeCtx())).not.toThrow();
   });
 
+  it('tapping the Stats card opens the read-only stats sub-screen', () => {
+    registry.addComponent(
+      player,
+      'attributes',
+      components.attributes({ hp: 20, con: 20, attack: 1, xp: 10 }), // level 2
+    );
+    controller.open();
+    const ctx = makeCtx();
+    controller.render(ctx);
+
+    // Stats is the third card (index 2), same row as Inventory/Equipment; center x ≈ 398.
+    controller.handleInput({ type: 'pointerdown', x: 398, y: 300 });
+    expect(controller.isOpen).toBe(true);
+    expect(() => controller.render(ctx)).not.toThrow();
+
+    // Tapping the top-left affordance now hits the sub-screen's Back (→ root, stays open). Had the
+    // Stats tap missed, we'd still be on root and this would hit ✕ (close) instead — so staying open
+    // proves we navigated into Stats and back.
+    controller.handleInput({ type: 'pointerdown', x: 38, y: 38 });
+    expect(controller.isOpen).toBe(true);
+  });
+
   it('tapping the Equipment card navigates to the equipment screen', () => {
     controller.open();
     const ctx = makeCtx();

@@ -133,8 +133,8 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 - [ ] Attributes set for Player and monsters (HP/CON/attack/XP seeded; full ability block is the tuning pass)
 - [x] Gain XP on kill (scales with the defeated creature's level; all creatures earn)
 - [ ] Level up at XP tiers (Level derives + displays; rewards/crossing deferred to the tuning pass)
-- [ ] Player attributes screen
-- [ ] Attributes added to HUD widget
+- [x] Player attributes screen (Stats card in the character menu; curated set pending display metadata)
+- [x] Attributes added to HUD widget (Level line; HP already shown)
 - [ ] New game Player stat allocation
 - [ ] Attributes used in other systems
   - Throw/ranged miss chance?
