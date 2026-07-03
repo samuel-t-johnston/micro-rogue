@@ -56,7 +56,7 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
         },
         {
           id: 'stats',
-          label: 'Character',
+          label: 'Stats',
           glyph: '📊',
           badge: player ? `Lv ${getScore(player, 'level')}` : null,
         },
@@ -144,7 +144,7 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
     return createCharacterMenuSubScreen({
       theme,
       getViewport,
-      title: 'Character',
+      title: 'Stats',
       onBack: openRoot,
       renderBody: body.render,
       handleBodyInput: body.handleInput,
