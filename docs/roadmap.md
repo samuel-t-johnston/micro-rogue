@@ -130,7 +130,7 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
   - "Score" type - STR, DEX, INT, CON, SPD, Level
   - "Pool" type - HP, MP, Hunger
   - "Accumulator" type - XP
-- [ ] Attributes set for Player and monsters (HP/CON/attack/XP seeded; full ability block is the tuning pass)
+- [x] Attributes set for Player and monsters (full stat block seeded; ability-score *values* are placeholders until tuning)
 - [x] Gain XP on kill (scales with the defeated creature's level; all creatures earn)
 - [ ] Level up at XP tiers (Level derives + displays; rewards/crossing deferred to the tuning pass)
 - [x] Player attributes screen (Stats card in the character menu; curated set pending display metadata)

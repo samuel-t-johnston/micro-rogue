@@ -4,11 +4,13 @@ import { createEquipmentScreenBody } from '../screens/equipment-screen.js';
 import { createStatsScreenBody } from '../screens/stats-screen.js';
 import { getScore, describeAttribute } from '../../attributes/attribute-access.js';
 
-// Curated character-sheet attributes: the Level headline plus the currently meaningful stats. Not
-// driven by listAttributes because Level is derived (never stored) and we intentionally omit the
-// not-yet-seeded ability scores. Per-attribute display config (order/visibility) is the deferred
-// display-metadata work — see docs/design/attribute-system.md.
-const CHARACTER_SHEET = ['level', 'hp', 'attack', 'con', 'xp'];
+// Curated character-sheet attributes and their display order. Not driven by listAttributes because
+// Level is derived (never stored) and we choose the order deliberately. `con` is omitted: it currently
+// just backs max HP (maxHP = con placeholder), so showing it would duplicate the HP row; it returns as
+// its own line when it becomes a real ability score. mp/hunger are omitted until they have gameplay.
+// Per-attribute display config (order/visibility) is the deferred display-metadata work — see
+// docs/design/attribute-system.md.
+const CHARACTER_SHEET = ['level', 'hp', 'str', 'dex', 'int', 'spd', 'attack', 'xp'];
 
 /**
  * Creates the full-screen character menu overlay (a root card grid drilling into Inventory and
