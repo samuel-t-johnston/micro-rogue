@@ -1,6 +1,7 @@
 import { gameLog } from '../engine/log/game-log.js';
 import { animations } from '../render/animations.js';
 import { subject, conjugate } from '../engine/log/text/log-text.js';
+import { awardKillXp } from './kill-reward.js';
 
 /**
  * @file Death handling, triggered from the damage chokepoint (src/effects/effect-types/effect-damage.js)
@@ -25,9 +26,13 @@ export function onDeath(entity, level, registry) {
  * under the death popup) and the game-over flow is delegated to the level's onPlayerDeath hook, which
  * the game scene wires up. Using the level as the coordination point keeps death.js decoupled from
  * the UI / app-state layers.
+ *
+ * `killer` is whoever dealt the lethal blow (the damage effect's user), when known; it earns kill XP.
+ * Read before any teardown, since the reward scales with the victim's still-live level.
  */
-export function handleDeath(entity, level, registry) {
+export function handleDeath(entity, level, registry, killer = null) {
   onDeath(entity, level, registry);
+  awardKillXp(entity, killer);
 
   // Logged before any removal — destroyEntity clears the entity's components, so the
   // name and player/non-player distinction must be read while the entity is intact.

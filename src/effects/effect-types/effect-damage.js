@@ -12,6 +12,6 @@ export function effectDamage(user, target, params, level, registry) {
   const subject = target ?? user;
   if (!hasAttribute(subject, 'hp')) return { applied: false };
   const { current } = adjustPool(subject, 'hp', -(params.amount ?? 0));
-  if (current <= 0) handleDeath(subject, level, registry);
+  if (current <= 0) handleDeath(subject, level, registry, user);
   return { applied: true, reaction: 'looks hurt' };
 }

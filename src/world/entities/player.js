@@ -11,11 +11,12 @@ export async function createPlayer(registry, x, y) {
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('player'));
   registry.addComponent(entity, 'position', components.position(x, y));
   // Placeholder stat block: con=20 reproduces the old max HP (maxHP = con), attack=1 the old unarmed
-  // damage. Real ability-score values arrive with progression tuning (see docs/design/attribute-system.md).
+  // damage, xp=0 starts at level 1. Real ability-score values and the level curve arrive with
+  // progression tuning (see docs/design/attribute-system.md).
   registry.addComponent(
     entity,
     'attributes',
-    components.attributes({ hp: 20, con: 20, attack: 1 }),
+    components.attributes({ hp: 20, con: 20, attack: 1, xp: 0 }),
   );
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
   registry.addComponent(entity, 'creature', components.creature());

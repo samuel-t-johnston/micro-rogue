@@ -7,7 +7,12 @@ export function createGoblin(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Goblin'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('goblin'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  registry.addComponent(entity, 'attributes', components.attributes({ hp: 5, con: 5, attack: 1 }));
+  // xp seeds the creature's level (see data/attribute-set.js): 0 → level 1.
+  registry.addComponent(
+    entity,
+    'attributes',
+    components.attributes({ hp: 5, con: 5, attack: 1, xp: 0 }),
+  );
   registry.addComponent(entity, 'attacker', components.attacker());
   registry.addComponent(entity, 'faction', components.faction(['goblins']));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
@@ -37,7 +42,11 @@ export function createOrc(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Orc'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('orc'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  registry.addComponent(entity, 'attributes', components.attributes({ hp: 9, con: 9, attack: 1 }));
+  registry.addComponent(
+    entity,
+    'attributes',
+    components.attributes({ hp: 9, con: 9, attack: 1, xp: 10 }), // xp seeds level 2
+  );
   registry.addComponent(entity, 'attacker', components.attacker());
   registry.addComponent(entity, 'faction', components.faction(['orcs']));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
@@ -91,7 +100,7 @@ export function createOrcCommander(registry, x, y) {
   registry.addComponent(
     entity,
     'attributes',
-    components.attributes({ hp: 12, con: 12, attack: 2 }),
+    components.attributes({ hp: 12, con: 12, attack: 2, xp: 30 }), // xp seeds level 3
   );
   registry.addComponent(entity, 'attacker', components.attacker());
   registry.addComponent(entity, 'faction', components.faction(['orcs']));
@@ -144,7 +153,11 @@ export function createScuttler(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Scuttler'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('scuttler'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  registry.addComponent(entity, 'attributes', components.attributes({ hp: 2, con: 2, attack: 1 }));
+  registry.addComponent(
+    entity,
+    'attributes',
+    components.attributes({ hp: 2, con: 2, attack: 1, xp: 0 }),
+  );
   registry.addComponent(entity, 'attacker', components.attacker());
   registry.addComponent(entity, 'faction', components.faction(['scuttlers']));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1.4)); // above average — scuttles

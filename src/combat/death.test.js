@@ -3,6 +3,7 @@ import { handleDeath } from './death.js';
 import { createEntityRegistry } from '../engine/core/entity-component-system.js';
 import { createLevel } from '../world/map/level.js';
 import { components } from '../world/entities/components.js';
+import { getAccumulator } from '../attributes/attribute-access.js';
 
 describe('handleDeath', () => {
   let registry, level;
@@ -41,6 +42,22 @@ describe('handleDeath', () => {
     expect(registry.getEntity(player.id)).toBe(player);
     expect(level.entities).toContain(player);
     expect(signalled).toBe(player);
+  });
+
+  it('credits a killer with xp for a defeated creature (scaled by its level)', () => {
+    const victim = registry.createEntity();
+    registry.addComponent(victim, 'position', components.position(2, 2));
+    registry.addComponent(victim, 'creature', components.creature());
+    registry.addComponent(victim, 'attributes', components.attributes({ xp: 10 })); // level 2
+    level.placeEntity(victim);
+
+    const killer = registry.createEntity();
+    registry.addComponent(killer, 'attributes', components.attributes({ xp: 0 }));
+
+    handleDeath(victim, level, registry, killer);
+
+    expect(getAccumulator(killer, 'xp')).toBe(10); // 5 per victim level
+    expect(registry.getEntity(victim.id)).toBeNull(); // still removed
   });
 
   it('does not throw on player death when no onPlayerDeath hook is set', () => {
