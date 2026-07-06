@@ -7,7 +7,7 @@ import { components } from '../../world/entities/components.js';
 function makeSubject() {
   const registry = createEntityRegistry();
   const e = registry.createEntity();
-  registry.addComponent(e, 'attributes', components.attributes({ hp: 10, con: 20 })); // maxHP = con
+  registry.addComponent(e, 'attributes', components.attributes({ hp: 10, hpBase: 20, con: 0 })); // maxHP = hpBase
   return { registry, e };
 }
 

@@ -1,5 +1,6 @@
 import { applyEffect } from '../../effects/core/effects.js';
-import { getScore, hasAttribute } from '../../attributes/attribute-access.js';
+import { hasAttribute } from '../../attributes/attribute-access.js';
+import { resolveAttackDamage } from '../../combat/attack-damage.js';
 import { getWeaponStats, resolveAmmo, getEquippedWeapon } from '../../combat/weapons.js';
 import { traceFlight, settleProjectile } from '../core/projectile-flight.js';
 import { splitStack } from '../../world/entities/stacking.js';
@@ -45,7 +46,7 @@ function dealDamage(actor, struck, amount, level, registry) {
 // the unchanged original attack path; it does not require the actor to have a position (the wiggle and
 // the combat sound are each guarded), so a bare attacker still deals damage.
 function meleeAttack(actor, target, level, registry) {
-  const amount = getScore(actor, 'attack');
+  const amount = resolveAttackDamage(actor, { isRanged: false }); // a swing: STR-scaled, no ammo
   const targetPos = target.components.get('position');
   if (targetPos) animations.wiggle(actor, { x: targetPos.x, y: targetPos.y });
   dealDamage(actor, target, amount, level, registry);
@@ -124,9 +125,11 @@ const freeOnFailedAttack = (actor) => actor.components.has('playerControlled');
  *   on a player misfire.
  */
 function projectileAttack(actor, target, actorPos, targetPos, weapon, level, registry) {
-  // Captured before consuming ammo: a self-thrown weapon (javelin) clears the weapon slot when its last
-  // unit flies, which would otherwise drop its attack modifier from the resolved total.
-  const amount = getScore(actor, 'attack');
+  // A strike is "ranged" (DEX-scaled) exactly when it spends ammunition — a bow shot or a thrown
+  // javelin; a reach weapon (spear, ammoType null) fights in melee (STR) even out at distance. Resolved
+  // before consuming ammo: a self-thrown weapon (javelin) clears the weapon slot when its last unit
+  // flies, which would otherwise drop its attack modifier from the resolved total.
+  const amount = resolveAttackDamage(actor, { isRanged: weapon.ammoType != null });
 
   let projectile = null;
   let usedLastName = null;
@@ -184,7 +187,8 @@ function projectileAttack(actor, target, actorPos, targetPos, weapon, level, reg
 /**
  * Attacks the target entity. Branches on the actor's equipped weapon and the distance to the target:
  * a melee swing within meleeRange, otherwise a reach/ranged attack out to the weapon's range (see
- * projectileAttack). Damage is the attribute-resolved attack damage (unarmed base + worn modifiers).
+ * projectileAttack). Damage is resolveAttackDamage: the `attack` score (unarmed base + worn modifiers)
+ * plus half the governing ability (STR melee, DEX ranged), floored, min 1 (see attack-damage.js).
  * @returns {boolean} `false` when the turn is consumed (the normal case, including a swing at a target
  *   that died before resolution, and any failed attack by an NPC); `true` only when the *player* misses
  *   on no ammo or an out-of-range target — a free affordance that doesn't spend their turn.

@@ -15,7 +15,7 @@ A creature is not a class — it's an **entity built from a recipe of components
 | `attacker` | base (unarmed) attack damage |
 | `faction` | hostility tags — see [`factions.js`](../../src/combat/factions.js) |
 | `creature` | marks it as an actor (a living thing with agency) — the source of the `isActor` sense tag goals use to tell creatures from inert scenery and floor items |
-| `turnTaker` | puts it in the turn queue at a given speed ([turn-order.md](turn-order.md)) |
+| `turnTaker` | puts it in the turn queue; its speed is derived from the `spd` attribute and synced in (call `syncSpeed` after attaching both — see [turn-order.md](turn-order.md)) |
 | `blocksMovement` | occupies its tile |
 | `inventory` + `wearsEquipment` | can carry and wear items ([item.md](item.md), [equipment.md](equipment.md)); a creature with these can be given a loadout and equip it via the `equip-weapon`/`equip-ammo` goals ([loadouts.md](loadouts.md)) |
 | `memory` | per-entity scratch store for goals |

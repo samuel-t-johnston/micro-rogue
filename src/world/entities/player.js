@@ -1,4 +1,5 @@
 import { components } from './components.js';
+import { syncSpeed } from '../../attributes/speed-sync.js';
 import { HUMANOID_SLOTS } from '../../../data/equipment-slots.js';
 
 /**
@@ -10,9 +11,11 @@ export async function createPlayer(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Player'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('player'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  // Full stat block. The ability scores (str/dex/int/spd) are placeholders — nothing reads them yet;
-  // they gain mechanical weight (attack scaling, etc.) in the progression-tuning pass. con=20 reproduces
-  // the old max HP (maxHP = con), attack=1 the old unarmed damage, xp=0 starts at level 1. See
+  // Full stat block. str/dex/int/con are placeholders on the old ~10 scale, to be rebalanced in the
+  // progression pass. spd=1 is the ~1.0 turn-speed scale (1 action/round); it feeds turnTaker.speed
+  // via syncSpeed below, with dex adding a small nimbleness bonus. hpBase is the raw HP floor that
+  // equipment and 2·con add onto (maxHP = hpBase + equip + 2·con); current is absent so it spawns
+  // full. attack=1 is the old unarmed damage, xp=0 starts at level 1. See
   // docs/design/attribute-system.md.
   registry.addComponent(
     entity,
@@ -22,13 +25,15 @@ export async function createPlayer(registry, x, y) {
       dex: 12,
       int: 10,
       con: 20,
-      spd: 10,
+      spd: 1,
       attack: 1,
-      hp: 20,
+      hpBase: 20,
+      mpBase: 1,
       xp: 0,
     }),
   );
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
+  syncSpeed(entity); // seed turnTaker.speed from spd + dex so the first turn uses the derived value
   registry.addComponent(entity, 'creature', components.creature());
   registry.addComponent(entity, 'playerControlled', components.playerControlled());
   registry.addComponent(entity, 'attacker', components.attacker()); // can-attack marker

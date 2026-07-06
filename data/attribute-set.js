@@ -49,7 +49,7 @@ export const ATTRIBUTE_SET = [
     flavor: Flavors.SCORE,
     shortLabel: 'STR',
     longLabel: 'Strength',
-    default: 10,
+    default: 1,
     resolve: baseAndMods,
   },
   {
@@ -57,7 +57,7 @@ export const ATTRIBUTE_SET = [
     flavor: Flavors.SCORE,
     shortLabel: 'DEX',
     longLabel: 'Dexterity',
-    default: 10,
+    default: 1,
     resolve: baseAndMods,
   },
   {
@@ -65,7 +65,7 @@ export const ATTRIBUTE_SET = [
     flavor: Flavors.SCORE,
     shortLabel: 'INT',
     longLabel: 'Intelligence',
-    default: 10,
+    default: 1,
     resolve: baseAndMods,
   },
   {
@@ -73,26 +73,33 @@ export const ATTRIBUTE_SET = [
     flavor: Flavors.SCORE,
     shortLabel: 'CON',
     longLabel: 'Constitution',
-    default: 10,
+    default: 1,
     resolve: baseAndMods,
   },
+
+  // spd drives turn cadence: it is synced into turnTaker.speed (see src/attributes/speed-sync.js),
+  // which the turn manager reads for turn order. Base is on a ~1.0 scale (1.0 = one action per round);
+  // DEX adds a small nimbleness bonus (0.01 per point) on top of base + equipment. Formula must stay
+  // acyclic — spd reads dex, never the reverse.
   {
     name: 'spd',
     flavor: Flavors.SCORE,
     shortLabel: 'SPD',
     longLabel: 'Speed',
-    default: 10,
-    resolve: baseAndMods,
+    default: 1,
+    resolve: ({ base, mods, score }) => base + mods + 0.01 * score('dex'),
   },
 
-  // attack: unarmed base (migrated from attacker.damage) + weapon/equipment `attack` modifiers. The
-  // "STR or DEX depending on the weapon" scaling is a later enrichment layered onto this same formula.
+  // attack: the mode-independent damage rating — unarmed/innate base + weapon/equipment `attack`
+  // modifiers. The STR/DEX ability scaling is NOT applied here (it depends on the melee-vs-ranged mode
+  // of a specific strike, which is an action-time fact); the damage code layers it on via
+  // resolveAttackDamage (src/combat/attack-damage.js). Base defaults to 1.
   {
     name: 'attack',
     flavor: Flavors.SCORE,
     shortLabel: 'Atk',
     longLabel: 'Attack',
-    default: 0,
+    default: 1,
     resolve: baseAndMods,
   },
 
@@ -105,20 +112,23 @@ export const ATTRIBUTE_SET = [
     resolve: ({ accumulated }) => levelForXp(accumulated('xp')),
   },
 
-  // Pools: store `current`; max is derived (an absent current reads as full).
+  // Pools: store `current` under the attribute name and a per-entity raw base under the companion
+  // `${name}Base` key (e.g. hpBase). `max = base + equipment + 2·stat`: the base is the flat authored
+  // floor, equipment adds its `${name}` modifiers, and the governing ability score scales it. An
+  // absent current reads as full; an absent base is 0.
   {
     name: 'hp',
     flavor: Flavors.POOL,
     shortLabel: 'HP',
     longLabel: 'Health',
-    resolveMax: ({ score, mods }) => score('con') + mods,
+    resolveMax: ({ base, mods, score }) => base + mods + 2 * score('con'),
   },
   {
     name: 'mp',
     flavor: Flavors.POOL,
     shortLabel: 'MP',
     longLabel: 'Mana',
-    resolveMax: ({ score, mods }) => score('int') + mods,
+    resolveMax: ({ base, mods, score }) => base + mods + 2 * score('int'),
   },
   {
     name: 'hunger',

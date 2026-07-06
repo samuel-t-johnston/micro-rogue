@@ -1,4 +1,5 @@
 import { components } from './components.js';
+import { syncSpeed } from '../../attributes/speed-sync.js';
 import { HUMANOID_SLOTS } from '../../../data/equipment-slots.js';
 
 /** Creates a Goblin: a basic melee creature that attacks adjacent foes, flees when outmatched, else wanders. */
@@ -7,16 +8,28 @@ export function createGoblin(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Goblin'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('goblin'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  // Full stat block. Ability scores (str/dex/int/spd) are thematic placeholders — nimble but weak — and
-  // are inert until the progression-tuning pass. xp seeds the level (data/attribute-set.js): 0 → level 1.
+  // Full stat block. str/dex/int are thematic placeholders (nimble but weak) on the old ~10 scale;
+  // spd=1 is the ~1.0 turn-speed scale, fed into turnTaker.speed by syncSpeed. xp seeds the level
+  // (data/attribute-set.js): 0 → level 1.
   registry.addComponent(
     entity,
     'attributes',
-    components.attributes({ str: 8, dex: 12, int: 9, con: 5, spd: 11, attack: 1, hp: 5, xp: 0 }),
+    components.attributes({
+      str: 8,
+      dex: 12,
+      int: 9,
+      con: 5,
+      spd: 1,
+      attack: 1,
+      hpBase: 5,
+      mpBase: 1,
+      xp: 0,
+    }),
   );
   registry.addComponent(entity, 'attacker', components.attacker());
   registry.addComponent(entity, 'faction', components.faction(['goblins']));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
+  syncSpeed(entity);
   registry.addComponent(entity, 'creature', components.creature());
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'inventory', components.inventory());
@@ -43,15 +56,26 @@ export function createOrc(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Orc'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('orc'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  // Brawny, slower; xp seeds level 2. Ability scores placeholder (see createGoblin).
+  // Brawny, average cadence; xp seeds level 2. Ability scores placeholder (see createGoblin).
   registry.addComponent(
     entity,
     'attributes',
-    components.attributes({ str: 13, dex: 9, int: 8, con: 9, spd: 9, attack: 1, hp: 9, xp: 10 }),
+    components.attributes({
+      str: 13,
+      dex: 9,
+      int: 8,
+      con: 9,
+      spd: 1,
+      attack: 1,
+      hpBase: 9,
+      mpBase: 1,
+      xp: 10,
+    }),
   );
   registry.addComponent(entity, 'attacker', components.attacker());
   registry.addComponent(entity, 'faction', components.faction(['orcs']));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
+  syncSpeed(entity);
   registry.addComponent(entity, 'creature', components.creature());
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'inventory', components.inventory());
@@ -108,15 +132,17 @@ export function createOrcCommander(registry, x, y) {
       dex: 10,
       int: 12,
       con: 12,
-      spd: 9,
+      spd: 1,
       attack: 2,
-      hp: 12,
+      hpBase: 12,
+      mpBase: 1,
       xp: 30,
     }),
   );
   registry.addComponent(entity, 'attacker', components.attacker());
   registry.addComponent(entity, 'faction', components.faction(['orcs']));
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
+  syncSpeed(entity);
   registry.addComponent(entity, 'creature', components.creature());
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'inventory', components.inventory());
@@ -165,15 +191,28 @@ export function createScuttler(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Scuttler'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('scuttler'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  // Tiny, fast, mindless; xp seeds level 1. Ability scores placeholder (see createGoblin).
+  // Tiny, fast, mindless; xp seeds level 1. Ability scores placeholder (see createGoblin). spd=1.4
+  // carries the scuttling speed advantage (was the old turnTaker literal); syncSpeed feeds it into
+  // turnTaker.speed, plus dex's nimbleness bonus.
   registry.addComponent(
     entity,
     'attributes',
-    components.attributes({ str: 4, dex: 14, int: 3, con: 2, spd: 15, attack: 1, hp: 2, xp: 0 }),
+    components.attributes({
+      str: 4,
+      dex: 14,
+      int: 3,
+      con: 2,
+      spd: 1.4,
+      attack: 1,
+      hpBase: 2,
+      mpBase: 1,
+      xp: 0,
+    }),
   );
   registry.addComponent(entity, 'attacker', components.attacker());
   registry.addComponent(entity, 'faction', components.faction(['scuttlers']));
-  registry.addComponent(entity, 'turnTaker', components.turnTaker(1.4)); // above average — scuttles
+  registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
+  syncSpeed(entity);
   registry.addComponent(entity, 'creature', components.creature());
   registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
   registry.addComponent(entity, 'memory', components.memory({ remembersEnemies: true }));

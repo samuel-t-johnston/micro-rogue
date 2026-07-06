@@ -36,6 +36,8 @@ import saveV4 from '../fixtures/save-v4.json';
 import saveV5 from '../fixtures/save-v5.json';
 import saveV6 from '../fixtures/save-v6.json';
 import saveV7 from '../fixtures/save-v7.json';
+import saveV8 from '../fixtures/save-v8.json';
+import saveV9 from '../fixtures/save-v9.json';
 
 // Builds a realistic game directly (the pipeline's static stage does a dynamic file:// import
 // that vitest's resolver mangles on Windows): a chest with contained items, creatures, map
@@ -275,8 +277,8 @@ describe('v1 → … migration chain (real, from a fixture)', () => {
     const restored = deserializeGame(loadSave(saveV1));
     expect(restored.player.id).toBe(saveV1.playerId);
     expect(restored.turnCount).toBe(saveV1.meta.turnCount);
-    // health {18,20} folded to the hp pool + con (maxHP = con) by the v7→v8 migration.
-    expect(restored.player.components.get('attributes')).toEqual({ hp: 18, con: 20 });
+    // health {18,20} folded to the hp pool + con by v7→v8; v9→v10 seeds hpBase from con.
+    expect(restored.player.components.get('attributes')).toEqual({ hp: 18, con: 20, hpBase: 20 });
     expect(rng.getMasterSeed()).toBe(saveV1.meta.seed);
   });
 });
@@ -557,7 +559,13 @@ describe('v7 → v8 migration (real, from a fixture)', () => {
         },
       ],
     };
-    expect(loadSave(raw).entities[0].components.attributes).toEqual({ str: 14, hp: 4, con: 6 });
+    // loadSave runs the full chain: v7→v8 folds health, v9→v10 seeds hpBase from con.
+    expect(loadSave(raw).entities[0].components.attributes).toEqual({
+      str: 14,
+      hp: 4,
+      con: 6,
+      hpBase: 6,
+    });
   });
 
   it('does not mutate the source fixture', () => {
@@ -569,8 +577,102 @@ describe('v7 → v8 migration (real, from a fixture)', () => {
   it('a migrated v7 save deserializes into a live game with a working hp pool', () => {
     const restored = deserializeGame(loadSave(saveV7));
     expect(restored.player.id).toBe(saveV7.playerId);
-    expect(getPool(restored.player, 'hp')).toEqual({ current: 18, max: 25 }); // con 20 + armor hp 5
+    // max = hpBase 20 (seeded from con by v9→v10) + armor hp 5 + 2·con 40.
+    expect(getPool(restored.player, 'hp')).toEqual({ current: 18, max: 65 });
     expect(getScore(restored.player, 'attack')).toBe(2); // unarmed 1 + dagger 1
+  });
+});
+
+describe('v8 → v9 migration (real, from a fixture)', () => {
+  const findEntity = (entities, id) => entities.find((e) => e.id === id);
+
+  it('seeds the spd base from turnTaker.speed, overwriting the old inert placeholder scale', () => {
+    const migrated = loadSave(saveV8);
+    expect(migrated.saveVersion).toBe(SAVE_VERSION);
+    // Player stored spd 10 (old scale) but turnTaker.speed 1 — the real cadence wins.
+    expect(findEntity(migrated.entities, 1).components.attributes.spd).toBe(1);
+  });
+
+  it('also seeds spd inside frozen floors', () => {
+    const goblin = findEntity(loadSave(saveV8).frozenLevels['floor-2'].entities, 5);
+    expect(goblin.components.attributes.spd).toBe(1); // was 11, turnTaker.speed 1
+  });
+
+  it('leaves a turnTaker that has no attributes untouched (keeps its literal speed)', () => {
+    const raw = {
+      saveVersion: 8,
+      versionHistory: [{ saveVersion: 8 }],
+      entities: [{ id: 1, components: { turnTaker: { speed: 1.4, accumulator: 0 } } }],
+    };
+    const migrated = loadSave(raw);
+    expect(migrated.entities[0].components.attributes).toBeUndefined();
+    expect(migrated.entities[0].components.turnTaker.speed).toBe(1.4);
+  });
+
+  it('leaves attributes on an entity with no turnTaker untouched', () => {
+    const raw = {
+      saveVersion: 8,
+      versionHistory: [{ saveVersion: 8 }],
+      entities: [{ id: 1, components: { attributes: { str: 5, spd: 10 } } }],
+    };
+    expect(loadSave(raw).entities[0].components.attributes).toEqual({ str: 5, spd: 10 });
+  });
+
+  it('does not mutate the source fixture', () => {
+    loadSave(saveV8);
+    expect(saveV8.entities[0].components.attributes.spd).toBe(10);
+  });
+
+  it('a migrated v8 save deserializes into a live game whose speed derives from spd + dex', () => {
+    const restored = deserializeGame(loadSave(saveV8));
+    expect(restored.player.id).toBe(saveV8.playerId);
+    // spd base 1 (from turnTaker.speed) + 0.01 * dex 12 = 1.12.
+    expect(getScore(restored.player, 'spd')).toBeCloseTo(1.12);
+  });
+});
+
+describe('v9 → v10 migration (real, from a fixture)', () => {
+  const findEntity = (entities, id) => entities.find((e) => e.id === id);
+
+  it('seeds hpBase from con so the pool base survives the current/base split', () => {
+    const migrated = loadSave(saveV9);
+    expect(migrated.saveVersion).toBe(SAVE_VERSION);
+    const player = findEntity(migrated.entities, 1).components.attributes;
+    expect(player.hpBase).toBe(20); // from con 20
+    expect(player.hp).toBe(18); // stored current untouched
+  });
+
+  it('also seeds hpBase inside frozen floors', () => {
+    const goblin = findEntity(loadSave(saveV9).frozenLevels['floor-2'].entities, 5);
+    expect(goblin.components.attributes.hpBase).toBe(5); // from con 5
+  });
+
+  it('leaves an entity without attributes untouched', () => {
+    const potion = findEntity(loadSave(saveV9).entities, 4).components;
+    expect(potion.attributes).toBeUndefined();
+  });
+
+  it('does not overwrite an hpBase that already exists', () => {
+    const raw = {
+      saveVersion: 9,
+      versionHistory: [{ saveVersion: 9 }],
+      entities: [{ id: 1, components: { attributes: { con: 5, hp: 3, hpBase: 99 } } }],
+    };
+    expect(loadSave(raw).entities[0].components.attributes.hpBase).toBe(99);
+  });
+
+  it('does not mutate the source fixture', () => {
+    loadSave(saveV9);
+    expect(saveV9.entities[0].components.attributes.hpBase).toBeUndefined();
+  });
+
+  it('a migrated v9 save deserializes into a live game with base + con + equipment HP', () => {
+    const restored = deserializeGame(loadSave(saveV9));
+    expect(restored.player.id).toBe(saveV9.playerId);
+    // max = hpBase 20 + armor hp 5 + 2·con 40 = 65; current 18 preserved.
+    expect(getPool(restored.player, 'hp')).toEqual({ current: 18, max: 65 });
+    // mp has no authored base: max = 2·int 20, absent current reads full.
+    expect(getPool(restored.player, 'mp')).toEqual({ current: 20, max: 20 });
   });
 });
 

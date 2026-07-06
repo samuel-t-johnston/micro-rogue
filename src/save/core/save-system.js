@@ -20,7 +20,7 @@ import {
 } from './serialize.js';
 
 /** Save schema version. Bumped only on a breaking schema change (see the design doc). */
-export const SAVE_VERSION = 8;
+export const SAVE_VERSION = 10;
 
 /** Game release version; independent of SAVE_VERSION, tracks releases and mirrors package.json. */
 export const GAME_VERSION = '0.2.0';
@@ -237,6 +237,55 @@ export const migrations = [
       fold(save.entities);
       for (const floor of Object.values(save.frozenLevels ?? {})) {
         fold(floor.entities);
+      }
+      return save;
+    },
+  },
+  {
+    from: 8,
+    to: 9,
+    // v9 makes turn speed a derived attribute. Pre-v9, `spd` was an inert placeholder Score on a ~10
+    // scale while the real turn cadence lived in turnTaker.speed; now `spd` (rescaled to a ~1.0 base,
+    // plus a small DEX term) is synced *into* turnTaker.speed by the speed sync (src/attributes/
+    // speed-sync.js). Seed each entity's new `spd` base straight from its stored turnTaker.speed so its
+    // cadence is preserved exactly across the upgrade — the DEX term then layers on at load. Only
+    // entities that both take turns and carry attributes are touched; a bare turnTaker keeps its literal
+    // speed (no attributes to sync from). Frozen literals only — a migration never calls live code.
+    migrate(save) {
+      const seedSpd = (entities) => {
+        for (const entity of entities ?? []) {
+          const c = entity.components;
+          if (c?.turnTaker && c.attributes) c.attributes.spd = c.turnTaker.speed;
+        }
+      };
+      seedSpd(save.entities);
+      for (const floor of Object.values(save.frozenLevels ?? {})) {
+        seedSpd(floor.entities);
+      }
+      return save;
+    },
+  },
+  {
+    from: 9,
+    to: 10,
+    // v10 splits pool state into a stored current (unchanged, under `hp`) and a per-entity raw base
+    // under a companion `${name}Base` key, so the new `max = base + equip + 2·stat` formula no longer
+    // double-uses the mutable current value. Pre-v10 there was no HP base and maxHP was just `con`, so
+    // seed `hpBase` from the stored `con` — each entity's former max-HP driver — which reproduces the
+    // base a freshly-built creature of the same kind now carries (factories author hpBase == con).
+    // MP had no authored base and stays baseless (max = 2·int). Frozen literals only — never live code.
+    migrate(save) {
+      const seedHpBase = (entities) => {
+        for (const entity of entities ?? []) {
+          const attrs = entity.components?.attributes;
+          if (attrs && attrs.hpBase === undefined && ('con' in attrs || 'hp' in attrs)) {
+            attrs.hpBase = attrs.con ?? attrs.hp ?? 0;
+          }
+        }
+      };
+      seedHpBase(save.entities);
+      for (const floor of Object.values(save.frozenLevels ?? {})) {
+        seedHpBase(floor.entities);
       }
       return save;
     },

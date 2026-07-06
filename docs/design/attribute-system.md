@@ -68,12 +68,14 @@ lowercase keys keep the metadata clean since it drives user-facing display.
 ```js
 attributes: {
   str: 10, dex: 9, int: 8, con: 11, spd: 10,  // score bases
-  hp: 20, mp: 5, hunger: 100,                  // pool CURRENT values
-  xp: 0,                                        // accumulator value
+  hp: 20, hpBase: 8, mp: 5,                     // pool CURRENT values + a raw base (hpBase)
+  hunger: 100, xp: 0,                           // pool current, accumulator value
 }
 ```
 
-- **Score** stores its `base`. **Pool** stores its `current` (max is derived, never stored).
+- **Score** stores its `base`. **Pool** stores its `current`; its max is derived, but the flat
+  per-entity **raw base** the max formula adds onto is stored under the companion key `${name}Base`
+  (e.g. `hpBase`) — kept separate from the mutable current so taking damage never shrinks the max.
   **Accumulator** stores its `value`.
 - **Derived attributes store nothing** — `Level` and `attack` have no entry; they are pure functions.
 - **A missing key resolves to the definition's default.** Legacy entities, minimalist monsters, and
@@ -147,24 +149,36 @@ parse a flavor-tagged blob to use the result, the uniform getter bought nothing.
 | `dex` | Score | base | base + equip | DEX / Dexterity |
 | `int` | Score | base | base + equip | INT / Intelligence |
 | `con` | Score | base | base + equip | CON / Constitution |
-| `spd` | Score | base | base + equip | SPD / Speed |
+| `spd` | Score | base | base + equip + 0.01·`dex` | SPD / Speed |
 | `level` | Score (derived) | — | tier(`xp`) | Lvl / Level |
 | `attack` | Score | base (unarmed) | base + equip `attack` mods | Atk / Attack |
-| `hp` | Pool | current | max = f(`con`) + equip | HP / Health |
-| `mp` | Pool | current | max = f(`int`) + equip | MP / Mana |
-| `hunger` | Pool | current | max = f(`con`) | Hun / Hunger |
+| `hp` | Pool | current + base | max = `hpBase` + equip + 2·`con` | HP / Health |
+| `mp` | Pool | current + base | max = `mpBase` + equip + 2·`int` | MP / Mana |
+| `hunger` | Pool | current | max = 10·`con` | Hun / Hunger |
 | `xp` | Accumulator | value | identity | XP / Experience |
 
 Notes:
 
-- **`attack` is a stored-base Score, not purely derived.** The stored base is the entity's *unarmed*
-  damage (a goblin's claws differ from a fist); equipment `attack` modifiers add on top. This is
-  exactly today's `attackDamage` attribute, formalized. The "STR or DEX depending on weapon" scaling
-  is a **later formula enrichment** — layering it on doesn't change the interface or the migration.
-- **The pool max formulas are placeholders.** `f(con)`/`f(int)` scale is unresolved and belongs with
-  progression tuning. See §9 for how migration preserves current maxes without committing to a curve.
+- **`attack` is a mode-independent stored-base Score.** The stored base is the entity's *unarmed*
+  damage (a goblin's claws differ from a fist); equipment `attack` modifiers add on top. The **STR/DEX
+  ability scaling is deliberately NOT in this resolver** — whether a strike scales on STR (melee) or DEX
+  (ranged) is an action-time fact (it turns on whether the strike spends ammunition), not entity state.
+  The damage code owns that: `resolveAttackDamage` (src/combat/attack-damage.js) = `getScore(attack) +
+  floor(governing_score / 2)`, min 1. Keeping `attack` mode-independent is why one weapon carries one
+  `attack` modifier that applies to both a javelin's stab and its throw.
+- **Pool max = raw base + equipment + 2·governing score.** HP scales on `con`, MP on `int`; the base
+  is the flat per-entity floor stored under `hpBase`/`mpBase`. The `2·` coefficient and the base values
+  are still balance knobs — the core scores (`con`/`int`) currently sit on the old ~10 scale, so HP/MP
+  run high until the progression-tuning pass rebalances them. Hunger has no base (max = 10·`con`).
 - **`mp` and `hunger` exist but are inert at first**: MP isn't spent, Hunger doesn't decay yet (its
   per-turn tick is an `upkeep` hook, deferred). They resolve and display; that's the first cut.
+- **`spd` drives turn order.** Its resolved value is synced into the `turnTaker.speed` field the turn
+  manager reads (`src/attributes/speed-sync.js`), so the turn module stays ignorant of attributes. The
+  sync polls each entity at its turn boundary (game-scene `onTurnStart`) and seeds it at construction;
+  speed is floored at `MIN_SPEED` so a debuff can't freeze an entity out of the queue. Base is on a
+  ~1.0 scale (1 action/round); the `0.01·dex` term is a small nimbleness bonus. The ability-score bases
+  (`str`/`dex`/`int`/`con`) still sit on the old ~10 scale pending the progression-tuning rebalance,
+  which is why `dex`'s contribution is presently ~0.1 at default.
 
 ## 7. Removing the `has('health')` overload
 

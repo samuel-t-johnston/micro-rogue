@@ -12,7 +12,7 @@ describe('executeConsume', () => {
     registry = createEntityRegistry();
     actor = registry.createEntity();
     registry.addComponent(actor, 'inventory', components.inventory());
-    registry.addComponent(actor, 'attributes', components.attributes({ hp: 10, con: 20 })); // maxHP = con
+    registry.addComponent(actor, 'attributes', components.attributes({ hp: 10, hpBase: 20, con: 0 })); // maxHP = hpBase
 
     potion = createHealingPotion(registry, null, null, actor.id);
     actor.components.get('inventory').items.push(potion);

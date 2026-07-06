@@ -25,7 +25,7 @@ function makeItem(registry, name, { throwable } = {}) {
 function makeCreature(registry, level, x, y, { name = 'orc', hp = 10 } = {}) {
   const e = registry.createEntity();
   registry.addComponent(e, 'name', components.name(name));
-  registry.addComponent(e, 'attributes', components.attributes({ hp, con: hp })); // maxHP = con
+  registry.addComponent(e, 'attributes', components.attributes({ hp, hpBase: hp, con: 0 })); // maxHP = hpBase
   registry.addComponent(e, 'position', components.position(x, y));
   registry.addComponent(e, 'creature', components.creature());
   registry.addComponent(e, 'blocksMovement', components.blocksMovement());

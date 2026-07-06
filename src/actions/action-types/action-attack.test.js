@@ -33,7 +33,7 @@ describe('executeAttack', () => {
   function makeTarget(hp, x = 2, y = 2) {
     const e = registry.createEntity();
     registry.addComponent(e, 'position', components.position(x, y));
-    registry.addComponent(e, 'attributes', components.attributes({ hp, con: hp })); // maxHP = con
+    registry.addComponent(e, 'attributes', components.attributes({ hp, hpBase: hp, con: 0 })); // maxHP = hpBase
     level.placeEntity(e);
     return e;
   }
