@@ -74,11 +74,15 @@ export function setScoreBase(entity, name, value) {
 }
 
 /** A pool's `{ current, max }`: max is derived; current is the stored value clamped to [0, max]
- *  (an absent current reads as full). */
+ *  (an absent current reads as full). The pool's per-entity raw base — the flat value stat scaling
+ *  and equipment add onto in `resolveMax` — is stored under the companion key `${name}Base` (e.g.
+ *  `hpBase`), separate from the mutable current so damage never shrinks the max. It is passed to the
+ *  formula as `ctx.base`; an absent base falls back to the definition's `base`, then 0. */
 export function getPool(entity, name) {
   const def = getDefinition(name);
   requireFlavor(def, Flavors.POOL);
-  const max = def.resolveMax(resolveContext(entity, name, undefined));
+  const base = stateOf(entity)?.[`${name}Base`] ?? def.base ?? 0;
+  const max = def.resolveMax(resolveContext(entity, name, base));
   const stored = stateOf(entity)?.[name];
   return { current: clamp(stored ?? max, 0, max), max };
 }

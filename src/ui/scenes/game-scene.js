@@ -21,6 +21,7 @@ import { createLevelManager } from '../../world/dungeon/level-manager.js';
 import transitMap from '../../../data/transit-map.js';
 import { applySenses } from '../../ai/core/planning-context.js';
 import { upkeep } from '../../engine/turn/upkeep.js';
+import { syncSpeed } from '../../attributes/speed-sync.js';
 import { winConditions, escapeWithQuestItem } from '../../engine/turn/win-conditions.js';
 import { scentUpkeep, scentAt } from '../../world/sense-systems/scent.js';
 import { getTileType } from '../../world/map/tile-registry.js';
@@ -461,6 +462,9 @@ export function createGameScene({
       },
       invokeAction: (entity) => actionSystem.invokeAction(entity),
       onTurnStart: (entity) => {
+        // Refresh derived turn speed from the entity's attributes before it acts — the sanctioned
+        // per-entity poll point (see speed-sync.js). Takes effect next queue pass, per turn-order.md.
+        syncSpeed(entity);
         if (entity.components.has('playerControlled')) upkeep.run({ level, registry, player });
       },
       onTurnEnd: handleTurnEnd,

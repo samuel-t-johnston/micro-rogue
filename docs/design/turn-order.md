@@ -44,7 +44,12 @@ The rescan fires once per loop iteration — after the entity finishes acting (o
 
 ## Speed and Accumulator Semantics
 
-Speed is a numeric property on any entity with a `TurnTaker` component.
+Speed is a numeric property on any entity with a `TurnTaker` component. For attribute-bearing entities
+it is not authored directly: the `spd` attribute is resolved (base + equipment + a small DEX term) and
+synced into `turnTaker.speed` at each entity's turn boundary and at construction (see
+`src/attributes/speed-sync.js` and attribute-system.md). The turn module still only reads
+`turnTaker.speed` — it never touches attributes, so it stays swappable. A turn-taker with no attributes
+(a future timed object) keeps the literal speed it was constructed with.
 
 | Speed value | Behavior |
 |---|---|

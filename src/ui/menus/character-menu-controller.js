@@ -3,6 +3,7 @@ import { createInventoryScreenBody } from '../screens/inventory-screen.js';
 import { createEquipmentScreenBody } from '../screens/equipment-screen.js';
 import { createStatsScreenBody } from '../screens/stats-screen.js';
 import { getScore, getPool, getAccumulator } from '../../attributes/attribute-access.js';
+import { resolveAttackDamage } from '../../combat/attack-damage.js';
 import { levelProgress } from '../../../data/attribute-set.js';
 
 /**
@@ -137,7 +138,8 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
           int: getScore(player, 'int'),
           con: getScore(player, 'con'),
           spd: getScore(player, 'spd'),
-          attack: getScore(player, 'attack'),
+          meleeAttack: resolveAttackDamage(player, { isRanged: false }),
+          rangedAttack: resolveAttackDamage(player, { isRanged: true }),
         };
       },
     });

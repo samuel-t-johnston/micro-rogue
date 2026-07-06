@@ -101,9 +101,12 @@ Register the factory in [`entity-prefabs.js`](../../src/world/entities/entity-pr
 
 ## Worth knowing
 
-- **Damage is attribute-resolved, like all gear.** Ranged damage is base + the weapon's
-  `attributeModifiers` ([equipment.md](equipment.md)); arrows deliberately carry no modifiers. Note
-  `getAttribute` sums **all** equipment slots, so any modifier you put on ammo would also boost melee —
+- **Damage is attribute-resolved, like all gear.** Damage is the `attack` score (base + the weapon's
+  `attributeModifiers`, [equipment.md](equipment.md)) plus an ability bonus of half the governing score
+  — DEX for a ranged strike, STR for melee — floored, min 1 (`resolveAttackDamage`,
+  [attack-damage.js](../../src/combat/attack-damage.js)). "Ranged" means the strike spends ammo, so a
+  spear's reach and a javelin's point-blank stab scale on STR. Arrows deliberately carry no modifiers,
+  and the score sums **all** equipment slots, so any modifier on ammo would also boost melee —
   intentional non-special-casing, documented in the design doc.
 - **Stacking is one entity with a count.** `splitStack` peels units off a stack; `inventory-stacking.js`
   merges on pickup and powers the Split / Stack all inventory actions (see above).

@@ -129,27 +129,31 @@ export function createStatsScreenBody({ theme, getStats }) {
       divider(ctx, leftX, y, innerW);
       y += ROW_GAP;
 
+      // A two-column score row; an empty right label leaves that column blank.
       const scoreRow = (labelL, valL, labelR, valR) => {
         drawText(ctx, `${labelL}: ${valL}`, leftX, y, {
           color: theme.text,
           size: SCORE_SIZE,
           baseline: 'top',
         });
-        drawText(ctx, `${labelR}: ${valR}`, rightX, y, {
-          color: theme.text,
-          size: SCORE_SIZE,
-          baseline: 'top',
-        });
+        if (labelR) {
+          drawText(ctx, `${labelR}: ${valR}`, rightX, y, {
+            color: theme.text,
+            size: SCORE_SIZE,
+            baseline: 'top',
+          });
+        }
         y += SCORE_ROW_H;
       };
       scoreRow('Strength', s.str, 'Dexterity', s.dex);
       scoreRow('Intelligence', s.int, 'Constitution', s.con);
 
-      // Divider, then Speed | Attack.
+      // Divider, then Speed, and the resolved Melee | Ranged attack damage.
       y += 4;
       divider(ctx, leftX, y, innerW);
       y += ROW_GAP;
-      scoreRow('Speed', s.spd, 'Attack', s.attack);
+      scoreRow('Speed', s.spd, '', '');
+      scoreRow('Melee Atk', s.meleeAttack, 'Ranged Atk', s.rangedAttack);
     },
 
     handleInput() {

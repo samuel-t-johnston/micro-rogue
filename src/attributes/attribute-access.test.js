@@ -55,7 +55,7 @@ describe('attribute accessors', () => {
     });
 
     it('falls back to the definition default when unset', () => {
-      expect(getScore(makeActor(), 'str')).toBe(10);
+      expect(getScore(makeActor(), 'str')).toBe(1);
     });
 
     it('adds equipment modifiers to the base', () => {
@@ -79,7 +79,7 @@ describe('attribute accessors', () => {
 
     it('reads defaults when the entity has no attributes component', () => {
       const bare = registry.createEntity();
-      expect(getScore(bare, 'str')).toBe(10);
+      expect(getScore(bare, 'str')).toBe(1);
     });
   });
 
@@ -97,39 +97,44 @@ describe('attribute accessors', () => {
   });
 
   describe('pool', () => {
-    it('derives max from its formula and reads absent current as full', () => {
-      const e = makeActor({ con: 8 }); // maxHP = con
-      expect(getPool(e, 'hp')).toEqual({ current: 8, max: 8 });
+    it('derives max as base + 2·CON and reads absent current as full', () => {
+      const e = makeActor({ con: 8, hpBase: 4 }); // maxHP = 4 + 2·8 = 20
+      expect(getPool(e, 'hp')).toEqual({ current: 20, max: 20 });
+    });
+
+    it('treats an absent base as 0', () => {
+      const e = makeActor({ con: 8 }); // maxHP = 0 + 2·8 = 16
+      expect(getPool(e, 'hp')).toEqual({ current: 16, max: 16 });
     });
 
     it('adds equipment modifiers to the derived max', () => {
-      const e = makeActor({ con: 8 });
-      equip(e, Slots.ARMOR, { hp: 4 });
-      expect(getPool(e, 'hp')).toEqual({ current: 12, max: 12 });
+      const e = makeActor({ con: 8, hpBase: 4 });
+      equip(e, Slots.ARMOR, { hp: 4 }); // maxHP = 4 + 4 + 16 = 24
+      expect(getPool(e, 'hp')).toEqual({ current: 24, max: 24 });
     });
 
     it('clamps a stored current above a dropped max on read (non-destructive)', () => {
-      const e = makeActor({ con: 10, hp: 10 });
-      equip(e, Slots.ARMOR, { hp: -4 }); // maxHP now 6
-      expect(getPool(e, 'hp')).toEqual({ current: 6, max: 6 });
+      const e = makeActor({ con: 10, hpBase: 0, hp: 20 }); // maxHP = 2·10 = 20
+      equip(e, Slots.ARMOR, { hp: -6 }); // maxHP now 14
+      expect(getPool(e, 'hp')).toEqual({ current: 14, max: 14 });
     });
 
     it('adjustPool applies damage and healing, clamped to [0, max]', () => {
-      const e = makeActor({ con: 10, hp: 10 });
+      const e = makeActor({ con: 5, hpBase: 0, hp: 10 }); // maxHP = 2·5 = 10
       expect(adjustPool(e, 'hp', -3)).toEqual({ current: 7, max: 10 });
       expect(adjustPool(e, 'hp', -100)).toEqual({ current: 0, max: 10 });
       expect(adjustPool(e, 'hp', 100)).toEqual({ current: 10, max: 10 });
     });
 
     it('setPoolCurrent sets the current clamped to max', () => {
-      const e = makeActor({ con: 10, hp: 2 });
+      const e = makeActor({ con: 5, hpBase: 0, hp: 2 }); // maxHP = 10
       expect(setPoolCurrent(e, 'hp', 99)).toEqual({ current: 10, max: 10 });
     });
 
-    it('mp max derives from int, hunger from con', () => {
-      const e = makeActor({ int: 7, con: 5 });
-      expect(getPool(e, 'mp').max).toBe(7);
-      expect(getPool(e, 'hunger').max).toBe(50);
+    it('mp max derives from base + 2·INT, hunger from 10·CON', () => {
+      const e = makeActor({ int: 7, con: 5, mpBase: 1 });
+      expect(getPool(e, 'mp').max).toBe(15); // 1 + 2·7
+      expect(getPool(e, 'hunger').max).toBe(50); // 10·5
     });
   });
 
@@ -188,7 +193,7 @@ describe('attribute accessors', () => {
         shortLabel: 'HP',
         longLabel: 'Health',
         current: 9,
-        max: 9,
+        max: 18, // 0 base + 2·con 9
       });
       expect(describeAttribute(e, 'xp')).toMatchObject({ flavor: Flavors.ACCUMULATOR, value: 40 });
     });
