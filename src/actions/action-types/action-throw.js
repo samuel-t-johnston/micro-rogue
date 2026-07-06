@@ -1,8 +1,10 @@
 import { applyEffect } from '../../effects/core/effects.js';
-import { traceFlight, settleProjectile } from '../core/projectile-flight.js';
+import { traceFlight, settleProjectile, scatterTile } from '../core/projectile-flight.js';
+import { rollsMiss } from '../../combat/accuracy.js';
+import { chebyshevDistance } from '../../world/map/geometry.js';
 import { animations } from '../../render/animations.js';
 import { gameLog } from '../../engine/log/game-log.js';
-import { subject, object, conjugate, itemName } from '../../engine/log/text/log-text.js';
+import { subject, object, conjugate, possessive, itemName } from '../../engine/log/text/log-text.js';
 
 // Joins names into a readable list: "a", "a and b", "a, b and c".
 function joinNames(names) {
@@ -13,9 +15,10 @@ function joinNames(names) {
 const capitalize = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 /**
- * Throws an item from the actor's inventory toward a target tile. The item flies in a straight line and
- * hits the first thing that stops it — a wall, fixture, or creature — which may be short of the aimed
- * tile (no miss model otherwise). Any item can be thrown; only one with a `throwable` component carries
+ * Throws an item from the actor's inventory toward a target tile. The throw may go wide (accuracy.js) —
+ * a miss veers to a tile beside the aim — after which the item flies in a straight line and hits the
+ * first thing that stops it: a wall, fixture, or creature, possibly short of where it was aimed. Any
+ * item can be thrown; only one with a `throwable` component carries
  * an on-hit effect, applied to each non-item entity on the impact tile that can receive it (e.g.
  * damage/heal need `health`). The item then shatters (per `breakChance`) or comes to rest — on the
  * impact tile if it can hold it, otherwise bouncing back to the last clear tile.
@@ -30,7 +33,19 @@ export function executeThrow(actor, action, level, registry) {
   inventory.items.splice(idx, 1);
 
   const origin = actor.components.get('position');
-  const { impact, before } = traceFlight(level, origin.x, origin.y, action.x, action.y);
+  // A throw can go wide (thrower DEX + range, same roll as a bow). A miss veers to a tile beside the
+  // aimed one — which may clip a bystander standing there — or hits home if the target is boxed in.
+  const aimed = { x: action.x, y: action.y };
+  let aim = aimed;
+  let missed = false;
+  if (rollsMiss(actor, chebyshevDistance(origin, aimed))) {
+    const scatter = scatterTile(level, origin, aimed);
+    if (scatter) {
+      aim = scatter;
+      missed = true;
+    }
+  }
+  const { impact, before } = traceFlight(level, origin.x, origin.y, aim.x, aim.y);
   const throwable = item.components.get('throwable');
   const itemId = item.id;
   const thrownName = itemName(item); // captured before a lethal hit / break can clear components
@@ -89,6 +104,14 @@ export function executeThrow(actor, action, level, registry) {
     impactLine = broke
       ? `The ${thrownName} shatters on the floor.`
       : `${subject(actor)} ${conjugate(actor, 'throw', 'throws')} the ${thrownName}.`;
+  }
+  // A wide throw announces the miss before the impact line (which then narrates where it actually went).
+  if (missed) {
+    gameLog.add({
+      actor: actor.id,
+      action: 'throw',
+      display: `${subject(actor)} ${conjugate(actor, 'miss', 'misses')} ${possessive(actor)} target.`,
+    });
   }
   gameLog.add({ actor: actor.id, action: 'throw', item: itemId, display: impactLine });
 

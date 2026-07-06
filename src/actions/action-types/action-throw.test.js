@@ -1,9 +1,17 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { executeThrow } from './action-throw.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { createLevel } from '../../world/map/level.js';
 import { components } from '../../world/entities/components.js';
 import { gameLog } from '../../engine/log/game-log.js';
+import { rollsMiss } from '../../combat/accuracy.js';
+
+// Throw accuracy is stubbed: lands on the aimed tile by default, forced wide per-test via
+// rollsMiss.mockReturnValueOnce(true). The scatterTile redirect geometry stays real.
+vi.mock('../../combat/accuracy.js', () => ({
+  rollsMiss: vi.fn(() => false),
+  missChance: () => 0,
+}));
 
 function makeLevel() {
   const level = createLevel();
@@ -58,6 +66,8 @@ describe('executeThrow', () => {
 
   beforeEach(() => {
     gameLog.reset();
+    rollsMiss.mockReset();
+    rollsMiss.mockReturnValue(false); // lands true by default; per-test override for a forced miss
     registry = createEntityRegistry();
     level = makeLevel();
     actor = registry.createEntity();
@@ -83,6 +93,24 @@ describe('executeThrow', () => {
     expect(result).toBe(false);
     expect(orc.components.get('attributes').hp).toBe(5);
     expect(inventory.items).toHaveLength(0);
+  });
+
+  it('spares the target when the throw goes wide, veering to a neighbouring tile', () => {
+    const orc = makeCreature(registry, level, 3, 2); // aimed at, hp 10
+    const potion = makeItem(registry, 'Potion of Pain', {
+      throwable: ['damage', { amount: 5 }, 1],
+    });
+    inventory.items.push(potion);
+    rollsMiss.mockReturnValueOnce(true); // force the throw wide
+
+    const result = throwAt(potion, 3, 2);
+
+    expect(result).toBe(false);
+    expect(orc.components.get('attributes').hp).toBe(10); // the miss veered off the target's tile
+    expect(inventory.items).toHaveLength(0); // still thrown
+    expect(gameLog.getDisplayEntries(5).map((e) => e.display)).toContainEqual(
+      expect.stringMatching(/you miss your target/i), // the player-form miss line
+    );
   });
 
   it('heals a creature when thrown with a heal effect', () => {

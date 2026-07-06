@@ -7,7 +7,12 @@
 import { rng } from '../../engine/core/rng.js';
 import { components } from '../../world/entities/components.js';
 import { getTileType } from '../../world/map/tile-registry.js';
-import { lineTiles } from '../../world/map/geometry.js';
+import {
+  lineTiles,
+  cardinalDirection,
+  COMPASS_DIRECTIONS,
+  DIRECTION_STEPS,
+} from '../../world/map/geometry.js';
 
 /**
  * True if a tile stops a projectile's flight: solid terrain (a wall) or any entity that blocks
@@ -49,6 +54,31 @@ function landItem(item, x, y, level, registry) {
     registry.addComponent(item, 'position', components.position(x, y));
   }
   level.placeEntity(item);
+}
+
+/**
+ * Where a *missed* shot at `target` is redirected: a random tile adjacent to the target, drawn from the
+ * five that are not "behind" it from the shooter's viewpoint. The excluded three — the tile in the
+ * shot's travel direction plus its two diagonal neighbours — are the ones whose line from the shooter
+ * runs through the target itself, so dropping them keeps a miss from punching *through* the target to
+ * reach its scatter tile. Candidates are filtered by `tileHoldsItem`, which admits open floor and
+ * creature tiles but rejects walls and solid fixtures — so a stray shot can still clip a bystander
+ * standing beside the target (the fun part) but never "scatters into" a wall. Returns `null` when the
+ * target is boxed in (all five blocked) or the shooter and target coincide; the caller then just hits.
+ */
+export function scatterTile(level, from, target) {
+  const dir = cardinalDirection(from, target);
+  if (!dir) return null;
+  const i = COMPASS_DIRECTIONS.indexOf(dir);
+  const behind = new Set([
+    COMPASS_DIRECTIONS[i],
+    COMPASS_DIRECTIONS[(i + 1) % 8],
+    COMPASS_DIRECTIONS[(i + 7) % 8],
+  ]);
+  const candidates = COMPASS_DIRECTIONS.filter((d) => !behind.has(d))
+    .map((d) => ({ x: target.x + DIRECTION_STEPS[d][0], y: target.y + DIRECTION_STEPS[d][1] }))
+    .filter((t) => tileHoldsItem(level, t.x, t.y));
+  return candidates.length ? rng.pick(candidates) : null;
 }
 
 /**
