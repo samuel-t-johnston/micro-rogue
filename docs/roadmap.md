@@ -132,9 +132,10 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
   - "Accumulator" type - XP
 - [x] Attributes set for Player and monsters (full stat block seeded; ability-score *values* are placeholders until tuning)
 - [x] Gain XP on kill (scales with the defeated creature's level; all creatures earn)
-- [ ] Level up at XP tiers (Level derives + displays; rewards/crossing deferred to the tuning pass)
 - [x] Player attributes screen (Stats card in the character menu; curated set pending display metadata)
 - [x] Attributes added to HUD widget (Level line; HP already shown)
+- [x] Add miss chance to ranged attacks and throw (DEX + range; a miss scatters to an adjacent tile)
+- [ ] Level up at XP tiers (Level derives + displays; rewards/crossing deferred to the tuning pass)
 - [ ] New game Player stat allocation
 - [ ] Attributes used in other systems
   - Throw/ranged miss chance?

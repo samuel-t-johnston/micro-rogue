@@ -219,6 +219,24 @@ Ranged attack is gated instead by `range` + clear line; in practice an enemy you
 clear line to is what you can shoot. The bow's "15, within vision" reduces to: you can only tap an
 enemy you can see, and the clear-line check enforces the rest.
 
+### Accuracy and misses
+
+Ranged strikes and thrown items can go **wide**. A strike is "ranged" for accuracy the same way it is
+for damage — it **spends ammunition** (bow shot, thrown javelin); a reach weapon (spear) and a
+javelin's point-blank stab never miss. Throws always roll (utility lobs at empty ground included — the
+same formula, kept simple).
+
+- **Miss chance** (`src/combat/accuracy.js`, `missChance`): `0.25 + 0.01·distance − 0.01·min(DEX, 20)`,
+  clamped to `[0, 0.95]`. The DEX cap keeps a maxed archer around 95% to hit at close range, leaving
+  room for future accuracy bonuses. Pure and unit-tested; the roll (`rollsMiss`) goes through the
+  shared gameplay `rng` like `breakChance`.
+- **On a miss**, the shot is **redirected to a tile adjacent to the target** (`scatterTile` in
+  `projectile-flight.js`), chosen from the five that are *not* "behind" the target from the shooter's
+  view — the three behind are excluded so a miss can't punch *through* the target to reach its scatter
+  tile. Candidates are filtered by `tileHoldsItem` (open floor and creature tiles, never walls), so a
+  stray shot can still **clip a bystander** standing beside the target. A boxed-in target (all five
+  blocked) just gets hit. The redirected tile then flows through the normal flight/impact/settle path.
+
 ---
 
 ## 7. Stacking, and splitting one unit off a stack

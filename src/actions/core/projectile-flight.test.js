@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { traceFlight, settleProjectile } from './projectile-flight.js';
+import { traceFlight, settleProjectile, scatterTile } from './projectile-flight.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { createLevel } from '../../world/map/level.js';
 import { components } from '../../world/entities/components.js';
@@ -56,6 +56,56 @@ describe('traceFlight', () => {
     const { impact, before } = traceFlight(level, 2, 2, 3, 2);
     expect(impact).toEqual({ x: 3, y: 2 });
     expect(before).toEqual({ x: 2, y: 2 });
+  });
+});
+
+describe('scatterTile', () => {
+  let level;
+
+  beforeEach(() => {
+    rng.init(7);
+    level = makeLevel();
+  });
+
+  // Shooter due west of the target: the shot travels E, so the three "behind" tiles are E/SE/NE of
+  // the target. from (0,2) → target (3,2).
+  const behind = [
+    { x: 4, y: 2 },
+    { x: 4, y: 3 },
+    { x: 4, y: 1 },
+  ];
+  const allowed = [
+    { x: 3, y: 3 }, // S
+    { x: 2, y: 3 }, // SW
+    { x: 2, y: 2 }, // W
+    { x: 2, y: 1 }, // NW
+    { x: 3, y: 1 }, // N
+  ];
+
+  it('only ever redirects to a side/front tile, never one directly behind the target', () => {
+    const seen = new Set();
+    for (let i = 0; i < 40; i++) {
+      const t = scatterTile(level, { x: 0, y: 2 }, { x: 3, y: 2 });
+      seen.add(`${t.x},${t.y}`);
+      expect(allowed).toContainEqual(t);
+      expect(behind).not.toContainEqual(t);
+    }
+    expect(seen.size).toBeGreaterThan(1); // it does vary across the allowed set
+  });
+
+  it('excludes walls and solid fixtures from the candidates', () => {
+    for (const t of allowed) if (!(t.x === 2 && t.y === 2)) level.tiles[t.y][t.x] = 'wall';
+    // Only the W tile (2,2) is left open, so it is the sole possible landing spot.
+    expect(scatterTile(level, { x: 0, y: 2 }, { x: 3, y: 2 })).toEqual({ x: 2, y: 2 });
+  });
+
+  it('returns null when every candidate tile is blocked (a cornered target just gets hit)', () => {
+    for (const t of allowed) level.tiles[t.y][t.x] = 'wall';
+    expect(scatterTile(level, { x: 0, y: 2 }, { x: 3, y: 2 })).toBeNull();
+  });
+
+  it('returns null when the shooter and target coincide', () => {
+    expect(scatterTile(level, { x: 2, y: 2 }, { x: 2, y: 2 })).toBeNull();
   });
 });
 

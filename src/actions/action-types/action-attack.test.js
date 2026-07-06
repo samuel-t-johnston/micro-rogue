@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { executeAttack } from './action-attack.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { createLevel } from '../../world/map/level.js';
@@ -7,6 +7,14 @@ import { Slots, HUMANOID_SLOTS } from '../../../data/equipment-slots.js';
 import { rng } from '../../engine/core/rng.js';
 import { gameLog } from '../../engine/log/game-log.js';
 import { animations } from '../../render/animations.js';
+import { rollsMiss } from '../../combat/accuracy.js';
+
+// Ranged accuracy is stubbed so shots land deterministically: hit by default, forced wide per-test with
+// rollsMiss.mockReturnValueOnce(true). scatterTile (the redirect geometry) stays real.
+vi.mock('../../combat/accuracy.js', () => ({
+  rollsMiss: vi.fn(() => false),
+  missChance: () => 0,
+}));
 
 describe('executeAttack', () => {
   let registry, level;
@@ -15,6 +23,8 @@ describe('executeAttack', () => {
     rng.init(1);
     gameLog.reset();
     animations.reset();
+    rollsMiss.mockReset();
+    rollsMiss.mockReturnValue(false); // hit by default; per-test override for a forced miss
     registry = createEntityRegistry();
     level = createLevel();
     level.width = 7;
@@ -288,6 +298,56 @@ describe('executeAttack', () => {
       const target = makeTarget(10, 5, 1); // distance 4
 
       expect(executeAttack(actor, { targetEntityId: target.id }, level, registry)).toBe(false);
+    });
+  });
+
+  describe('ranged miss', () => {
+    it('a wide shot spares the aimed target and can clip a bystander beside it', () => {
+      const actor = makeRangedActor({ x: 1, y: 1, damage: 2 });
+      equipWeapon(actor, 15, { meleeRange: 0, ammoType: 'arrow' });
+      const arrows = equipArrows(actor, 5);
+      const target = makeTarget(10, 4, 1); // due east, distance 3
+      // The five non-"behind" tiles around the target, each holding a bystander to be clipped.
+      const ring = [
+        [4, 2],
+        [3, 2],
+        [3, 1],
+        [3, 0],
+        [4, 0],
+      ].map(([x, y]) => makeTarget(10, x, y));
+      rollsMiss.mockReturnValueOnce(true);
+
+      executeAttack(actor, { targetEntityId: target.id }, level, registry);
+
+      expect(target.components.get('attributes').hp).toBe(10); // the aimed target is untouched
+      expect(ring.some((b) => b.components.get('attributes').hp < 10)).toBe(true); // a neighbour hit
+      expect(arrows.components.get('stackable').count).toBe(4); // the arrow is still spent
+      expect(gameLog.getDisplayEntries(5).map((e) => e.display)).toContainEqual(
+        expect.stringMatching(/misses its target/i), // the NPC-form miss line
+      );
+    });
+
+    it('a wide shot into open ground hits nothing', () => {
+      const actor = makeRangedActor({ x: 1, y: 1, damage: 2 });
+      equipWeapon(actor, 15, { meleeRange: 0, ammoType: 'arrow' });
+      equipArrows(actor, 5);
+      const target = makeTarget(10, 4, 1);
+      rollsMiss.mockReturnValueOnce(true);
+
+      executeAttack(actor, { targetEntityId: target.id }, level, registry);
+
+      expect(target.components.get('attributes').hp).toBe(10); // scattered onto empty floor
+    });
+
+    it('a reach weapon (no ammo) never rolls to miss', () => {
+      const actor = makeRangedActor({ x: 1, y: 1, damage: 3 });
+      equipWeapon(actor, 2, { meleeRange: 1 }); // spear: reach, ammoType null → melee-scaled
+      const target = makeTarget(5, 3, 1); // distance 2, clear line
+
+      executeAttack(actor, { targetEntityId: target.id }, level, registry);
+
+      expect(target.components.get('attributes').hp).toBe(2); // hit for full damage
+      expect(rollsMiss).not.toHaveBeenCalled(); // reach attacks don't consult accuracy at all
     });
   });
 

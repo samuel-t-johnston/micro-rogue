@@ -2,7 +2,8 @@ import { applyEffect } from '../../effects/core/effects.js';
 import { hasAttribute } from '../../attributes/attribute-access.js';
 import { resolveAttackDamage } from '../../combat/attack-damage.js';
 import { getWeaponStats, resolveAmmo, getEquippedWeapon } from '../../combat/weapons.js';
-import { traceFlight, settleProjectile } from '../core/projectile-flight.js';
+import { traceFlight, settleProjectile, scatterTile } from '../core/projectile-flight.js';
+import { rollsMiss } from '../../combat/accuracy.js';
 import { splitStack } from '../../world/entities/stacking.js';
 import { chebyshevDistance, cardinalDirection } from '../../world/map/geometry.js';
 import { gameLog } from '../../engine/log/game-log.js';
@@ -125,11 +126,12 @@ const freeOnFailedAttack = (actor) => actor.components.has('playerControlled');
  *   on a player misfire.
  */
 function projectileAttack(actor, target, actorPos, targetPos, weapon, level, registry) {
-  // A strike is "ranged" (DEX-scaled) exactly when it spends ammunition — a bow shot or a thrown
-  // javelin; a reach weapon (spear, ammoType null) fights in melee (STR) even out at distance. Resolved
-  // before consuming ammo: a self-thrown weapon (javelin) clears the weapon slot when its last unit
-  // flies, which would otherwise drop its attack modifier from the resolved total.
-  const amount = resolveAttackDamage(actor, { isRanged: weapon.ammoType != null });
+  // A strike is "ranged" (DEX-scaled, and it can miss) exactly when it spends ammunition — a bow shot
+  // or a thrown javelin; a reach weapon (spear, ammoType null) fights in melee (STR) even out at
+  // distance. Resolved before consuming ammo: a self-thrown weapon (javelin) clears the weapon slot when
+  // its last unit flies, which would otherwise drop its attack modifier from the resolved total.
+  const isRanged = weapon.ammoType != null;
+  const amount = resolveAttackDamage(actor, { isRanged });
 
   let projectile = null;
   let usedLastName = null;
@@ -149,10 +151,31 @@ function projectileAttack(actor, target, actorPos, targetPos, weapon, level, reg
     if (consumed.depleted) usedLastName = itemName(projectile);
   }
 
-  const { impact, before } = traceFlight(level, actorPos.x, actorPos.y, targetPos.x, targetPos.y);
+  // A ranged shot can go wide (DEX + range; melee/reach never rolls). A miss veers to a tile beside the
+  // target — which may clip a bystander standing there — falling back to a straight shot if the target
+  // is boxed in. The flight, impact, and animation then resolve toward the (possibly redirected) tile.
+  let aim = targetPos;
+  let missed = false;
+  if (isRanged && rollsMiss(actor, chebyshevDistance(actorPos, targetPos))) {
+    const scatter = scatterTile(level, actorPos, targetPos);
+    if (scatter) {
+      aim = scatter;
+      missed = true;
+    }
+  }
+  const { impact, before } = traceFlight(level, actorPos.x, actorPos.y, aim.x, aim.y);
   const struck = [...level.getEntitiesAt(impact.x, impact.y)].find((e) => hasAttribute(e, 'hp'));
 
-  animateAttack(actor, actorPos, targetPos, impact, weapon, projectile);
+  animateAttack(actor, actorPos, aim, impact, weapon, projectile);
+
+  // Announce the miss before whatever the stray shot goes on to do (clatter, or clip a bystander).
+  if (missed) {
+    gameLog.add({
+      actor: actor.id,
+      action: 'attack',
+      display: `${subject(actor)} ${conjugate(actor, 'miss', 'misses')} ${possessive(actor)} target.`,
+    });
+  }
 
   if (struck) {
     dealDamage(actor, struck, amount, level, registry);
