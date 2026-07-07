@@ -26,7 +26,7 @@ export const tiles = `\
 export const entities = [
   { type: 'stairsUp', x: 1, y: 1 },
   { type: 'stairsDown', x: 13, y: 13 },
-  { type: 'chest', x: 8, y: 8, contents: ['sword', 'leatherArmor'] },
+  { type: 'chest', x: 8, y: 8, contents: ['sword', 'leatherArmor', 'bread'] },
   { type: 'healingPotion', x: 5, y: 5 },
   { type: 'scroll', x: 9, y: 9 },
   { type: 'scuttler', x: 3, y: 3 },

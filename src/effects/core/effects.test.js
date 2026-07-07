@@ -67,6 +67,35 @@ describe('effectDamage', () => {
   });
 });
 
+describe('effectSatiate', () => {
+  // hunger is a pool with max = 10·con; con 0 here → max 0, so give the subject con for headroom.
+  function makeEater() {
+    const registry = createEntityRegistry();
+    const e = registry.createEntity();
+    registry.addComponent(e, 'attributes', components.attributes({ hunger: 10, con: 10 })); // max 100
+    return { registry, e };
+  }
+
+  it('adds hunger to the target', () => {
+    const { e } = makeEater();
+    applyEffect(EffectTypes.SATIATE, e, null, { amount: 30 });
+    expect(e.components.get('attributes').hunger).toBe(40);
+  });
+
+  it('clamps at hunger.max — eating past full is wasted', () => {
+    const { e } = makeEater();
+    applyEffect(EffectTypes.SATIATE, e, null, { amount: 999 });
+    expect(e.components.get('attributes').hunger).toBe(100);
+  });
+
+  it('is a no-op when the subject has no hunger pool', () => {
+    const registry = createEntityRegistry();
+    const e = registry.createEntity();
+    const result = applyEffect(EffectTypes.SATIATE, e, null, { amount: 5 });
+    expect(result.applied).toBe(false);
+  });
+});
+
 describe('applyEffect dispatch', () => {
   it('throws on an unknown effect type', () => {
     const { e } = makeSubject();

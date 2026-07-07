@@ -1,5 +1,6 @@
 import { components } from './components.js';
 import { syncSpeed } from '../../attributes/speed-sync.js';
+import { getPool, setPoolCurrent } from '../../attributes/attribute-access.js';
 import { HUMANOID_SLOTS } from '../../../data/equipment-slots.js';
 
 /**
@@ -32,6 +33,10 @@ export async function createPlayer(registry, x, y) {
       xp: 0,
     }),
   );
+  // Start the player fully fed: seed the hunger current to its derived max (10·con). Storing the
+  // current also makes hasPool('hunger') true, so the satiate/decay guards find the pool. maxHP is
+  // left unseeded (an absent pool current reads as full), but hunger stores a value so it can drain.
+  setPoolCurrent(entity, 'hunger', getPool(entity, 'hunger').max);
   registry.addComponent(entity, 'turnTaker', components.turnTaker(1));
   syncSpeed(entity); // seed turnTaker.speed from spd + dex so the first turn uses the derived value
   registry.addComponent(entity, 'creature', components.creature());

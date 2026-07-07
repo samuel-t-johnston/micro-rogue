@@ -24,6 +24,7 @@ import { upkeep } from '../../engine/turn/upkeep.js';
 import { syncSpeed } from '../../attributes/speed-sync.js';
 import { winConditions, escapeWithQuestItem } from '../../engine/turn/win-conditions.js';
 import { scentUpkeep, scentAt } from '../../world/sense-systems/scent.js';
+import { tickHunger } from '../../world/systems/hunger.js';
 import { getTileType } from '../../world/map/tile-registry.js';
 import { gameLog } from '../../engine/log/game-log.js';
 import { isEntryVisible } from '../../engine/log/log-visibility.js';
@@ -87,6 +88,10 @@ export function createGameScene({
   // Camera follows the player ('follow') until a drag-to-pan switches to free-look ('free'); a
   // turn-finishing player action (handleTurnEnd) or a level change (mountLevel) snaps back to follow.
   let cameraMode = 'follow';
+  // The player's hunger at the end of last turn — how the hunger tick tells a threshold *crossing*
+  // from sitting below the line, and eating from the ordinary drain. Transient (re-seeded from the
+  // live pool in mountLevel), so a crossing message never re-fires across a reload.
+  let lastHunger = 0;
   const TAP_SLOP = 12; // px of drift that disqualifies a tap (and starts a drag-to-pan)
   const PINCH_STEP_RATIO = 1.25; // pinch distance change that advances one zoom level
   const LONGPRESS_MS = 450; // press-and-hold that raises the contextual tile menu (touch)
@@ -419,6 +424,10 @@ export function createGameScene({
   function handleTurnEnd(entity, { free }) {
     if (gameOver || free || !entity.components.has('playerControlled')) return;
     cameraMode = 'follow'; // a turn-finishing player action snaps the viewport back to the player
+    // Hunger drains once per turn-consuming player action; may bite (and even kill) at empty, so tick
+    // it before the win check but after the action has resolved.
+    lastHunger = tickHunger(player, level, registry, lastHunger);
+    if (gameOver) return; // a starvation bite may have ended the run
     const result = winConditions.run({ registry, level, player });
     if (result) endGame(result);
   }
@@ -430,6 +439,7 @@ export function createGameScene({
     level.onPlayerDeath = handlePlayerDeath;
     level.onTransition = requestTransition;
     applySenses(player, level);
+    lastHunger = getPool(player, 'hunger').current; // baseline for this level's hunger crossings
 
     const ppos = registry.getComponent(player, 'position');
     cameraMode = 'follow'; // a new floor recenters on the player, dropping any free-look pan

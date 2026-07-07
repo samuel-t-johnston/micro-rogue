@@ -1,5 +1,6 @@
 import { effectHeal } from '../effect-types/effect-heal.js';
 import { effectDamage } from '../effect-types/effect-damage.js';
+import { effectSatiate } from '../effect-types/effect-satiate.js';
 
 /**
  * @callback EffectHandler
@@ -17,6 +18,7 @@ import { effectDamage } from '../effect-types/effect-damage.js';
 const EFFECTS = {
   heal: effectHeal,
   damage: effectDamage,
+  satiate: effectSatiate,
 };
 
 /**
@@ -34,4 +36,5 @@ export function applyEffect(effectType, user, target, params, level, registry) {
 export const EffectTypes = Object.freeze({
   HEAL: 'heal',
   DAMAGE: 'damage',
+  SATIATE: 'satiate',
 });

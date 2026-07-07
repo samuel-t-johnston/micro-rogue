@@ -134,11 +134,11 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 - [x] Gain XP on kill (scales with the defeated creature's level; all creatures earn)
 - [x] Player attributes screen (Stats card in the character menu; curated set pending display metadata)
 - [x] Attributes added to HUD widget (Level line; HP already shown)
-- [x] Add miss chance to ranged attacks and throw (DEX + range; a miss scatters to an adjacent tile)
 - [ ] Level up at XP tiers (Level derives + displays; rewards/crossing deferred to the tuning pass)
 - [ ] New game Player stat allocation
 - [ ] Attributes used in other systems
-  - Throw/ranged miss chance?
+  - [x] Add miss chance to ranged attacks and throw (DEX + range; a miss scatters to an adjacent tile)
+  - [x] Hunger ticks down, damage on starvation. Add satiety effect and food items.
   - Attack damage
   - Equip requirements
   - Auto-move stops on HP drop — watch current HP (read via the attribute resolver, not `health.current`) and cancel auto-move when it falls. Seed an HP watermark in `player-get-input` when arming auto-move, parallel to `knownEnemyIds` (baseline must be captured at arming time to catch damage taken before the first auto-move step); compare/refresh it in `player-auto-move` and clear it in `cancelAutoMove`. Needs HP exposed on `selfState` in `planning-context.js`. Catches already-known and out-of-vision attackers, which the new-enemy check misses. Fold this into the shared salience monitor rather than building it standalone — see [state-change-alerts.md](design/state-change-alerts.md), which also covers the in-menu warning that reuses the same HP watermark.
