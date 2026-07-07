@@ -50,10 +50,12 @@ describe('resolveTileActions', () => {
     expect(gameplay(resolve(level, 2, 1))).toEqual([]);
   });
 
-  it('attacks an adjacent creature (entity with health) as the primary action', () => {
+  it('attacks an adjacent creature (entity with an hp pool) as the primary action', () => {
     const creature = registry.createEntity();
     registry.addComponent(creature, 'position', components.position(2, 1));
-    registry.addComponent(creature, 'attributes', components.attributes({ hp: 5, con: 5 }));
+    // Authored like a real, undamaged creature: only the pool base, no stored current. The attackable
+    // check must recognise the pool from `hpBase` alone (regression: it once keyed on a stored `hp`).
+    registry.addComponent(creature, 'attributes', components.attributes({ hpBase: 5 }));
     registry.addComponent(creature, 'blocksMovement', components.blocksMovement());
     level.placeEntity(creature);
 
@@ -65,7 +67,7 @@ describe('resolveTileActions', () => {
   function makeCreature(x, y) {
     const c = registry.createEntity();
     registry.addComponent(c, 'position', components.position(x, y));
-    registry.addComponent(c, 'attributes', components.attributes({ hp: 5, con: 5 }));
+    registry.addComponent(c, 'attributes', components.attributes({ hpBase: 5 })); // undamaged: base only
     registry.addComponent(c, 'blocksMovement', components.blocksMovement());
     level.placeEntity(c);
     return c;

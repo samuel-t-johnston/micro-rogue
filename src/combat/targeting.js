@@ -6,6 +6,18 @@
  */
 import { chebyshevDistance } from '../world/map/geometry.js';
 import { traceFlight } from '../actions/core/projectile-flight.js';
+import { hasPool } from '../attributes/attribute-access.js';
+
+/**
+ * Whether `entity` is a valid damage target: it carries an `hp` pool (stored current *or* base). This
+ * is the one definition of "attackable-in-principle" — tile-action resolution, the attack action, and
+ * the ranged-impact hit test all share it, so none re-derives it. It keys on pool *presence* via
+ * `hasPool`, never a raw stored-`hp` check: a full-health creature stores only `hpBase` (its current
+ * defaults to full), so a stored-key check would wrongly read it as unattackable (a past regression).
+ */
+export function isDamageable(entity) {
+  return hasPool(entity, 'hp');
+}
 
 /**
  * Whether `from` can attack `to` with reach `capability` ({ range, meleeRange }). A target within

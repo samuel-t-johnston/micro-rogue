@@ -1,4 +1,4 @@
-import { hasAttribute, adjustPool } from '../../attributes/attribute-access.js';
+import { hasPool, adjustPool } from '../../attributes/attribute-access.js';
 
 /**
  * Restores HP on the target via the hp pool (clamped at max by adjustPool, so callers can't overheal).
@@ -8,7 +8,7 @@ import { hasAttribute, adjustPool } from '../../attributes/attribute-access.js';
  */
 export function effectHeal(user, target, params, _level, _registry) {
   const subject = target ?? user;
-  if (!hasAttribute(subject, 'hp')) return { applied: false };
+  if (!hasPool(subject, 'hp')) return { applied: false };
   adjustPool(subject, 'hp', params.amount ?? 0);
   return { applied: true, reaction: 'seems healthier' };
 }

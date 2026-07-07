@@ -17,7 +17,7 @@ const stateOf = (entity) => entity.components.get('attributes');
 // Writes require an existing `attributes` component: attaching one needs the registry (to keep its
 // reverse component index correct), which the accessors deliberately don't hold. Entities that own
 // attributes get the component at construction/migration; writing to one without it is a programming
-// error — gameplay consumers guard with hasAttribute() first (as effect-damage guards on health today).
+// error — gameplay consumers guard with hasPool()/hasStoredAttribute() first (as effect-damage guards).
 function requireState(entity, name) {
   const state = stateOf(entity);
   if (!state) throw new Error(`Cannot set "${name}": entity has no attributes component`);
@@ -52,10 +52,26 @@ function resolveContext(entity, name, base) {
   };
 }
 
-/** Whether the entity carries stored state for `name` (its `attributes` component has the key). */
-export function hasAttribute(entity, name) {
+/**
+ * Storage-presence introspection: whether the entity's `attributes` component *stores a key* named
+ * `name`. For **display/enumeration only** (it backs `listAttributes`). It is **not** a "does this
+ * entity have stat X" test — the system is default-tolerant (a missing key resolves to the definition
+ * default), and pools split storage into a current (`name`) and a base (`${name}Base`), so a
+ * full-health creature stores no `hp`. For gameplay presence use `getScore`/`getPool`/`hasPool`.
+ */
+export function hasStoredAttribute(entity, name) {
   const state = stateOf(entity);
   return state != null && Object.prototype.hasOwnProperty.call(state, name);
+}
+
+/**
+ * Whether the entity has pool `name` set up on it — i.e. it stores either the pool's current (`name`)
+ * or its base (`${name}Base`). Since a pool's current defaults to full when unstored, an undamaged
+ * entity carries only the base; damageability and effect targeting must key on this, not on
+ * `hasStoredAttribute(entity, 'hp')`, which would miss a full-health creature that never took a hit.
+ */
+export function hasPool(entity, name) {
+  return hasStoredAttribute(entity, name) || hasStoredAttribute(entity, `${name}Base`);
 }
 
 /** Effective value of a score attribute: resolve(stored base or default, + equipment mods). */
@@ -123,7 +139,7 @@ export function addToAccumulator(entity, name, amount) {
 export function listAttributes(entity) {
   return allDefinitions()
     .map((d) => d.name)
-    .filter((name) => hasAttribute(entity, name));
+    .filter((name) => hasStoredAttribute(entity, name));
 }
 
 /**

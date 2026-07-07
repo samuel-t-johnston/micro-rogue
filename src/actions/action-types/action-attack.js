@@ -1,5 +1,5 @@
 import { applyEffect } from '../../effects/core/effects.js';
-import { hasAttribute } from '../../attributes/attribute-access.js';
+import { isDamageable } from '../../combat/targeting.js';
 import { resolveAttackDamage } from '../../combat/attack-damage.js';
 import { getWeaponStats, resolveAmmo, getEquippedWeapon } from '../../combat/weapons.js';
 import { traceFlight, settleProjectile, scatterTile } from '../core/projectile-flight.js';
@@ -164,7 +164,7 @@ function projectileAttack(actor, target, actorPos, targetPos, weapon, level, reg
     }
   }
   const { impact, before } = traceFlight(level, actorPos.x, actorPos.y, aim.x, aim.y);
-  const struck = [...level.getEntitiesAt(impact.x, impact.y)].find((e) => hasAttribute(e, 'hp'));
+  const struck = [...level.getEntitiesAt(impact.x, impact.y)].find(isDamageable);
 
   animateAttack(actor, actorPos, aim, impact, weapon, projectile);
 
@@ -218,7 +218,7 @@ function projectileAttack(actor, target, actorPos, targetPos, weapon, level, reg
  */
 export function executeAttack(actor, action, level, registry) {
   const target = registry.getEntity(action.targetEntityId);
-  if (!target || !hasAttribute(target, 'hp')) return false;
+  if (!target || !isDamageable(target)) return false;
 
   const weapon = getWeaponStats(actor);
   const actorPos = actor.components.get('position');

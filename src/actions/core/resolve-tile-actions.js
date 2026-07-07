@@ -8,8 +8,7 @@
  * "Close" offered second; a *closed* door defaults to opening it. See docs/design/ux-design.md.
  */
 import { chebyshevDistance } from '../../world/map/geometry.js';
-import { isAttackable } from '../../combat/targeting.js';
-import { hasAttribute } from '../../attributes/attribute-access.js';
+import { isAttackable, isDamageable } from '../../combat/targeting.js';
 import { displayName } from '../../engine/log/text/log-text.js';
 
 // A tile occupant's display name for pickup/interact labels — `displayName` appends a stack quantity
@@ -75,7 +74,7 @@ export function resolveTileActions(
   const isAdjacent = distance === 1;
 
   const occupants = [...level.getEntitiesAt(x, y)];
-  const creature = occupants.find((e) => hasAttribute(e, 'hp'));
+  const creature = occupants.find(isDamageable);
   const door = occupants.find((e) => e.components.has('openable'));
   const container = occupants.find((e) => e.components.has('container'));
   const passable = level.isPassable(x, y);

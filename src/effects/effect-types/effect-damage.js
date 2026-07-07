@@ -1,5 +1,5 @@
 import { handleDeath } from '../../combat/death.js';
-import { hasAttribute, adjustPool } from '../../attributes/attribute-access.js';
+import { hasPool, adjustPool } from '../../attributes/attribute-access.js';
 
 /**
  * Reduces HP on the target via the hp pool (clamped at 0 by adjustPool). When HP reaches 0 the entity
@@ -10,7 +10,7 @@ import { hasAttribute, adjustPool } from '../../attributes/attribute-access.js';
  */
 export function effectDamage(user, target, params, level, registry) {
   const subject = target ?? user;
-  if (!hasAttribute(subject, 'hp')) return { applied: false };
+  if (!hasPool(subject, 'hp')) return { applied: false };
   const { current } = adjustPool(subject, 'hp', -(params.amount ?? 0));
   if (current <= 0) handleDeath(subject, level, registry, user);
   return { applied: true, reaction: 'looks hurt' };

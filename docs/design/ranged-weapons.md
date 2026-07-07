@@ -139,8 +139,8 @@ degradation we fix with a save migration. See §8 *Migration*.
 ## 4. The weapons resolver — `src/combat/weapons.js`
 
 A new module is the single definition site for "what can this actor do with its equipped weapon",
-shared by the tile-action resolver, the attack handler, and (later) the NPC goal. It keeps
-`getAttribute`-style derivation: read the equipped weapon on demand, never cache.
+shared by the tile-action resolver, the attack handler, and (later) the NPC goal. It uses the same
+derive-on-demand style as the attribute accessors: read the equipped weapon on demand, never cache.
 
 ```js
 getEquippedWeapon(entity)        // → the weapon item entity in the WEAPON slot, or null
@@ -164,7 +164,7 @@ resolveAmmo(entity, ammoType)    // → { source, item } for consumption, or nul
 We keep the single `attack` action (`{ type: 'attack', targetEntityId }`) so the UI and the NPC goal
 need no new action type. `executeAttack` branches on the resolved weapon and the target's distance:
 
-1. **Melee** (`d ≤ meleeRange`): unchanged from today — `getAttribute(ATTACK_DAMAGE)`, attacker
+1. **Melee** (`d ≤ meleeRange`): `resolveAttackDamage` (STR-scaled — see below), attacker
    `wiggle` toward the target, combat sound, `damage` effect. No ammo, no flight.
 
 2. **Reach, non-consuming** (`meleeRange < d ≤ range`, `ammoType === null` — the spear): same damage
@@ -183,12 +183,13 @@ need no new action type. `executeAttack` branches on the resolved weapon and the
      wiggle fallback), then **break or land** the flown item per its `breakChance`.
    - Return `false` (turn consumed).
 
-Damage for every mode comes from the existing attribute resolver
-(`getAttribute(actor, ATTACK_DAMAGE)`), i.e. unarmed base + worn `attributeModifiers`. **Arrows ship
-with no `attributeModifiers`** (ranged damage = base + weapon modifier). We do **not** special-case
-the resolver to forbid ammo from contributing stats — if a future "+1 arrows" wants in, it works
-through the same path; today's arrows simply contribute nothing. (See §8 for the one subtlety this
-creates.)
+Damage for every mode comes from `resolveAttackDamage` (`src/combat/attack-damage.js`): the `attack`
+score (`getScore(actor, 'attack')` = unarmed base + worn `attributeModifiers`) plus half the governing
+ability — STR for melee, DEX for a ranged shot — floored, min 1. **Arrows ship with no
+`attributeModifiers`** (their damage is the shooter's `attack` score + the weapon's modifier). We do
+**not** special-case the accessors to forbid ammo from contributing stats — if a future "+1 arrows"
+wants in, it works through the same path; today's arrows simply contribute nothing. (See §8 for the one
+subtlety this creates.)
 
 ---
 
@@ -293,7 +294,7 @@ itself when `count === n`) lives inside `splitStack`, so callers don't special-c
 
 ---
 
-## 8. Serialization and the `getAttribute` subtlety
+## 8. Serialization and the equipment-modifier subtlety
 
 **Serialization** needs no new mechanism. The flat-registry snapshot already serializes every entity's
 components as data and rewrites entity references in `inventory.items` / `wearsEquipment.slots`
@@ -327,12 +328,12 @@ The migration upgrades the data; the resolver defaults guarantee safety without 
 This bumps `SAVE_VERSION` to **7** (and is the reason for the bump — the components alone wouldn't
 require it).
 
-**The `getAttribute` subtlety.** `getAttribute` sums `attributeModifiers` across **all**
-`wearsEquipment.slots`. Once the ammunition slot exists, any `attributeModifiers` on equipped ammo
-would be added to the wearer's stats **always, even for melee**. We accept this by **not putting
-`attributeModifiers` on arrows** (per §5) rather than by special-casing the resolver. The behaviour is
-documented here so that if someone later adds a stat-bearing ammo and is surprised it boosts melee
-swings, the fix is a deliberate per-slot resolution policy, not a patch.
+**The equipment-modifier subtlety.** The attribute accessors sum `attributeModifiers` across **all**
+`wearsEquipment.slots` (via `sumEquipmentMods`). Once the ammunition slot exists, any
+`attributeModifiers` on equipped ammo would be added to the wearer's stats **always, even for melee**.
+We accept this by **not putting `attributeModifiers` on arrows** (per §5) rather than by special-casing
+the accessors. The behaviour is documented here so that if someone later adds a stat-bearing ammo and
+is surprised it boosts melee swings, the fix is a deliberate per-slot resolution policy, not a patch.
 
 ---
 

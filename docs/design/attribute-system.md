@@ -188,7 +188,13 @@ concept shouldn't ride on a stat component. We tag concepts with dedicated compo
 `creature`). Two current call sites mean two *different* things and split accordingly:
 
 - **`resolve-tile-actions.js`** (`occupants.find(has('health'))`) means **"a valid attack target"** →
-  becomes an `isDamageable(entity)` check = "has an `hp` pool" (`hasAttribute(entity, 'hp')`).
+  becomes **`isDamageable(entity)`** (`src/combat/targeting.js`), the one shared definition of
+  attackable, also used by the attack action and the ranged-impact hit test. It resolves to
+  **`hasPool(entity, 'hp')`** — a check on the pool's *presence*, not a stored current: once pools split
+  into a stored current (`hp`) and a raw base (`hpBase`), an undamaged creature carries only `hpBase`
+  (its current defaults to full), so a raw `hasStoredAttribute(entity, 'hp')` would wrongly read a
+  full-health creature as unattackable. The damage/heal effect guards key on `hasPool(subject, 'hp')`
+  directly (they adjust the pool rather than ask "is this a target").
 - **`describe-tile.js`** (rank + name-casing) means **"is a creature/actor"** → keys on the existing
   `creature` component.
 

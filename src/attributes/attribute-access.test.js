@@ -7,7 +7,8 @@ import {
   setPoolCurrent,
   getAccumulator,
   addToAccumulator,
-  hasAttribute,
+  hasStoredAttribute,
+  hasPool,
   listAttributes,
   describeAttribute,
 } from './attribute-access.js';
@@ -166,11 +167,17 @@ describe('attribute accessors', () => {
   });
 
   describe('display helpers', () => {
-    it('hasAttribute reflects stored keys only', () => {
+    it('hasStoredAttribute reflects stored keys only', () => {
       const e = makeActor({ str: 10, hp: 5 });
-      expect(hasAttribute(e, 'str')).toBe(true);
-      expect(hasAttribute(e, 'mp')).toBe(false);
-      expect(hasAttribute(e, 'level')).toBe(false); // derived, never stored
+      expect(hasStoredAttribute(e, 'str')).toBe(true);
+      expect(hasStoredAttribute(e, 'mp')).toBe(false);
+      expect(hasStoredAttribute(e, 'level')).toBe(false); // derived, never stored
+    });
+
+    it('hasPool detects a pool via its stored current or its base key', () => {
+      expect(hasPool(makeActor({ hp: 5 }), 'hp')).toBe(true); // stored current
+      expect(hasPool(makeActor({ hpBase: 5 }), 'hp')).toBe(true); // base only (undamaged, current full)
+      expect(hasPool(makeActor({ str: 5 }), 'hp')).toBe(false); // no hp pool at all
     });
 
     it('listAttributes returns stored attributes in registry order', () => {
