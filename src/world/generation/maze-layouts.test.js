@@ -27,8 +27,8 @@ function floodFill(grid, sx, sy) {
 }
 
 const MAPS = [
-  { name: 'maze-spiral', mod: spiral, items: 2, creatures: { orc: 2 }, chests: 0 },
-  { name: 'maze-zigzag', mod: zigzag, items: 2, creatures: { orc: 2 }, chests: 0 },
+  { name: 'maze-spiral', mod: spiral, items: 3, creatures: { orc: 2 }, chests: 0 },
+  { name: 'maze-zigzag', mod: zigzag, items: 3, creatures: { orc: 2 }, chests: 0 },
   { name: 'maze-pillars', mod: pillars, items: 2, creatures: { scuttler: 5 }, chests: 1 },
 ];
 
@@ -39,6 +39,9 @@ const ITEM_TYPES = new Set([
   'sword',
   'leatherArmor',
   'scroll',
+  'grapes',
+  'bread',
+  'meat',
 ]);
 
 describe.each(MAPS)('$name', ({ mod, items, creatures, chests }) => {

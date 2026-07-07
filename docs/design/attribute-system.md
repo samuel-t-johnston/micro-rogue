@@ -170,8 +170,13 @@ Notes:
   is the flat per-entity floor stored under `hpBase`/`mpBase`. The `2·` coefficient and the base values
   are still balance knobs — the core scores (`con`/`int`) currently sit on the old ~10 scale, so HP/MP
   run high until the progression-tuning pass rebalances them. Hunger has no base (max = 10·`con`).
-- **`mp` and `hunger` exist but are inert at first**: MP isn't spent, Hunger doesn't decay yet (its
-  per-turn tick is an `upkeep` hook, deferred). They resolve and display; that's the first cut.
+- **`mp` is inert at first**: MP isn't spent yet. It resolves and displays; that's the first cut.
+- **`hunger` decays** once per turn-consuming player action, ticked from the game scene's
+  `handleTurnEnd` (not the `upkeep` hook — that fires on free actions too, e.g. examining a tile).
+  `src/world/systems/hunger.js` drains 1/turn, announces threshold crossings (hungry <40%, starving
+  <20%, dying at 0) and eating (less hungry / full / stuffed), and bites for 1 damage at a 50% chance
+  on an empty stomach — which can kill via the damage effect. The `satiate` effect (food) refills it.
+  Only the player is ticked today, though any creature can carry the pool.
 - **`spd` drives turn order.** Its resolved value is synced into the `turnTaker.speed` field the turn
   manager reads (`src/attributes/speed-sync.js`), so the turn module stays ignorant of attributes. The
   sync polls each entity at its turn boundary (game-scene `onTurnStart`) and seeds it at construction;

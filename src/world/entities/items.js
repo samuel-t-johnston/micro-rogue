@@ -309,5 +309,74 @@ export function createScroll(registry, x, y, entityId) {
   return entity;
 }
 
+/** Creates Grapes (consumable food: satiate 10 — a light snack). */
+export function createGrapes(registry, x, y, entityId) {
+  const location = resolveItemLocation(registry, x, y, entityId);
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name('Grapes'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('grapes'));
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('grapes', '#101010', '%', '#a25fd0', RenderLayers.ITEM),
+  );
+  registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(
+    entity,
+    'consumable',
+    components.consumable(EffectTypes.SATIATE, { amount: 10 }),
+  );
+  if (location.type === 'map') {
+    registry.addComponent(entity, 'position', components.position(x, y));
+  }
+  return entity;
+}
+
+/** Creates Bread (consumable food: satiate 30 — a solid meal). */
+export function createBread(registry, x, y, entityId) {
+  const location = resolveItemLocation(registry, x, y, entityId);
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name('Bread'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('bread'));
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('bread', '#101010', '%', '#c89b5a', RenderLayers.ITEM),
+  );
+  registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(
+    entity,
+    'consumable',
+    components.consumable(EffectTypes.SATIATE, { amount: 30 }),
+  );
+  if (location.type === 'map') {
+    registry.addComponent(entity, 'position', components.position(x, y));
+  }
+  return entity;
+}
+
+/** Creates Meat (consumable food: satiate 50 — a hearty feast). */
+export function createMeat(registry, x, y, entityId) {
+  const location = resolveItemLocation(registry, x, y, entityId);
+  const entity = registry.createEntity();
+  registry.addComponent(entity, 'name', components.name('Meat'));
+  registry.addComponent(entity, 'entityTypeId', components.entityTypeId('meat'));
+  registry.addComponent(
+    entity,
+    'renderable',
+    components.renderable('meat', '#101010', '%', '#c0523b', RenderLayers.ITEM),
+  );
+  registry.addComponent(entity, 'item', components.item(location));
+  registry.addComponent(
+    entity,
+    'consumable',
+    components.consumable(EffectTypes.SATIATE, { amount: 50 }),
+  );
+  if (location.type === 'map') {
+    registry.addComponent(entity, 'position', components.position(x, y));
+  }
+  return entity;
+}
+
 // When you add an item factory above, register it in src/world/entities/entity-prefabs.js — that catalog is
 // the single source of truth for spawnable types, and entity-prefabs.test.js fails if you forget.

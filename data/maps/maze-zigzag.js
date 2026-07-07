@@ -28,6 +28,7 @@ export const entities = [
   { type: 'stairsDown', x: 13, y: 13 },
   { type: 'healingPotion', x: 5, y: 5 },
   { type: 'dagger', x: 11, y: 9 },
+  { type: 'bread', x: 7, y: 1 },
   { type: 'orc', x: 3, y: 7 },
   { type: 'orc', x: 9, y: 7 },
 ];

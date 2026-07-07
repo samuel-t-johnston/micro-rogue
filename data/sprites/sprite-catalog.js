@@ -24,6 +24,9 @@ export const SPRITES = {
   'potion-of-pain': { sheet: 'ProjectUtumnoFull-DCSS', col: 10, row: 42 },
   'amulet-of-yendor': { sheet: 'ProjectUtumnoFull-DCSS', col: 34, row: 35 },
   'scroll-of-healing': { sheet: 'ProjectUtumnoFull-DCSS', col: 44, row: 43 },
+  grapes: { sheet: 'ProjectUtumnoFull-DCSS', col: 16, row: 40 },
+  bread: { sheet: 'ProjectUtumnoFull-DCSS', col: 9, row: 40 },
+  meat: { sheet: 'ProjectUtumnoFull-DCSS', col: 13, row: 40 },
 
   // Equipment
   dagger: { sheet: 'ProjectUtumnoFull-DCSS', col: 4, row: 45 },

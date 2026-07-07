@@ -11,6 +11,9 @@ import {
   createLeatherArmor,
   createScroll,
   createAmulet,
+  createGrapes,
+  createBread,
+  createMeat,
 } from './items.js';
 import {
   createStairs,
@@ -55,6 +58,11 @@ export const ENTITY_PREFABS = {
   javelin: { kind: 'item', make: createJavelin },
   bow: { kind: 'item', make: createBow },
   arrow: { kind: 'item', make: createArrow },
+  // Consumable food (satiate effect). Appended last to keep the procedural item-pool order — and thus
+  // seeded-RNG determinism — stable. See docs/design/attribute-system.md (hunger).
+  grapes: { kind: 'item', make: createGrapes },
+  bread: { kind: 'item', make: createBread },
+  meat: { kind: 'item', make: createMeat },
 
   // Furniture. Stairs are two prefabs from one factory because the up/down variants render
   // differently and the map data refers to them by distinct ids.
