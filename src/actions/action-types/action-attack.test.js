@@ -3,6 +3,7 @@ import { executeAttack } from './action-attack.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { createLevel } from '../../world/map/level.js';
 import { components } from '../../world/entities/components.js';
+import { getPool } from '../../attributes/attribute-access.js';
 import { Slots, HUMANOID_SLOTS } from '../../../data/equipment-slots.js';
 import { rng } from '../../engine/core/rng.js';
 import { gameLog } from '../../engine/log/game-log.js';
@@ -99,6 +100,21 @@ describe('executeAttack', () => {
 
     expect(free).toBe(false); // consumes the turn
     expect(target.components.get('attributes').hp).toBe(4);
+  });
+
+  it('damages an undamaged creature that stores only its hp base (no current)', () => {
+    // Mirrors how real creatures are authored (hpBase, current absent = full) — the bug that once made
+    // full-health creatures unattackable. maxHP = hpBase 5 + 2·con 0 = 5.
+    const actor = makeActor(2);
+    const target = registry.createEntity();
+    registry.addComponent(target, 'position', components.position(2, 2));
+    registry.addComponent(target, 'attributes', components.attributes({ hpBase: 5, con: 0 }));
+    level.placeEntity(target);
+
+    const free = executeAttack(actor, { targetEntityId: target.id }, level, registry);
+
+    expect(free).toBe(false); // it is a valid, attackable target
+    expect(getPool(target, 'hp').current).toBe(3); // 5 − 2 damage
   });
 
   it('includes worn-weapon modifiers in the damage', () => {
