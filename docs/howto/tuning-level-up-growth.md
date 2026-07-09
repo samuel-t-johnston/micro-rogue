@@ -31,9 +31,19 @@ The distribution is a pure function of the point count, so the watcher applies t
 
 Edit the `levelUp` component in [`player.js`](../../src/world/entities/player.js) — change the split, the points per level, or the cap. To bias toward strength, for example: `{ str: 0.5, dex: 0.25, con: 0.25 }`. Any attribute score can appear in the split.
 
-## `dynamic: false` — the spawn-scaling seam
+## `dynamic: false` — scaling creatures at spawn
 
-A `dynamic: false` entity keeps its spec but does **not** grow as it earns XP. This is the hook for the (upcoming) creature spawn-scaling feature: author a monster's base stats and its level-up split, then boot it to a target level at spawn by running the same allocator over `(level − 1) × points` points. The watcher deliberately ignores it so a scaled-up monster doesn't also creep upward from the odd XP it earns fighting.
+A `dynamic: false` entity keeps its spec but does **not** grow as it earns XP. Creatures use this: each is authored with **level-1 base stats** and a `dynamic: false` spec (see [`creatures.js`](../../src/world/entities/creatures.js)), and a map-generation stage boots them to a per-floor level.
+
+**The `scaleCreatures` stage** ([`stage-scale-creatures.js`](../../src/world/generation/stages/stage-scale-creatures.js)) takes a `levels` map of `entityTypeId → level`:
+
+```js
+{ type: 'scaleCreatures', levels: { goblin: 2, orc: 2, scuttler: 2, orcCommander: 2 } }
+```
+
+For each placed creature whose type is named, it sets `xp` to that level's threshold (so the creature reads as that level for display **and** for the XP it's worth when killed) and runs `applyLevelUps` — the same allocator the player's growth uses — for the attribute gains. It only touches `dynamic: false` creatures, so the player (dynamic) is never pre-scaled; a configured type absent from the floor is skipped, and a placed creature not in the config is left alone. Add it to a floor's pipeline after the creatures are placed (see [`data/pipelines/`](../../data/pipelines/)); floor 1 omits it, so its monsters stay at level 1.
+
+This is the tuning workflow: **balance a creature at level 1** in `creatures.js`, choose its scaling split, and let each floor's `scaleCreatures` config decide how deep-floor copies grow.
 
 ## Worth knowing
 

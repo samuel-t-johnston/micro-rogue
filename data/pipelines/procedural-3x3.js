@@ -15,6 +15,8 @@ export default {
     { type: 'stairs' },
     { type: 'spawn' },
     { type: 'populate' },
+    // Third floor: bump this floor's monsters to level 3.
+    { type: 'scaleCreatures', levels: { goblin: 3, orc: 3, scuttler: 3, orcCommander: 3 } },
     // Arms the placed creatures from item tables (orcs → spear, commander → bow + arrows).
     { type: 'loadout' },
   ],

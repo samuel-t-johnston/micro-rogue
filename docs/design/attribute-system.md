@@ -263,9 +263,13 @@ Ordering follows the roadmap, migration-first so behavior is preserved before ne
    requirements, miss chance, new-game allocation.
    - **Level-up attribute growth landed** (`levelUp` component + `src/world/systems/level-up.js`):
      a turn-boundary watch diffs each leveling entity's derived Level against a per-component
-     watermark and allocates points across a declared attribute split. `dynamic: false` entities
-     keep the spec but don't grow as they earn XP — the seam the creature spawn-scaling feature will
-     use to boost a monster to a target level at spawn. See docs/howto/tuning-level-up-growth.md.
+     watermark and allocates points across a declared attribute split.
+   - **Creature level-scaling landed** (`scaleCreatures` map-gen stage,
+     `src/world/generation/stages/stage-scale-creatures.js`): creatures are authored at level 1 with a
+     `dynamic: false` levelUp spec; the stage boots each named type to a per-floor level (sets `xp` to
+     match, then runs the shared `applyLevelUps` allocator). Floors 2/3 scale their monsters to level
+     2/3; floor 1 stays level 1. Ships with a creature balance pass. See
+     docs/howto/tuning-level-up-growth.md.
 
 ## 11. Decisions and adjustable defaults
 

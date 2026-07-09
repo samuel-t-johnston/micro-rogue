@@ -54,10 +54,37 @@ function announceLevelUp(entity, level) {
 }
 
 /**
- * Reconciles one entity's attributes with its current Level: a no-op unless the entity carries a
- * `dynamic` levelUp component whose Level has risen past the watermark it last allocated for. On a gain
- * it applies the point distribution between the old and new levels (capped at the spec's maxLevel),
- * advances the watermark, and announces the new level for the player.
+ * Grows an entity's attributes from its watermark `lastLevel` up to `toLevel`, applying the point
+ * distribution earned over those levels and advancing the watermark. Returns the number of levels
+ * gained (0 if `toLevel` isn't above the watermark). The shared core of both mid-game growth
+ * (`watchLevelUp`) and generation-time scaling (the scaleCreatures stage) — it ignores `dynamic` and
+ * the level cap, leaving those policy checks to the caller.
+ */
+export function applyLevelUps(entity, spec, toLevel) {
+  const from = spec.lastLevel;
+  if (toLevel <= from) return 0;
+
+  const before = distributeLevelUpPoints(
+    spec.attributePercentages,
+    pointsForLevel(from, spec.points),
+  );
+  const after = distributeLevelUpPoints(
+    spec.attributePercentages,
+    pointsForLevel(toLevel, spec.points),
+  );
+  for (const name of Object.keys(spec.attributePercentages)) {
+    const delta = (after[name] ?? 0) - (before[name] ?? 0);
+    if (delta) adjustScoreBase(entity, name, delta);
+  }
+
+  spec.lastLevel = toLevel;
+  return toLevel - from;
+}
+
+/**
+ * Reconciles a `dynamic` entity's attributes with its current derived Level: a no-op unless the entity
+ * carries a `dynamic` levelUp component whose Level has risen past the watermark it last allocated for.
+ * On a gain it grows the attributes (capped at the spec's maxLevel) and announces the new level.
  *
  * Poll-not-listen (docs/design/attribute-system.md): called at the entity's turn boundary, after any
  * XP earned this turn has landed, so the derived Level already reflects the kill that triggered it.
@@ -68,21 +95,5 @@ export function watchLevelUp(entity) {
 
   // A nullish cap means "no cap" — JSON has no Infinity, so an uncapped spec round-trips as null.
   const current = Math.min(getScore(entity, 'level'), spec.maxLevel ?? Infinity);
-  if (current <= spec.lastLevel) return;
-
-  const before = distributeLevelUpPoints(
-    spec.attributePercentages,
-    pointsForLevel(spec.lastLevel, spec.points),
-  );
-  const after = distributeLevelUpPoints(
-    spec.attributePercentages,
-    pointsForLevel(current, spec.points),
-  );
-  for (const name of Object.keys(spec.attributePercentages)) {
-    const delta = (after[name] ?? 0) - (before[name] ?? 0);
-    if (delta) adjustScoreBase(entity, name, delta);
-  }
-
-  spec.lastLevel = current;
-  announceLevelUp(entity, current);
+  if (applyLevelUps(entity, spec, current) > 0) announceLevelUp(entity, current);
 }

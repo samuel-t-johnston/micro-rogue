@@ -8,22 +8,33 @@ export function createGoblin(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Goblin'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('goblin'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  // Full stat block. str/dex/int are thematic placeholders (nimble but weak) on the old ~10 scale;
-  // spd=1 is the ~1.0 turn-speed scale, fed into turnTaker.speed by syncSpeed. xp seeds the level
-  // (data/attribute-set.js): 0 → level 1.
+  // Level-1 base stats: a weak, lightly-built melee grunt (weaker than the player at equal level). Its
+  // level-up growth (below) is a rounded STR/CON spread, so deeper-floor goblins hit a bit harder and
+  // last a bit longer. spd=1 is the ~1.0 turn-speed scale, fed into turnTaker.speed by syncSpeed; xp 0 →
+  // level 1. The scaleCreatures map-gen stage boots it to the floor's level. See docs/design/attribute-system.md.
   registry.addComponent(
     entity,
     'attributes',
     components.attributes({
-      str: 8,
-      dex: 12,
+      str: 5,
+      dex: 6,
       int: 9,
-      con: 5,
+      con: 3,
       spd: 1,
       attack: 1,
-      hpBase: 5,
+      hpBase: 6,
       mpBase: 1,
       xp: 0,
+    }),
+  );
+  registry.addComponent(
+    entity,
+    'levelUp',
+    components.levelUp({
+      dynamic: false,
+      points: 1,
+      attributePercentages: { str: 0.5, con: 0.5 },
+      maxLevel: 30,
     }),
   );
   registry.addComponent(entity, 'attacker', components.attacker());
@@ -56,20 +67,32 @@ export function createOrc(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Orc'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('orc'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  // Brawny, average cadence; xp seeds level 2. Ability scores placeholder (see createGoblin).
+  // Level-1 base stats: a solid melee soldier, a roughly even match for the player at equal level (hits
+  // about as hard, a little less HP). Rounded STR/CON growth. xp 0 → level 1; the scaleCreatures stage
+  // boots it to the floor's level. (Was authored at level 2; now baselined to 1 like every creature.)
   registry.addComponent(
     entity,
     'attributes',
     components.attributes({
-      str: 13,
-      dex: 9,
+      str: 5,
+      dex: 8,
       int: 8,
-      con: 9,
+      con: 6,
       spd: 1,
       attack: 1,
-      hpBase: 9,
+      hpBase: 10,
       mpBase: 1,
-      xp: 10,
+      xp: 0,
+    }),
+  );
+  registry.addComponent(
+    entity,
+    'levelUp',
+    components.levelUp({
+      dynamic: false,
+      points: 1,
+      attributePercentages: { str: 0.5, con: 0.5 },
+      maxLevel: 30,
     }),
   );
   registry.addComponent(entity, 'attacker', components.attacker());
@@ -126,17 +149,30 @@ export function createOrcCommander(registry, x, y) {
   registry.addComponent(
     entity,
     'attributes',
-    // Brawny and tactical; xp seeds level 3. Ability scores placeholder (see createGoblin).
+    // Level-1 base stats: a tougher, bow-wielding leader — more HP than a rank-and-file orc and ranged
+    // pressure, so it reads as a step above the player at equal level. Growth is DEX/CON (its bow shots
+    // scale on DEX, HP on CON). xp 0 → level 1; the scaleCreatures stage boots it to the floor's level.
+    // (Was authored at level 3; now baselined to 1 like every creature.)
     components.attributes({
-      str: 14,
-      dex: 10,
+      str: 9,
+      dex: 7,
       int: 12,
-      con: 12,
+      con: 8,
       spd: 1,
       attack: 2,
       hpBase: 12,
       mpBase: 1,
-      xp: 30,
+      xp: 0,
+    }),
+  );
+  registry.addComponent(
+    entity,
+    'levelUp',
+    components.levelUp({
+      dynamic: false,
+      points: 1,
+      attributePercentages: { dex: 0.5, con: 0.5 },
+      maxLevel: 30,
     }),
   );
   registry.addComponent(entity, 'attacker', components.attacker());
@@ -191,9 +227,11 @@ export function createScuttler(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Scuttler'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('scuttler'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  // Tiny, fast, mindless; xp seeds level 1. Ability scores placeholder (see createGoblin). spd=1.4
-  // carries the scuttling speed advantage (was the old turnTaker literal); syncSpeed feeds it into
-  // turnTaker.speed, plus dex's nimbleness bonus.
+  // Level-1 base stats: all speed and bite, no toughness — the lowest CON and HP of any creature, so it
+  // dies to a single hit but swarms and strikes fast. spd=1.4 carries the scuttling speed advantage
+  // (fed into turnTaker.speed by syncSpeed, plus dex's nimbleness bonus). Its level-up growth is a
+  // STR/DEX split — sharper and faster with depth, never sturdier. xp 0 → level 1; the scaleCreatures
+  // stage boots it to the floor's level.
   registry.addComponent(
     entity,
     'attributes',
@@ -201,12 +239,22 @@ export function createScuttler(registry, x, y) {
       str: 4,
       dex: 14,
       int: 3,
-      con: 2,
+      con: 1,
       spd: 1.4,
       attack: 1,
-      hpBase: 2,
+      hpBase: 1,
       mpBase: 1,
       xp: 0,
+    }),
+  );
+  registry.addComponent(
+    entity,
+    'levelUp',
+    components.levelUp({
+      dynamic: false,
+      points: 1,
+      attributePercentages: { str: 0.5, dex: 0.5 },
+      maxLevel: 30,
     }),
   );
   registry.addComponent(entity, 'attacker', components.attacker());
