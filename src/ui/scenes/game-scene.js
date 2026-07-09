@@ -11,6 +11,7 @@ import { createRenderer } from '../../render/renderer.js';
 import { panCamera } from '../../render/camera-pan.js';
 import { createZoom, defaultZoomIndex } from '../../render/zoom.js';
 import { animations } from '../../render/animations.js';
+import { vignette } from '../../render/vignette.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { createTurnManager } from '../../engine/turn/turn-manager.js';
 import { createInputController } from '../../engine/core/input-controller.js';
@@ -631,6 +632,7 @@ export function createGameScene({
         // continued game starts with an empty log too.
         gameLog.reset();
         animations.reset();
+        vignette.reset();
 
         // On 'continue', rehydrate the saved game. A present-but-unloadable save (too-new, failed
         // migration, corrupt) is reported to the host (onLoadFailed) so the menu can explain it,
@@ -741,6 +743,10 @@ export function createGameScene({
       contextMenu?.render(ctx);
       renderTargeting(ctx);
       outcomePopup.render(ctx);
+
+      // Screen-edge vignettes draw last so they sit above the world *and* the UI — a damage warning
+      // must read even with a menu open. Edge-only (clear center), so it never masks menu content.
+      vignette.render(ctx, width, height);
     },
 
     screenToWorld(x, y) {
@@ -821,6 +827,7 @@ export function createGameScene({
       level = null;
       player = null;
       animations.reset();
+      vignette.reset();
     },
   };
 }

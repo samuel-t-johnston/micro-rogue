@@ -3,6 +3,7 @@ import { distributeLevelUpPoints, watchLevelUp } from './level-up.js';
 import { getScore } from '../../attributes/attribute-access.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { components } from '../entities/components.js';
+import { gameLog } from '../../engine/log/game-log.js';
 
 // The default player spec: one point per level, an even split over STR→DEX→CON, INT never.
 const EVEN_STR_DEX_CON = { str: 0.33, dex: 0.33, con: 0.33, int: 0 };
@@ -133,5 +134,28 @@ describe('watchLevelUp', () => {
     registry.addComponent(e, 'attributes', components.attributes({ str: 5, xp: 60 }));
     expect(() => watchLevelUp(e)).not.toThrow();
     expect(getScore(e, 'str')).toBe(5);
+  });
+
+  it('logs the level reached and the attribute gained for the player', () => {
+    const e = makeLeveler({ xp: 10, player: true }); // → level 2, +1 STR
+    gameLog.reset();
+    watchLevelUp(e);
+    const entry = gameLog.getAll().find((x) => x.action === 'levelUp');
+    expect(entry.display).toBe('You reach level 2! +1 STR');
+  });
+
+  it('lists every attribute gained across a multi-level jump', () => {
+    const e = makeLeveler({ xp: 60, player: true }); // → level 4: +1 STR, +1 DEX, +1 CON
+    gameLog.reset();
+    watchLevelUp(e);
+    const entry = gameLog.getAll().find((x) => x.action === 'levelUp');
+    expect(entry.display).toBe('You reach level 4! +1 STR, +1 DEX, +1 CON');
+  });
+
+  it('does not log for a non-player leveler', () => {
+    const e = makeLeveler({ xp: 10 }); // dynamic but not player-controlled
+    gameLog.reset();
+    watchLevelUp(e);
+    expect(gameLog.getAll().some((x) => x.action === 'levelUp')).toBe(false);
   });
 });

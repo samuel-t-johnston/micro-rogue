@@ -1,6 +1,11 @@
 import { getScore, adjustScoreBase } from '../../attributes/attribute-access.js';
+import { getDefinition } from '../../attributes/attribute-registry.js';
 import { gameLog } from '../../engine/log/game-log.js';
 import { subject, conjugate } from '../../engine/log/text/log-text.js';
+import { vignette } from '../../render/vignette.js';
+
+// The player's level-up flourish: a single slow gold swell around the screen edge (see vignette.js).
+const LEVEL_UP_VIGNETTE = { color: '#ffcf40', pulses: 1, pulseLength: 3000 };
 
 /**
  * @file Level-up: the turn-boundary watch that turns an entity's rising Level into permanent attribute
@@ -44,25 +49,36 @@ export function distributeLevelUpPoints(attributePercentages, totalPoints) {
 // carry the first N−1 levels' worth of growth). Keeps the phase math in one place.
 const pointsForLevel = (level, perLevel) => (level - 1) * perLevel;
 
-function announceLevelUp(entity, level) {
-  if (!entity.components.has('playerControlled')) return; // keep off-screen creature growth out of the log
+// "+1 STR, +1 CON" from a { attr: delta } map, using each attribute's display label; "" if no gains.
+function formatGains(gains) {
+  return Object.entries(gains)
+    .map(([name, delta]) => `+${delta} ${getDefinition(name).shortLabel}`)
+    .join(', ');
+}
+
+function announceLevelUp(entity, level, gains) {
+  if (!entity.components.has('playerControlled')) return; // creatures grow silently; the player gets the show
+  vignette.trigger(LEVEL_UP_VIGNETTE);
+  const deltas = formatGains(gains);
+  const reach = `${subject(entity)} ${conjugate(entity, 'reach', 'reaches')} level ${level}!`;
   gameLog.add({
     actor: entity.id,
     action: 'levelUp',
-    display: `${subject(entity)} ${conjugate(entity, 'reach', 'reaches')} level ${level}!`,
+    display: deltas ? `${reach} ${deltas}` : reach,
   });
 }
 
 /**
  * Grows an entity's attributes from its watermark `lastLevel` up to `toLevel`, applying the point
- * distribution earned over those levels and advancing the watermark. Returns the number of levels
- * gained (0 if `toLevel` isn't above the watermark). The shared core of both mid-game growth
- * (`watchLevelUp`) and generation-time scaling (the scaleCreatures stage) — it ignores `dynamic` and
- * the level cap, leaving those policy checks to the caller.
+ * distribution earned over those levels and advancing the watermark. Returns `{ levels, gains }` — the
+ * number of levels gained (0 if `toLevel` isn't above the watermark) and a `{ attr: delta }` map of the
+ * increases (for the level-up log). The shared core of both mid-game growth (`watchLevelUp`) and
+ * generation-time scaling (the scaleCreatures stage) — it ignores `dynamic` and the level cap, leaving
+ * those policy checks to the caller.
  */
 export function applyLevelUps(entity, spec, toLevel) {
   const from = spec.lastLevel;
-  if (toLevel <= from) return 0;
+  if (toLevel <= from) return { levels: 0, gains: {} };
 
   const before = distributeLevelUpPoints(
     spec.attributePercentages,
@@ -72,13 +88,17 @@ export function applyLevelUps(entity, spec, toLevel) {
     spec.attributePercentages,
     pointsForLevel(toLevel, spec.points),
   );
+  const gains = {};
   for (const name of Object.keys(spec.attributePercentages)) {
     const delta = (after[name] ?? 0) - (before[name] ?? 0);
-    if (delta) adjustScoreBase(entity, name, delta);
+    if (delta) {
+      adjustScoreBase(entity, name, delta);
+      gains[name] = delta;
+    }
   }
 
   spec.lastLevel = toLevel;
-  return toLevel - from;
+  return { levels: toLevel - from, gains };
 }
 
 /**
@@ -95,5 +115,6 @@ export function watchLevelUp(entity) {
 
   // A nullish cap means "no cap" — JSON has no Infinity, so an uncapped spec round-trips as null.
   const current = Math.min(getScore(entity, 'level'), spec.maxLevel ?? Infinity);
-  if (applyLevelUps(entity, spec, current) > 0) announceLevelUp(entity, current);
+  const { levels, gains } = applyLevelUps(entity, spec, current);
+  if (levels > 0) announceLevelUp(entity, current, gains);
 }
