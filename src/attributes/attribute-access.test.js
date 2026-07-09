@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   getScore,
   setScoreBase,
+  adjustScoreBase,
   getPool,
   adjustPool,
   setPoolCurrent,
@@ -76,6 +77,17 @@ describe('attribute accessors', () => {
       const e = makeActor({ str: 10 });
       setScoreBase(e, 'str', 18);
       expect(getScore(e, 'str')).toBe(18);
+    });
+
+    it('adjustScoreBase adds to the stored base and returns it', () => {
+      const e = makeActor({ str: 10 });
+      expect(adjustScoreBase(e, 'str', 3)).toBe(13);
+      expect(getScore(e, 'str')).toBe(13);
+    });
+
+    it('adjustScoreBase starts from the definition default when the base is unset', () => {
+      const e = makeActor();
+      expect(adjustScoreBase(e, 'str', 2)).toBe(3); // default 1 + 2
     });
 
     it('reads defaults when the entity has no attributes component', () => {

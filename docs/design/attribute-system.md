@@ -261,6 +261,11 @@ Ordering follows the roadmap, migration-first so behavior is preserved before ne
 6. **Character stats screen + HUD** via the generic display reader.
 7. Downstream (tuning bullet): level curve, per-level effects, MP/Hunger gameplay, equip
    requirements, miss chance, new-game allocation.
+   - **Level-up attribute growth landed** (`levelUp` component + `src/world/systems/level-up.js`):
+     a turn-boundary watch diffs each leveling entity's derived Level against a per-component
+     watermark and allocates points across a declared attribute split. `dynamic: false` entities
+     keep the spec but don't grow as they earn XP — the seam the creature spawn-scaling feature will
+     use to boost a monster to a target level at spawn. See docs/howto/tuning-level-up-growth.md.
 
 ## 11. Decisions and adjustable defaults
 

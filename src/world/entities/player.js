@@ -12,25 +12,37 @@ export async function createPlayer(registry, x, y) {
   registry.addComponent(entity, 'name', components.name('Player'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('player'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  // Full stat block. str/dex/int/con are placeholders on the old ~10 scale, to be rebalanced in the
-  // progression pass. spd=1 is the ~1.0 turn-speed scale (1 action/round); it feeds turnTaker.speed
+  // Full stat block. The four ability scores start at 5 each — a low baseline that level-up growth
+  // (below) builds on. spd=1 is the ~1.0 turn-speed scale (1 action/round); it feeds turnTaker.speed
   // via syncSpeed below, with dex adding a small nimbleness bonus. hpBase is the raw HP floor that
-  // equipment and 2·con add onto (maxHP = hpBase + equip + 2·con); current is absent so it spawns
-  // full. attack=1 is the old unarmed damage, xp=0 starts at level 1. See
+  // equipment and 2·con add onto (maxHP = hpBase + equip + 2·con = 20 + 10 at con 5); current is absent
+  // so it spawns full. attack=1 is the unarmed damage, xp=0 starts at level 1. See
   // docs/design/attribute-system.md.
   registry.addComponent(
     entity,
     'attributes',
     components.attributes({
-      str: 12,
-      dex: 12,
-      int: 10,
-      con: 20,
+      str: 5,
+      dex: 5,
+      int: 5,
+      con: 5,
       spd: 1,
       attack: 1,
       hpBase: 20,
       mpBase: 1,
       xp: 0,
+    }),
+  );
+  // Grows on level-up: one point per level, split evenly STR → DEX → CON (INT left out for now), up to
+  // level 25. The level-up system (src/world/systems/level-up.js) watches this and allocates the points.
+  registry.addComponent(
+    entity,
+    'levelUp',
+    components.levelUp({
+      dynamic: true,
+      points: 1,
+      attributePercentages: { str: 0.33, dex: 0.33, con: 0.33, int: 0 },
+      maxLevel: 25,
     }),
   );
   // Start the player fully fed: seed the hunger current to its derived max (10·con). Storing the

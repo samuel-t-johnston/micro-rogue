@@ -55,6 +55,28 @@ export const components = {
     return { ...initial };
   },
 
+  // Marks an entity as one that grows on level-up, and carries the spec that drives it (see
+  // src/world/systems/level-up.js). `attributePercentages` is the target split of allocated points
+  // across attributes (evaluated in declared order; a zero share never receives). `points` is granted
+  // per level; growth stops at `maxLevel`. `dynamic` gates mid-game growth — false creatures keep the
+  // spec (for spawn-time level scaling) but don't grow as they earn XP. `lastLevel` is the watermark
+  // the watcher last allocated for; it starts at the entity's spawn level and serializes as plain data.
+  levelUp({
+    dynamic = false,
+    points = 1,
+    attributePercentages = {},
+    maxLevel = Infinity,
+    lastLevel = 1,
+  } = {}) {
+    return {
+      dynamic,
+      points,
+      attributePercentages: { ...attributePercentages },
+      maxLevel,
+      lastLevel,
+    };
+  },
+
   // Marks an entity as blocking movement. The pathfinder treats it as impassable terrain.
   // Kept separate from `opaque` so a transparent entity can still block movement (e.g. a
   // force field).

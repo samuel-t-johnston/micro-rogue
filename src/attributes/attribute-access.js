@@ -89,6 +89,20 @@ export function setScoreBase(entity, name, value) {
   requireState(entity, name)[name] = value;
 }
 
+/**
+ * Adds `delta` to a score's stored base and returns the new base — the incremental sibling of
+ * setScoreBase, so level-up allocation doesn't hand-roll `stored ?? default` base math outside the
+ * accessor layer. An absent base starts from the definition default.
+ */
+export function adjustScoreBase(entity, name, delta) {
+  const def = getDefinition(name);
+  requireFlavor(def, Flavors.SCORE);
+  const state = requireState(entity, name);
+  const next = (state[name] ?? def.default ?? 0) + delta;
+  state[name] = next;
+  return next;
+}
+
 /** A pool's `{ current, max }`: max is derived; current is the stored value clamped to [0, max]
  *  (an absent current reads as full). The pool's per-entity raw base — the flat value stat scaling
  *  and equipment add onto in `resolveMax` — is stored under the companion key `${name}Base` (e.g.

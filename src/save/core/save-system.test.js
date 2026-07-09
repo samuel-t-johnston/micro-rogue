@@ -676,6 +676,58 @@ describe('v9 → v10 migration (real, from a fixture)', () => {
   });
 });
 
+describe('v10 → v11 migration (real, from a fixture)', () => {
+  const findEntity = (entities, id) => entities.find((e) => e.id === id);
+
+  it('grants the player a dynamic levelUp component with the default spec', () => {
+    const migrated = loadSave(saveV9);
+    expect(migrated.saveVersion).toBe(SAVE_VERSION);
+    const levelUp = findEntity(migrated.entities, 1).components.levelUp;
+    expect(levelUp).toEqual({
+      dynamic: true,
+      points: 1,
+      attributePercentages: { str: 0.33, dex: 0.33, con: 0.33, int: 0 },
+      maxLevel: 25,
+      lastLevel: 1, // player xp 0 → level 1; no retroactive allocation
+    });
+  });
+
+  it('seeds lastLevel from the player’s current level so no points are back-paid', () => {
+    const raw = {
+      saveVersion: 10,
+      versionHistory: [{ saveVersion: 10 }],
+      entities: [
+        { id: 1, components: { playerControlled: {}, attributes: { str: 5, xp: 30 } } }, // xp 30 → level 3
+      ],
+    };
+    expect(loadSave(raw).entities[0].components.levelUp.lastLevel).toBe(3);
+  });
+
+  it('leaves a non-player entity without a levelUp component', () => {
+    const goblin = findEntity(loadSave(saveV9).frozenLevels['floor-2'].entities, 5);
+    expect(goblin.components.levelUp).toBeUndefined();
+  });
+
+  it('does not overwrite a levelUp component that already exists', () => {
+    const raw = {
+      saveVersion: 10,
+      versionHistory: [{ saveVersion: 10 }],
+      entities: [
+        {
+          id: 1,
+          components: { playerControlled: {}, attributes: { xp: 0 }, levelUp: { dynamic: false } },
+        },
+      ],
+    };
+    expect(loadSave(raw).entities[0].components.levelUp).toEqual({ dynamic: false });
+  });
+
+  it('does not mutate the source fixture', () => {
+    loadSave(saveV9);
+    expect(saveV9.entities[0].components.levelUp).toBeUndefined();
+  });
+});
+
 describe('commitSave / loadSavedGame orchestration', () => {
   it('returns null when there is no save', () => {
     expect(loadSavedGame()).toBeNull();
