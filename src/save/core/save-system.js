@@ -20,7 +20,7 @@ import {
 } from './serialize.js';
 
 /** Save schema version. Bumped only on a breaking schema change (see the design doc). */
-export const SAVE_VERSION = 10;
+export const SAVE_VERSION = 11;
 
 /** Game release version; independent of SAVE_VERSION, tracks releases and mirrors package.json. */
 export const GAME_VERSION = '0.2.0';
@@ -286,6 +286,33 @@ export const migrations = [
       seedHpBase(save.entities);
       for (const floor of Object.values(save.frozenLevels ?? {})) {
         seedHpBase(floor.entities);
+      }
+      return save;
+    },
+  },
+  {
+    from: 10,
+    to: 11,
+    // v11 adds the `levelUp` component that drives on-level-up attribute growth (see
+    // src/world/systems/level-up.js). Grant it to the existing player so their save can start leveling;
+    // seed the watermark `lastLevel` to the player's CURRENT level so no back-payment of points fires on
+    // load — the level derives from xp via the (frozen here) placeholder curve levelForXp(xp) =
+    // floor((5+√(25+20·xp))/10). The spec mirrors createPlayer. Only the playerControlled entity gets it;
+    // creature spawn-scaling seeds its own specs later. Frozen literals only — a migration never calls
+    // live code, so the curve and spec are inlined and stay fixed even if the live ones change.
+    migrate(save) {
+      for (const entity of save.entities ?? []) {
+        const c = entity.components;
+        if (!c?.playerControlled || c.levelUp) continue;
+        const xp = c.attributes?.xp ?? 0;
+        const level = Math.floor((5 + Math.sqrt(25 + 20 * xp)) / 10);
+        c.levelUp = {
+          dynamic: true,
+          points: 1,
+          attributePercentages: { str: 0.33, dex: 0.33, con: 0.33, int: 0 },
+          maxLevel: 25,
+          lastLevel: Math.min(level, 25),
+        };
       }
       return save;
     },

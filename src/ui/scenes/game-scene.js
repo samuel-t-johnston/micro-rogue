@@ -25,6 +25,7 @@ import { syncSpeed } from '../../attributes/speed-sync.js';
 import { winConditions, escapeWithQuestItem } from '../../engine/turn/win-conditions.js';
 import { scentUpkeep, scentAt } from '../../world/sense-systems/scent.js';
 import { tickHunger } from '../../world/systems/hunger.js';
+import { watchLevelUp } from '../../world/systems/level-up.js';
 import { getTileType } from '../../world/map/tile-registry.js';
 import { gameLog } from '../../engine/log/game-log.js';
 import { isEntryVisible } from '../../engine/log/log-visibility.js';
@@ -477,7 +478,13 @@ export function createGameScene({
         syncSpeed(entity);
         if (entity.components.has('playerControlled')) upkeep.run({ level, registry, player });
       },
-      onTurnEnd: handleTurnEnd,
+      onTurnEnd: (entity, meta) => {
+        // Any entity that grows on level-up is reconciled at its own turn boundary, after the XP it
+        // may have earned this turn has landed (poll-not-listen; see level-up.js). handleTurnEnd then
+        // runs the player-only end-of-turn checks (hunger, win conditions).
+        watchLevelUp(entity);
+        handleTurnEnd(entity, meta);
+      },
       // Emergency breaker tripped: a creature's goal stack kept returning free actions. Surface it
       // loudly (console) and in the debug log so the offending entity is findable; the turn loop has
       // already force-consumed the turn to stay responsive.
