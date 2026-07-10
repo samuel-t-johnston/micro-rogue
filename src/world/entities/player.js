@@ -45,7 +45,7 @@ export async function createPlayer(registry, x, y) {
       maxLevel: 25,
     }),
   );
-  // Start the player fully fed: seed the hunger current to its derived max (10·con). Storing the
+  // Start the player fully fed: seed the hunger current to its derived max (20·con). Storing the
   // current also makes hasPool('hunger') true, so the satiate/decay guards find the pool. maxHP is
   // left unseeded (an absent pool current reads as full), but hunger stores a value so it can drain.
   setPoolCurrent(entity, 'hunger', getPool(entity, 'hunger').max);

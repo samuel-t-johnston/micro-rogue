@@ -154,7 +154,7 @@ parse a flavor-tagged blob to use the result, the uniform getter bought nothing.
 | `attack` | Score | base (unarmed) | base + equip `attack` mods | Atk / Attack |
 | `hp` | Pool | current + base | max = `hpBase` + equip + 2·`con` | HP / Health |
 | `mp` | Pool | current + base | max = `mpBase` + equip + 2·`int` | MP / Mana |
-| `hunger` | Pool | current | max = 10·`con` | Hun / Hunger |
+| `hunger` | Pool | current | max = 20·`con` | Hun / Hunger |
 | `xp` | Accumulator | value | identity | XP / Experience |
 
 Notes:
@@ -169,7 +169,7 @@ Notes:
 - **Pool max = raw base + equipment + 2·governing score.** HP scales on `con`, MP on `int`; the base
   is the flat per-entity floor stored under `hpBase`/`mpBase`. The `2·` coefficient and the base values
   are still balance knobs — the core scores (`con`/`int`) currently sit on the old ~10 scale, so HP/MP
-  run high until the progression-tuning pass rebalances them. Hunger has no base (max = 10·`con`).
+  run high until the progression-tuning pass rebalances them. Hunger has no base (max = 20·`con`).
 - **`mp` is inert at first**: MP isn't spent yet. It resolves and displays; that's the first cut.
 - **`hunger` decays** once per turn-consuming player action, ticked from the game scene's
   `handleTurnEnd` (not the `upkeep` hook — that fires on free actions too, e.g. examining a tile).
@@ -263,9 +263,13 @@ Ordering follows the roadmap, migration-first so behavior is preserved before ne
    requirements, miss chance, new-game allocation.
    - **Level-up attribute growth landed** (`levelUp` component + `src/world/systems/level-up.js`):
      a turn-boundary watch diffs each leveling entity's derived Level against a per-component
-     watermark and allocates points across a declared attribute split. `dynamic: false` entities
-     keep the spec but don't grow as they earn XP — the seam the creature spawn-scaling feature will
-     use to boost a monster to a target level at spawn. See docs/howto/tuning-level-up-growth.md.
+     watermark and allocates points across a declared attribute split.
+   - **Creature level-scaling landed** (`scaleCreatures` map-gen stage,
+     `src/world/generation/stages/stage-scale-creatures.js`): creatures are authored at level 1 with a
+     `dynamic: false` levelUp spec; the stage boots each named type to a per-floor level (sets `xp` to
+     match, then runs the shared `applyLevelUps` allocator). Floors 2/3 scale their monsters to level
+     2/3; floor 1 stays level 1. Ships with a creature balance pass. See
+     docs/howto/tuning-level-up-growth.md.
 
 ## 11. Decisions and adjustable defaults
 

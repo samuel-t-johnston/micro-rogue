@@ -3,6 +3,7 @@ import { applyEffect, EffectTypes } from './effects.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { createLevel } from '../../world/map/level.js';
 import { components } from '../../world/entities/components.js';
+import { getPool } from '../../attributes/attribute-access.js';
 
 function makeSubject() {
   const registry = createEntityRegistry();
@@ -68,11 +69,11 @@ describe('effectDamage', () => {
 });
 
 describe('effectSatiate', () => {
-  // hunger is a pool with max = 10·con; con 0 here → max 0, so give the subject con for headroom.
+  // hunger is a pool whose max scales with con; con 0 → max 0, so give the subject con for headroom.
   function makeEater() {
     const registry = createEntityRegistry();
     const e = registry.createEntity();
-    registry.addComponent(e, 'attributes', components.attributes({ hunger: 10, con: 10 })); // max 100
+    registry.addComponent(e, 'attributes', components.attributes({ hunger: 10, con: 10 }));
     return { registry, e };
   }
 
@@ -85,7 +86,7 @@ describe('effectSatiate', () => {
   it('clamps at hunger.max — eating past full is wasted', () => {
     const { e } = makeEater();
     applyEffect(EffectTypes.SATIATE, e, null, { amount: 999 });
-    expect(e.components.get('attributes').hunger).toBe(100);
+    expect(getPool(e, 'hunger').current).toBe(getPool(e, 'hunger').max);
   });
 
   it('is a no-op when the subject has no hunger pool', () => {

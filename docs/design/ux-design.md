@@ -160,6 +160,8 @@ Animations are sparse but purposeful. All are cosmetic — game state resolves b
 
 **Screen overlay effects** — edge vignette for persistent status states: red for low health, green or purple for poison, orange for fire. Pairs with status effect icons in HUD components; not a replacement for them. Disableable in settings. Reduced-motion fallback (static tint instead of pulse) also supported.
 
+_Landed (first cut):_ `src/render/vignette.js` — an ambient singleton (sibling of `animations`) drawing timed edge-glow pulses parameterized by `color`, `pulses`, and `pulseLength` (+ optional `maxAlpha`). It draws last in the game-scene frame, above the UI, so a warning reads even over an open menu. First use is the gold single-pulse **level-up** flourish (fired from `level-up.js`); a red two-pulse damage "heartbeat" and the persistent-status vignettes above are the next users. Honors the animation reduced-motion kill switch today; the settings toggle and static-tint fallback come with the persistent-status work.
+
 **Dialogue** — structured NPC conversation with player responses warrants a bottom sheet or modal, distinct from the log. Ambient barks go to the log; spatial treatment (speech icon on the map near the speaker) is a future enhancement.
 
 **Projectiles and thrusts** — ranged attacks and thrown items fly a detached sprite from attacker to impact (one-way), and reach weapons (the spear) lunge out-and-back; both pick an 8-way directional sprite and fall back to the action wiggle when art is missing. Implemented in the animation system's detached pass alongside the death smoosh. See [ranged-weapons.md](ranged-weapons.md).

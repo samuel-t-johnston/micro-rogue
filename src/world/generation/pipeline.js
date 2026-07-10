@@ -15,6 +15,7 @@ import { run as runCarveHalls } from './stages/stage-carve-halls.js';
 import { run as runStairs } from './stages/stage-stairs.js';
 import { run as runSpawn } from './stages/stage-spawn.js';
 import { run as runPopulate } from './stages/stage-populate.js';
+import { run as runScaleCreatures } from './stages/stage-scale-creatures.js';
 import { run as runLoadout } from './stages/stage-loadout.js';
 
 const STAGES = {
@@ -29,6 +30,7 @@ const STAGES = {
   stairs: runStairs,
   spawn: runSpawn,
   populate: runPopulate,
+  scaleCreatures: runScaleCreatures,
   loadout: runLoadout,
 };
 

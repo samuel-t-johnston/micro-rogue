@@ -134,14 +134,15 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 - [x] Gain XP on kill (scales with the defeated creature's level; all creatures earn)
 - [x] Player attributes screen (Stats card in the character menu; curated set pending display metadata)
 - [x] Attributes added to HUD widget (Level line; HP already shown)
-- [ ] Level up at XP tiers (Level derives + displays; rewards/crossing deferred to the tuning pass)
-- [ ] New game Player stat allocation
+- [x] Level up at XP tiers (Level derives + displays; rewards/crossing deferred to the tuning pass)
+- [x] New game Player stat allocation
 - [ ] Attributes used in other systems
   - [x] Add miss chance to ranged attacks and throw (DEX + range; a miss scatters to an adjacent tile)
   - [x] Hunger ticks down, damage on starvation. Add satiety effect and food items.
-  - Attack damage
-  - Equip requirements
-  - Auto-move stops on HP drop — watch current HP (read via the attribute resolver, not `health.current`) and cancel auto-move when it falls. Seed an HP watermark in `player-get-input` when arming auto-move, parallel to `knownEnemyIds` (baseline must be captured at arming time to catch damage taken before the first auto-move step); compare/refresh it in `player-auto-move` and clear it in `cancelAutoMove`. Needs HP exposed on `selfState` in `planning-context.js`. Catches already-known and out-of-vision attackers, which the new-enemy check misses. Fold this into the shared salience monitor rather than building it standalone — see [state-change-alerts.md](design/state-change-alerts.md), which also covers the in-menu warning that reuses the same HP watermark.
+  - [x] Attack damage
+  - [ ] Auto-move stops on HP drop — watch current HP (read via the attribute resolver, not `health.current`) and cancel auto-move when it falls. Seed an HP watermark in `player-get-input` when arming auto-move, parallel to `knownEnemyIds` (baseline must be captured at arming time to catch damage taken before the first auto-move step); compare/refresh it in `player-auto-move` and clear it in `cancelAutoMove`. Needs HP exposed on `selfState` in `planning-context.js`. Catches already-known and out-of-vision attackers, which the new-enemy check misses. Fold this into the shared salience monitor rather than building it standalone — see [state-change-alerts.md](design/state-change-alerts.md), which also covers the in-menu warning that reuses the same HP watermark.
+ - [x] Bonus: vignette effect on level-up
+ - [ ] Hunger warning in HUD - "Hungry" or "Starving!"
 
 ---
 
@@ -196,27 +197,29 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 
 *Features driven by using the engine to build a new roguelike! Maybe a 7DRL.*
 
+- [ ] Clean up old save file versions
+
 ---
 
 ## Deferred / Not Scheduled
 
 *Medium Priority / Easy:*
 
+- [ ] Randomize attack damage
 - [ ] "Save" button that tells the user about auto-save.
-- [ ] Particles and projectile animations — leave a hook in the animation system; implement when ranged combat exists
-- [ ] `flee` goal: low-HP retreat behavior
-- [ ] Screen overlay effects: red vignette for low HP; reduced-motion fallback; disableable
-- [ ] Emote icons: `!` alert, `?` investigating, `💤` sleeping — reusable component
-- [ ] Status effects: HUD display, multi-effect overflow handling
+- [ ] Screen overlay effects (vignette) - reduced-motion fallback; disableable
 - [ ] Light-sensitive vision sense - current unlimited vision sense becomes "darkvision". Tile light levels + light emitters
-- [ ] Echolocation sense — a precise hearing-style sense that resolves *exact* source tiles via walking-distance sound propagation (the muffling / weighted path-cost model explored during M6 hearing design). Distinct from ordinary hearing, which deliberately yields only an imprecise direction + a type/classification; echolocation would pinpoint the source. High-detail and arguably more "bat sonar" than human hearing — revisit as a special creature ability or player tool.
 - [ ] Score + Leaderboards
-- [ ] Zoo level for dev testing
 - [ ] More furniture: fountains? secret doors? 
 - [ ] Zoo level for dev testing
 - [ ] Developer F.A.Q.
 - [ ] View RNG seed, mode where seed can be specified
-- [ ] Clean up old save file versions that can only possibly exist in dev - possibly at beta
+
+- [ ] Particles and projectile animations — leave a hook in the animation system; implement when ranged combat exists
+- [ ] `flee` goal: low-HP retreat behavior
+- [ ] Emote icons: `!` alert, `?` investigating, `💤` sleeping — reusable component
+- [ ] Status effects: HUD display, multi-effect overflow handling
+- [ ] Echolocation sense — a precise hearing-style sense that resolves *exact* source tiles via walking-distance sound propagation (the muffling / weighted path-cost model explored during M6 hearing design). Distinct from ordinary hearing, which deliberately yields only an imprecise direction + a type/classification; echolocation would pinpoint the source. High-detail and arguably more "bat sonar" than human hearing — revisit as a special creature ability or player tool.
 
 *Low Priority / Hard:*
 
