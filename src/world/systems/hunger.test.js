@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { tickHunger } from './hunger.js';
+import { tickHunger, hungerStatus } from './hunger.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { createLevel } from '../map/level.js';
 import { components } from '../entities/components.js';
@@ -143,3 +143,28 @@ describe('tickHunger', () => {
     expect(getPool(player, 'hp').current).toBe(before);
   });
 });
+
+describe('hungerStatus', () => {
+  it('reports ok / hungry / starving by fraction of max (matching the crossing thresholds)', () => {
+    const { player, max } = makePlayer();
+    expect(hungerStatus(seedAndReturn(player, max))).toBe('ok');
+    expect(hungerStatus(seedAndReturn(player, 0.4 * max))).toBe('ok'); // exactly 40%: not yet hungry
+    expect(hungerStatus(seedAndReturn(player, 0.39 * max))).toBe('hungry');
+    expect(hungerStatus(seedAndReturn(player, 0.2 * max))).toBe('hungry'); // exactly 20%: not yet starving
+    expect(hungerStatus(seedAndReturn(player, 0.19 * max))).toBe('starving');
+    expect(hungerStatus(seedAndReturn(player, 0))).toBe('starving');
+  });
+
+  it('is "ok" for an entity with no hunger pool', () => {
+    const registry = createEntityRegistry();
+    const e = registry.createEntity();
+    registry.addComponent(e, 'attributes', components.attributes({ str: 5 }));
+    expect(hungerStatus(e)).toBe('ok');
+  });
+});
+
+// Seeds hunger and returns the player, for inline use above.
+function seedAndReturn(player, value) {
+  setPoolCurrent(player, 'hunger', value);
+  return player;
+}

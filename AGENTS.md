@@ -110,6 +110,7 @@ DO NOT INSTALL TOOLS LIKE PLAYWRIGHT TO TEST UI!
 - Don't test private implementation details. If a test breaks during a refactor that didn't change observable behavior, the test was wrong. 
 
 # PRs and Commits
+ - Get confirmation from the user before committing
  - Always commit to a branch, not main
  - Code changes should be reviewed and unit tested before committing.
  - ESLint and Prettier should be run before committing.

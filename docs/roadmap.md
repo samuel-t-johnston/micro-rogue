@@ -141,8 +141,8 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
   - [x] Hunger ticks down, damage on starvation. Add satiety effect and food items.
   - [x] Attack damage
   - [ ] Auto-move stops on HP drop — watch current HP (read via the attribute resolver, not `health.current`) and cancel auto-move when it falls. Seed an HP watermark in `player-get-input` when arming auto-move, parallel to `knownEnemyIds` (baseline must be captured at arming time to catch damage taken before the first auto-move step); compare/refresh it in `player-auto-move` and clear it in `cancelAutoMove`. Needs HP exposed on `selfState` in `planning-context.js`. Catches already-known and out-of-vision attackers, which the new-enemy check misses. Fold this into the shared salience monitor rather than building it standalone — see [state-change-alerts.md](design/state-change-alerts.md), which also covers the in-menu warning that reuses the same HP watermark.
- - [x] Bonus: vignette effect on level-up
- - [ ] Hunger warning in HUD - "Hungry" or "Starving!"
+ - [x] Vignette effect on level-up
+ - [x] Hunger warning in HUD - "Hungry" or "Starving!"
 
 ---
 
@@ -158,6 +158,7 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 - [ ] RNG item spawn in map gen - item tables + player level
 - [ ] RNG monster inventory in map gen - item tables + player level
 - [ ] RNG monster loot drops - item tables
+- [ ] Fancy bitset/Page 437 line walls (in glyph rendering mode) - config to enable
 
 ---
 
@@ -181,6 +182,9 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 - [ ] 10 monsters
 - [ ] 1 boss
 - [ ] Attack telegraph animations
+- [ ] Damage randomization
+- [ ] spear animation
+- [ ] defense/armor
 
 ---
 

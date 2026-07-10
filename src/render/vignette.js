@@ -67,21 +67,35 @@ export function drawVignette(ctx, width, height, { color, alpha }) {
 }
 
 function createVignetteManager() {
-  let active = []; // { start, color, pulses, pulseLength, maxAlpha }
+  let active = []; // transient pulses: { start, color, pulses, pulseLength, maxAlpha }
+  const sustained = new Map(); // key -> { color, alpha }: steady overlays held while a state persists
 
   return {
     /**
-     * Start a vignette. No-op when animations are disabled (reduced motion) or no color is given, so
-     * callers can fire unconditionally. `pulses`/`pulseLength`/`maxAlpha` fall back to sensible defaults.
+     * Start a transient vignette. No-op when animations are disabled (reduced motion) or no color is
+     * given, so callers can fire unconditionally. `pulses`/`pulseLength`/`maxAlpha` fall back to defaults.
      */
     trigger({ color, pulses = 1, pulseLength = 1000, maxAlpha = DEFAULT_MAX_ALPHA } = {}) {
       if (!animations.enabled || !color) return;
       active.push({ start: now(), color, pulses, pulseLength, maxAlpha });
     },
 
-    // Draw every live vignette and drop the finished ones. Self-timed off performance.now() (a test may
-    // pass an explicit `t`); called last in the frame so the overlay sits above the world and the UI.
+    /**
+     * Set (or clear, with a nullish `spec`) a steady vignette held under `key` while some state lasts —
+     * e.g. a thin red edge while starving. Unlike a pulse it doesn't time out; the caller sets it each
+     * frame from the live state. Kept on regardless of the reduced-motion switch: it's a static tint (no
+     * motion), which is exactly the accessible fallback form. `spec` is `{ color, alpha }`.
+     */
+    setSustained(key, spec) {
+      if (spec) sustained.set(key, spec);
+      else sustained.delete(key);
+    },
+
+    // Draw the steady sustained overlays, then the transient pulses on top, dropping finished pulses.
+    // Self-timed off performance.now() (a test may pass an explicit `t`); called last in the frame so
+    // the overlay sits above the world and the UI.
     render(ctx, width, height, t = now()) {
+      for (const spec of sustained.values()) drawVignette(ctx, width, height, spec);
       if (active.length === 0) return;
       const still = [];
       for (const v of active) {
@@ -93,9 +107,10 @@ function createVignetteManager() {
       active = still;
     },
 
-    // Drop all in-flight vignettes (new-game / scene teardown), mirroring animations.reset().
+    // Drop all vignettes, transient and sustained (new-game / scene teardown), mirroring animations.reset().
     reset() {
       active = [];
+      sustained.clear();
     },
   };
 }
