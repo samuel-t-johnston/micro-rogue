@@ -25,7 +25,7 @@ import { upkeep } from '../../engine/turn/upkeep.js';
 import { syncSpeed } from '../../attributes/speed-sync.js';
 import { winConditions, escapeWithQuestItem } from '../../engine/turn/win-conditions.js';
 import { scentUpkeep, scentAt } from '../../world/sense-systems/scent.js';
-import { tickHunger } from '../../world/systems/hunger.js';
+import { tickHunger, hungerStatus } from '../../world/systems/hunger.js';
 import { watchLevelUp } from '../../world/systems/level-up.js';
 import { getTileType } from '../../world/map/tile-registry.js';
 import { gameLog } from '../../engine/log/game-log.js';
@@ -49,6 +49,9 @@ import {
   buildSupportBundle,
   downloadSupportBundle,
 } from '../../save/support-bundle/support-bundle.js';
+
+// The steady edge glow held while the player is starving (see hungerStatus): a thin, deep-red frame.
+const STARVING_VIGNETTE = { color: '#e0352f', alpha: 0.3 };
 
 /**
  * Creates the in-game scene (see the file overview). `startMode` is 'new' or 'continue'; the host
@@ -731,7 +734,11 @@ export function createGameScene({
       const exp = player
         ? levelProgress(getAccumulator(player, 'xp'))
         : { level: 1, into: 0, forNext: 0 };
-      hudWidget.render(ctx, { level: exp.level, hp, mp, exp });
+      const hunger = player ? hungerStatus(player) : 'ok';
+      hudWidget.render(ctx, { level: exp.level, hp, mp, exp, hunger });
+      // Hold a thin red edge vignette while starving — a peripheral cue you can't miss, backing the HUD
+      // warning so a creeping starvation registers even mid-menu. Cleared the moment hunger recovers.
+      vignette.setSustained('starving', hunger === 'starving' ? STARVING_VIGNETTE : null);
 
       characterMenuButton.render(ctx);
       gameMenuButton.render(ctx);

@@ -1,4 +1,4 @@
-import { getPool, adjustPool } from '../../attributes/attribute-access.js';
+import { getPool, adjustPool, hasPool } from '../../attributes/attribute-access.js';
 import { applyEffect, EffectTypes } from '../../effects/core/effects.js';
 import { gameLog } from '../../engine/log/game-log.js';
 import { rng } from '../../engine/core/rng.js';
@@ -12,9 +12,25 @@ import { rng } from '../../engine/core/rng.js';
 
 // Fraction-of-max thresholds the downward messages fire at (strictly below), and the fill the "full"
 // eat-message needs (at or above). Kept as fractions so they scale with each entity's derived max.
-const HUNGRY_PCT = 0.4;
-const STARVING_PCT = 0.2;
+export const HUNGRY_PCT = 0.4;
+export const STARVING_PCT = 0.2;
 const STARVE_DAMAGE_CHANCE = 0.5; // odds an empty stomach bites for 1 damage this turn
+
+/**
+ * The player's current hunger tier for at-a-glance UI (the HUD warning and the starving vignette):
+ * `'starving'` below 20% of max, `'hungry'` below 40%, else `'ok'`. Boundaries match the crossing
+ * messages (`crossingMessage`) so the label and the announcement never disagree. `'ok'` for an entity
+ * with no hunger pool.
+ */
+export function hungerStatus(entity) {
+  if (!hasPool(entity, 'hunger')) return 'ok';
+  const { current, max } = getPool(entity, 'hunger');
+  if (max <= 0) return 'ok';
+  const frac = current / max;
+  if (frac < STARVING_PCT) return 'starving';
+  if (frac < HUNGRY_PCT) return 'hungry';
+  return 'ok';
+}
 
 /** The message for eating (hunger rose this turn), chosen by the fill reached before the same-turn
  *  decay: a full-up gorge reads "stuffed", a decent meal "full", a nibble "less hungry". */
