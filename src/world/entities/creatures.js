@@ -16,13 +16,13 @@ export function createGoblin(registry, x, y) {
     entity,
     'attributes',
     components.attributes({
-      str: 5,
-      dex: 6,
-      int: 9,
+      str: 3,
+      dex: 3,
+      int: 2,
       con: 3,
       spd: 1,
       attack: 1,
-      hpBase: 6,
+      hpBase: 1,
       mpBase: 1,
       xp: 0,
     }),
@@ -68,19 +68,18 @@ export function createOrc(registry, x, y) {
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('orc'));
   registry.addComponent(entity, 'position', components.position(x, y));
   // Level-1 base stats: a solid melee soldier, a roughly even match for the player at equal level (hits
-  // about as hard, a little less HP). Rounded STR/CON growth. xp 0 → level 1; the scaleCreatures stage
-  // boots it to the floor's level. (Was authored at level 2; now baselined to 1 like every creature.)
+  // about as hard, a little less HP). Rounded STR/CON growth. xp 0 → level 1;
   registry.addComponent(
     entity,
     'attributes',
     components.attributes({
       str: 5,
-      dex: 8,
-      int: 8,
-      con: 6,
+      dex: 5,
+      int: 5,
+      con: 5,
       spd: 1,
       attack: 1,
-      hpBase: 10,
+      hpBase: 5,
       mpBase: 1,
       xp: 0,
     }),
@@ -154,13 +153,13 @@ export function createOrcCommander(registry, x, y) {
     // scale on DEX, HP on CON). xp 0 → level 1; the scaleCreatures stage boots it to the floor's level.
     // (Was authored at level 3; now baselined to 1 like every creature.)
     components.attributes({
-      str: 9,
+      str: 3,
       dex: 7,
-      int: 12,
-      con: 8,
+      int: 7,
+      con: 7,
       spd: 1,
-      attack: 2,
-      hpBase: 12,
+      attack: 1,
+      hpBase: 8,
       mpBase: 1,
       xp: 0,
     }),
@@ -236,9 +235,9 @@ export function createScuttler(registry, x, y) {
     entity,
     'attributes',
     components.attributes({
-      str: 4,
-      dex: 14,
-      int: 3,
+      str: 6,
+      dex: 10,
+      int: 1,
       con: 1,
       spd: 1.4,
       attack: 1,

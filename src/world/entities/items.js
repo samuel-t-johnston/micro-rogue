@@ -309,7 +309,7 @@ export function createScroll(registry, x, y, entityId) {
   return entity;
 }
 
-/** Creates Grapes (consumable food: satiate 10 — a light snack). */
+/** Creates Grapes (consumable food: satiate 50 — a light snack). */
 export function createGrapes(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
@@ -324,7 +324,7 @@ export function createGrapes(registry, x, y, entityId) {
   registry.addComponent(
     entity,
     'consumable',
-    components.consumable(EffectTypes.SATIATE, { amount: 10 }),
+    components.consumable(EffectTypes.SATIATE, { amount: 50 }),
   );
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));
@@ -332,7 +332,7 @@ export function createGrapes(registry, x, y, entityId) {
   return entity;
 }
 
-/** Creates Bread (consumable food: satiate 30 — a solid meal). */
+/** Creates Bread (consumable food: satiate 100 — a solid meal). */
 export function createBread(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
@@ -347,7 +347,7 @@ export function createBread(registry, x, y, entityId) {
   registry.addComponent(
     entity,
     'consumable',
-    components.consumable(EffectTypes.SATIATE, { amount: 30 }),
+    components.consumable(EffectTypes.SATIATE, { amount: 100 }),
   );
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));
@@ -355,7 +355,7 @@ export function createBread(registry, x, y, entityId) {
   return entity;
 }
 
-/** Creates Meat (consumable food: satiate 50 — a hearty feast). */
+/** Creates Meat (consumable food: satiate 150 — a hearty feast). */
 export function createMeat(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
   const entity = registry.createEntity();
@@ -370,7 +370,7 @@ export function createMeat(registry, x, y, entityId) {
   registry.addComponent(
     entity,
     'consumable',
-    components.consumable(EffectTypes.SATIATE, { amount: 50 }),
+    components.consumable(EffectTypes.SATIATE, { amount: 150 }),
   );
   if (location.type === 'map') {
     registry.addComponent(entity, 'position', components.position(x, y));

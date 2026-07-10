@@ -17,7 +17,7 @@ const now = () => performance.now();
 
 const DEFAULT_MAX_ALPHA = 0.55;
 const RISE = 0.2; // fraction of a pulse spent rising to the peak; the remaining 0.8 is the slow fade
-const INNER_RADIUS = 0.5; // fraction of the corner distance kept fully clear at the center
+const INNER_RADIUS = 0.75; // fraction of the corner distance kept fully clear — a thin edge band
 
 const easeOutQuad = (t) => 1 - (1 - t) * (1 - t);
 const easeInQuad = (t) => t * t;

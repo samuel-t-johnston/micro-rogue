@@ -154,7 +154,7 @@ parse a flavor-tagged blob to use the result, the uniform getter bought nothing.
 | `attack` | Score | base (unarmed) | base + equip `attack` mods | Atk / Attack |
 | `hp` | Pool | current + base | max = `hpBase` + equip + 2·`con` | HP / Health |
 | `mp` | Pool | current + base | max = `mpBase` + equip + 2·`int` | MP / Mana |
-| `hunger` | Pool | current | max = 10·`con` | Hun / Hunger |
+| `hunger` | Pool | current | max = 20·`con` | Hun / Hunger |
 | `xp` | Accumulator | value | identity | XP / Experience |
 
 Notes:
@@ -169,7 +169,7 @@ Notes:
 - **Pool max = raw base + equipment + 2·governing score.** HP scales on `con`, MP on `int`; the base
   is the flat per-entity floor stored under `hpBase`/`mpBase`. The `2·` coefficient and the base values
   are still balance knobs — the core scores (`con`/`int`) currently sit on the old ~10 scale, so HP/MP
-  run high until the progression-tuning pass rebalances them. Hunger has no base (max = 10·`con`).
+  run high until the progression-tuning pass rebalances them. Hunger has no base (max = 20·`con`).
 - **`mp` is inert at first**: MP isn't spent yet. It resolves and displays; that's the first cut.
 - **`hunger` decays** once per turn-consuming player action, ticked from the game scene's
   `handleTurnEnd` (not the `upkeep` hook — that fires on free actions too, e.g. examining a tile).

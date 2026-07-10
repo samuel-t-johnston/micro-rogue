@@ -144,10 +144,14 @@ describe('attribute accessors', () => {
       expect(setPoolCurrent(e, 'hp', 99)).toEqual({ current: 10, max: 10 });
     });
 
-    it('mp max derives from base + 2·INT, hunger from 10·CON', () => {
-      const e = makeActor({ int: 7, con: 5, mpBase: 1 });
-      expect(getPool(e, 'mp').max).toBe(15); // 1 + 2·7
-      expect(getPool(e, 'hunger').max).toBe(50); // 10·5
+    it('mp max derives from base + 2·INT, and hunger scales linearly with CON', () => {
+      expect(getPool(makeActor({ int: 7, mpBase: 1 }), 'mp').max).toBe(15); // 1 + 2·7
+      // Assert hunger max is proportional to CON rather than pinning the (tunable) coefficient:
+      // doubling CON doubles the max, and it's nonzero.
+      const low = getPool(makeActor({ con: 5 }), 'hunger').max;
+      const high = getPool(makeActor({ con: 10 }), 'hunger').max;
+      expect(low).toBeGreaterThan(0);
+      expect(high).toBe(2 * low);
     });
   });
 

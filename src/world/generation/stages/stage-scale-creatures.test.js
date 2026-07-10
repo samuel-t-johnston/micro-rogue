@@ -3,6 +3,7 @@ import { createEntityRegistry } from '../../../engine/core/entity-component-syst
 import { createGoblin, createOrc, createScuttler } from '../../entities/creatures.js';
 import { createPlayer } from '../../entities/player.js';
 import { getScore, getAccumulator } from '../../../attributes/attribute-access.js';
+import { distributeLevelUpPoints } from '../../systems/level-up.js';
 import { xpForLevel } from '../../../../data/attribute-set.js';
 import { run } from './stage-scale-creatures.js';
 
@@ -16,20 +17,29 @@ describe('stage-scale-creatures', () => {
   });
 
   it('boots a matched creature to the configured level: stats, xp, and derived level', () => {
-    const goblin = createGoblin(registry, 0, 0); // base str 5, con 3, split str.5/con.5
+    const goblin = createGoblin(registry, 0, 0);
+    const spec = goblin.components.get('levelUp');
+    const baseStr = getScore(goblin, 'str');
+    const baseCon = getScore(goblin, 'con');
+    // Expected growth comes from the creature's own spec (not hard-coded base stats), so this
+    // survives routine monster balance tuning.
+    const gained = distributeLevelUpPoints(spec.attributePercentages, (3 - 1) * spec.points);
+
     scale(registry, { goblin: 3 });
+
     expect(getScore(goblin, 'level')).toBe(3);
     expect(getAccumulator(goblin, 'xp')).toBe(xpForLevel(3));
-    expect(getScore(goblin, 'str')).toBe(6); // 2 points to L3 → +1 str, +1 con
-    expect(getScore(goblin, 'con')).toBe(4);
-    expect(goblin.components.get('levelUp').lastLevel).toBe(3);
+    expect(getScore(goblin, 'str')).toBe(baseStr + (gained.str ?? 0));
+    expect(getScore(goblin, 'con')).toBe(baseCon + (gained.con ?? 0));
+    expect(spec.lastLevel).toBe(3);
   });
 
   it('leaves a creature present but not named in the config untouched', () => {
     const orc = createOrc(registry, 0, 0);
+    const baseStr = getScore(orc, 'str');
     scale(registry, { goblin: 3 });
     expect(getScore(orc, 'level')).toBe(1);
-    expect(getScore(orc, 'str')).toBe(5);
+    expect(getScore(orc, 'str')).toBe(baseStr);
     expect(orc.components.get('levelUp').lastLevel).toBe(1);
   });
 

@@ -135,7 +135,7 @@ export const ATTRIBUTE_SET = [
     flavor: Flavors.POOL,
     shortLabel: 'Hun',
     longLabel: 'Hunger',
-    resolveMax: ({ score }) => score('con') * 10,
+    resolveMax: ({ score }) => score('con') * 20,
   },
 
   // Accumulators: monotonic, threshold-triggering.
