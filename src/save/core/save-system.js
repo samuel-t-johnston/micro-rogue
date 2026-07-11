@@ -23,7 +23,7 @@ import {
 export const SAVE_VERSION = 11;
 
 /** Game release version; independent of SAVE_VERSION, tracks releases and mirrors package.json. */
-export const GAME_VERSION = '0.2.0';
+export const GAME_VERSION = '0.3.0';
 
 // Frozen at v5: the combined-sheet (col,row) sprite coordinates that shipped through v4, mapped to
 // the catalog names that replaced them (see data/sprites/sprite-catalog.js). Never edit once
