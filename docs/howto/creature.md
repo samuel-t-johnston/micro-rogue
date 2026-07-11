@@ -11,8 +11,9 @@ A creature is not a class — it's an **entity built from a recipe of components
 | `name` | display name |
 | `entityTypeId` | stable prefab id (e.g. `'orc'`) — a content identity independent of `name`, stamped by the factory; loadout/loot rules filter on it ([loadouts.md](loadouts.md)) |
 | `position` | location on the level |
-| `health` | current / max HP |
-| `attacker` | base (unarmed) attack damage |
+| `attributes` | the entity's stat block — scores (STR/DEX/INT/CON/SPD), `attack` (unarmed base), pool raw bases (`hpBase`/`mpBase`), and `xp`; read through the typed accessors ([attribute-system.md](../design/attribute-system.md)) |
+| `levelUp` | how it grows per level — a point-allocation spec across attributes; creatures use `dynamic: false` and are booted to a floor's level by the `scaleCreatures` gen stage ([tuning-level-up-growth.md](tuning-level-up-growth.md)) |
+| `attacker` | can-attack marker — lets it take the attack action; the damage rating itself is the `attack` score in `attributes` |
 | `faction` | hostility tags — see [`factions.js`](../../src/combat/factions.js) |
 | `creature` | marks it as an actor (a living thing with agency) — the source of the `isActor` sense tag goals use to tell creatures from inert scenery and floor items |
 | `turnTaker` | puts it in the turn queue; its speed is derived from the `spd` attribute and synced in (call `syncSpeed` after attaching both — see [turn-order.md](turn-order.md)) |
@@ -53,7 +54,7 @@ Add `createX(registry, x, y)` to [`src/world/entities/creatures.js`](../../src/w
 - **Goal stack** (`ai`) — its behaviour and priorities.
 - **`faction`** — who it's hostile to.
 - **`senses`** — how it perceives.
-- **Stats** — `health`, `attacker`, `turnTaker` speed.
+- **Stats** — the `attributes` stat block (scores, `attack`, `hpBase`/`mpBase`), the `levelUp` growth spec, and `turnTaker` speed (from `spd`).
 - **`renderable`** — glyph + colour (creatures are glyph-only for now; no sprites yet).
 
 ### 2. Register it as a prefab
