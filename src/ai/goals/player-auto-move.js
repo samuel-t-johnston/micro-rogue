@@ -1,5 +1,5 @@
 import { findPath } from '../../world/map/pathfinding.js';
-import { areHostile } from '../../combat/factions.js';
+import { diff } from '../senses/salience-monitor.js';
 
 // Delay between auto-move steps so each move is visible and the player has
 // time to tap to interrupt. Does not affect single adjacent-tile moves.
@@ -8,18 +8,20 @@ const AUTO_MOVE_DELAY_MS = 150;
 // Clears all auto-move state from memory.
 function cancelAutoMove(memory) {
   delete memory.autoMoveTarget;
-  delete memory.knownEnemyIds;
+  delete memory.autoMoveBaseline;
 }
 
 /**
  * Player goal: steps one tile per turn toward `memory.autoMoveTarget`, cancelling (and clearing the
- * target) if a player input is buffered (tap/key during auto-move), a new enemy enters vision, the
- * target is reached, or no path exists. A short delay between steps keeps each move visible and
- * interruptible.
+ * target) if a player input is buffered (tap/key during auto-move), the salience monitor flags an
+ * alert-worthy change (a new hostile enters perception, or the player's HP drops — the latter catching
+ * known and out-of-vision attackers the new-enemy check alone would miss), the target is reached, or no
+ * path exists. The baseline is fixed at arming (player-get-input), so any alert cancels. A short delay
+ * between steps keeps each move visible and interruptible.
  */
 export const playerAutoMove = {
   async evaluate(context) {
-    const { memory, perception, selfState, level, hasPendingInput } = context;
+    const { memory, selfState, level, hasPendingInput } = context;
     const target = memory.autoMoveTarget;
 
     if (!target) return null;
@@ -30,16 +32,8 @@ export const playerAutoMove = {
       return null;
     }
 
-    // Cancel: a new enemy entered vision since auto-move started
-    const visibleEnemyIds = new Set(
-      perception.entities
-        .filter((e) => e.tags.isActor && areHostile(selfState.factions, e.factions))
-        .map((e) => e.entityId),
-    );
-    const knownEnemyIds = new Set(memory.knownEnemyIds ?? []);
-    const hasNewEnemy = [...visibleEnemyIds].some((id) => !knownEnemyIds.has(id));
-
-    if (hasNewEnemy) {
+    // Cancel: the settled world changed in an alert-worthy way since auto-move armed
+    if (diff(memory.autoMoveBaseline, context).alerted) {
       cancelAutoMove(memory);
       return null;
     }
@@ -56,8 +50,6 @@ export const playerAutoMove = {
       cancelAutoMove(memory);
       return null;
     }
-
-    memory.knownEnemyIds = [...visibleEnemyIds];
 
     await new Promise((r) => setTimeout(r, AUTO_MOVE_DELAY_MS));
 

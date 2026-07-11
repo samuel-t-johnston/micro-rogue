@@ -1,6 +1,7 @@
 import { resolveSenses } from '../senses/sense-registry.js';
 import { areHostile } from '../../combat/factions.js';
 import { getAttackCapability } from '../../combat/weapons.js';
+import { getPool } from '../../attributes/attribute-access.js';
 import { chebyshevDistance, projectTile } from '../../world/map/geometry.js';
 import { parseTileKey } from '../../engine/core/tile-key.js';
 
@@ -161,7 +162,7 @@ export function applySenses(entity, level, turnCount = 0) {
  *   need to traverse live components `selfState` doesn't project. World perception still flows only
  *   through `perception`; `selfEntity` is the agent reasoning about itself, not about the world.
  * @property {object} memory - The entity's `memory` component (undefined for memoryless entities).
- * @property {{ position: {x: number, y: number}, factions: string[], attackCapability: {range: number, meleeRange: number} }} selfState - A read-only value snapshot of the acting entity's own world state. Unlike `selfEntity` it holds copied/derived values (position is copied; `attackCapability` is computed, not a component), so it's cheap to build and to fake in tests.
+ * @property {{ position: {x: number, y: number}, factions: string[], attackCapability: {range: number, meleeRange: number}, hp: number }} selfState - A read-only value snapshot of the acting entity's own world state. Unlike `selfEntity` it holds copied/derived values (position is copied; `attackCapability` is computed, `hp` is the resolved pool current), so it's cheap to build and to fake in tests.
  * @property {{ entities: object[], sounds: object[], smells: object[], visibleTiles: Set<string>, knownTiles: Map<string, number> }} perception - Merged, reconciled output of all the entity's senses.
  * @property {object} level - The current level.
  * @property {number} turnCount - The entity's per-entity action clock.
@@ -185,6 +186,7 @@ export function buildPlanningContext({ entity, level, inputController, turnCount
     position: { x: pos.x, y: pos.y },
     factions: entity.components.get('faction') ?? [],
     attackCapability: getAttackCapability(entity),
+    hp: getPool(entity, 'hp').current,
   };
   const perception = {
     entities: mergeSenseResults(rawResults),

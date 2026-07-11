@@ -136,11 +136,12 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 - [x] Attributes added to HUD widget (Level line; HP already shown)
 - [x] Level up at XP tiers (Level derives + displays; rewards/crossing deferred to the tuning pass)
 - [x] New game Player stat allocation
-- [ ] Attributes used in other systems
+- [x] Attributes used in other systems
   - [x] Add miss chance to ranged attacks and throw (DEX + range; a miss scatters to an adjacent tile)
   - [x] Hunger ticks down, damage on starvation. Add satiety effect and food items.
   - [x] Attack damage
-  - [ ] Auto-move stops on HP drop — watch current HP (read via the attribute resolver, not `health.current`) and cancel auto-move when it falls. Seed an HP watermark in `player-get-input` when arming auto-move, parallel to `knownEnemyIds` (baseline must be captured at arming time to catch damage taken before the first auto-move step); compare/refresh it in `player-auto-move` and clear it in `cancelAutoMove`. Needs HP exposed on `selfState` in `planning-context.js`. Catches already-known and out-of-vision attackers, which the new-enemy check misses. Fold this into the shared salience monitor rather than building it standalone — see [state-change-alerts.md](design/state-change-alerts.md), which also covers the in-menu warning that reuses the same HP watermark.
+  - [x] Auto-move stops on HP drop — subsumed by the shared salience monitor ([state-change-alerts.md](design/state-change-alerts.md)). Auto-move and the in-menu warning both diff a baseline (perceived hostiles + HP via the attribute resolver) each turn: a new hostile or any HP drop cancels auto-move / raises the menu alert. HP is exposed on `selfState` in `planning-context.js`.
+ - [x] State-change alerts — shared salience monitor (`src/ai/senses/salience-monitor.js`); auto-move refactored onto it (now cancels on HP drop, catching known/out-of-vision attackers); menus stay open across turn-consuming actions and surface a red edge-pulse + `[!]` when the settled world changes. See [state-change-alerts.md](design/state-change-alerts.md).
  - [x] Vignette effect on level-up
  - [x] Hunger warning in HUD - "Hungry" or "Starving!"
 

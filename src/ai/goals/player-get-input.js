@@ -1,5 +1,5 @@
 import { findPath } from '../../world/map/pathfinding.js';
-import { areHostile } from '../../combat/factions.js';
+import { snapshot } from '../senses/salience-monitor.js';
 import { resolveTileActions } from '../../actions/core/resolve-tile-actions.js';
 
 // Actions the UI submits already resolved (character menu, the contextual tile menu).
@@ -28,7 +28,7 @@ const PASS_THROUGH = new Set([
  */
 export const playerGetInput = {
   async evaluate(context) {
-    const { memory, selfState, level, awaitInput, perception } = context;
+    const { memory, selfState, level, awaitInput } = context;
 
     // Turn a movement target into an action: an adjacent step moves immediately; a distant tile
     // pathfinds and arms auto-move. Returns the action, or null to keep waiting (blocked/unreachable).
@@ -41,10 +41,9 @@ export const playerGetInput = {
       }
       const path = findPath(selfState.position, { x: tx, y: ty }, level);
       if (!path || path.length === 0) return null;
-      // Snapshot visible enemies so auto-move can detect new ones next turn.
-      memory.knownEnemyIds = perception.entities
-        .filter((e) => e.tags.isActor && areHostile(selfState.factions, e.factions))
-        .map((e) => e.entityId);
+      // Snapshot the salient baseline at arming time (perceived hostiles + HP) so auto-move can detect
+      // an alert-worthy change each step — including damage taken before the first step lands.
+      memory.autoMoveBaseline = snapshot(context);
       memory.autoMoveTarget = { x: tx, y: ty };
       return { type: 'move', x: path[0].x, y: path[0].y };
     };

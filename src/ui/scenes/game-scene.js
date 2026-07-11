@@ -27,6 +27,10 @@ import { winConditions, escapeWithQuestItem } from '../../engine/turn/win-condit
 import { scentUpkeep, scentAt } from '../../world/sense-systems/scent.js';
 import { tickHunger, hungerStatus } from '../../world/systems/hunger.js';
 import { watchLevelUp } from '../../world/systems/level-up.js';
+import {
+  snapshot as salienceSnapshot,
+  diff as salienceDiff,
+} from '../../ai/senses/salience-monitor.js';
 import { getTileType } from '../../world/map/tile-registry.js';
 import { gameLog } from '../../engine/log/game-log.js';
 import { isEntryVisible } from '../../engine/log/log-visibility.js';
@@ -52,6 +56,11 @@ import {
 
 // The steady edge glow held while the player is starving (see hungerStatus): a thin, deep-red frame.
 const STARVING_VIGNETTE = { color: '#e0352f', alpha: 0.3 };
+
+// The in-menu state-change alert: a brief red edge "heartbeat" (two quick beats) fired when the settled
+// world changes while a menu is open, so danger reads even over a full-screen menu. See
+// docs/design/state-change-alerts.md.
+const ALERT_VIGNETTE = { color: '#e0352f', pulses: 2, pulseLength: 400, maxAlpha: 0.5 };
 
 /**
  * Creates the in-game scene (see the file overview). `startMode` is 'new' or 'continue'; the host
@@ -97,6 +106,11 @@ export function createGameScene({
   // from sitting below the line, and eating from the ordinary drain. Transient (re-seeded from the
   // live pool in mountLevel), so a crossing message never re-fires across a reload.
   let lastHunger = 0;
+  // In-menu state-change alert state. `alertWatermark` is the salience snapshot as of the last player
+  // turn (advanced every turn); `menuAlerted` is the sticky flag driving the menu's [!], set when an
+  // alert fires while a menu is open and cleared on acknowledgement (back to the map, or menu close).
+  let alertWatermark = null;
+  let menuAlerted = false;
   const TAP_SLOP = 12; // px of drift that disqualifies a tap (and starts a drag-to-pan)
   const PINCH_STEP_RATIO = 1.25; // pinch distance change that advances one zoom level
   const LONGPRESS_MS = 450; // press-and-hold that raises the contextual tile menu (touch)
@@ -216,6 +230,7 @@ export function createGameScene({
   function handleMenuAction(action) {
     if (action?.type === 'throw' && action.x == null) {
       const { itemEntityId } = action;
+      characterMenuController.close(); // targeting needs the map visible; also acknowledges any alert
       beginTargeting({
         prompt: 'Choose a target',
         onPick: (tile) =>
@@ -340,6 +355,10 @@ export function createGameScene({
     getViewport,
     getPlayer: () => player,
     onAction: (action) => handleMenuAction(action),
+    getAlerted: () => menuAlerted,
+    onClose: () => {
+      menuAlerted = false;
+    },
   });
   const hudWidget = createHudWidget({
     theme,
@@ -437,6 +456,24 @@ export function createGameScene({
     if (result) endGame(result);
   }
 
+  // Non-goal observer of the player's freshly-settled perception, wired as the action system's
+  // onPlayerContext (fires each player turn after senses, before goals — see action-system.js). It
+  // advances the salience watermark every turn (enemies only move on player turns, so the watermark
+  // always captures the settled world) and, when a menu is open, diffs the turn's change against it:
+  // on an alert-worthy delta it pulses the edge vignette and lights the menu's [!], *without* closing
+  // the menu. Being on the map (menu closed) is continuous acknowledgement that clears the flag, so
+  // reopening never shows a stale alert. See docs/design/state-change-alerts.md.
+  function observeSalience(context) {
+    const changed = salienceDiff(alertWatermark, context).alerted;
+    alertWatermark = salienceSnapshot(context);
+    if (!characterMenuController.isOpen) {
+      menuAlerted = false;
+    } else if (changed) {
+      vignette.trigger(ALERT_VIGNETTE);
+      menuAlerted = true;
+    }
+  }
+
   // Wires the per-level runtime (senses, camera, input, action system, turn loop) onto the current
   // `level` and starts the turn loop. Shared by the initial load and every level transition, so the
   // two paths can't drift. `initialTurnCount` carries the player's turn count across a transition.
@@ -445,6 +482,8 @@ export function createGameScene({
     level.onTransition = requestTransition;
     applySenses(player, level);
     lastHunger = getPool(player, 'hunger').current; // baseline for this level's hunger crossings
+    alertWatermark = null; // re-baselined on the first player turn; no cross-level carryover
+    menuAlerted = false;
 
     const ppos = registry.getComponent(player, 'position');
     cameraMode = 'follow'; // a new floor recenters on the player, dropping any free-look pan
@@ -453,7 +492,13 @@ export function createGameScene({
     inputController = createInputController();
     targeting = null;
     resetGestures();
-    const actionSystem = createActionSystem({ level, inputController, registry, dialogController });
+    const actionSystem = createActionSystem({
+      level,
+      inputController,
+      registry,
+      dialogController,
+      onPlayerContext: observeSalience,
+    });
 
     // Per-player-turn upkeep (see src/engine/turn/upkeep.js). Order matters: scent diffuses before the
     // autosave so a reload restores the up-to-date field. Steps read the current level from context.
@@ -833,6 +878,8 @@ export function createGameScene({
       transitioning = false;
       level = null;
       player = null;
+      alertWatermark = null;
+      menuAlerted = false;
       animations.reset();
       vignette.reset();
     },

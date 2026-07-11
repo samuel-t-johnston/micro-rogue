@@ -87,6 +87,62 @@ describe('invokeAction goal bookkeeping', () => {
   });
 });
 
+describe('invokeAction onPlayerContext observer', () => {
+  let registry, level, inputController;
+
+  beforeEach(() => {
+    gameLog.reset();
+    goalActs.clear();
+    registry = createEntityRegistry();
+    level = makeLevel();
+    inputController = { waitForInput: () => {}, hasPendingInput: () => false };
+  });
+
+  function makeActor({ player }) {
+    const e = registry.createEntity();
+    registry.addComponent(e, 'name', components.name(player ? 'Hero' : 'Goblin'));
+    registry.addComponent(e, 'position', components.position(2, 2));
+    registry.addComponent(e, 'ai', components.ai(['low']));
+    if (player) registry.addComponent(e, 'playerControlled', components.playerControlled());
+    level.placeEntity(e);
+    return e;
+  }
+
+  it('fires for the player with the built planning context, before goals act', async () => {
+    goalActs.set('low', true);
+    const seen = [];
+    const system = createActionSystem({
+      level,
+      inputController,
+      registry,
+      dialogController: {},
+      onPlayerContext: (ctx) => seen.push(ctx),
+    });
+
+    await system.invokeAction(makeActor({ player: true }));
+
+    expect(seen).toHaveLength(1);
+    expect(seen[0].selfState.position).toEqual({ x: 2, y: 2 });
+    expect(seen[0].perception).toBeDefined();
+  });
+
+  it('does not fire for a non-player entity', async () => {
+    goalActs.set('low', true);
+    const seen = [];
+    const system = createActionSystem({
+      level,
+      inputController,
+      registry,
+      dialogController: {},
+      onPlayerContext: (ctx) => seen.push(ctx),
+    });
+
+    await system.invokeAction(makeActor({ player: false }));
+
+    expect(seen).toHaveLength(0);
+  });
+});
+
 describe('invokeAction decay handling', () => {
   let registry, level, system;
 

@@ -169,7 +169,7 @@ describe('character menu — full equip/unequip flow', () => {
 
     expect(submitted).toHaveLength(1);
     expect(submitted[0]).toEqual({ type: 'equip', itemEntityId: dagger.id });
-    expect(controller.isOpen).toBe(false);
+    expect(controller.isOpen).toBe(true); // stays open across the turn-consuming action
 
     executeEquip(player, submitted[0], null, registry);
     expect(player.components.get('wearsEquipment').slots[Slots.WEAPON]).toBe(dagger);
@@ -189,7 +189,7 @@ describe('character menu — full equip/unequip flow', () => {
 
     expect(submitted).toHaveLength(2);
     expect(submitted[1]).toEqual({ type: 'unequip', slot: Slots.WEAPON });
-    expect(controller.isOpen).toBe(false);
+    expect(controller.isOpen).toBe(true); // stays open across the turn-consuming action
 
     executeUnequip(player, submitted[1], null, registry);
     expect(player.components.get('wearsEquipment').slots[Slots.WEAPON]).toBe(null);
@@ -234,7 +234,7 @@ describe('character menu — full equip/unequip flow', () => {
 
     expect(submitted).toHaveLength(1);
     expect(submitted[0]).toEqual({ type: 'consume', itemEntityId: potion.id });
-    expect(controller.isOpen).toBe(false);
+    expect(controller.isOpen).toBe(true); // stays open across the turn-consuming action
 
     executeConsume(player, submitted[0], null, registry);
     expect(player.components.get('attributes').hp).toBe(18);
@@ -265,7 +265,7 @@ describe('character menu — full equip/unequip flow', () => {
 
     expect(submitted).toHaveLength(1);
     expect(submitted[0]).toEqual({ type: 'drop', itemEntityId: potion.id });
-    expect(controller.isOpen).toBe(false);
+    expect(controller.isOpen).toBe(true); // stays open across the turn-consuming action
 
     executeDrop(player, submitted[0], level, registry);
     expect(player.components.get('inventory').items).not.toContain(potion);
@@ -315,6 +315,46 @@ describe('character menu — full equip/unequip flow', () => {
     controller.handleInput({ type: 'keydown', key: 'Escape' });
     // Escape on subscreen returns to root (per controller wiring), not closes the menu
     expect(controller.isOpen).toBe(true);
+  });
+});
+
+describe('character menu — state-change alert wiring', () => {
+  let player;
+
+  beforeEach(() => {
+    ({ player } = makePlayer());
+  });
+
+  it('fires onClose whenever the menu is dismissed (so the caller can acknowledge the alert)', () => {
+    let closes = 0;
+    const controller = createCharacterMenuController({
+      theme,
+      getViewport,
+      getPlayer: () => player,
+      onAction: () => {},
+      onClose: () => closes++,
+    });
+    controller.open();
+    controller.handleInput({ type: 'keydown', key: 'Escape' }); // close from root
+    expect(closes).toBe(1);
+    // An explicit close (e.g. the caller closing for throw/targeting) also fires it.
+    controller.open();
+    controller.close();
+    expect(closes).toBe(2);
+  });
+
+  it('renders the [!] affordance without throwing when getAlerted is true', () => {
+    const controller = createCharacterMenuController({
+      theme,
+      getViewport,
+      getPlayer: () => player,
+      onAction: () => {},
+      getAlerted: () => true,
+    });
+    controller.open();
+    expect(() => controller.render(makeCtx())).not.toThrow(); // root
+    controller.handleInput({ type: 'pointerdown', x: 240, y: 300 }); // → Equipment sub-screen
+    expect(() => controller.render(makeCtx())).not.toThrow();
   });
 });
 

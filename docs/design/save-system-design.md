@@ -99,7 +99,7 @@ to a top-level `player` key to keep it from being serialized into a departing or
 > migration chain is for).
 >
 > Player state is whatever components the entity carries: `health`, `inventory` (item refs → ids),
-> `wearsEquipment` (slot refs → ids), `memory` (goal state — `autoMoveTarget`, `knownEnemyIds`), `ai`
+> `wearsEquipment` (slot refs → ids), `memory` (goal state — `autoMoveTarget`, `autoMoveBaseline`), `ai`
 > (goal-key stack + `lastGoal`), `tilePerception`, position, factions, etc. Item *locations* are
 > already discriminated unions carrying ids (`{ type: 'equipped', ownerId, slot }` etc.); see
 > `src/world/entities/components.js`.

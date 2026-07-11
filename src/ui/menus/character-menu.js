@@ -18,7 +18,12 @@ function backButtonRect() {
   return { x: MARGIN, y: MARGIN, w: BACK_BTN_SIZE, h: BACK_BTN_SIZE };
 }
 
-function drawHeader(ctx, theme, viewport, title, backGlyph) {
+// The state-change alert glyph, drawn on the back/exit affordance while an alert is unacknowledged —
+// colocating the alert with its remedy (the button that takes you back to see what changed). Red, but
+// the '!' carries the meaning so color is never the sole signal (docs/design/state-change-alerts.md).
+const ALERT_COLOR = '#e0352f';
+
+function drawHeader(ctx, theme, viewport, title, backGlyph, alerted = false) {
   ctx.fillStyle = theme.bg;
   ctx.fillRect(0, 0, viewport.width, viewport.height);
 
@@ -33,6 +38,24 @@ function drawHeader(ctx, theme, viewport, title, backGlyph) {
     baseline: 'middle',
   });
 
+  if (alerted) {
+    // A badge dot in the button's top-right corner with a '!' — small, unmissable, always in the
+    // same place, so glancing at the exit tells you the world changed.
+    const bx = back.x + back.w - 8;
+    const by = back.y + 8;
+    ctx.beginPath();
+    ctx.arc(bx, by, 9, 0, Math.PI * 2);
+    ctx.fillStyle = ALERT_COLOR;
+    ctx.fill();
+    drawText(ctx, '!', bx, by, {
+      color: '#fff',
+      size: 13,
+      weight: '700',
+      align: 'center',
+      baseline: 'middle',
+    });
+  }
+
   drawText(ctx, title, viewport.width / 2, MARGIN + HEADER_H / 2, {
     color: theme.text,
     size: 22,
@@ -43,7 +66,14 @@ function drawHeader(ctx, theme, viewport, title, backGlyph) {
 }
 
 /** Creates the root card grid (Inventory, Equipment cards). Tap a card to navigate; ✕/Escape closes. */
-export function createCharacterMenuRoot({ theme, getViewport, cards, onClose, onSelect }) {
+export function createCharacterMenuRoot({
+  theme,
+  getViewport,
+  cards,
+  onClose,
+  onSelect,
+  getAlerted = () => false,
+}) {
   function layoutCards() {
     const vp = getViewport();
     const availableW = vp.width - 2 * MARGIN;
@@ -74,7 +104,7 @@ export function createCharacterMenuRoot({ theme, getViewport, cards, onClose, on
   return {
     render(ctx) {
       const vp = getViewport();
-      drawHeader(ctx, theme, vp, 'Character', '✕'); // ✕ close
+      drawHeader(ctx, theme, vp, 'Character', '✕', getAlerted()); // ✕ close
 
       for (const card of layoutCards()) {
         ctx.fillStyle = theme.surface;
@@ -143,6 +173,7 @@ export function createCharacterMenuSubScreen({
   renderBody,
   handleBodyInput,
   onBack,
+  getAlerted = () => false,
 }) {
   function bodyRect() {
     const vp = getViewport();
@@ -153,7 +184,7 @@ export function createCharacterMenuSubScreen({
   return {
     render(ctx) {
       const vp = getViewport();
-      drawHeader(ctx, theme, vp, title, '‹'); // ‹ back
+      drawHeader(ctx, theme, vp, title, '‹', getAlerted()); // ‹ back
       renderBody(ctx, bodyRect());
     },
 

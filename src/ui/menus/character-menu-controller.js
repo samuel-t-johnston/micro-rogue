@@ -9,14 +9,26 @@ import { levelProgress } from '../../../data/attribute-set.js';
 /**
  * Creates the full-screen character menu overlay (a root card grid drilling into Inventory and
  * Equipment sub-screens). Suppresses map input while open. `onAction` is invoked with a game action
- * (e.g. equip/unequip) that the caller routes through the input controller; submitting an action
- * closes the menu, since open-during-turn-resolution behavior isn't designed yet.
+ * (e.g. equip/unequip) that the caller routes through the input controller; the menu **stays open**
+ * across turn-consuming actions so the player isn't bounced to the map after every step — the caller
+ * closes it explicitly for actions that need the map (throw/targeting). A change in the settled world
+ * is surfaced by `getAlerted` (a `[!]` on the back affordance + the caller's vignette pulse) rather
+ * than by force-closing; see docs/design/state-change-alerts.md. `onClose` fires whenever the menu is
+ * dismissed, so the caller can clear that acknowledged alert.
  */
-export function createCharacterMenuController({ theme, getViewport, getPlayer, onAction }) {
+export function createCharacterMenuController({
+  theme,
+  getViewport,
+  getPlayer,
+  onAction,
+  getAlerted = () => false,
+  onClose = () => {},
+}) {
   let screen = null;
 
   function close() {
     screen = null;
+    onClose();
   }
   function openRoot() {
     screen = buildRoot();
@@ -42,6 +54,7 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
     return createCharacterMenuRoot({
       theme,
       getViewport,
+      getAlerted,
       cards: [
         {
           id: 'inventory',
@@ -76,14 +89,14 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
       theme,
       getViewport,
       getItems: () => getPlayer()?.components.get('inventory')?.items ?? [],
-      onAction: (action) => {
-        close();
-        onAction(action);
-      },
+      // Keep the menu open across the turn-consuming action (see the factory doc); the caller closes
+      // it for actions that need the map (throw).
+      onAction: (action) => onAction(action),
     });
     return createCharacterMenuSubScreen({
       theme,
       getViewport,
+      getAlerted,
       title: 'Inventory',
       onBack: openRoot,
       renderBody: body.render,
@@ -105,14 +118,12 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
         if (!inv) return [];
         return inv.items.filter((it) => it.components.has('equippable'));
       },
-      onAction: (action) => {
-        close();
-        onAction(action);
-      },
+      onAction: (action) => onAction(action),
     });
     return createCharacterMenuSubScreen({
       theme,
       getViewport,
+      getAlerted,
       title: 'Equipment',
       onBack: openRoot,
       renderBody: body.render,
@@ -146,6 +157,7 @@ export function createCharacterMenuController({ theme, getViewport, getPlayer, o
     return createCharacterMenuSubScreen({
       theme,
       getViewport,
+      getAlerted,
       title: 'Stats',
       onBack: openRoot,
       renderBody: body.render,
