@@ -16,8 +16,6 @@ A `SenseResult` is `{ entities, visibleTiles, sounds, smells }`, where each obse
 
 [`planning-context.js`](../../src/ai/core/planning-context.js) runs every sense each turn, merges the results (highest confidence wins on conflict), updates the entity's `tilePerception`, and exposes the merged view as `context.perception` to goals ([ai-goals.md](ai-goals.md)). **Planners never read the world directly — only what senses report.**
 
-Two senses exist:
-
 | Sense | Source | Behaviour |
 |---|---|---|
 | `vision` | [`vision.js`](../../src/ai/senses/vision.js) | Shadowcasting FOV; a tile blocks sight if its type is `opaque` or it holds an `opaque` entity. Full detail on what's seen. |

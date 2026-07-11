@@ -41,7 +41,7 @@ music.stop({ fade: 400 });                // fade out and tear down
 ## Add a new sound or track
 
 1. **Drop the file in** `assets/sfx/` or `assets/music/`. **MP3** is the baseline format — it plays everywhere (see [audio-design.md](../design/audio-design.md#formats)).
-2. **Register it in the manifest** in [`audio-settings.js`](../../src/audio/audio-settings.js), keyed by the id you'll `play()`. Build the URL with `import.meta.url` so it resolves when served from a subdirectory (GitHub Pages), per [AGENTS.md](../../AGENTS.md):
+2. **Register it in the manifest** in [`audio-settings.js`](../../src/audio/audio-settings.js), keyed by the id you'll `play()`. Build the URL with `import.meta.url` so it resolves when served from a subdirectory (GitHub Pages):
    ```js
    const SFX_MANIFEST = {
      'menu-select': new URL('../../assets/sfx/menu-selection.mp3', import.meta.url).href,

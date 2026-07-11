@@ -9,7 +9,7 @@ They look similar but serve different jobs and never overlap in content.
 
 | | **Game menu** | **Character menu** |
 |---|---|---|
-| Scope | Application / system — start, load, configure | The current run — inventory, equipment |
+| Scope | Application / system — start, load, configure | The current run — inventory, equipment, stats |
 | Available | At launch (main menu) **and** in-game | In-game only |
 | Layout | Centered vertical button list, drill-down | Responsive card grid, drill-down |
 | Opened by | Main menu scene, or the ⚙ button (top-right) | The 👤 button (bottom-right) |
@@ -48,13 +48,25 @@ button list with a Cancel row and tap-outside/Escape dismiss.
 
 ## Character menu
 
-In-run gameplay only: inspect and act on the player entity. The root is a card grid (**Inventory**,
-**Equipment**); each card drills into a sub-screen. [`character-menu.js`](../../src/ui/menus/character-menu.js)
+In-run gameplay only: inspect and act on the player entity. The root is a card grid — **Inventory**,
+**Equipment**, and **Stats** — each card drilling into a sub-screen. [`character-menu.js`](../../src/ui/menus/character-menu.js)
 provides the chrome (`createCharacterMenuRoot`, `createCharacterMenuSubScreen`) and
 [`character-menu-controller.js`](../../src/ui/menus/character-menu-controller.js) wires the screens to the
-player's [`inventory`/`wearsEquipment`](../../src/world/entities/components.js) components, submitting game
-actions (equip, drop, consume) back through the input controller. See [item.md](item.md) and
-[equipment.md](equipment.md) for the content it operates on.
+player's components:
+
+- **Inventory / Equipment** read the player's [`inventory`/`wearsEquipment`](../../src/world/entities/components.js)
+  and submit game actions (equip, unequip, drop, consume, throw) back through the input controller. See
+  [item.md](item.md) and [equipment.md](equipment.md) for the content they operate on.
+- **Stats** is a **read-only** attributes sheet — ability scores, pools (HP/MP/Hunger), melee/ranged
+  attack, and XP/level, read through the attribute accessors ([attribute-system.md](../design/attribute-system.md)).
+  It has no action rows, and is also **deep-linked from a tap on the HUD** (`openStats`).
+
+Unlike the game menu, the character menu **stays open across a turn-consuming action** (equip/consume/
+drop advance the world without dropping you back to the map). If the settled world then changed in a way
+worth seeing — a new hostile appears, or the player takes damage — a brief red edge-pulse fires and a
+`[!]` lights on the back affordance, rather than force-closing the menu. Targeted actions (throw) are the
+exception: they close the menu so the map is visible for aiming. See
+[state-change-alerts.md](../design/state-change-alerts.md).
 
 ## Contextual tile menu
 
@@ -84,7 +96,7 @@ never collide:
 
 | Corner | Element |
 |---|---|
-| Top-left | HUD — HP / turn ([`hud.js`](../../src/ui/widgets/hud.js)) |
+| Top-left | HUD — level box + HP/MP/EXP lines and a hunger warning; tap to open Stats ([`hud.js`](../../src/ui/widgets/hud.js)) |
 | Top-right | ⚙ game menu ([`game-menu-button.js`](../../src/ui/widgets/game-menu-button.js)) |
 | Bottom-left | ≡ message log ([`message-log.js`](../../src/ui/widgets/message-log.js)) |
 | Bottom-right | 👤 character menu ([`character-menu-button.js`](../../src/ui/widgets/character-menu-button.js)) |
@@ -120,15 +132,20 @@ string and draws it as a centered block — used for the Credits page, built by
 same as any sub-page.
 
 **To the character menu** — add a card in `createCharacterMenuRoot`'s `cards` list and a matching
-sub-screen builder in the controller, following the Inventory/Equipment pair.
+sub-screen builder in the controller, following the Inventory/Equipment/Stats trio. Stats is the
+template for a **read-only** screen (a sub-screen body with no action rows); Inventory/Equipment show
+the action-submitting variant.
 
 ## Worth knowing
 
 - **One list implementation, two menus.** The main menu and the in-game game menu render through the
   same `menu-shell`; only the chrome (branding vs. dimmed overlay) and the option wiring differ.
-- **Menus pause the game for free.** While an overlay is open, the scene routes input to it, so the
-  player's `player-get-input` goal stays blocked and the turn loop parks — no explicit pause flag.
-  Same mechanism for both the game and character menus. See [turn-order.md](turn-order.md).
+- **Menus pause the game for free.** While an overlay is open and idle, the scene routes input to it, so
+  the player's `player-get-input` goal stays blocked and the turn loop parks — no explicit pause flag.
+  Same mechanism for both menus. The character menu is the nuance: submitting a turn-consuming action
+  from it unblocks the goal for that one turn (the world advances) and then re-parks with the menu still
+  open — see the character-menu section and [state-change-alerts.md](../design/state-change-alerts.md).
+  See [turn-order.md](turn-order.md).
 - **"Same options" isn't literal across contexts.** The return-to-game row is **Continue** (loads
   the save) on the main menu but **Resume** (closes the overlay) in-game — an in-game "load last
   save" would silently discard moves, so it's deliberately not offered.

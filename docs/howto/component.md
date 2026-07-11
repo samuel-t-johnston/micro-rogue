@@ -2,7 +2,7 @@
 
 *A brief intro to the entity-component-system (ECS) and how to add a new component.*
 
-## What is an ECS
+## What is an ECS?
 
 Many roguelikes have a large number of game systems and entities that interact with each other. To support this ROGµE uses a strategy that is common in game dev, but may be unfamiliar to non-game developers: the Entity-Component-System or ECS.
 

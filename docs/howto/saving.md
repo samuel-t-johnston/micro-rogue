@@ -11,8 +11,8 @@ Everything lives in [`src/save/core/save-system.js`](../../src/save/core/save-sy
 `serializeGame(...)` produces a JSON-safe object:
 
 - **`meta`** — the RNG snapshot (`seed` + named streams; see [rng-and-determinism.md](../design/rng-and-determinism.md)), `turnCount`, and `nextEntityId`.
-- **`playerId`** + **`entities`** — the **whole entity registry as one flat list**, referenced by id. The player is serialized inline like any other entity (with the top-level `playerId` pointer), *not* hoisted to its own key. This is because items inside chests/inventories/equipment are entities that live only in the registry — serializing `level.entities` would miss them. (Two deliberate divergences from the design doc, noted in the file header.)
-- **`currentNodeId`** + **`currentLevel`** + **`frozenLevels`** — the multi-floor state from the level manager's `snapshot()`. Under model (b) the registry holds only the active floor + player, so `entities` is exactly that; each frozen floor carries its own serialized entities inside its blob (see [dungeon-layout.md](dungeon-layout.md)).
+- **`playerId`** + **`entities`** — the **whole entity registry as one flat list**, referenced by id. The player is serialized inline like any other entity (with the top-level `playerId` pointer), *not* hoisted to its own key. This is because items inside chests/inventories/equipment are entities that live only in the registry — serializing `level.entities` would miss them. (Two deliberate divergences from the design doc.)
+- **`currentNodeId`** + **`currentLevel`** + **`frozenLevels`** — the multi-floor state from the level manager's `snapshot()`. The registry holds only the active floor + player, so `entities` is exactly that; each frozen floor carries its own serialized entities inside its blob (see [dungeon-layout.md](dungeon-layout.md)).
 - **`saveVersion`** / **`gameVersion`** / **`versionHistory`** — schema and release versioning.
 
 ### When it saves
@@ -42,7 +42,7 @@ The schema evolves through an **append-only** chain — the `migrations` array o
 
 1. Bump `SAVE_VERSION`.
 2. Append `{ from: <old>, to: <new>, migrate(save) { … return save; } }` to `migrations`.
-3. Ship a **fixture** — a real save at the source version in [`src/save/fixtures/`](../../src/save/fixtures) (`save-v<old>.json`) — and a test that loads it through `loadSave()` and asserts the post-migration shape. Save migrations are [test-first by rule](../../AGENTS.md): every migration ships with its fixture and test.
+3. Ship a **fixture** — a real save at the source version in [`src/save/fixtures/`](../../src/save/fixtures) (`save-v<old>.json`) — and a test that loads it through `loadSave()` and asserts the post-migration shape. Save migrations are test-first: every migration ships with its fixture and test.
 
 ## See also
 
