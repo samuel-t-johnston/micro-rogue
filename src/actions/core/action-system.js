@@ -25,7 +25,13 @@ import { gameLog } from '../../engine/log/game-log.js';
  * @returns {{ invokeAction: (entity: object) => Promise<boolean> }} `invokeAction` resolves
  *   `false` if the action consumed the turn, `true` for a free action.
  */
-export function createActionSystem({ level, inputController, registry, dialogController }) {
+export function createActionSystem({
+  level,
+  inputController,
+  registry,
+  dialogController,
+  onPlayerContext,
+}) {
   // Action type → handler lookup. Add new action types here.
   const dispatch = {
     move: (entity, action) => executeMove(entity, action, level, registry),
@@ -76,6 +82,12 @@ export function createActionSystem({ level, inputController, registry, dialogCon
       inputController,
       turnCount: entity.components.get('turnTaker')?.actCount ?? 0,
     });
+    // Non-goal observers of the player's freshly-settled perception (the in-menu salience alert today;
+    // auto-rest / travel / the notification layer later). Fired here — after the context is built,
+    // before goals run — so an alert lands the instant control returns, not gated behind the player's
+    // next input. Player-only, and can't act: it observes, it doesn't decide the turn. See
+    // docs/design/state-change-alerts.md (the minimal seed of the deferred perception-reporter pass).
+    if (entity.components.has('playerControlled')) onPlayerContext?.(context);
     const result = await evaluateGoals(resolveGoals(ai.goals), context, (_goal, i) => {
       // Record the goal driving this turn on the component (read by the debug goal
       // inspector). Emit a debug-only goalChange entry (no `display`) only when it

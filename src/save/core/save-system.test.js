@@ -87,10 +87,13 @@ async function buildGame() {
 
   const mem = player.components.get('memory');
   mem.autoMoveTarget = { x: 3, y: 4 };
-  mem.knownEnemyIds = registry
-    .getEntitiesWith('ai')
-    .filter((e) => e !== player)
-    .map((e) => e.id);
+  mem.autoMoveBaseline = {
+    enemyIds: registry
+      .getEntitiesWith('ai')
+      .filter((e) => e !== player)
+      .map((e) => e.id),
+    hp: 20,
+  };
 
   // Deterministic perception content (independent of FOV specifics) to assert Set/Map fidelity.
   const tp = player.components.get('tilePerception');
@@ -145,7 +148,7 @@ describe('serializeGame / deserializeGame round-trip', () => {
 
     // Goal memory (plain JSON, id-based) round-trips via the default codec.
     expect(p.components.get('memory').autoMoveTarget).toEqual({ x: 3, y: 4 });
-    expect(Array.isArray(p.components.get('memory').knownEnemyIds)).toBe(true);
+    expect(Array.isArray(p.components.get('memory').autoMoveBaseline.enemyIds)).toBe(true);
 
     // Chest contents survive — items live only in the registry, referenced by ids.
     const chest = restored.registry.getAllEntities().find((e) => e.components.has('container'));
