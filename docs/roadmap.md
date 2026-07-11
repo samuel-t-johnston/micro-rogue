@@ -155,15 +155,24 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 - [ ] Map Gen - Cellular Automata
 - [ ] Map Gen - Drunk Walk/Digger
 - [ ] Map Gen - Voronoi/Wave Function Collapse
-- [ ] Item Tables
-- [ ] RNG item spawn in map gen - item tables + player level
-- [ ] RNG monster inventory in map gen - item tables + player level
-- [ ] RNG monster loot drops - item tables
 - [ ] Fancy bitset/Page 437 line walls (in glyph rendering mode) - config to enable
+- [ ] Re-entry pipeline - level that always regenerates
+- [ ] New rooms? (options: vault, temple, courtyard, throne room, armory, lab, graveyard, shop, zoo, nest)
 
 ---
 
-## Alpha - v0.5.0 - Stay Classy
+## Alpha - v0.5.0 - Items
+
+- [ ] Item Tables / generic entity tables (spawn tables later?)
+  - Weight by variables: depth, etc. - just give it the registry?
+- [ ] RNG item spawn in map gen - item tables + player level
+- [ ] RNG monster inventory in map gen - item tables + player level
+- [ ] RNG monster loot drops - item tables
+- [ ] Consider new items (gold coins)
+
+---
+
+## Alpha - v0.6.0 - Stay Classy
 
 *This milestone is not finalized*
 
@@ -174,7 +183,7 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 
 ---
 
-## Alpha - v0.6.0 - Now is the Hour of Our More Content
+## Alpha - v0.7.0 - Now is the Hour of Our More Content
 
 *This milestone is not finalized*
 
@@ -189,7 +198,7 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 
 ---
 
-## Alpha - v0.7.0 - Bringing Balance to the Force
+## Alpha - v0.8.0 - Bringing Balance to the Force
 
 *This milestone is not finalized*
 
@@ -198,7 +207,7 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 
 ---
 
-## Beta - v0.8.0 and Beyond
+## Beta - v0.9.0 and Beyond
 
 *Features driven by using the engine to build a new roguelike! Maybe a 7DRL.*
 
