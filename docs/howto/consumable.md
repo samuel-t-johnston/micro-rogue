@@ -12,12 +12,13 @@ components.consumable(EffectTypes.HEAL, { amount: 10 })
 
 **The consume action** — [`action-consume.js`](../../src/actions/action-types/action-consume.js) — looks up the item in the actor's inventory, applies its effect, logs the use, then removes the item and destroys the entity. (It logs *before* destroying, so the item's `name` is still intact.)
 
-**The effects registry** — [`src/effects/core/effects.js`](../../src/effects/core/effects.js) — maps `effectType` keys to handler functions sharing the signature `(user, target, params, level, registry) → void`. The consumable stores the *key* (not a function reference) so it serializes cleanly; `applyEffect` resolves it at use time. Two effects exist today:
+**The effects registry** — [`src/effects/core/effects.js`](../../src/effects/core/effects.js) — maps `effectType` keys to handler functions sharing the signature `(user, target, params, level, registry) → void`. The consumable stores the *key* (not a function reference) so it serializes cleanly; `applyEffect` resolves it at use time. Three effects exist today:
 
 | Effect | Handler |
 |---|---|
 | `heal` | [`effect-heal.js`](../../src/effects/effect-types/effect-heal.js) |
 | `damage` | [`effect-damage.js`](../../src/effects/effect-types/effect-damage.js) |
+| `satiate` | [`effect-satiate.js`](../../src/effects/effect-types/effect-satiate.js) — refills the `hunger` pool ([hunger.md](hunger.md)) |
 
 ## Add a new consumable
 
@@ -37,4 +38,4 @@ If the effect you need doesn't exist yet, add it to the effects registry:
 
 - **`target` is optional.** Drinking is self-targeted (`target` is `null`). The handler signature already carries a `target` so a future "throw potion" action can route a different target through the same effect — see the note in [`action-consume.js`](../../src/actions/action-types/action-consume.js).
 - **The item is destroyed on use** — consumables are single-use by definition.
-- **Effects are documented here on purpose.** The registry currently has one consumer (consumables) and two trivial, instantaneous effects — no durations, stacks, or status effects. When a second consumer appears (traps, thrown items, spells) or effects gain state, split effects into its own `effects.md`. Until then, don't over-design it.
+- **Effects are documented here on purpose.** The registry now has a few consumers — consumables, thrown items ([`action-throw.js`](../../src/actions/action-types/action-throw.js)), and starvation damage ([hunger.md](hunger.md)) — but its effects are still trivial and instantaneous: no durations, stacks, or status effects. Split effects into its own `effects.md` once they gain state (durations/stacks/status); until then the payload is thin enough to keep here.

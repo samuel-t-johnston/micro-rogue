@@ -5,7 +5,7 @@ An list of potentially useful tools for roguelike dev, game dev, Javascript dev.
 **Used in ROGµE**
 
  - Node.js - for all the JS stuff
- - Vitest and 'happy-dom' for unit testing
+ - Vitest and happy-dom for unit testing
  - ESLint and Prettier - code linting and formatting
  - Github Pages - for easy demo
    - https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site

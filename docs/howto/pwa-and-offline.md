@@ -16,7 +16,7 @@ It does two jobs:
 1. The changed worker bytes are what make the browser install a new service worker. This matters
    most on **iOS**: an installed (home-screen) PWA will otherwise sit on old code indefinitely —
    the symptom is "Safari shows the update but the installed app doesn't, and force-quitting
-   doesn't help" (only a delete/reinstall did). Bumping the version avoids that.
+   doesn't help" (only a delete/reinstall). Bumping the version avoids that.
 2. On `activate` the new worker deletes every cache whose name isn't the current version, clearing
    the old asset set.
 
@@ -33,7 +33,7 @@ reaches installed iOS PWAs.
 
 There is **no build step and no generated file list**. On the first online load the browser
 fetches the whole static-import module graph (all of `src/`), both stylesheets, and the active
-sprite sheet; network-first caches each one automatically. So almost everything self-caches.
+sprite sheets; network-first caches each one automatically. So almost everything self-caches.
 
 The exceptions are assets the app loads *lazily*, which a given session might never request:
 

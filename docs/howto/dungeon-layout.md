@@ -45,7 +45,7 @@ const PIPELINES = {
 
 ## The runtime
 
-[`createLevelManager`](../../src/world/dungeon/level-manager.js) is the consumer side — it executes the topology, never decides it. It owns the **active floor** and a **cold storage** map of the frozen inactive ones. Under **model (b)**, only the active floor's entities live in the registry, so the turn manager and senses always see exactly one floor plus the player.
+[`createLevelManager`](../../src/world/dungeon/level-manager.js) is the consumer side — it executes the topology, never decides it. It owns the **active floor** and a **cold storage** map of the frozen inactive ones. Only the active floor's entities live in the registry, so the turn manager and senses always see exactly one floor plus the player.
 
 `travel(player, port)`:
 

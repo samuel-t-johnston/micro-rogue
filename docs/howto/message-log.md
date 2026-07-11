@@ -1,6 +1,6 @@
 # Message Log
 
-*The bottom-left log: ghost lines, the icon, and the expandable overlay.*
+*The bottom-left log widget: ghost lines, the icon, and the expandable overlay.*
 
 The widget lives in [`src/ui/widgets/message-log.js`](../../src/ui/widgets/message-log.js). It reads
 straight from the [event log](../design/dev-tools-and-logging.md) via providers the game scene

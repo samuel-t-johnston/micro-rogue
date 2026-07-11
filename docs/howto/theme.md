@@ -18,6 +18,9 @@ The token set is kept deliberately small. Add a new token only when a concrete U
 | `--color-text-dim`       | `textDim`       | Secondary text, labels, ghost log lines  |
 | `--color-text-disabled`  | `textDisabled`  | Disabled button labels                   |
 | `--color-debug`          | `debug`         | Debug-only / unseen lines in the log overlay |
+| `--color-health`         | `health`        | HP readouts and health UI (HUD, Stats)   |
+| `--color-magic`          | `magic`         | MP readouts and magic UI                 |
+| `--color-experience`     | `experience`    | EXP readouts and experience UI           |
 
 ## Change a color value
 

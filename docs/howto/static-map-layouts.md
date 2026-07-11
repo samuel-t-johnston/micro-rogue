@@ -79,5 +79,5 @@ export default {
 ## Worth knowing
 
 - **The loader trims the tile string before splitting into rows.** Leading and trailing blank lines at the string level are removed; blank lines in the middle of the map would produce zero-width rows and fail the row-length check.
-- **Map files are dynamically imported at runtime.** The stage resolves paths relative to `import.meta.url`, which is required for GitHub Pages compatibility (see AGENTS.md).
+- **Map files are dynamically imported at runtime.** The stage resolves paths relative to `import.meta.url`, which is required for GitHub Pages compatibility.
 - **The `legend` and `tiles` exports must both be named exports** (not default). The stage reads them as `mod.legend` and `mod.tiles`.

@@ -1,9 +1,9 @@
 # Weapons
 
-_Weapon-specific behaviour — range, ammunition, stacking, and the ranged attack flow. Read
-[item.md](item.md) for the generic item recipe and [equipment.md](equipment.md) for slots and stat
-modifiers first. The full design rationale lives in
-[docs/design/ranged-weapons.md](../design/ranged-weapons.md)._
+*Weapon-specific behaviour — range, ammunition, stacking, and the ranged attack flow.* 
+
+Read [item.md](item.md) for the generic item recipe and [equipment.md](equipment.md) for slots and stat
+modifiers first. The full design rationale lives in [docs/design/ranged-weapons.md](../design/ranged-weapons.md).
 
 ## How it works
 
