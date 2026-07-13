@@ -1,3 +1,23 @@
+/** A stable hue (0..359) for a scent profile — a small string hash so each profile tints consistently. */
+export function scentHue(profile) {
+  let h = 0;
+  for (let i = 0; i < profile.length; i++) h = (h * 31 + profile.charCodeAt(i)) >>> 0;
+  return h % 360;
+}
+
+/**
+ * Places the tooltip box near the pointer, flipping to stay on-screen: it prefers up-and-right of the
+ * pointer, flips left when it would overflow the right edge, and flips below when it would clip the top.
+ * @returns {{ lx: number, ly: number }} The box's top-left corner.
+ */
+export function fitTooltipBox(pointerX, pointerY, boxW, boxH, width) {
+  let lx = pointerX + 14;
+  let ly = pointerY - boxH - 6;
+  if (lx + boxW > width) lx = pointerX - boxW - 6;
+  if (ly < 0) ly = pointerY + 14;
+  return { lx, ly };
+}
+
 /**
  * Creates the debug overlay: a full-viewport canvas that draws toggleable diagnostic layers
  * (passability, FOV, scent heatmap, sound markers) plus a pointer tooltip showing tile and entity
@@ -78,12 +98,6 @@ export function createDebugOverlay({ getViewport }) {
   }
 
   // Deterministic hue per scent profile, so the player's trail and an orc's cloud read distinctly.
-  function scentHue(profile) {
-    let h = 0;
-    for (let i = 0; i < profile.length; i++) h = (h * 31 + profile.charCodeAt(i)) >>> 0;
-    return h % 360;
-  }
-
   // Scent heatmap: each profile tinted its hue, alpha rising with intensity; profiles blend.
   function drawScentLayer(frame) {
     const { worldToScreen, tileSize, bounds, getScent } = frame;
@@ -150,10 +164,7 @@ export function createDebugOverlay({ getViewport }) {
     const boxW = maxTextW + pad * 2;
     const boxH = lines.length * lineH + pad * 2;
 
-    let lx = pointerX + 14;
-    let ly = pointerY - boxH - 6;
-    if (lx + boxW > width) lx = pointerX - boxW - 6;
-    if (ly < 0) ly = pointerY + 14;
+    const { lx, ly } = fitTooltipBox(pointerX, pointerY, boxW, boxH, width);
 
     ctx.fillStyle = 'rgba(0,0,0,0.72)';
     ctx.fillRect(lx, ly, boxW, boxH);
