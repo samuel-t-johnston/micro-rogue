@@ -18,6 +18,7 @@ const SHOUT_VOLUME = 8;
 export const shoutEnemyReport = {
   evaluate(context) {
     const { memory, perception, selfState } = context;
+    if (!memory) return null; // this goal's state lives in memory; a memoryless creature can't report
 
     const hostiles = perception.entities.filter(
       (o) => o.tags.isActor && areHostile(selfState.factions, o.factions),

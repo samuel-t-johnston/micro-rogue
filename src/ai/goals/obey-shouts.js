@@ -15,6 +15,7 @@ export const HEADING_PERSISTENCE = 6;
 export const obeyShouts = {
   evaluate(context) {
     const { memory, perception, selfState, level } = context;
+    if (!memory) return null; // the heading is held in memory; a memoryless creature can't obey
 
     const order = (perception.sounds ?? []).find(
       (s) => s.understood && s.message?.kind === 'enemy-report' && s.message.direction,

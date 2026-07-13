@@ -38,6 +38,10 @@ describe('shoutEnemyReport', () => {
     expect(shoutEnemyReport.evaluate(ctx(enemy, memory))).not.toBeNull(); // re-seen → re-report
   });
 
+  it('returns null for a memoryless creature instead of throwing', () => {
+    expect(shoutEnemyReport.evaluate(ctx([obs(7, 8, 2, ['player'])], null))).toBeNull();
+  });
+
   it('ignores same-faction actors and returns null', () => {
     expect(shoutEnemyReport.evaluate(ctx([obs(7, 8, 5, ['orcs'])]))).toBeNull();
   });

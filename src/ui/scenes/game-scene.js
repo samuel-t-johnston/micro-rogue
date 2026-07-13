@@ -146,13 +146,13 @@ export function createGameScene({
 
   // Raise the contextual menu for the tile under a screen point (long-press or right-click). Builds
   // its rows from the same resolveTileActions the tap interpreter uses, so the offered actions match
-  // what a tap would do. A tile with nothing to offer opens no menu. Hands gesture state to the modal.
+  // what a tap would do. resolveTileActions always offers at least a free "Look", so the menu never
+  // opens empty. Hands gesture state to the modal.
   function openContextMenu(screenX, screenY) {
     if (!level || !inputController) return;
     const world = renderer.screenToWorld(screenX, screenY);
     const tile = { x: Math.floor(world.x), y: Math.floor(world.y) };
     const rows = resolveTileActions(level, getPlayerPos(), tile, getAttackCapability(player));
-    if (rows.length === 0) return;
     resetGestures();
     contextMenu = createContextMenu({
       theme,
