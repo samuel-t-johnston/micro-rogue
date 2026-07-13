@@ -642,7 +642,14 @@ export function createGameScene({
       return gameMenuController.handleInput(event);
     }
 
-    if (dialogController.handleInput(event)) return true;
+    // The item-list dialog is fully modal while open: it owns every event (wheel, keys, taps) so
+    // nothing leaks to the map or the diagnostic shortcuts behind it. The dialog itself ignores
+    // wheel/non-Escape keys, so we swallow unconditionally rather than on its handled/unhandled flag.
+    if (dialogController.isActive) {
+      dialogController.handleInput(event);
+      return true;
+    }
+
     if (messageLogWidget.handleInput(event)) return true;
     if (hudWidget.handleInput(event)) return true;
     if (characterMenuButton.handleInput(event)) return true;

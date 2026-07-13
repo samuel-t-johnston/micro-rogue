@@ -77,6 +77,21 @@ describe('gameSettings store', () => {
     expect(gameSettings.get('handedness')).toBe('left');
   });
 
+  // ENGINE-4 (B8): set() clamps an out-of-range volume into [0,1] and accepts it, matching load(),
+  // rather than treating the clamp as a rejection and no-oping.
+  it('clamps an out-of-range volume on set (matching load)', () => {
+    gameSettings.set('masterVolume', 1.5);
+    expect(gameSettings.get('masterVolume')).toBe(1);
+    gameSettings.set('sfxVolume', -0.5);
+    expect(gameSettings.get('sfxVolume')).toBe(0);
+  });
+
+  it('ignores a non-numeric volume set without changing the prior value', () => {
+    gameSettings.set('musicVolume', 0.5);
+    gameSettings.set('musicVolume', 'loud');
+    expect(gameSettings.get('musicVolume')).toBe(0.5);
+  });
+
   it('persists skipNewGameInstructions across a load', () => {
     gameSettings.set('skipNewGameInstructions', true);
     gameSettings.reset();
