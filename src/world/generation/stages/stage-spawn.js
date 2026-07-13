@@ -5,11 +5,12 @@
  */
 import { components } from '../../entities/components.js';
 import { centermostRoomTile } from '../zone-tiles.js';
+import { LEVEL_ZONES, LEVEL_ROOMS } from '../blackboard-keys.js';
 
 /** Runs the spawn (entry-point) finishing stage (see the file overview). */
 export function run(level, stageConfig, blackboard, rng, registry) {
-  const zones = blackboard['level:zones'] ?? [];
-  const rooms = blackboard['level:rooms'] ?? {};
+  const zones = blackboard[LEVEL_ZONES] ?? [];
+  const rooms = blackboard[LEVEL_ROOMS] ?? {};
 
   const zone = zones.find((z) => z.labels.includes('stairs-up')) ?? zones[0];
   if (!zone) {

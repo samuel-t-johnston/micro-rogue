@@ -53,7 +53,12 @@ function clamp01(v) {
   return v < 0 ? 0 : v > 1 ? 1 : v;
 }
 
-function createAnimationManager() {
+/**
+ * Creates an animation manager: owns the in-flight animation list and the reduced-motion kill switch,
+ * and exposes the animation methods plus frame/reset. The module exports one shared instance
+ * (`animations`); the factory is exported for isolated tests.
+ */
+export function createAnimationManager() {
   let active = []; // all in-flight animations, attached and detached
   let current = 0; // last frame timestamp; getters sample against this
   let enabled = true; // reduced-motion / "disable animations" kill switch
@@ -116,6 +121,10 @@ function createAnimationManager() {
     detached,
     frame,
 
+    // Reduced-motion extension seam: setEnabled(false) makes every animation method a no-op (draws
+    // snap to their final state). No shipped caller yet — a fork/accessibility layer drives it (e.g.
+    // from prefers-reduced-motion). It survives reset() so the choice isn't lost between runs.
+    // See "animation enable/disable config" in the roadmap's deferred section.
     setEnabled(v) {
       enabled = v;
     },
@@ -251,7 +260,7 @@ function createAnimationManager() {
     reset() {
       active = [];
       current = 0;
-      enabled = true;
+      // `enabled` is intentionally NOT reset — a reduced-motion choice persists across runs/new games.
     },
 
     // Sampled transform for a detached animation at the current frame (renderer use).

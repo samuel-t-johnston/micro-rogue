@@ -11,6 +11,7 @@
  */
 import { createDoor } from '../../entities/furniture.js';
 import { cellsAdjacent } from './stage-room-grid-geometry.js';
+import { LEVEL_ZONES, LEVEL_LINKS, LEVEL_ROOMS } from '../blackboard-keys.js';
 
 // Plan one corridor as opening offsets + the lane for its perpendicular leg.
 //   la / lb        — the gutter lines just outside each room's facing wall (la by A, lb by B).
@@ -44,9 +45,9 @@ function planCorridor(la, lb, al, ah, bl, bh, rng) {
 
 /** Runs the carve-halls realization stage (see the file overview). */
 export function run(level, stageConfig, blackboard, rng, registry) {
-  const zones = blackboard['level:zones'] ?? [];
-  const links = blackboard['level:links'] ?? [];
-  const rooms = blackboard['level:rooms'] ?? {};
+  const zones = blackboard[LEVEL_ZONES] ?? [];
+  const links = blackboard[LEVEL_LINKS] ?? [];
+  const rooms = blackboard[LEVEL_ROOMS] ?? {};
   const byId = new Map(zones.map((z) => [z.id, z]));
 
   const carve = (x, y) => {

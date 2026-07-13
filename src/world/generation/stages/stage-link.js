@@ -13,6 +13,7 @@
  * Reads:  level:zones, level:adjacency
  * Writes: level:links -> [{ id, a, b }]   (a < b, ordered)
  */
+import { LEVEL_ZONES, LEVEL_ADJACENCY, LEVEL_LINKS } from '../blackboard-keys.js';
 
 function shuffle(arr, rng) {
   const out = [...arr];
@@ -27,8 +28,8 @@ function shuffle(arr, rng) {
 export function run(level, stageConfig = {}, blackboard, rng) {
   const extraLinkChance = stageConfig.extraLinkChance ?? 0.2;
   const maxExtraDegree = stageConfig.maxExtraDegree ?? 2;
-  const zones = blackboard['level:zones'] ?? [];
-  const adjacency = blackboard['level:adjacency'] ?? [];
+  const zones = blackboard[LEVEL_ZONES] ?? [];
+  const adjacency = blackboard[LEVEL_ADJACENCY] ?? [];
 
   // Union-find over zone ids (path-halving; no rank — graphs are tiny).
   const parent = new Map(zones.map((z) => [z.id, z.id]));
@@ -73,5 +74,5 @@ export function run(level, stageConfig = {}, blackboard, rng) {
   }
 
   chosen.sort((e1, e2) => e1[0] - e2[0] || e1[1] - e2[1]);
-  blackboard['level:links'] = chosen.map(([a, b], id) => ({ id, a, b }));
+  blackboard[LEVEL_LINKS] = chosen.map(([a, b], id) => ({ id, a, b }));
 }

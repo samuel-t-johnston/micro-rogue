@@ -5,6 +5,7 @@
  */
 import { ENTITY_PREFABS, prefabIdsByKind } from '../../entities/entity-prefabs.js';
 import { roomTiles, centermostRoomTile } from '../zone-tiles.js';
+import { LEVEL_ZONES, LEVEL_ROOMS } from '../blackboard-keys.js';
 
 const make = (registry, id, x, y, entityId) => ENTITY_PREFABS[id].make(registry, x, y, entityId);
 
@@ -45,8 +46,8 @@ export function weightedPick(rooms, weights, rng) {
 /** Runs the populate stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard, rng, registry) {
   const cfg = { ...DEFAULTS, ...stageConfig };
-  const zones = blackboard['level:zones'] ?? [];
-  const rooms = blackboard['level:rooms'] ?? {};
+  const zones = blackboard[LEVEL_ZONES] ?? [];
+  const rooms = blackboard[LEVEL_ROOMS] ?? {};
 
   // Empty room tiles only — inside the room rect, and not already occupied (the spatial index
   // tracks everything placed so far: stairs, doors, the entry point, earlier spawns). This keeps

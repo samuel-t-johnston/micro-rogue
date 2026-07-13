@@ -21,6 +21,7 @@
  *   level:zones     -> [{ id, cells: [[col,row],…], rect: {x,y,w,h}, labels: ['room'] }]
  *   level:adjacency -> [[idA, idB], …]   (idA < idB, deduped)
  */
+import { LEVEL_GRID, LEVEL_ZONES, LEVEL_ADJACENCY } from '../blackboard-keys.js';
 
 const DEFAULTS = { cols: 3, rows: 3, cellSize: 10, deletes: 1, merges: 1, minZones: 1 };
 
@@ -139,7 +140,7 @@ export function run(level, stageConfig = {}, blackboard, rng) {
     }
   }
 
-  blackboard['level:grid'] = { cols, rows, cellSize };
-  blackboard['level:zones'] = zones;
-  blackboard['level:adjacency'] = adjacency;
+  blackboard[LEVEL_GRID] = { cols, rows, cellSize };
+  blackboard[LEVEL_ZONES] = zones;
+  blackboard[LEVEL_ADJACENCY] = adjacency;
 }

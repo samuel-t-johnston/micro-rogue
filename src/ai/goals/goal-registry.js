@@ -17,7 +17,8 @@ import { exploreDoorsEager } from './explore-doors-eager.js';
 
 // Maps the string keys stored in an entity's `ai` component to goal implementations.
 // The `ai` component holds names (not function references) so it serializes cleanly;
-// goals are resolved here at evaluation time. Add new goals to this map.
+// goals are resolved here at evaluation time. Add a shipped goal to this map, or register one at
+// runtime with registerGoal (below) — the fork-facing extension seam, mirroring registerSense.
 const goals = {
   'player-auto-move': playerAutoMove, // Player goal: auto-move toward a target tile
   'player-auto-pickup': playerAutoPickup, // Player goal: auto-pickup items on the current tile
@@ -36,6 +37,16 @@ const goals = {
   investigate: investigate, // NPC goal: pursue the last place a foe was perceived
   'explore-doors-eager': exploreDoorsEager, // NPC goal: seek out closed doors and pass through them
 };
+
+/**
+ * Registers a goal under a name, so new goals (or test doubles) can be added without editing this
+ * module's literal map. Mirrors registerSense; the `ai` component then references it by name.
+ * @param {string} name
+ * @param {object} goal - A goal object (see the `Goal` typedef in goal-evaluator.js).
+ */
+export function registerGoal(name, goal) {
+  goals[name] = goal;
+}
 
 /**
  * Resolves an ordered list of goal names to goal objects, preserving order (= priority). Throws on

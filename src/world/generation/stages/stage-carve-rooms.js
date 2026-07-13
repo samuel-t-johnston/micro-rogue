@@ -5,6 +5,7 @@
  * edge, so adjacent zones never touch. Records each cell's room rect to `level:rooms` for the hall
  * stage. See docs/design/procedural-3x3-dungeon.md (Room variety & dog-leg halls).
  */
+import { LEVEL_GRID, LEVEL_ZONES, LEVEL_ROOMS } from '../blackboard-keys.js';
 
 const MIN_FLOOR = 2; // a 2x2 floor room (4x4 counting its wall ring)
 
@@ -17,9 +18,9 @@ function ensureOverlap(a, b, k0, k1) {
 
 /** Runs the carve-rooms realization stage (see the file overview). */
 export function run(level, stageConfig, blackboard, rng) {
-  const grid = blackboard['level:grid'] ?? { cols: 0, rows: 0, cellSize: 10 };
+  const grid = blackboard[LEVEL_GRID] ?? { cols: 0, rows: 0, cellSize: 10 };
   const cs = grid.cellSize;
-  const zones = blackboard['level:zones'] ?? [];
+  const zones = blackboard[LEVEL_ZONES] ?? [];
 
   level.width = grid.cols * cs;
   level.height = grid.rows * cs;
@@ -80,5 +81,5 @@ export function run(level, stageConfig, blackboard, rng) {
     }
     rooms[key] = { ...r };
   }
-  blackboard['level:rooms'] = rooms;
+  blackboard[LEVEL_ROOMS] = rooms;
 }
