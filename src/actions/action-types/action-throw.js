@@ -4,7 +4,13 @@ import { rollsMiss } from '../../combat/accuracy.js';
 import { chebyshevDistance } from '../../world/map/geometry.js';
 import { animations } from '../../render/animations.js';
 import { gameLog } from '../../engine/log/game-log.js';
-import { subject, object, conjugate, possessive, itemName } from '../../engine/log/text/log-text.js';
+import {
+  subject,
+  object,
+  conjugate,
+  possessive,
+  itemName,
+} from '../../engine/log/text/log-text.js';
 
 // Joins names into a readable list: "a", "a and b", "a, b and c".
 function joinNames(names) {
@@ -29,10 +35,15 @@ export function executeThrow(actor, action, level, registry) {
   const item = inventory?.items.find((e) => e.id === action.itemEntityId);
   if (!item) return true; // nothing to throw (shouldn't happen via the UI) — free no-op
 
+  // A positionless thrower can't aim (the whole flight is computed from origin.x/.y). Bail before
+  // removing the item from inventory so the free no-op doesn't also lose it — mirrors executeAttack,
+  // which tolerates a missing position. Throwing is player-only today, so this is idiom insurance.
+  const origin = actor.components.get('position');
+  if (!origin) return true;
+
   const idx = inventory.items.indexOf(item);
   inventory.items.splice(idx, 1);
 
-  const origin = actor.components.get('position');
   // A throw can go wide (thrower DEX + range, same roll as a bow). A miss veers to a tile beside the
   // aimed one — which may clip a bystander standing there — or hits home if the target is boxed in.
   const aimed = { x: action.x, y: action.y };

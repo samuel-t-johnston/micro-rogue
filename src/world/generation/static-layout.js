@@ -19,8 +19,11 @@ export async function loadStaticLayout(layoutName, level, importLayout = importM
 
 /** Pure parse: validates the tile string and writes it into the level. Returns the layout's entities. */
 export function parseLayout(mod, layoutName, level) {
-  const rows = mod.tiles.trim().split('\n');
-  if (rows.length === 0) throw new Error(`Map "${layoutName}" is empty`);
+  // Guard the real empty condition: '' or all-whitespace. Checking rows.length === 0 was dead —
+  // ''.split('\n') is [''] (length 1), so an empty layout slipped through to a 0-width level.
+  const trimmed = mod.tiles.trim();
+  if (trimmed === '') throw new Error(`Map "${layoutName}" is empty`);
+  const rows = trimmed.split('\n');
   const width = rows[0].length;
   for (let i = 1; i < rows.length; i++) {
     if (rows[i].length !== width) {

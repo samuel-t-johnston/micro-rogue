@@ -74,9 +74,14 @@ export const gameSettings = {
 
   // Set one key and persist. An invalid value (or unknown key) is a no-op — the key keeps its
   // prior valid value — rather than silently snapping back to the default or corrupting the store.
+  // A volume is clamped into [0,1] and accepted (matching load()), not rejected: only a non-numeric
+  // volume is a no-op. Every other key must survive normalize unchanged, else it was invalid.
   set(key, value) {
     const candidate = normalizeSettings({ ...current, [key]: value });
-    if (candidate[key] !== value) return; // value was rejected by normalize
+    const accepted = VOLUME_KEYS.includes(key)
+      ? typeof value === 'number' && Number.isFinite(value)
+      : candidate[key] === value;
+    if (!accepted) return;
     current = candidate;
     write(current);
   },

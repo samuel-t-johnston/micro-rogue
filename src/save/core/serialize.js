@@ -18,6 +18,11 @@ import { serializeScent, deserializeScent } from '../../world/sense-systems/scen
 
 // Each codec: serialize(data) -> JSON-safe; deserialize(data, getEntity) -> runtime shape.
 // getEntity(id) resolves an id back to its (already-created) entity during load.
+//
+// INVARIANT: a component whose data isn't plain JSON — it holds an entity ref, a Set/Map, a class
+// instance, or a non-finite number — MUST register a codec here. Everything else round-trips through
+// structuredClone + JSON untouched. The component-codec round-trip guard in serialize.test.js enforces
+// this: it fails loudly if any component the registry can produce doesn't survive save + load.
 const COMPONENT_CODECS = {
   inventory: {
     serialize: (data) => ({ items: data.items.map((e) => e.id) }),
@@ -54,13 +59,20 @@ const COMPONENT_CODECS = {
   },
 };
 
-// Components with no codec are plain JSON; clone so the save object never aliases live state.
-function serializeComponent(name, data) {
+/**
+ * Serializes one component's data to a JSON-safe form via its codec, or a plain structuredClone when
+ * it has none (so the save object never aliases live state). Exported for the round-trip guard test.
+ */
+export function serializeComponent(name, data) {
   const codec = COMPONENT_CODECS[name];
   return codec ? codec.serialize(data) : structuredClone(data);
 }
 
-function deserializeComponent(name, data, getEntity) {
+/**
+ * Rehydrates one component's data from its serialized form via its codec (resolving id refs through
+ * `getEntity`), or a plain structuredClone when it has none. Exported for the round-trip guard test.
+ */
+export function deserializeComponent(name, data, getEntity) {
   const codec = COMPONENT_CODECS[name];
   return codec ? codec.deserialize(data, getEntity) : structuredClone(data);
 }

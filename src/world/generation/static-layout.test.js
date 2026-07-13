@@ -33,4 +33,15 @@ describe('parseLayout', () => {
       /Unknown symbol "\?"/,
     );
   });
+
+  // MAP-8 (B6): an empty or all-whitespace layout must throw, not silently produce a 0-width level.
+  it('throws on an empty layout', () => {
+    expect(() => parseLayout({ legend, tiles: '' }, 'empty', createLevel())).toThrow(/is empty/);
+  });
+
+  it('throws on an all-whitespace layout', () => {
+    expect(() => parseLayout({ legend, tiles: '  \n  ' }, 'blank', createLevel())).toThrow(
+      /is empty/,
+    );
+  });
 });

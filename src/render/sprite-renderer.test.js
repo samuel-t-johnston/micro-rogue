@@ -1,5 +1,33 @@
 import { describe, it, expect } from 'vitest';
-import { pickSheetSize, resolveDraw } from './sprite-renderer.js';
+import { pickSheetSize, resolveDraw, createSpriteRenderer } from './sprite-renderer.js';
+
+// RENDER-1 (B2): load() must not reject when a sheet PNG fails to load. Previously
+// entry.img.onerror = reject, so a single missing/renamed asset aborted renderer.load(), which
+// game-scene awaits inside its mount try — leaving `level` unset and the scene blank. The design
+// (resolveDraw null → glyph fallback, and draw() returning false when a sheet isn't ready) says a
+// missing sprite should degrade to a glyph, not blank the screen. load() now resolves per-asset,
+// mirroring sfx.load's tolerance.
+describe('createSpriteRenderer.load — graceful degradation', () => {
+  it('resolves so draws fall back to glyphs when a sheet asset fails to load', async () => {
+    const OrigImage = globalThis.Image;
+    class FakeImage {
+      set src(_v) {
+        // Simulate a 404 on the sheet PNG (missing/renamed asset, or offline first-load).
+        queueMicrotask(() => this.onerror?.(new Error('404')));
+      }
+    }
+    globalThis.Image = FakeImage;
+    try {
+      const catalog = { floor: { sheet: 'sprite-sheet', col: 0, row: 0 } };
+      const sheets = { 'sprite-sheet': [16] };
+      const r = createSpriteRenderer({ catalog, sheets });
+      // Expected: load() resolves (game boots, tiles draw as glyphs). Actual: it rejects.
+      await expect(r.load()).resolves.toBeUndefined();
+    } finally {
+      globalThis.Image = OrigImage;
+    }
+  });
+});
 
 // Picks the source sheet for a given device-pixel tile target. The goal is the most detailed
 // sheet that still scales up by a clean integer factor (crisp pixel art); when nothing divides

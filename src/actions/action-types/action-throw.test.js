@@ -266,4 +266,17 @@ describe('executeThrow', () => {
 
     expect(knife.components.get('position')).toEqual({ x: 2, y: 2 });
   });
+
+  // ACTION-5 (B7): a positionless thrower can't aim, so the throw is a free no-op — and, crucially,
+  // it must not remove the item from inventory (the guard runs before the splice).
+  it('is a free no-op that keeps the item when the actor has no position', () => {
+    registry.removeComponent(actor, 'position');
+    const knife = makeItem(registry, 'Knife', { throwable: ['damage', { amount: 3 }, 0] });
+    inventory.items.push(knife);
+
+    const result = throwAt(knife, 4, 2);
+
+    expect(result).toBe(true); // free action — the turn isn't spent
+    expect(inventory.items).toContain(knife); // not lost from inventory
+  });
 });

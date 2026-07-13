@@ -329,6 +329,20 @@ export class SaveTooNewError extends Error {
   }
 }
 
+/**
+ * Thrown by deserializeGame when a save is structurally intact enough to parse but carries data
+ * that would silently corrupt the restored run — currently a missing/non-finite `meta.seed`, which
+ * would reseed the RNG master at random and diverge the run forever. Failing loud beats that silent
+ * drift; game-scene's onLoadFailed reports it like SaveTooNewError/MigrationError.
+ */
+export class CorruptSaveError extends Error {
+  constructor(reason) {
+    super(`Save is corrupt: ${reason}`);
+    this.name = 'CorruptSaveError';
+    this.reason = reason;
+  }
+}
+
 /** Thrown by loadSave when a migration step fails; carries the from/to versions and the cause. */
 export class MigrationError extends Error {
   constructor(from, to, cause) {
@@ -380,6 +394,11 @@ export function serializeGame({
  * rehydrates every entity, rebuilds the level, and resolves the player.
  */
 export function deserializeGame(save) {
+  // Guard the RNG master seed before restore: a missing/non-finite seed would make rng.restore
+  // fall back to a fresh random master and silently diverge the run. Fail loud instead (SAVE-1).
+  if (!Number.isFinite(save.meta?.seed)) {
+    throw new CorruptSaveError('missing or non-finite meta.seed');
+  }
   rng.restore({ seed: save.meta.seed, streams: save.meta.streams });
 
   const registry = createEntityRegistry();

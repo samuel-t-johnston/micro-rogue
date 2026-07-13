@@ -26,6 +26,12 @@ describe('weapon component', () => {
   });
 });
 
+describe('levelUp component', () => {
+  it('defaults maxLevel to a finite, JSON-safe cap (Infinity would serialize to null)', () => {
+    expect(Number.isFinite(components.levelUp().maxLevel)).toBe(true);
+  });
+});
+
 describe('ammunition component', () => {
   it('stores ammoType with zero break chance and no sprites by default', () => {
     expect(components.ammunition('arrow')).toEqual({

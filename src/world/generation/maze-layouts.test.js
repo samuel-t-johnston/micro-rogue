@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import * as spiral from '../../../data/maps/maze-spiral.js';
 import * as zigzag from '../../../data/maps/maze-zigzag.js';
 import * as pillars from '../../../data/maps/maze-pillars.js';
+import { ENTITY_PREFABS, prefabIdsByKind } from '../../world/entities/entity-prefabs.js';
 
 const parse = (tiles) =>
   tiles
@@ -27,24 +28,15 @@ function floodFill(grid, sx, sy) {
 }
 
 const MAPS = [
-  { name: 'maze-spiral', mod: spiral, items: 3, creatures: { orc: 2 }, chests: 0 },
-  { name: 'maze-zigzag', mod: zigzag, items: 3, creatures: { orc: 2 }, chests: 0 },
-  { name: 'maze-pillars', mod: pillars, items: 2, creatures: { scuttler: 5 }, chests: 1 },
+  { name: 'maze-spiral', mod: spiral },
+  { name: 'maze-zigzag', mod: zigzag },
+  { name: 'maze-pillars', mod: pillars },
 ];
 
-const ITEM_TYPES = new Set([
-  'healingPotion',
-  'potionOfPain',
-  'dagger',
-  'sword',
-  'leatherArmor',
-  'scroll',
-  'grapes',
-  'bread',
-  'meat',
-]);
+// Derived from the prefab catalog, not hand-listed, so a roster change can't leave this stale.
+const ITEM_TYPES = new Set(prefabIdsByKind('item'));
 
-describe.each(MAPS)('$name', ({ mod, items, creatures, chests }) => {
+describe.each(MAPS)('$name', ({ mod }) => {
   const grid = parse(mod.tiles);
 
   it('is a 15x15 grid of legend characters', () => {
@@ -77,14 +69,18 @@ describe.each(MAPS)('$name', ({ mod, items, creatures, chests }) => {
     }
   });
 
-  it('carries exactly one up- and one down-stairs and the expected contents', () => {
+  it('carries exactly one up- and one down-stairs', () => {
     const count = (pred) => mod.entities.filter(pred).length;
     expect(count((e) => e.type === 'stairsUp')).toBe(1);
     expect(count((e) => e.type === 'stairsDown')).toBe(1);
-    expect(count((e) => ITEM_TYPES.has(e.type))).toBe(items);
-    expect(count((e) => e.type === 'chest')).toBe(chests);
-    for (const [type, n] of Object.entries(creatures)) {
-      expect(count((e) => e.type === type)).toBe(n);
+  });
+
+  // Structural, not roster-coupled: every authored type must resolve to a real prefab (a typo or a
+  // removed type fails loudly), and the map must place at least one item.
+  it('authors only resolvable prefab types, including at least one item', () => {
+    for (const e of mod.entities) {
+      expect(ENTITY_PREFABS[e.type], `unknown prefab type "${e.type}"`).toBeTruthy();
     }
+    expect(mod.entities.some((e) => ITEM_TYPES.has(e.type))).toBe(true);
   });
 });

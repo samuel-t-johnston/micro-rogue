@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { executeSelfInteract } from './action-self-interact.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { createLevel } from '../../world/map/level.js';
-import { createHealingPotion } from '../../world/entities/items.js';
+import { consumable } from '../../test-support/fixtures.js';
 import { createStairs } from '../../world/entities/furniture.js';
 
 function makeLevel() {
@@ -30,7 +30,7 @@ describe('executeSelfInteract', () => {
   });
 
   it('picks up the item and returns false when exactly one item is present', async () => {
-    const potion = createHealingPotion(registry, 2, 2);
+    const potion = consumable(registry, { x: 2, y: 2 });
     level.placeEntity(potion);
 
     const result = await executeSelfInteract(actor, {}, level, registry, dialogController);
@@ -41,14 +41,14 @@ describe('executeSelfInteract', () => {
   });
 
   it('returns true (free action) when multiple items are present and the dialog is cancelled', async () => {
-    level.placeEntity(createHealingPotion(registry, 2, 2));
-    level.placeEntity(createHealingPotion(registry, 2, 2));
+    level.placeEntity(consumable(registry, { x: 2, y: 2 }));
+    level.placeEntity(consumable(registry, { x: 2, y: 2 }));
 
     expect(await executeSelfInteract(actor, {}, level, registry, dialogController)).toBe(true);
   });
 
   it('does not pick up items from a different tile', async () => {
-    const potion = createHealingPotion(registry, 3, 2);
+    const potion = consumable(registry, { x: 3, y: 2 });
     level.placeEntity(potion);
 
     await executeSelfInteract(actor, {}, level, registry, dialogController);

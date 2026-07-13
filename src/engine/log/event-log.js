@@ -14,6 +14,9 @@ export function createEventLog() {
   // string that were also perceivable when logged (`seen !== false`). Entries the
   // visibility provider never classified (`seen` undefined) default to shown.
   function getDisplayEntries(count) {
+    // Guard count <= 0 explicitly: slice(-0) === slice(0) would return the WHOLE array, the
+    // opposite of "the most-recent 0 entries". Sanctioned full-log reads use Infinity or getAll().
+    if (count <= 0) return [];
     const display = entries.filter((e) => e.display != null && e.seen !== false);
     return display.slice(-count);
   }

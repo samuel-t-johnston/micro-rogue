@@ -1,20 +1,17 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { executeUnequip } from './action-unequip.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
-import { createDagger } from '../../world/entities/items.js';
-import { components } from '../../world/entities/components.js';
-import { Slots, HUMANOID_SLOTS } from '../../../data/equipment-slots.js';
+import { humanoid, equippable } from '../../test-support/fixtures.js';
+import { Slots } from '../../../data/equipment-slots.js';
 
 describe('executeUnequip', () => {
   let registry, actor, dagger;
 
   beforeEach(() => {
     registry = createEntityRegistry();
-    actor = registry.createEntity();
-    registry.addComponent(actor, 'inventory', components.inventory());
-    registry.addComponent(actor, 'wearsEquipment', components.wearsEquipment(HUMANOID_SLOTS));
+    actor = humanoid(registry);
 
-    dagger = createDagger(registry, null, null, actor.id);
+    dagger = equippable(registry, { slot: Slots.WEAPON, ownerId: actor.id });
     actor.components.get('wearsEquipment').slots[Slots.WEAPON] = dagger;
     dagger.components.get('item').location = {
       type: 'equipped',
