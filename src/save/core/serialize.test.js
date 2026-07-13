@@ -2,11 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { createLevel } from '../../world/map/level.js';
 import { components } from '../../world/entities/components.js';
+import { Slots } from '../../../data/equipment-slots.js';
+import { consumable } from '../../test-support/fixtures.js';
 import {
   serializeEntities,
   deserializeEntities,
   serializeLevel,
   deserializeLevel,
+  serializeComponent,
+  deserializeComponent,
 } from './serialize.js';
 
 // Round-trips through JSON to prove the serialized form is genuinely JSON-safe (no Maps,
@@ -155,5 +159,105 @@ describe('level serialization', () => {
     expect(level2.depth).toBe(3);
     expect(level2.pipelineId).toBe('procedural-3x3');
     expect(level2.seed).toBe(9999);
+  });
+});
+
+// The one guard that enforces the plain-JSON component invariant (see serialize.js / components.js):
+// every component the registry can produce must survive the real save path — serialize + JSON +
+// deserialize — structurally unchanged. A component holding a Set/Map/entity-ref/non-finite number
+// with no codec would silently corrupt on save; here it fails loudly instead. The completeness test
+// makes a newly-added component fail until its author supplies a sample, forcing them to exercise it.
+describe('component-codec round-trip guard', () => {
+  // Referenced entities for the ref-holding codecs (inventory/wearsEquipment), built via T1 fixtures.
+  const reg = createEntityRegistry();
+  const item1 = consumable(reg, { name: 'A' });
+  const item2 = consumable(reg, { name: 'B' });
+  const getEntity = (id) => reg.getEntity(id);
+
+  const wears = components.wearsEquipment([Slots.WEAPON, Slots.ARMOR]);
+  wears.slots[Slots.WEAPON] = item1; // one slot filled, one null
+
+  const tp = components.tilePerception();
+  tp.visible.add('1,2');
+  tp.memory.set('1,2', 'floor');
+  tp.rememberedEntities.set('3,4', [
+    { sprite: 'door-closed', color: '#8B6F47', glyph: '+', glyphColor: '#c8a36a', layer: 0 },
+  ]);
+
+  // Representative data for every component — the shapes real saves carry; ref/collection components
+  // use the entities and structures above. Keep alphabetized to match components.js.
+  const SAMPLES = {
+    ai: { ...components.ai(['chase-others', 'attack-in-range']), lastGoal: 'chase-others' },
+    ammunition: components.ammunition('arrow', 0.5, { N: 'arrow-n' }),
+    attacker: components.attacker(),
+    attributeModifiers: components.attributeModifiers({ attack: 1, hp: 5 }),
+    attributes: components.attributes({ hp: 10, str: 3 }),
+    blocksMovement: components.blocksMovement(),
+    consumable: components.consumable('heal', { amount: 10 }),
+    container: components.container(),
+    creature: components.creature(),
+    decay: components.decay(5),
+    dungeonExit: components.dungeonExit(),
+    entityTypeId: components.entityTypeId('orc'),
+    entryPoint: components.entryPoint(),
+    equippable: components.equippable(Slots.WEAPON),
+    faction: components.faction(['orcs']),
+    hearing: components.hearing(5),
+    inventory: components.inventory([item1, item2]),
+    item: components.item({ type: 'inventory', ownerId: item1.id }),
+    knownLanguages: components.knownLanguages(['orcish']),
+    levelUp: components.levelUp({
+      dynamic: true,
+      points: 2,
+      attributePercentages: { str: 1 },
+      maxLevel: 25,
+      lastLevel: 3,
+    }),
+    memory: components.memory({ autoMoveTarget: { x: 1, y: 2 }, enemyIds: [1, 2] }),
+    name: components.name('Goblin'),
+    noisyMovement: components.noisyMovement({
+      chance: 0.5,
+      volume: 3,
+      message: { kind: 'scrabble' },
+    }),
+    opaque: components.opaque(),
+    openable: components.openable('door-closed', 'door-open'),
+    persistVisible: components.persistVisible(),
+    playerControlled: components.playerControlled(),
+    position: components.position(3, 4),
+    questItem: components.questItem('amulet-of-yendor'),
+    renderable: components.renderable('orc', '#101010', 'o', '#00ff00', 0),
+    scentSource: components.scentSource({ profile: 'orcs', intensity: 3 }),
+    senses: components.senses(['vision', 'hearing']),
+    smell: components.smell(2),
+    sound: components.sound({
+      sourceId: item1.id,
+      volume: 6,
+      language: 'orcish',
+      message: { kind: 'enemy-report', direction: 'NW' },
+      sourceFactions: ['orcs'],
+    }),
+    stackable: components.stackable(100, 20),
+    throwable: components.throwable('damage', { amount: 5 }, 1),
+    tilePerception: tp,
+    transition: components.transition(null, 'down'),
+    turnTaker: components.turnTaker(1),
+    vision: components.vision(8),
+    voice: components.voice('orcish'),
+    weapon: components.weapon(15, {
+      meleeRange: 0,
+      ammoType: 'arrow',
+      attackSprites: { N: 'arrow-n' },
+    }),
+    wearsEquipment: wears,
+  };
+
+  it('has a sample for every component (add one when you add a component)', () => {
+    expect(Object.keys(SAMPLES).sort()).toEqual(Object.keys(components).sort());
+  });
+
+  it.each(Object.keys(SAMPLES))('round-trips %s through serialize + JSON + deserialize', (name) => {
+    const throughSave = JSON.parse(JSON.stringify(serializeComponent(name, SAMPLES[name])));
+    expect(deserializeComponent(name, throughSave, getEntity)).toEqual(SAMPLES[name]);
   });
 });

@@ -2,6 +2,11 @@
  * @file Component factory functions — the single definition site for each component's shape and
  * defaults. Always create components through these functions, never as inline object literals. Add
  * new components in alphabetical order and keep them sorted.
+ *
+ * SERIALIZATION: a component's data must be plain JSON so it survives save + load. If it holds an
+ * entity ref, a Set/Map, a class instance, or a non-finite number, register a codec for it in
+ * src/save/core/serialize.js — otherwise it silently corrupts on save. The round-trip guard in
+ * serialize.test.js enforces this: add your component's sample there when you add it here.
  */
 import { RenderLayers } from '../../render/render-layers.js';
 
@@ -58,14 +63,16 @@ export const components = {
   // Marks an entity as one that grows on level-up, and carries the spec that drives it (see
   // src/world/systems/level-up.js). `attributePercentages` is the target split of allocated points
   // across attributes (evaluated in declared order; a zero share never receives). `points` is granted
-  // per level; growth stops at `maxLevel`. `dynamic` gates mid-game growth — false creatures keep the
-  // spec (for spawn-time level scaling) but don't grow as they earn XP. `lastLevel` is the watermark
-  // the watcher last allocated for; it starts at the entity's spawn level and serializes as plain data.
+  // per level; growth stops at `maxLevel` (a finite default so the spec stays JSON-safe — Infinity
+  // would serialize to null; see the serialization note at the top of this file). `dynamic` gates
+  // mid-game growth — false creatures keep the spec (for spawn-time level scaling) but don't grow as
+  // they earn XP. `lastLevel` is the watermark the watcher last allocated for; it starts at the
+  // entity's spawn level and serializes as plain data.
   levelUp({
     dynamic = false,
     points = 1,
     attributePercentages = {},
-    maxLevel = Infinity,
+    maxLevel = 100,
     lastLevel = 1,
   } = {}) {
     return {
