@@ -5,11 +5,7 @@ import { createLevel } from '../../world/map/level.js';
 import { createPlayer } from '../../world/entities/player.js';
 import { createGoblin, createOrc } from '../../world/entities/creatures.js';
 import { createBoulder, createChest, createDoor } from '../../world/entities/furniture.js';
-import {
-  createDagger,
-  createHealingPotion,
-  createPotionOfPain,
-} from '../../world/entities/items.js';
+import { consumable, equippable } from '../../test-support/fixtures.js';
 import { Slots } from '../../../data/equipment-slots.js';
 import { getPool, getScore } from '../../attributes/attribute-access.js';
 import {
@@ -61,13 +57,19 @@ async function buildGame() {
   const cy = 4;
   level.placeEntity(createBoulder(registry, cx + 2, cy));
   level.placeEntity(createDoor(registry, 5, 3));
-  level.placeEntity(createHealingPotion(registry, cx - 2, cy));
-  level.placeEntity(createDagger(registry, cx - 3, cy));
+  level.placeEntity(consumable(registry, { x: cx - 2, y: cy, name: 'Test Potion' }));
+  level.placeEntity(
+    equippable(registry, { x: cx - 3, y: cy, slot: Slots.WEAPON, name: 'Test Blade' }),
+  );
   const chest = createChest(registry, cx + 3, cy + 1);
   const chestInv = chest.components.get('inventory');
-  chestInv.items.push(createHealingPotion(registry, null, null, chest.id));
-  chestInv.items.push(createPotionOfPain(registry, null, null, chest.id));
-  chestInv.items.push(createDagger(registry, null, null, chest.id));
+  chestInv.items.push(consumable(registry, { containerId: chest.id, name: 'Test Potion' }));
+  chestInv.items.push(
+    consumable(registry, { effect: 'damage', amount: 5, containerId: chest.id, name: 'Test Pain' }),
+  );
+  chestInv.items.push(
+    equippable(registry, { containerId: chest.id, slot: Slots.WEAPON, name: 'Test Blade' }),
+  );
   level.placeEntity(chest);
   level.placeEntity(createGoblin(registry, 3, 2));
   level.placeEntity(createOrc(registry, 8, 2));
@@ -75,10 +77,14 @@ async function buildGame() {
   const player = await createPlayer(registry, cx, cy);
   level.placeEntity(player);
 
-  const potion = createHealingPotion(registry, null, null, player.id);
+  const potion = consumable(registry, { ownerId: player.id, name: 'Test Potion' });
   player.components.get('inventory').items.push(potion);
 
-  const dagger = createDagger(registry, null, null, player.id);
+  const dagger = equippable(registry, {
+    ownerId: player.id,
+    slot: Slots.WEAPON,
+    name: 'Test Blade',
+  });
   dagger.components.get('item').location = {
     type: 'equipped',
     ownerId: player.id,
@@ -134,11 +140,11 @@ describe('serializeGame / deserializeGame round-trip', () => {
     const inv = p.components.get('inventory').items;
     expect(inv).toHaveLength(1);
     expect(inv[0]).toBe(restored.registry.getEntity(inv[0].id));
-    expect(inv[0].components.get('name')).toBe('Healing Potion');
+    expect(inv[0].components.get('name')).toBe('Test Potion');
 
     const weapon = p.components.get('wearsEquipment').slots[Slots.WEAPON];
     expect(weapon).toBe(restored.registry.getEntity(weapon.id));
-    expect(weapon.components.get('name')).toBe('Dagger');
+    expect(weapon.components.get('name')).toBe('Test Blade');
 
     // tilePerception keeps its runtime Set/Map types and contents.
     const tp = p.components.get('tilePerception');

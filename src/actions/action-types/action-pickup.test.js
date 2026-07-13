@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { executePickup } from './action-pickup.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { createLevel } from '../../world/map/level.js';
-import { createHealingPotion, createArrow } from '../../world/entities/items.js';
+import { consumable, stackable } from '../../test-support/fixtures.js';
 
 function makeLevel() {
   const level = createLevel();
@@ -23,7 +23,7 @@ describe('executePickup', () => {
     registry.addComponent(actor, 'position', { x: 2, y: 2 });
     registry.addComponent(actor, 'inventory', { items: [] });
 
-    potion = createHealingPotion(registry, 2, 2);
+    potion = consumable(registry, { x: 2, y: 2 });
     level.placeEntity(potion);
   });
 
@@ -50,12 +50,10 @@ describe('executePickup', () => {
   });
 
   it('merges a picked-up stack into an existing inventory stack of the same type', () => {
-    const carried = createArrow(registry, null, null, actor.id);
-    carried.components.get('stackable').count = 5;
+    const carried = stackable(registry, { ownerId: actor.id, count: 5 });
     actor.components.get('inventory').items.push(carried);
 
-    const onFloor = createArrow(registry, 2, 2);
-    onFloor.components.get('stackable').count = 8;
+    const onFloor = stackable(registry, { x: 2, y: 2, count: 8 });
     level.placeEntity(onFloor);
 
     executePickup(actor, { itemEntityId: onFloor.id }, level, registry);

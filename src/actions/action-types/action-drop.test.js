@@ -2,8 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { executeDrop } from './action-drop.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { createLevel } from '../../world/map/level.js';
-import { createHealingPotion, createDagger } from '../../world/entities/items.js';
+import { consumable, equippable } from '../../test-support/fixtures.js';
 import { components } from '../../world/entities/components.js';
+import { Slots } from '../../../data/equipment-slots.js';
 
 function makeLevel() {
   const level = createLevel();
@@ -23,7 +24,7 @@ describe('executeDrop', () => {
     registry.addComponent(actor, 'position', components.position(3, 4));
     registry.addComponent(actor, 'inventory', components.inventory());
 
-    potion = createHealingPotion(registry, null, null, actor.id);
+    potion = consumable(registry, { ownerId: actor.id });
     actor.components.get('inventory').items.push(potion);
   });
 
@@ -49,7 +50,7 @@ describe('executeDrop', () => {
   });
 
   it('drops equippable items just like consumables', () => {
-    const dagger = createDagger(registry, null, null, actor.id);
+    const dagger = equippable(registry, { slot: Slots.WEAPON, ownerId: actor.id });
     actor.components.get('inventory').items.push(dagger);
     executeDrop(actor, { itemEntityId: dagger.id }, level, registry);
     expect(actor.components.get('inventory').items).not.toContain(dagger);
