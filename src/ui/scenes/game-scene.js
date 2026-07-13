@@ -24,6 +24,7 @@ import { applySenses } from '../../ai/core/planning-context.js';
 import { upkeep } from '../../engine/turn/upkeep.js';
 import { syncSpeed } from '../../attributes/speed-sync.js';
 import { winConditions, escapeWithQuestItem } from '../../engine/turn/win-conditions.js';
+import { WIN_CONDITIONS } from '../../../data/win-conditions.js';
 import { scentUpkeep, scentAt } from '../../world/sense-systems/scent.js';
 import { tickHunger, hungerStatus } from '../../world/systems/hunger.js';
 import { watchLevelUp } from '../../world/systems/level-up.js';
@@ -505,12 +506,12 @@ export function createGameScene({
     upkeep.register('scent', (ctx) => scentUpkeep(ctx.level, ctx.registry));
     upkeep.register('autosave', () => saveGame());
 
-    // The classic victory: escape the dungeon (stand on a dungeonExit) carrying the Amulet of Yendor.
-    // Registered here so the win check is live for every floor; evaluated at each player turn-end.
-    winConditions.register(
-      'escape-with-amulet',
-      escapeWithQuestItem('amulet-of-yendor', 'You escaped the dungeon with the Amulet of Yendor!'),
-    );
+    // The shipped victories (content — see data/win-conditions.js): each a "carry a quest item to a
+    // dungeon exit" escape, built via the engine factory. Registered here so the checks are live for
+    // every floor; evaluated at each player turn-end.
+    for (const { name, questItemId, message } of WIN_CONDITIONS) {
+      winConditions.register(name, escapeWithQuestItem(questItemId, message));
+    }
 
     turnManager = createTurnManager({
       // Turn-queue membership = takes turns OR decays. turnTakers act on the energy model;

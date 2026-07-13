@@ -14,7 +14,16 @@ export default {
     { type: 'carveHalls' },
     { type: 'stairs' },
     { type: 'spawn' },
-    { type: 'populate' },
+    // The shipped creature roster: who spawns and their room-affinity weights (per-label multipliers;
+    // a room's pick-weight is the product over its labels). Item counts fall to stage-populate defaults.
+    {
+      type: 'populate',
+      creatures: [
+        { type: 'orcCommander', count: 1, weights: { treasure: 5, item: 2 } }, // leads the orcs
+        { type: 'orc', count: 2, weights: { treasure: 5, item: 2 } }, // affinity
+        { type: 'goblin', count: 2, weights: { treasure: 0.2, item: 0.2 }, separate: true }, // aversion, distinct rooms
+      ],
+    },
     // Third floor: bump this floor's monsters to level 3.
     { type: 'scaleCreatures', levels: { goblin: 3, orc: 3, scuttler: 3, orcCommander: 3 } },
     // Arms the placed creatures from item tables (orcs → spear, commander → bow + arrows).

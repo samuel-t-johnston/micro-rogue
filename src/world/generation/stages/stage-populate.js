@@ -12,17 +12,15 @@ const make = (registry, id, x, y, entityId) => ENTITY_PREFABS[id].make(registry,
 // placed deterministically on the 'amulet' zone below — never rolled in.
 const ITEM_POOL = prefabIdsByKind('item').filter((id) => id !== 'amulet');
 
-// Spawn rules (overridable via stageConfig). Creature `weights` are per-label multipliers; a room's
-// pick-weight is the product over its labels (absent labels contribute 1). Exported so tests can
-// assert against the configured roster/counts instead of duplicating the magic numbers.
+// Spawn rules (overridable via stageConfig). The creature `weights` are per-label multipliers; a
+// room's pick-weight is the product over its labels (absent labels contribute 1). The creature roster
+// is content and lives in the pipeline config (see data/pipelines/procedural-3x3.js) — empty here, so
+// a populate stage with no roster places items only. Item-count defaults stay as tuning knobs, exported
+// so tests can assert against them.
 export const DEFAULTS = {
   treasureRoom: { chestItems: [1, 2], floorItems: [0, 1] },
   itemRoom: { floorItems: [1, 1] },
-  creatures: [
-    { type: 'orcCommander', count: 1, weights: { treasure: 5, item: 2 } }, // leads the orcs
-    { type: 'orc', count: 2, weights: { treasure: 5, item: 2 } }, // affinity
-    { type: 'goblin', count: 2, weights: { treasure: 0.2, item: 0.2 }, separate: true }, // aversion, distinct rooms
-  ],
+  creatures: [],
 };
 
 function roomWeight(zone, weights) {

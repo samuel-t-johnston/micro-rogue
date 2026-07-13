@@ -4,7 +4,9 @@
  *   - an un-understood vocalization → you hear that a *language* was shouted, not what it meant;
  *   - an understood vocalization (or a non-verbal sound) → you hear what it conveys.
  * Either way the imprecise compass direction it reached you from is appended.
+ * The language flavor table is content — see data/senses/language-flavor.js.
  */
+import { LANGUAGE_FLAVOR } from '../../../../data/senses/language-flavor.js';
 
 const DIRECTION_WORDS = {
   N: 'north',
@@ -15,11 +17,6 @@ const DIRECTION_WORDS = {
   SW: 'southwest',
   W: 'west',
   NW: 'northwest',
-};
-
-// Flavor adjective per language for the un-understood case. Falls back to the bare language name.
-const LANGUAGE_FLAVOR = {
-  orcish: 'guttural orcish',
 };
 
 function languagePhrase(language) {
