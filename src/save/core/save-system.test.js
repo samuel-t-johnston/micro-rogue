@@ -19,6 +19,7 @@ import {
   migrations,
   SaveTooNewError,
   MigrationError,
+  CorruptSaveError,
   SAVE_VERSION,
   GAME_VERSION,
   writeSave,
@@ -196,6 +197,22 @@ describe('serializeGame / deserializeGame round-trip', () => {
     expect(restored.frozenLevels).toEqual(frozenLevels);
     // The active floor's entities are the only ones in the live registry.
     expect(restored.registry.getEntity(player.id)).not.toBeNull();
+  });
+
+  // SAVE-1 (B1): a save whose meta.seed is missing (corrupt / pre-seed / too-old) must be rejected
+  // before it reaches rng.restore — otherwise rng.restore({ seed: undefined, … }) silently picks a
+  // fresh RANDOM master seed and the restored run diverges from the saved run forever, with no error.
+  // deserializeGame now throws CorruptSaveError (caught by game-scene's onLoadFailed) instead.
+  it('rejects a save missing meta.seed instead of silently reseeding', async () => {
+    const { registry, level, player } = await buildGame(); // rng.init(12345)
+    const save = serializeGame({ registry, level, player, turnCount: 1 });
+    expect(save.meta.seed).toBe(12345);
+
+    delete save.meta.seed; // simulate a corrupt/too-old save that lost its master seed
+    expect(() => deserializeGame(JSON.parse(JSON.stringify(save)))).toThrow(CorruptSaveError);
+
+    // The live RNG master is untouched — no silent determinism break slipped through.
+    expect(rng.getMasterSeed()).toBe(12345);
   });
 });
 

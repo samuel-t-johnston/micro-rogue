@@ -12,7 +12,11 @@ describe('executeConsume', () => {
     registry = createEntityRegistry();
     actor = registry.createEntity();
     registry.addComponent(actor, 'inventory', components.inventory());
-    registry.addComponent(actor, 'attributes', components.attributes({ hp: 10, hpBase: 20, con: 0 })); // maxHP = hpBase
+    registry.addComponent(
+      actor,
+      'attributes',
+      components.attributes({ hp: 10, hpBase: 20, con: 0 }),
+    ); // maxHP = hpBase
 
     potion = createHealingPotion(registry, null, null, actor.id);
     actor.components.get('inventory').items.push(potion);
@@ -67,6 +71,38 @@ describe('executeConsume', () => {
     expect(result).toBe(false);
     expect(actor.components.get('inventory').items).toContain(potion);
     expect(actor.components.get('attributes').hp).toBe(10);
+  });
+
+  // ACTION-1 (B3): consuming one unit of a *stacked* consumable decrements the stack instead of
+  // destroying the whole entity. Latent today (no shipped consumable is stackable) but a fork adding
+  // stackable food would lose the whole stack on one bite.
+  it('decrements a stacked consumable instead of destroying the whole stack', () => {
+    const food = registry.createEntity();
+    registry.addComponent(food, 'item', components.item({ type: 'inventory', ownerId: actor.id }));
+    registry.addComponent(food, 'consumable', components.consumable('heal', { amount: 2 }));
+    registry.addComponent(food, 'stackable', components.stackable(10, 5));
+    food.components.get('stackable').count = 3;
+    actor.components.get('inventory').items.push(food);
+
+    executeConsume(actor, { itemEntityId: food.id }, null, registry);
+
+    expect(registry.getEntity(food.id)).not.toBeNull(); // survives — the stack is decremented
+    expect(food.components.get('stackable').count).toBe(2);
+    expect(actor.components.get('inventory').items).toContain(food); // still in inventory
+  });
+
+  it('destroys a stacked consumable when its last unit is consumed', () => {
+    const food = registry.createEntity();
+    registry.addComponent(food, 'item', components.item({ type: 'inventory', ownerId: actor.id }));
+    registry.addComponent(food, 'consumable', components.consumable('heal', { amount: 2 }));
+    registry.addComponent(food, 'stackable', components.stackable(10, 5));
+    food.components.get('stackable').count = 1; // last unit
+    actor.components.get('inventory').items.push(food);
+
+    executeConsume(actor, { itemEntityId: food.id }, null, registry);
+
+    expect(registry.getEntity(food.id)).toBeNull(); // last unit → destroyed
+    expect(actor.components.get('inventory').items).not.toContain(food);
   });
 
   it('returns false and does nothing when item is not consumable', () => {

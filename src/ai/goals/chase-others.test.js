@@ -53,4 +53,30 @@ describe('chaseOthers', () => {
     expect(result.action.type).toBe('move');
     expect(result.action.y).toBe(3);
   });
+
+  // AI-2 (B4): chase-others no longer commits to the single nearest hostile. When the nearest is
+  // walled off it falls through to a reachable farther one — mirroring attack-in-range, which
+  // evaluates each candidate rather than bailing on the first.
+  it('pursues a reachable farther hostile when the nearest is walled off', () => {
+    const level = openLevel(9, 9);
+    // Seal (2,4) inside a wall pocket: every neighbor is a wall, so no path-to-adjacent exists.
+    for (const [x, y] of [
+      [1, 3],
+      [2, 3],
+      [3, 3],
+      [1, 4],
+      [3, 4],
+      [1, 5],
+      [2, 5],
+      [3, 5],
+    ]) {
+      level.tiles[y][x] = 'wall';
+    }
+    const nearUnreachable = obs(1, 2, 4, ['player']); // distance 2, sealed off
+    const farReachable = obs(2, 2, 7, ['player']); // distance 5, open ground
+    const result = chaseOthers.evaluate(ctx([nearUnreachable, farReachable], level));
+    // Desired: step toward the reachable far hostile. Actual today: null (it bails on the nearest).
+    expect(result).not.toBeNull();
+    expect(result.action.type).toBe('move');
+  });
 });

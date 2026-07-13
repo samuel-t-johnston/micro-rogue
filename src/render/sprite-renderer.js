@@ -66,20 +66,29 @@ export function createSpriteRenderer({ catalog, sheets }) {
   }
 
   return {
-    load() {
-      return Promise.all(
+    async load() {
+      await Promise.all(
         images.map(
           (entry) =>
-            new Promise((resolve, reject) => {
+            new Promise((resolve) => {
+              const url = new URL(
+                `../../assets/sprites/${entry.sheet}-${entry.size}.png`,
+                import.meta.url,
+              ).href;
               entry.img.onload = () => {
                 entry.ready = true;
                 resolve();
               };
-              entry.img.onerror = reject;
-              entry.img.src = new URL(
-                `../../assets/sprites/${entry.sheet}-${entry.size}.png`,
-                import.meta.url,
-              ).href;
+              // Mirror sfx.load's per-asset tolerance: a missing/renamed sheet (404, offline
+              // first-load, a catalog size whose PNG was never built) must not abort the whole
+              // load — it stays not-ready and draws fall through to the glyph path (draw() → false).
+              entry.img.onerror = () => {
+                console.warn(
+                  `[sprites] failed to load sheet "${entry.sheet}-${entry.size}" from ${url}`,
+                );
+                resolve();
+              };
+              entry.img.src = url;
             }),
         ),
       );
