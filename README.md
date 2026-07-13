@@ -87,13 +87,13 @@ npm run dev
 Kill dev server:
 
 ```
-npm dev:kill
+npm run dev:kill
 ```
 
 Kill any running instances and start server:
 
 ```
-npm dev:fresh
+npm run dev:fresh
 ```
 
 The dev server serves the repo root, so `index.html` at the root, `src/` modules, and `styles/` all resolve via relative paths. Any static server pointed at the repo root works (e.g. `npx serve .`).
