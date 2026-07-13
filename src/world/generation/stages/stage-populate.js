@@ -25,8 +25,6 @@ export const DEFAULTS = {
   ],
 };
 
-const randInt = ([min, max], rng) => min + rng.nextInt(0, max - min + 1);
-
 function roomWeight(zone, weights) {
   let w = 1;
   for (const label of zone.labels) if (weights[label] != null) w *= weights[label];
@@ -72,18 +70,18 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
     if (ct) {
       const chest = make(registry, 'chest', ct[0], ct[1]);
       const inv = chest.components.get('inventory');
-      const n = randInt(cfg.treasureRoom.chestItems, rng);
+      const n = rng.intInclusive(...cfg.treasureRoom.chestItems);
       for (let i = 0; i < n; i++)
         inv.items.push(make(registry, rng.pick(ITEM_POOL), null, null, chest.id));
       level.placeEntity(chest);
     }
-    const n = randInt(cfg.treasureRoom.floorItems, rng);
+    const n = rng.intInclusive(...cfg.treasureRoom.floorItems);
     for (let i = 0; i < n; i++) dropItem(zone);
   }
 
   // Item rooms: floor items only.
   for (const zone of zones.filter((z) => z.labels.includes('item'))) {
-    const n = randInt(cfg.itemRoom.floorItems, rng);
+    const n = rng.intInclusive(...cfg.itemRoom.floorItems);
     for (let i = 0; i < n; i++) dropItem(zone);
   }
 

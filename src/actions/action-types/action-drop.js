@@ -1,4 +1,4 @@
-import { components } from '../../world/entities/components.js';
+import { placeItemOnMap } from '../../world/entities/placement.js';
 import { gameLog } from '../../engine/log/game-log.js';
 import { subject, conjugate, itemName } from '../../engine/log/text/log-text.js';
 
@@ -19,15 +19,7 @@ export function executeDrop(actor, action, level, registry) {
   const idx = inventory.items.indexOf(item);
   if (idx >= 0) inventory.items.splice(idx, 1);
 
-  item.components.get('item').location = { type: 'map' };
-  if (item.components.has('position')) {
-    const p = item.components.get('position');
-    p.x = pos.x;
-    p.y = pos.y;
-  } else {
-    registry.addComponent(item, 'position', components.position(pos.x, pos.y));
-  }
-  level.placeEntity(item);
+  placeItemOnMap(registry, level, item, pos.x, pos.y);
 
   gameLog.add({
     actor: actor.id,

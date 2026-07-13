@@ -82,6 +82,10 @@ export function createRng(seed) {
     nextInt(min, max) {
       return Math.floor(advance() * (max - min)) + min;
     },
+    /** Returns an integer in [min, max] — both ends inclusive. One draw, like nextInt. */
+    intInclusive(min, max) {
+      return Math.floor(advance() * (max - min + 1)) + min;
+    },
     pick(arr) {
       if (arr.length === 0) throw new Error('rng.pick called with empty array');
       return arr[Math.floor(advance() * arr.length)];
@@ -180,6 +184,9 @@ export const rng = {
   },
   nextInt(min, max) {
     return _service.stream('gameplay').nextInt(min, max);
+  },
+  intInclusive(min, max) {
+    return _service.stream('gameplay').intInclusive(min, max);
   },
   pick(arr) {
     return _service.stream('gameplay').pick(arr);

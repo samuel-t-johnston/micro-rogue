@@ -10,9 +10,7 @@
  * is harmless; connectivity is what matters). See docs/design/procedural-3x3-dungeon.md.
  */
 import { createDoor } from '../../entities/furniture.js';
-
-const cellsAdjacent = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) === 1;
-const randIn = (lo, hi, rng) => lo + rng.nextInt(0, hi - lo + 1);
+import { cellsAdjacent } from './stage-room-grid-geometry.js';
 
 // Plan one corridor as opening offsets + the lane for its perpendicular leg.
 //   la / lb        — the gutter lines just outside each room's facing wall (la by A, lb by B).
@@ -25,14 +23,18 @@ function planCorridor(la, lb, al, ah, bl, bh, rng) {
     hi = Math.min(ah, bh);
   if (lo <= hi) {
     // facing walls overlap → straight cut at a shared offset
-    const s = randIn(lo, hi, rng);
+    const s = rng.intInclusive(lo, hi);
     return { pa: s, pb: s, mid: la };
   }
   const innerLo = Math.min(la, lb) + 1,
     innerHi = Math.max(la, lb) - 1;
   if (innerLo <= innerHi) {
     // gutter ≥ 3: an interior lane exists → Z-bend through it
-    return { pa: randIn(al, ah, rng), pb: randIn(bl, bh, rng), mid: randIn(innerLo, innerHi, rng) };
+    return {
+      pa: rng.intInclusive(al, ah),
+      pb: rng.intInclusive(bl, bh),
+      mid: rng.intInclusive(innerLo, innerHi),
+    };
   }
   // 2-tile gutter and no overlap: bend off the mutually-nearest corners, leg on B's door line. The leg
   // then stays clear of both rooms (it never extends past either nearest corner), so nothing hugs a wall.

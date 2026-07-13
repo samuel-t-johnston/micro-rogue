@@ -1,4 +1,5 @@
 import { components } from './components.js';
+import { addMapPosition } from './placement.js';
 import { Slots } from '../../../data/equipment-slots.js';
 import { EffectTypes } from '../../effects/core/effects.js';
 import { RenderLayers } from '../../render/render-layers.js';
@@ -54,10 +55,7 @@ export function createHealingPotion(registry, x, y, entityId) {
     'throwable',
     components.throwable(EffectTypes.HEAL, { amount: 5 }, 1),
   );
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 /** Creates a Potion of Pain (consumable: damage 5 — a hostile drink; thrown: damage 5, always shatters). */
@@ -82,10 +80,7 @@ export function createPotionOfPain(registry, x, y, entityId) {
     'throwable',
     components.throwable(EffectTypes.DAMAGE, { amount: 5 }, 1),
   );
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 /** Creates a Dagger (weapon: +1 attack damage). */
@@ -103,10 +98,7 @@ export function createDagger(registry, x, y, entityId) {
   registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
   registry.addComponent(entity, 'weapon', components.weapon(1)); // melee, range 1
   registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ attack: 1 }));
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 /** Creates a Sword (weapon: +3 attack damage). */
@@ -124,10 +116,7 @@ export function createSword(registry, x, y, entityId) {
   registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
   registry.addComponent(entity, 'weapon', components.weapon(1)); // melee, range 1
   registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ attack: 3 }));
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 /**
@@ -148,10 +137,7 @@ export function createSpear(registry, x, y, entityId) {
   registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
   registry.addComponent(entity, 'weapon', components.weapon(2, { meleeRange: 1 }));
   registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ attack: 2 }));
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 /**
@@ -182,10 +168,7 @@ export function createJavelin(registry, x, y, entityId) {
   );
   registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ attack: 2 }));
   registry.addComponent(entity, 'stackable', components.stackable(5, 3));
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 /**
@@ -210,10 +193,7 @@ export function createBow(registry, x, y, entityId) {
     components.weapon(15, { meleeRange: 0, ammoType: 'arrow' }),
   );
   registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ attack: 2 }));
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 /**
@@ -238,10 +218,7 @@ export function createArrow(registry, x, y, entityId) {
     components.ammunition('arrow', 0.5, directionalAttackSprites('arrow')),
   );
   registry.addComponent(entity, 'stackable', components.stackable(100, 20));
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 /** Creates Leather Armor (armor: +5 max HP). */
@@ -258,10 +235,7 @@ export function createLeatherArmor(registry, x, y, entityId) {
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'equippable', components.equippable(Slots.ARMOR));
   registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ hp: 5 }));
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 /**
@@ -280,10 +254,7 @@ export function createAmulet(registry, x, y, entityId) {
   );
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'questItem', components.questItem('amulet-of-yendor'));
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 /** Creates a Scroll of Healing (consumable: heal 15). */
@@ -303,10 +274,7 @@ export function createScroll(registry, x, y, entityId) {
     'consumable',
     components.consumable(EffectTypes.HEAL, { amount: 15 }),
   );
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 /** Creates Grapes (consumable food: satiate 50 — a light snack). */
@@ -326,10 +294,7 @@ export function createGrapes(registry, x, y, entityId) {
     'consumable',
     components.consumable(EffectTypes.SATIATE, { amount: 50 }),
   );
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 /** Creates Bread (consumable food: satiate 100 — a solid meal). */
@@ -349,10 +314,7 @@ export function createBread(registry, x, y, entityId) {
     'consumable',
     components.consumable(EffectTypes.SATIATE, { amount: 100 }),
   );
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 /** Creates Meat (consumable food: satiate 150 — a hearty feast). */
@@ -372,10 +334,7 @@ export function createMeat(registry, x, y, entityId) {
     'consumable',
     components.consumable(EffectTypes.SATIATE, { amount: 150 }),
   );
-  if (location.type === 'map') {
-    registry.addComponent(entity, 'position', components.position(x, y));
-  }
-  return entity;
+  return addMapPosition(registry, entity, location, x, y);
 }
 
 // When you add an item factory above, register it in src/world/entities/entity-prefabs.js — that catalog is

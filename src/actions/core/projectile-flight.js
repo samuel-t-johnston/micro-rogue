@@ -5,7 +5,7 @@
  * rather than parallel maintenance. See docs/design/ranged-weapons.md and docs/howto/item.md.
  */
 import { rng } from '../../engine/core/rng.js';
-import { components } from '../../world/entities/components.js';
+import { placeItemOnMap } from '../../world/entities/placement.js';
 import { getTileType } from '../../world/map/tile-registry.js';
 import {
   lineTiles,
@@ -40,20 +40,6 @@ export function tileHoldsItem(level, x, y) {
     if (e.components.has('blocksMovement') && !e.components.has('creature')) return false;
   }
   return true;
-}
-
-// Places a projectile that didn't break onto the map at the resting tile, so it can be retrieved
-// (mirrors executeDrop's placement). The item must already have left its previous location.
-function landItem(item, x, y, level, registry) {
-  item.components.get('item').location = { type: 'map' };
-  if (item.components.has('position')) {
-    const p = item.components.get('position');
-    p.x = x;
-    p.y = y;
-  } else {
-    registry.addComponent(item, 'position', components.position(x, y));
-  }
-  level.placeEntity(item);
 }
 
 /**
@@ -115,6 +101,6 @@ export function settleProjectile(item, { impact, before, breakChance }, level, r
     return true;
   }
   const rest = tileHoldsItem(level, impact.x, impact.y) ? impact : before;
-  landItem(item, rest.x, rest.y, level, registry);
+  placeItemOnMap(registry, level, item, rest.x, rest.y);
   return false;
 }

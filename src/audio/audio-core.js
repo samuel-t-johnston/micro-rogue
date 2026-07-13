@@ -20,6 +20,7 @@
  * Everything degrades to a silent no-op when the Web Audio API is unavailable (ancient browsers,
  * server-side test runners such as happy-dom). Callers never have to guard.
  */
+import { clamp01 } from './clamp.js';
 
 const AudioContextCtor =
   typeof globalThis !== 'undefined'
@@ -219,10 +220,4 @@ export function setMasterMuted(value) {
 /** @returns {boolean} Whether master is muted. */
 export function isMasterMuted() {
   return masterMuted;
-}
-
-function clamp01(v) {
-  v = Number(v);
-  if (Number.isNaN(v)) return 0;
-  return v < 0 ? 0 : v > 1 ? 1 : v;
 }
