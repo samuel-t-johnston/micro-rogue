@@ -12,6 +12,8 @@ import { run as runLabel } from './stages/stage-label.js';
 import { run as runLink } from './stages/stage-link.js';
 import { run as runCarveRooms } from './stages/stage-carve-rooms.js';
 import { run as runCarveHalls } from './stages/stage-carve-halls.js';
+import { run as runBspGeometry } from './stages/stage-bsp-geometry.js';
+import { run as runBspCarve } from './stages/stage-bsp-carve.js';
 import { run as runStairs } from './stages/stage-stairs.js';
 import { run as runSpawn } from './stages/stage-spawn.js';
 import { run as runPopulate } from './stages/stage-populate.js';
@@ -27,6 +29,8 @@ const STAGES = {
   link: runLink,
   carveRooms: runCarveRooms,
   carveHalls: runCarveHalls,
+  bspGeometry: runBspGeometry,
+  bspCarve: runBspCarve,
   stairs: runStairs,
   spawn: runSpawn,
   populate: runPopulate,
