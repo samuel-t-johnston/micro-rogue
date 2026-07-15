@@ -3,8 +3,10 @@
  * sound-text). It's also the "what stands out" config: only profiles in SCENT_FLAVOR are noteworthy
  * enough to log — describeSmell returns null for anything else, and the player-smell goal skips it.
  * So orcs reek, but a profile we choose not to flavor (or that's surfaced through another sense, like
- * the scuttler's scrabbling) produces no smell line.
+ * the scuttler's scrabbling) produces no smell line. The flavor table is content — see
+ * data/senses/scent-flavor.js.
  */
+import { SCENT_FLAVOR } from '../../../../data/senses/scent-flavor.js';
 
 const DIRECTION_WORDS = {
   N: 'north',
@@ -15,10 +17,6 @@ const DIRECTION_WORDS = {
   SW: 'southwest',
   W: 'west',
   NW: 'northwest',
-};
-
-const SCENT_FLAVOR = {
-  orcs: 'the stench of orcs',
 };
 
 /** Renders a smelled-scent percept into a player-facing log line, or null if the profile isn't noteworthy. */

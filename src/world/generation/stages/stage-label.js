@@ -11,13 +11,14 @@
  * Blackboard:
  *   level:zones — each chosen zone gets one label pushed onto its `labels` (alongside 'room').
  */
+import { LEVEL_ZONES } from '../blackboard-keys.js';
 
 const DEFAULT_LABELS = ['stairs-up', 'stairs-down', 'treasure', 'item', 'item'];
 
 /** Runs the labeling stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard, rng) {
   const labels = stageConfig.labels ?? DEFAULT_LABELS;
-  const zones = blackboard['level:zones'] ?? [];
+  const zones = blackboard[LEVEL_ZONES] ?? [];
 
   // Assign each label to a distinct zone, drawn without replacement so no zone gets two roles.
   const pool = [...zones];

@@ -4,6 +4,7 @@
  * See docs/design/procedural-3x3-dungeon.md (Visualization & debug tooling).
  */
 import { getTileType } from '../map/tile-registry.js';
+import { LEVEL_ZONES, LEVEL_ADJACENCY, LEVEL_LINKS } from './blackboard-keys.js';
 
 function tileChar(id) {
   if (id == null) return ' ';
@@ -38,9 +39,9 @@ export function levelToAscii(level) {
 
 /** The planning graph as a text summary: zones (with labels/cells/rect), links, and raw adjacency. */
 export function zonesToText(blackboard) {
-  const zones = blackboard['level:zones'] ?? [];
-  const links = blackboard['level:links'] ?? [];
-  const adjacency = blackboard['level:adjacency'] ?? [];
+  const zones = blackboard[LEVEL_ZONES] ?? [];
+  const links = blackboard[LEVEL_LINKS] ?? [];
+  const adjacency = blackboard[LEVEL_ADJACENCY] ?? [];
   const lines = [`Zones (${zones.length}):`];
   for (const z of zones) {
     const cells = z.cells.map((c) => `(${c[0]},${c[1]})`).join(' ');
@@ -59,9 +60,9 @@ export function zonesToText(blackboard) {
  * Topologically faithful, not spatially — Mermaid auto-lays-out nodes (see the design doc).
  */
 export function zonesToMermaid(blackboard) {
-  const zones = blackboard['level:zones'] ?? [];
-  const links = blackboard['level:links'] ?? [];
-  const adjacency = blackboard['level:adjacency'] ?? [];
+  const zones = blackboard[LEVEL_ZONES] ?? [];
+  const links = blackboard[LEVEL_LINKS] ?? [];
+  const adjacency = blackboard[LEVEL_ADJACENCY] ?? [];
   const linked = new Set(links.map((l) => `${l.a},${l.b}`));
   const out = ['flowchart TD'];
   for (const z of zones) {

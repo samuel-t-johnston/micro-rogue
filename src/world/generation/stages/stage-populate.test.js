@@ -12,6 +12,14 @@ import { createLevel } from '../../map/level.js';
 import { createEntityRegistry } from '../../../engine/core/entity-component-system.js';
 import { createRng } from '../../../engine/core/rng.js';
 
+// A test-owned creature roster passed as populate config. The stage no longer bakes a roster (it's
+// content, shipped in the pipeline config), so tests supply their own and assert against it.
+const CREATURES = [
+  { type: 'orcCommander', count: 1, weights: { treasure: 5, item: 2 } },
+  { type: 'orc', count: 2, weights: { treasure: 5, item: 2 } },
+  { type: 'goblin', count: 2, weights: { treasure: 0.2, item: 0.2 }, separate: true },
+];
+
 // The whole realization+population pipeline, so corridors, doors, and stairs all exist when
 // populate runs — the conditions under which the "spawn on a door / in a hallway" bug appeared.
 function fullGenerate(seed) {
@@ -26,10 +34,10 @@ function fullGenerate(seed) {
     runCarveHalls,
     runStairs,
     runSpawn,
-    runPopulate,
   ]) {
     stage(level, {}, bb, createRng(seed), reg);
   }
+  runPopulate(level, { creatures: CREATURES }, bb, createRng(seed), reg);
   return { level, bb, reg };
 }
 
@@ -40,7 +48,7 @@ function generate(seed = 1) {
   runRoomGridGeometry(level, {}, bb, createRng(seed));
   runLabel(level, {}, bb, createRng(seed));
   runCarveRooms(level, {}, bb, createRng(seed));
-  runPopulate(level, {}, bb, createRng(seed), reg);
+  runPopulate(level, { creatures: CREATURES }, bb, createRng(seed), reg);
   return { level, bb, reg };
 }
 
@@ -89,7 +97,7 @@ describe('populate stage', () => {
   it('spawns the configured creatures, none on the stairs-up room, none stacked', () => {
     const { level, bb, reg } = generate(2);
     const creatures = reg.getEntitiesWith('ai');
-    const expectedCount = DEFAULTS.creatures.reduce((sum, spec) => sum + spec.count, 0);
+    const expectedCount = CREATURES.reduce((sum, spec) => sum + spec.count, 0);
     expect(creatures).toHaveLength(expectedCount);
 
     const seen = new Set();

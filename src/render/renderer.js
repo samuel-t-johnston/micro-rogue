@@ -58,17 +58,24 @@ export function createRenderer({
     };
   }
 
-  // Tile range covering the viewport, clamped to the level bounds.
-  function getVisibleTileRange(level) {
+  // Tile range covering the viewport. Clamped to the level bounds by default (for drawMap's tile
+  // iteration); pass `{ clamp: false }` for the raw range used to cull entities by position, which
+  // needs no level (an in-bounds entity culls identically against the clamped or unclamped range).
+  function getVisibleTileRange(level, { clamp = true } = {}) {
     const { width, height } = getViewport();
     const tileSize = ts();
-    const halfW = width / 2;
-    const halfH = height / 2;
+    const halfW = width / 2 / tileSize;
+    const halfH = height / 2 / tileSize;
+    const x0 = Math.floor(camera.x - halfW);
+    const x1 = Math.ceil(camera.x + halfW);
+    const y0 = Math.floor(camera.y - halfH);
+    const y1 = Math.ceil(camera.y + halfH);
+    if (!clamp) return { x0, x1, y0, y1 };
     return {
-      x0: Math.max(0, Math.floor(camera.x - halfW / tileSize)),
-      x1: Math.min(level.width - 1, Math.ceil(camera.x + halfW / tileSize)),
-      y0: Math.max(0, Math.floor(camera.y - halfH / tileSize)),
-      y1: Math.min(level.height - 1, Math.ceil(camera.y + halfH / tileSize)),
+      x0: Math.max(0, x0),
+      x1: Math.min(level.width - 1, x1),
+      y0: Math.max(0, y0),
+      y1: Math.min(level.height - 1, y1),
     };
   }
 
@@ -108,12 +115,7 @@ export function createRenderer({
   function drawRememberedEntities(ctx, tilePerception) {
     if (!tilePerception) return;
     ctx.imageSmoothingEnabled = false;
-    const tileSize = ts();
-    const { width, height } = getViewport();
-    const x0 = Math.floor(camera.x - width / 2 / tileSize);
-    const x1 = Math.ceil(camera.x + width / 2 / tileSize);
-    const y0 = Math.floor(camera.y - height / 2 / tileSize);
-    const y1 = Math.ceil(camera.y + height / 2 / tileSize);
+    const { x0, x1, y0, y1 } = getVisibleTileRange(null, { clamp: false });
 
     ctx.globalAlpha = 0.4;
     for (const [key, snapshots] of tilePerception.rememberedEntities) {
@@ -131,14 +133,7 @@ export function createRenderer({
   }
 
   function drawEntities(ctx, level, tilePerception) {
-    const { width, height } = getViewport();
-    const tileSize = ts();
-    const halfW = width / 2;
-    const halfH = height / 2;
-    const x0 = Math.floor(camera.x - halfW / tileSize);
-    const x1 = Math.ceil(camera.x + halfW / tileSize);
-    const y0 = Math.floor(camera.y - halfH / tileSize);
-    const y1 = Math.ceil(camera.y + halfH / tileSize);
+    const { x0, x1, y0, y1 } = getVisibleTileRange(level, { clamp: false });
 
     // Cull off-screen and out-of-FOV entities first, then sort by render layer so
     // lower layers (items) draw underneath higher layers (creatures, furniture).

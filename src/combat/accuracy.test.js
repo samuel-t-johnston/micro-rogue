@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { missChance, rollsMiss, MISS_MAX } from './accuracy.js';
+import { missChance, rollsMiss, MISS_MAX, MISS_MIN } from './accuracy.js';
 import { createEntityRegistry } from '../engine/core/entity-component-system.js';
 import { components } from '../world/entities/components.js';
 import { rng } from '../engine/core/rng.js';
@@ -36,6 +36,10 @@ describe('missChance', () => {
 
   it('never promises a certain hit — clamps to MISS_MAX at extreme range', () => {
     expect(missChance(actorWithDex(0), 500)).toBe(MISS_MAX);
+  });
+
+  it('never promises a certain hit — floors at MISS_MIN point-blank at max DEX', () => {
+    expect(missChance(actorWithDex(20), 0)).toBe(MISS_MIN);
   });
 });
 

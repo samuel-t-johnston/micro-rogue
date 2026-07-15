@@ -18,16 +18,19 @@ export const MISS_PER_DEX = 0.01;
 export const DEX_CAP = 20;
 /** Even a hopeless-looking shot keeps this hit chance; a point-blank expert never quite reaches 100%. */
 export const MISS_MAX = 0.95;
+/** No shot is ever a certainty: the symmetric floor to MISS_MAX, so a maxed archer stays at ~95% hit
+ *  even point-blank. Enforces "never quite 100%" structurally rather than leaning on the base/DEX math. */
+export const MISS_MIN = 0.05;
 
 /**
- * Probability in [0, MISS_MAX] that a ranged strike from `actor` at chebyshev `distance` misses:
+ * Probability in [MISS_MIN, MISS_MAX] that a ranged strike from `actor` at chebyshev `distance` misses:
  * `MISS_BASE + MISS_PER_DISTANCE·distance − MISS_PER_DEX·min(DEX, DEX_CAP)`. DEX is capped so a maxed
  * archer sits at ~95% to hit at close range, leaving room for future accuracy bonuses to matter.
  */
 export function missChance(actor, distance) {
   const dex = Math.min(getScore(actor, 'dex'), DEX_CAP);
   const chance = MISS_BASE + MISS_PER_DISTANCE * distance - MISS_PER_DEX * dex;
-  return Math.max(0, Math.min(MISS_MAX, chance));
+  return Math.max(MISS_MIN, Math.min(MISS_MAX, chance));
 }
 
 /** Rolls the shared gameplay RNG against missChance: true if this ranged strike goes wide. */

@@ -5,6 +5,7 @@
  */
 import { ENTITY_PREFABS, prefabIdsByKind } from '../../entities/entity-prefabs.js';
 import { roomTiles, centermostRoomTile } from '../zone-tiles.js';
+import { LEVEL_ZONES, LEVEL_ROOMS } from '../blackboard-keys.js';
 
 const make = (registry, id, x, y, entityId) => ENTITY_PREFABS[id].make(registry, x, y, entityId);
 
@@ -12,20 +13,16 @@ const make = (registry, id, x, y, entityId) => ENTITY_PREFABS[id].make(registry,
 // placed deterministically on the 'amulet' zone below — never rolled in.
 const ITEM_POOL = prefabIdsByKind('item').filter((id) => id !== 'amulet');
 
-// Spawn rules (overridable via stageConfig). Creature `weights` are per-label multipliers; a room's
-// pick-weight is the product over its labels (absent labels contribute 1). Exported so tests can
-// assert against the configured roster/counts instead of duplicating the magic numbers.
+// Spawn rules (overridable via stageConfig). The creature `weights` are per-label multipliers; a
+// room's pick-weight is the product over its labels (absent labels contribute 1). The creature roster
+// is content and lives in the pipeline config (see data/pipelines/procedural-3x3.js) — empty here, so
+// a populate stage with no roster places items only. Item-count defaults stay as tuning knobs, exported
+// so tests can assert against them.
 export const DEFAULTS = {
   treasureRoom: { chestItems: [1, 2], floorItems: [0, 1] },
   itemRoom: { floorItems: [1, 1] },
-  creatures: [
-    { type: 'orcCommander', count: 1, weights: { treasure: 5, item: 2 } }, // leads the orcs
-    { type: 'orc', count: 2, weights: { treasure: 5, item: 2 } }, // affinity
-    { type: 'goblin', count: 2, weights: { treasure: 0.2, item: 0.2 }, separate: true }, // aversion, distinct rooms
-  ],
+  creatures: [],
 };
-
-const randInt = ([min, max], rng) => min + rng.nextInt(0, max - min + 1);
 
 function roomWeight(zone, weights) {
   let w = 1;
@@ -49,8 +46,8 @@ export function weightedPick(rooms, weights, rng) {
 /** Runs the populate stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard, rng, registry) {
   const cfg = { ...DEFAULTS, ...stageConfig };
-  const zones = blackboard['level:zones'] ?? [];
-  const rooms = blackboard['level:rooms'] ?? {};
+  const zones = blackboard[LEVEL_ZONES] ?? [];
+  const rooms = blackboard[LEVEL_ROOMS] ?? {};
 
   // Empty room tiles only — inside the room rect, and not already occupied (the spatial index
   // tracks everything placed so far: stairs, doors, the entry point, earlier spawns). This keeps
@@ -72,18 +69,18 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
     if (ct) {
       const chest = make(registry, 'chest', ct[0], ct[1]);
       const inv = chest.components.get('inventory');
-      const n = randInt(cfg.treasureRoom.chestItems, rng);
+      const n = rng.intInclusive(...cfg.treasureRoom.chestItems);
       for (let i = 0; i < n; i++)
         inv.items.push(make(registry, rng.pick(ITEM_POOL), null, null, chest.id));
       level.placeEntity(chest);
     }
-    const n = randInt(cfg.treasureRoom.floorItems, rng);
+    const n = rng.intInclusive(...cfg.treasureRoom.floorItems);
     for (let i = 0; i < n; i++) dropItem(zone);
   }
 
   // Item rooms: floor items only.
   for (const zone of zones.filter((z) => z.labels.includes('item'))) {
-    const n = randInt(cfg.itemRoom.floorItems, rng);
+    const n = rng.intInclusive(...cfg.itemRoom.floorItems);
     for (let i = 0; i < n; i++) dropItem(zone);
   }
 

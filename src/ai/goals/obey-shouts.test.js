@@ -34,6 +34,10 @@ describe('obeyShouts', () => {
     expect(obeyShouts.evaluate(ctx([sound({ kind: 'taunt' })]))).toBeNull();
   });
 
+  it('returns null for a memoryless creature instead of throwing', () => {
+    expect(obeyShouts.evaluate(ctx([sound({ direction: 'E' })], null))).toBeNull();
+  });
+
   it('keeps advancing on the last heading for a few turns after the sound fades', () => {
     const memory = {};
     obeyShouts.evaluate(ctx([sound({ direction: 'E' })], memory)); // hears the order

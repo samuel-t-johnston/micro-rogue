@@ -6,6 +6,7 @@
  */
 import { ENTITY_PREFABS } from '../../entities/entity-prefabs.js';
 import { components } from '../../entities/components.js';
+import { STATIC_ENTITIES } from '../blackboard-keys.js';
 
 // The up-stairs and dungeon exit double as the player's arrival tile, so static placement tags them
 // with entryPoint. This is a placement concern, not part of the prefab's identity, so it lives here.
@@ -34,7 +35,7 @@ function placeChest(level, registry, spec) {
 
 /** Runs the place-static-entities population stage (see the file overview). */
 export function run(level, stageConfig, blackboard, rng, registry) {
-  for (const spec of blackboard['static:entities'] ?? []) {
+  for (const spec of blackboard[STATIC_ENTITIES] ?? []) {
     if (spec.type === 'chest') {
       placeChest(level, registry, spec);
       continue;

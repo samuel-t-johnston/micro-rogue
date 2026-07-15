@@ -22,8 +22,10 @@ import { gameLog } from '../../engine/log/game-log.js';
  * Creates the action system: a type→handler dispatch table plus the per-entity `invokeAction`
  * the turn manager calls each turn (it runs goal planning, then executes the chosen action).
  * Register new action types in the `dispatch` table.
- * @returns {{ invokeAction: (entity: object) => Promise<boolean> }} `invokeAction` resolves
- *   `false` if the action consumed the turn, `true` for a free action.
+ * @returns {{ invokeAction: (entity: object) => Promise<boolean>, executeAction: (entity: object,
+ *   action: object) => Promise<boolean> }} `invokeAction` runs a full turn (plan + execute);
+ *   `executeAction` dispatches an already-chosen action. Both resolve `false` if the action consumed
+ *   the turn, `true` for a free action (or an unknown/absent action type).
  */
 export function createActionSystem({
   level,
@@ -109,5 +111,5 @@ export function createActionSystem({
     return result?.action ? await executeAction(entity, result.action) : false;
   }
 
-  return { invokeAction };
+  return { invokeAction, executeAction };
 }

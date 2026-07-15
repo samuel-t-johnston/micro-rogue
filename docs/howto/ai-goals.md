@@ -48,7 +48,7 @@ export const fleeToCover = {
 
 ### 2. Register it
 
-Add it to the map in [`src/ai/goals/goal-registry.js`](../../src/ai/goals/goal-registry.js).
+Give it a name in the registry ([`src/ai/goals/goal-registry.js`](../../src/ai/goals/goal-registry.js)). For a shipped goal, add it to the map. From outside the module (a fork, a plugin, a test) call `registerGoal(name, goal)` — the same extension seam as `registerSense`. Either way the `ai` component references the goal by that name.
 
 ### 3. Add it to a goal stack
 

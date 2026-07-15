@@ -5,11 +5,12 @@
  */
 import { createStairs } from '../../entities/furniture.js';
 import { centermostRoomTile } from '../zone-tiles.js';
+import { LEVEL_ZONES, LEVEL_ROOMS } from '../blackboard-keys.js';
 
 /** Runs the stairs finishing stage (see the file overview). */
 export function run(level, stageConfig, blackboard, rng, registry) {
-  const zones = blackboard['level:zones'] ?? [];
-  const rooms = blackboard['level:rooms'] ?? {};
+  const zones = blackboard[LEVEL_ZONES] ?? [];
+  const rooms = blackboard[LEVEL_ROOMS] ?? {};
 
   for (const [label, dir] of [
     ['stairs-up', 'up'],

@@ -21,10 +21,15 @@
  *   level:zones     -> [{ id, cells: [[col,row],…], rect: {x,y,w,h}, labels: ['room'] }]
  *   level:adjacency -> [[idA, idB], …]   (idA < idB, deduped)
  */
+import { LEVEL_GRID, LEVEL_ZONES, LEVEL_ADJACENCY } from '../blackboard-keys.js';
 
 const DEFAULTS = { cols: 3, rows: 3, cellSize: 10, deletes: 1, merges: 1, minZones: 1 };
 
-const cellsAdjacent = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) === 1;
+/** A stable string key for a grid cell (col, row) — the cell-space analogue of tileKey. */
+export const cellKey = (c, r) => `${c},${r}`;
+
+/** True if two grid cells [col,row] are orthogonally adjacent (Manhattan distance 1). */
+export const cellsAdjacent = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) === 1;
 
 // Adjacency between two groups of cells: any cell of one orthogonally touching any cell of the other.
 const groupsAdjacent = (g1, g2) => g1.some((c1) => g2.some((c2) => cellsAdjacent(c1, c2)));
@@ -32,8 +37,8 @@ const groupsAdjacent = (g1, g2) => g1.some((c1) => g2.some((c2) => cellsAdjacent
 // True if a set of cells is a single orthogonally-connected component.
 function cellsConnected(cells) {
   if (cells.length <= 1) return true;
-  const present = new Set(cells.map(([c, r]) => `${c},${r}`));
-  const seen = new Set([`${cells[0][0]},${cells[0][1]}`]);
+  const present = new Set(cells.map(([c, r]) => cellKey(c, r)));
+  const seen = new Set([cellKey(cells[0][0], cells[0][1])]);
   const stack = [cells[0]];
   while (stack.length) {
     const [c, r] = stack.pop();
@@ -43,7 +48,7 @@ function cellsConnected(cells) {
       [0, 1],
       [0, -1],
     ]) {
-      const k = `${c + dc},${r + dr}`;
+      const k = cellKey(c + dc, r + dr);
       if (present.has(k) && !seen.has(k)) {
         seen.add(k);
         stack.push([c + dc, r + dr]);
@@ -135,7 +140,7 @@ export function run(level, stageConfig = {}, blackboard, rng) {
     }
   }
 
-  blackboard['level:grid'] = { cols, rows, cellSize };
-  blackboard['level:zones'] = zones;
-  blackboard['level:adjacency'] = adjacency;
+  blackboard[LEVEL_GRID] = { cols, rows, cellSize };
+  blackboard[LEVEL_ZONES] = zones;
+  blackboard[LEVEL_ADJACENCY] = adjacency;
 }

@@ -228,6 +228,8 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 - [ ] Zoo level for dev testing
 - [ ] Developer F.A.Q.
 - [ ] View RNG seed, mode where seed can be specified
+- [ ] Animation enable/disable config — a reduced-motion toggle driving `animations.setEnabled` (the seam exists and persists across resets; no shipped caller). Wire a `reduceMotion` setting + a `prefers-reduced-motion` read, re-applied at startup.
+- [ ] Improved audio config UI — surface the present-but-unwired per-channel mute API (`setMasterMuted` / `sfx.setMuted` / `music.setMuted`) as mute toggles, via `*Muted` settings keys pushed through `applyAudioSettings` (see [audio-design.md](design/audio-design.md)).
 
 - [ ] Particles and projectile animations — leave a hook in the animation system; implement when ranged combat exists
 - [ ] `flee` goal: low-HP retreat behavior

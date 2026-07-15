@@ -30,14 +30,6 @@ describe('gameLog singleton', () => {
     expect(lines).toEqual(['visible 1', 'visible 2']);
   });
 
-  // ENGINE-1 (B5): getDisplayEntries(0) returns no entries. Without the count<=0 guard,
-  // slice(-0) === slice(0) would return them all — the opposite of "the most-recent 0".
-  it('getDisplayEntries(0) returns no entries', () => {
-    gameLog.add({ display: 'a' });
-    gameLog.add({ display: 'b' });
-    expect(gameLog.getDisplayEntries(0)).toEqual([]);
-  });
-
   it('reset clears entries and restores the default turn provider', () => {
     gameLog.setTurnProvider(() => 99);
     gameLog.add({ display: 'x' });

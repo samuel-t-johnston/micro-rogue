@@ -12,6 +12,7 @@
  */
 
 import { ensureContext, getContext, getMusicBus, onReady, onRunning } from './audio-core.js';
+import { clamp01 } from './clamp.js';
 
 const sources = new Map(); // id -> url
 
@@ -163,12 +164,6 @@ function setMuted(value) {
 }
 function isMuted() {
   return muted;
-}
-
-function clamp01(v) {
-  v = Number(v);
-  if (Number.isNaN(v)) return 0;
-  return v < 0 ? 0 : v > 1 ? 1 : v;
 }
 
 export const music = {

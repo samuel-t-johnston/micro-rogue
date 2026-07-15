@@ -92,6 +92,15 @@ Three independent volumes and three independent mutes:
 Effective gain per channel = `(masterMuted || channelMuted) ? 0 : masterVolume *
 channelVolume`, realised by the graph rather than computed by hand.
 
+> **Status: mute is API-present, UI-deferred.** The six mute methods above are
+> implemented and tested, but nothing drives them yet — `applyAudioSettings`
+> (`audio-settings.js`) pushes only the three *volumes* from the settings store,
+> and there is no mute settings key or UI toggle. Mute is a ready extension point:
+> a fork can call the setters directly, or wire `*Muted` settings keys through
+> `applyAudioSettings` to surface it. Tracked as "Improved audio config UI" in the
+> roadmap's deferred section. (An "Off" volume covers silencing in the shipped UI
+> for now.)
+
 ### Mute is independent of volume
 
 Even though both collapse to a gain value, mute is modelled as its own boolean,

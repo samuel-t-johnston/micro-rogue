@@ -4,6 +4,7 @@
  * authored-entities handoff. See docs/howto/static-map-layouts.md and docs/design/map-generation.md.
  */
 import { loadStaticLayout } from '../static-layout.js';
+import { STATIC_ENTITIES, STATIC_LAYOUT } from '../blackboard-keys.js';
 
 /** Runs the randomStatic structure stage (see the file overview). */
 export async function run(level, stageConfig, blackboard, rng) {
@@ -11,6 +12,6 @@ export async function run(level, stageConfig, blackboard, rng) {
   if (layouts.length === 0)
     throw new Error('randomStatic stage requires a non-empty `layouts` array');
   const layout = rng.pick(layouts);
-  blackboard['static:layout'] = layout;
-  blackboard['static:entities'] = await loadStaticLayout(layout, level, stageConfig.importLayout);
+  blackboard[STATIC_LAYOUT] = layout;
+  blackboard[STATIC_ENTITIES] = await loadStaticLayout(layout, level, stageConfig.importLayout);
 }
