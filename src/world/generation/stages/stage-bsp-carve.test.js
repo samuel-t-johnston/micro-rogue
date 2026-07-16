@@ -84,23 +84,23 @@ describe('stage-bsp-carve', () => {
     }
   });
 
-  it('floors every room interior and carves each exit gap', () => {
+  it('floors every room interior and carves each connection gap', () => {
     const { level } = build({ width: 44, height: 34 }, {}, 6);
     for (const room of Object.values(level.blackboard[LEVEL_ROOMS])) {
       for (let y = room.y0; y <= room.y1; y++)
         for (let x = room.x0; x <= room.x1; x++) expect(level.tiles[y][x]).toBe('floor');
     }
-    for (const exit of level.blackboard[LEVEL_BSP].exits) {
-      expect(level.tiles[exit.gap[1]][exit.gap[0]]).toBe('floor');
+    for (const c of level.blackboard[LEVEL_BSP].connections) {
+      for (const [x, y] of c.tiles) expect(level.tiles[y][x]).toBe('floor');
     }
   });
 
-  it('doors every exit by default and places them on the exit gaps', () => {
+  it('doors every room exit by default and places them on the connection gaps', () => {
     const { level } = build({ width: 44, height: 34 }, {}, 6);
-    const exits = level.blackboard[LEVEL_BSP].exits;
+    const eligible = level.blackboard[LEVEL_BSP].connections.filter((c) => c.door);
     const placed = doors(level);
-    expect(placed.length).toBe(exits.length);
-    const gapKeys = new Set(exits.map((e) => `${e.gap[0]},${e.gap[1]}`));
+    expect(placed.length).toBe(eligible.length);
+    const gapKeys = new Set(eligible.map((c) => `${c.gap[0]},${c.gap[1]}`));
     for (const d of placed) {
       const p = d.components.get('position');
       expect(gapKeys.has(`${p.x},${p.y}`)).toBe(true);
@@ -149,5 +149,73 @@ describe('stage-bsp-carve', () => {
     expect(level.tiles[0][5]).toBe('sentinel'); // border tile left alone
     // interior still gets partitioned into rooms + walls
     expect(totalFloor(level)).toBeGreaterThan(0);
+  });
+
+  it('every connection gap is a straight doorway (floor on two opposite sides, never a corner)', () => {
+    const { level } = build({ width: 48, height: 32 }, {}, 4);
+    const isFloor = (x, y) => level.tiles[y]?.[x] === 'floor';
+    for (const c of level.blackboard[LEVEL_BSP].connections) {
+      const [x, y] = c.gap;
+      const horiz = isFloor(x - 1, y) && isFloor(x + 1, y);
+      const vert = isFloor(x, y - 1) && isFloor(x, y + 1);
+      // exactly one axis passes through (opposite neighbours), so it's a clean mid-wall doorway
+      expect(horiz !== vert).toBe(true);
+    }
+  });
+});
+
+describe('stage-bsp-carve with halls', () => {
+  const hallCfg = { width: 60, height: 44, minRoomSize: 6, includeHalls: true, hallWidth: 1 };
+
+  it('leaves the entire map floor-connected through halls and doors', () => {
+    const { level } = build(hallCfg, {}, 3);
+    expect(connectedFloorCount(level)).toBe(totalFloor(level));
+  });
+
+  it('floors every hall strip', () => {
+    const { level } = build(hallCfg, {}, 5);
+    for (const hall of level.blackboard[LEVEL_BSP].halls) {
+      for (let y = hall.y0; y <= hall.y1; y++)
+        for (let x = hall.x0; x <= hall.x1; x++) expect(level.tiles[y][x]).toBe('floor');
+    }
+  });
+
+  it('doors only the room exits, never the hall-to-hall gaps', () => {
+    const { level } = build(hallCfg, {}, 5);
+    const eligible = level.blackboard[LEVEL_BSP].connections.filter((c) => c.door);
+    expect(doors(level).length).toBe(eligible.length);
+    // hall-to-hall connections carry no rooms and get no door
+    const hallGaps = level.blackboard[LEVEL_BSP].connections.filter((c) => !c.door);
+    const doorKeys = new Set(
+      doors(level).map(
+        (d) => `${d.components.get('position').x},${d.components.get('position').y}`,
+      ),
+    );
+    for (const c of hallGaps) expect(doorKeys.has(`${c.gap[0]},${c.gap[1]}`)).toBe(false);
+  });
+
+  it('supports a 2-wide hall', () => {
+    const { level } = build({ ...hallCfg, hallWidth: 2 }, {}, 8);
+    expect(connectedFloorCount(level)).toBe(totalFloor(level));
+    expect(level.blackboard[LEVEL_BSP].halls.length).toBeGreaterThan(0);
+  });
+
+  it('stays fully connected with hall loops opened', () => {
+    const { level } = build({ ...hallCfg, hallLoopChance: 1 }, {}, 7);
+    expect(connectedFloorCount(level)).toBe(totalFloor(level));
+  });
+
+  it('stays fully connected with leaf-hall suites', () => {
+    const { level } = build({ ...hallCfg, skipLeafHalls: true }, {}, 7);
+    expect(connectedFloorCount(level)).toBe(totalFloor(level));
+  });
+
+  it('supports a 2-wide hall with suites and loops together', () => {
+    const { level } = build(
+      { ...hallCfg, hallWidth: 2, skipLeafHalls: true, hallLoopChance: 0.5 },
+      {},
+      2,
+    );
+    expect(connectedFloorCount(level)).toBe(totalFloor(level));
   });
 });
