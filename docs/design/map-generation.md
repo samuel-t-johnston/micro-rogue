@@ -8,7 +8,9 @@ Map generation is not a single algorithm — it's a sequence of discrete stages,
 **Current target: single-stage static layouts.** The pipeline architecture is designed to grow into, not to be fully built upfront. Start with one stage that loads a fixed layout; expand the pipeline iteratively as the game needs it.
 
 > The first procedural pipeline — a Rogue-style 3×3 room dungeon — is planned and tracked in
-> [procedural-3x3-dungeon.md](procedural-3x3-dungeon.md).
+> [procedural-3x3-dungeon.md](procedural-3x3-dungeon.md). The organic (walker + cellular-automata)
+> pipelines and the region model that lets them share the same downstream stages are in
+> [organic-map-generation.md](organic-map-generation.md) (ADR-026 through ADR-029).
 
 ---
 
