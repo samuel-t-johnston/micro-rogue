@@ -7,6 +7,9 @@
  *   labels — role labels to assign, one per distinct zone, in priority order
  *            (default ['stairs-up', 'stairs-down', 'treasure', 'item', 'item']). With fewer zones
  *            than labels, the trailing (lower-priority) labels are skipped, with a warning.
+ *   fill   — a label applied to *every* zone left unassigned after `labels` (default none). Lets a
+ *            big floor label all its leftover rooms in one go (e.g. fill:'item' for dense loot)
+ *            without listing dozens of entries.
  *
  * Blackboard:
  *   level:zones — each chosen zone gets one label pushed onto its `labels` (alongside 'room').
@@ -30,4 +33,7 @@ export function run(level, stageConfig = {}, blackboard, rng) {
     const [zone] = pool.splice(rng.nextInt(0, pool.length), 1);
     zone.labels.push(label);
   }
+
+  // Every remaining zone gets the fill label (no RNG — it's all of them).
+  if (stageConfig.fill) for (const zone of pool) zone.labels.push(stageConfig.fill);
 }

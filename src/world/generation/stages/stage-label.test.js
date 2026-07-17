@@ -51,6 +51,15 @@ describe('label stage', () => {
     expect(zones.filter((z) => z.labels.length > 1)).toHaveLength(2);
   });
 
+  it('applies a fill label to every zone left unlabelled', () => {
+    const zones = label(makeZones(7), 1, { labels: ['stairs-up', 'treasure'], fill: 'food' });
+    expect(countLabel(zones, 'stairs-up')).toBe(1);
+    expect(countLabel(zones, 'treasure')).toBe(1);
+    expect(countLabel(zones, 'food')).toBe(5); // the remaining zones
+    // no zone gets both a role and the fill
+    for (const z of zones) expect(z.labels.filter((l) => l !== 'room')).toHaveLength(1);
+  });
+
   it('skips trailing labels (with a warning) when there are too few zones', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const zones = label(makeZones(3)); // 3 zones, 5 default labels

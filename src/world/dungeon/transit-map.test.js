@@ -34,6 +34,22 @@ describe('transit map (the shipped 3-floor stack)', () => {
     expect(resolveDestination(transitMap, 'floor-3', 'down')).toBeNull(); // bottom of the dungeon
   });
 
+  it('wires floor-1 second down-stair to the BSP branch and back', () => {
+    expect(getNode(transitMap, 'branch-1-floor-1')).toMatchObject({
+      pipelineId: 'bsp',
+      branch: 1,
+      depth: 0,
+    });
+    expect(resolveDestination(transitMap, 'floor-1', 'branch1')).toEqual({
+      node: 'branch-1-floor-1',
+      port: 'up',
+    });
+    expect(resolveDestination(transitMap, 'branch-1-floor-1', 'up')).toEqual({
+      node: 'floor-1',
+      port: 'branch1',
+    });
+  });
+
   it('looks up nodes by id and their generation identity', () => {
     expect(getNode(transitMap, 'floor-2')).toMatchObject({
       id: 'floor-2',

@@ -11,17 +11,15 @@
 // Edit PIPELINE below to visualize a different set of stages or stage params.
 import { writeFileSync } from 'node:fs';
 import { runPipeline } from '../src/world/generation/pipeline.js';
-import { createEntityRegistry } from '../src/engine/entity-component-system.js';
-import { createRng } from '../src/engine/rng.js';
+import { createEntityRegistry } from '../src/engine/core/entity-component-system.js';
+import { createRng } from '../src/engine/core/rng.js';
 import { levelToAscii, zonesToText, zonesToMermaid } from '../src/world/generation/visualize.js';
 
 const PIPELINE = {
   stages: [
-    { type: 'roomGridGeometry' },
-    { type: 'label' },
-    { type: 'link' },
-    { type: 'carveRooms' },
-    { type: 'carveHalls' },
+    { type: 'bspGeometry', width: 48, height: 32, minRoomSize: 6 },
+    { type: 'label', labels: ['stairs-up', 'stairs-down', 'treasure', 'item', 'item'] },
+    { type: 'bspCarve', doors: { present: 'all', open: 'none' } },
     { type: 'stairs' },
     { type: 'spawn' },
     { type: 'populate' },

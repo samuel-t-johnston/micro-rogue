@@ -1,8 +1,10 @@
 /**
  * @file Population stage for static layouts: instantiates the authored entities a static/randomStatic
  * stage stashed on the blackboard (`static:entities`). Each spec is `{ type, x, y }`; `chest` also
- * carries `contents` (item type names). Placement is exact and deterministic — no RNG. `stairsUp`
- * doubles as the player's entry point. See docs/howto/static-map-layouts.md.
+ * carries `contents` (item type names), and a stair may carry `port` to override its transition port
+ * (so a floor can have a second down-stair leading to a different branch). Placement is exact and
+ * deterministic — no RNG. `stairsUp` doubles as the player's entry point. See
+ * docs/howto/static-map-layouts.md and docs/howto/dungeon-layout.md.
  */
 import { ENTITY_PREFABS } from '../../entities/entity-prefabs.js';
 import { components } from '../../entities/components.js';
@@ -40,6 +42,11 @@ export function run(level, stageConfig, blackboard, rng, registry) {
       placeChest(level, registry, spec);
       continue;
     }
-    level.placeEntity(spawn(registry, spec.type, spec.x, spec.y));
+    const entity = spawn(registry, spec.type, spec.x, spec.y);
+    // A stair can override its port so two same-direction stairs reach different destinations.
+    if (spec.port != null && entity.components.has('transition')) {
+      entity.components.get('transition').port = spec.port;
+    }
+    level.placeEntity(entity);
   }
 }

@@ -74,3 +74,29 @@ describe('createDoor', () => {
     expect(door.components.get('renderable').glyph).toBe('+');
   });
 });
+
+describe('createDoor spawned open', () => {
+  let registry, door;
+
+  beforeEach(() => {
+    registry = createEntityRegistry();
+    door = createDoor(registry, 5, 3, { open: true });
+  });
+
+  it('is open (isOpen is true)', () => {
+    expect(door.components.get('openable').isOpen).toBe(true);
+  });
+
+  it('is passable (no blocksMovement)', () => {
+    expect(door.components.has('blocksMovement')).toBe(false);
+  });
+
+  it('is transparent (no opaque)', () => {
+    expect(door.components.has('opaque')).toBe(false);
+  });
+
+  it('renderable sprite matches openSprite on the openable component', () => {
+    const { openSprite } = door.components.get('openable');
+    expect(door.components.get('renderable').sprite).toEqual(openSprite);
+  });
+});

@@ -74,21 +74,32 @@ export function createDungeonExit(registry, x, y) {
   return entity;
 }
 
-/** Creates a Door: openable, opaque, blocking furniture (remembered in fog of war). */
-export function createDoor(registry, x, y) {
+/**
+ * Creates a Door: openable, opaque, blocking furniture (remembered in fog of war). Pass
+ * `{ open: true }` to spawn it already open — passable and transparent, showing the open sprite —
+ * matching the runtime open state (see action-interact.js).
+ */
+export function createDoor(registry, x, y, { open = false } = {}) {
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name('Door'));
   registry.addComponent(entity, 'entityTypeId', components.entityTypeId('door'));
   registry.addComponent(entity, 'position', components.position(x, y));
-  registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
-  registry.addComponent(entity, 'opaque', components.opaque());
   registry.addComponent(
     entity,
     'renderable',
     components.renderable('door-closed', '#8B6F47', '+', '#c8a36a'),
   );
-  registry.addComponent(entity, 'openable', components.openable('door-closed', 'door-open'));
+  const openable = components.openable('door-closed', 'door-open');
+  registry.addComponent(entity, 'openable', openable);
   registry.addComponent(entity, 'persistVisible', components.persistVisible());
+  // Closed doors block movement and sight; an open door drops both and shows the open sprite.
+  if (open) {
+    openable.isOpen = true;
+    entity.components.get('renderable').sprite = openable.openSprite;
+  } else {
+    registry.addComponent(entity, 'blocksMovement', components.blocksMovement());
+    registry.addComponent(entity, 'opaque', components.opaque());
+  }
   return entity;
 }
 

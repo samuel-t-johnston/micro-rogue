@@ -13,5 +13,6 @@ export const LEVEL_ZONES = 'level:zones'; // [{ id, cells, rect, labels }]
 export const LEVEL_ADJACENCY = 'level:adjacency'; // [[idA, idB], …] (idA < idB, deduped)
 export const LEVEL_LINKS = 'level:links'; // adjacency pairs chosen to become corridors
 export const LEVEL_ROOMS = 'level:rooms'; // zone id -> carved room rect/tiles
+export const LEVEL_BSP = 'level:bsp'; // BSP carve plan: { bounds, outerWall, exits: [{a,b,gap,orientation}] }
 export const STATIC_ENTITIES = 'static:entities'; // authored entity specs from a static layout
 export const STATIC_LAYOUT = 'static:layout'; // the resolved static layout module/name
