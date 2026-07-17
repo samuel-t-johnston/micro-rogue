@@ -16,14 +16,20 @@ import { getPipeline } from './pipelines.js';
 import { getStart, getNode, resolveDestination } from './transit-map.js';
 import { resolveArrival } from '../map/spawn.js';
 
-/** Creates the dungeon runtime (see the file overview): start/travel/restore/snapshot over floors. */
-export function createLevelManager({ registry, transitMap }) {
+/**
+ * Creates the dungeon runtime (see the file overview): start/travel/restore/snapshot over floors.
+ * `generateLevel(node)` is an optional seam that overrides how a floor is built — the default runs the
+ * node's pipeline on its derived mapgen stream. Tests inject a trivial floor builder so the runtime's
+ * travel/freeze/thaw logic can be exercised without depending on any shipped content pipeline.
+ */
+export function createLevelManager({ registry, transitMap, generateLevel } = {}) {
   const coldStorage = new Map(); // nodeId -> frozen blob (the inactive floors)
   let current = null; // { nodeId, level }
 
   // Generates a floor from its transit-map node, drawing from the per-level mapgen stream derived
   // from the node's identity so the floor is the same every time the seed is.
   async function generate(node) {
+    if (generateLevel) return generateLevel(node);
     const mapgenRng = rng.deriveRng('mapgen', node.branch, node.depth);
     return runPipeline(getPipeline(node.pipelineId), mapgenRng, registry, {
       identity: { branch: node.branch, depth: node.depth },

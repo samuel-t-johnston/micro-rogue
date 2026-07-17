@@ -43,6 +43,16 @@ describe('placeStaticEntities stage', () => {
     expect(items.map((i) => i.components.get('name'))).toEqual(['Sword', 'Leather Armor']);
   });
 
+  it('overrides a stair transition port from the spec', () => {
+    const { level } = place([{ type: 'stairsDown', x: 2, y: 2, port: 'branch1' }]);
+    expect(at(level, 2, 2)[0].components.get('transition')).toEqual({ to: null, port: 'branch1' });
+  });
+
+  it('leaves the default port when the spec omits one', () => {
+    const { level } = place([{ type: 'stairsDown', x: 2, y: 2 }]);
+    expect(at(level, 2, 2)[0].components.get('transition').port).toBe('down');
+  });
+
   it('throws on an unknown entity type', () => {
     expect(() => place([{ type: 'dragon', x: 1, y: 1 }])).toThrow(/dragon/);
   });

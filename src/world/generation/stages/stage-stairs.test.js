@@ -58,6 +58,20 @@ describe('stairs stage', () => {
     expect(posOf(generate(5))).toEqual(posOf(generate(5)));
   });
 
+  it('places only the stairs named in a custom stairs config', () => {
+    const level = createLevel();
+    const reg = createEntityRegistry();
+    const bb = level.blackboard;
+    runRoomGridGeometry(level, {}, bb, createRng(1));
+    runLabel(level, {}, bb, createRng(1));
+    runCarveRooms(level, {}, bb, createRng(1));
+    runStairs(level, { stairs: [['stairs-up', 'up']] }, bb, createRng(1), reg);
+
+    const stairs = reg.getEntitiesWith('transition');
+    expect(stairs).toHaveLength(1);
+    expect(stairs[0].components.get('name')).toBe('Stairs Up');
+  });
+
   it('skips (with a warning) a stairs label that has no zone, placing the other', () => {
     // Geometry + carve, but a label set that omits 'stairs-down' entirely.
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});

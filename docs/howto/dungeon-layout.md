@@ -27,7 +27,16 @@ export default {
 - **`edges`** — connections between **named ports**. A port (`'up'`/`'down'`) maps to a staircase's direction; `dir: 'bidi'` means the link works both ways. The level manager resolves "the player took the `down` stairs on floor-2" to "arrive at floor-3's `up` port."
 - **`start`** — where a new game begins.
 
-The shipped dungeon is a linear 3-floor stack. The fuller model (exit/enter capabilities, branching, contract validation) is designed in [dungeon-planner.md](../design/dungeon-planner.md) but not built — today's reader is `transit-map.js` accessors in [`src/world/dungeon/transit-map.js`](../../src/world/dungeon/transit-map.js).
+The shipped dungeon is a 3-floor main stack (branch 0) plus one side **branch**: a second down-stair in floor-1's start room, port `branch1`, wired to a single large BSP floor (`branch-1-floor-1`, branch 1). The fuller model (exit/enter capabilities, contract validation) is designed in [dungeon-planner.md](../design/dungeon-planner.md) but not built — today's reader is `transit-map.js` accessors in [`src/world/dungeon/transit-map.js`](../../src/world/dungeon/transit-map.js).
+
+### Branching: more than one stair of the same direction
+
+A floor can have two down-stairs going to different places. Ports are just names, so the trick is giving the second stair a **distinct port** and wiring an edge to it:
+
+- **Procedural floor** — `stairs` stage config picks which stairs to place: `{ type: 'stairs', stairs: [['stairs-up','up'], ['stairs-down','down']] }`. A leaf/branch floor can place only an up-stair with `stairs: [['stairs-up','up']]`.
+- **Static floor** — author the extra stair with a `port` in the layout's entities: `{ type: 'stairsDown', x, y, port: 'branch1' }` (see [`data/maps/floor-1-a.js`](../../data/maps/floor-1-a.js)). Same-direction stairs stay visually identical; only the port (and thus the edge) differs.
+
+The down-vs-up log message reads off the stair's `entityTypeId`, not the port, so a `branch1` down-stair still says "descend."
 
 ## The pipeline registry
 

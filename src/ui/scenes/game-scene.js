@@ -572,6 +572,8 @@ export function createGameScene({
   async function performTransition(transitionEntity) {
     try {
       const port = transitionEntity.components.get('transition').port;
+      // Down vs up reads off the stair itself, not the port name (a branch stair's port isn't 'down').
+      const descending = transitionEntity.components.get('entityTypeId') === 'stairsDown';
       const turns = turnManager?.playerTurnCount ?? 0;
       const newLevel = await levelManager.travel(player, port);
       if (newLevel) {
@@ -580,8 +582,7 @@ export function createGameScene({
         // remembered tiles into cold storage and restores the destination's). mountLevel's applySenses
         // recomputes what's currently visible on arrival.
         gameLog.add({
-          display:
-            port === 'down' ? 'You descend deeper into the dungeon.' : 'You climb the stairs.',
+          display: descending ? 'You descend deeper into the dungeon.' : 'You climb the stairs.',
         });
       }
       mountLevel({ initialTurnCount: turns }); // also re-centres the camera on the player

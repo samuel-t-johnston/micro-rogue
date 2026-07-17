@@ -18,7 +18,9 @@ export const tiles = `\
 
 export const entities = [
   { type: 'dungeonExit', x: 6, y: 4 }, // lower room: surface up-stairs — the player's start tile and the win tile
-  { type: 'stairsDown', x: 6, y: 1 }, // upper room, past the door — the descent to floor 2 (and the return-trip arrival)
+  // Two descents from floor 1, distinguished by their transit-map port (see data/transit-map.js):
+  { type: 'stairsDown', x: 6, y: 1, port: 'down' }, // upper room, past the door — down the main stack to floor 2
+  { type: 'stairsDown', x: 9, y: 7, port: 'branch1' }, // start room — into branch 1 (the BSP floor)
 
   { type: 'boulder', x: 8, y: 4 },
   { type: 'door', x: 5, y: 3 },

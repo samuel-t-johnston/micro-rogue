@@ -1,20 +1,38 @@
 import { describe, it, expect } from 'vitest';
-import { rng } from '../../engine/core/rng.js';
 import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
 import { components } from '../entities/components.js';
+import { createStairs } from '../entities/furniture.js';
+import { createLevel } from '../map/level.js';
 import { createLevelManager } from './level-manager.js';
 
-// Two procedural floors wired up↔down. We avoid the static/maze pipelines here because their stages
-// do a dynamic file:// import that vitest's resolver mangles on Windows (see save-system.test.js);
-// procedural-3x3 runs entirely in code, and its `stairs` stage gives every floor an up + down port.
+// Two floors wired up↔down. The runtime's job is topology (freeze/thaw/travel/arrive), not content, so
+// we inject a trivial floor builder instead of running a shipped pipeline — that keeps these tests from
+// breaking when pipeline content changes, and sidesteps the static pipelines' file:// import that
+// vitest's resolver mangles on Windows. Each floor has an up-stair and a down-stair so both arrival
+// ports resolve. Pipeline-based generation is covered by pipeline.test.js.
 const TEST_MAP = {
   start: { node: 'a', port: 'up' },
   nodes: [
-    { id: 'a', pipelineId: 'procedural-3x3', branch: 0, depth: 0 },
-    { id: 'b', pipelineId: 'procedural-3x3', branch: 0, depth: 1 },
+    { id: 'a', pipelineId: 'test-floor', branch: 0, depth: 0 },
+    { id: 'b', pipelineId: 'test-floor', branch: 0, depth: 1 },
   ],
   edges: [{ a: ['a', 'down'], b: ['b', 'up'], dir: 'bidi' }],
 };
+
+// A minimal floor: a 10×10 room with an up-stair at (1,1) and a down-stair at (8,8).
+function makeFloor(registry, node) {
+  const level = createLevel({
+    branch: node.branch,
+    depth: node.depth,
+    pipelineId: node.pipelineId,
+  });
+  level.width = 10;
+  level.height = 10;
+  level.tiles = Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => 'floor'));
+  level.placeEntity(createStairs(registry, 1, 1, 'up'));
+  level.placeEntity(createStairs(registry, 8, 8, 'down'));
+  return level;
+}
 
 function makePlayer(registry) {
   const player = registry.createEntity();
@@ -24,10 +42,13 @@ function makePlayer(registry) {
 }
 
 // Stands the player on the start level at the resolved arrival port, the way game-scene does.
-async function startGame(seed = 1) {
-  rng.init(seed);
+async function startGame() {
   const registry = createEntityRegistry();
-  const manager = createLevelManager({ registry, transitMap: TEST_MAP });
+  const manager = createLevelManager({
+    registry,
+    transitMap: TEST_MAP,
+    generateLevel: (node) => makeFloor(registry, node),
+  });
   const { level } = await manager.start();
   const player = makePlayer(registry);
   level.placeEntity(player);
@@ -143,12 +164,22 @@ describe('LevelManager.travel', () => {
     expect(player.components.get('tilePerception').memory.get('3,3')).toBe('floor');
   });
 
-  it('generates floors deterministically from the master seed', async () => {
-    const a = await startGame(42);
-    const b = await startGame(42);
-    await a.manager.travel(a.player, 'down');
-    await b.manager.travel(b.player, 'down');
-    expect(stairPos(a.registry, 'up')).toEqual(stairPos(b.registry, 'up'));
-    expect(a.manager.getCurrentLevel().width).toBe(b.manager.getCurrentLevel().width);
+  it('builds each floor from its transit-map node identity', async () => {
+    const seen = [];
+    const registry = createEntityRegistry();
+    const manager = createLevelManager({
+      registry,
+      transitMap: TEST_MAP,
+      generateLevel: (node) => {
+        seen.push(`${node.branch}:${node.depth}`);
+        return makeFloor(registry, node);
+      },
+    });
+    const { level } = await manager.start(); // builds 'a'
+    const player = makePlayer(registry);
+    level.placeEntity(player);
+    await manager.travel(player, 'down'); // builds 'b'
+
+    expect(seen).toEqual(['0:0', '0:1']); // the manager passes each node's (branch, depth)
   });
 });

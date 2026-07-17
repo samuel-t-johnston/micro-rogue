@@ -6,11 +6,13 @@
 import staticTestLevel from '../../../data/pipelines/static-test-level.js';
 import randomStaticMaze from '../../../data/pipelines/random-static-maze.js';
 import procedural3x3 from '../../../data/pipelines/procedural-3x3.js';
+import bsp from '../../../data/pipelines/bsp.js';
 
 const PIPELINES = {
   [staticTestLevel.id]: staticTestLevel,
   [randomStaticMaze.id]: randomStaticMaze,
   [procedural3x3.id]: procedural3x3,
+  [bsp.id]: bsp,
 };
 
 /**

@@ -81,6 +81,30 @@ describe('weightedPick', () => {
 });
 
 describe('populate stage', () => {
+  it('biases floor items toward weighted types (e.g. lots of food)', () => {
+    const level = createLevel();
+    const reg = createEntityRegistry();
+    const bb = level.blackboard;
+    runRoomGridGeometry(level, {}, bb, createRng(3));
+    runLabel(level, { labels: ['stairs-up'], fill: 'item' }, bb, createRng(3)); // every other room = items
+    runCarveRooms(level, {}, bb, createRng(3));
+    runPopulate(
+      level,
+      { itemRoom: { floorItems: [2, 3] }, items: { weights: { bread: 200 } } },
+      bb,
+      createRng(3),
+      reg,
+    );
+    // No creatures configured, so every named floor entity besides the up-stair is a dropped item.
+    const items = level.entities.filter((e) => {
+      const name = e.components.get('name');
+      return name && name !== 'Stairs Up';
+    });
+    const bread = items.filter((e) => e.components.get('name') === 'Bread');
+    expect(items.length).toBeGreaterThan(4);
+    expect(bread.length).toBeGreaterThan(items.length - bread.length); // bread is the strong majority
+  });
+
   it('puts a chest with the configured item count in each treasure room', () => {
     const { bb, reg } = generate(2);
     const [minItems, maxItems] = DEFAULTS.treasureRoom.chestItems;

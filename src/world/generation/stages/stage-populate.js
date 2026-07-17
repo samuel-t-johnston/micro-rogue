@@ -18,10 +18,19 @@ const ITEM_POOL = prefabIdsByKind('item').filter((id) => id !== 'amulet');
 // is content and lives in the pipeline config (see data/pipelines/procedural-3x3.js) — empty here, so
 // a populate stage with no roster places items only. Item-count defaults stay as tuning knobs, exported
 // so tests can assert against them.
+//
+// `items.weights` biases *which* item type each floor/chest roll produces: it maps an item prefab id
+// to a multiplier (any id absent from the map, and every id when weights is empty, counts as 1). So
+// `{ bread: 8 }` makes bread eight times likelier than each other item. This is how a pipeline stocks a
+// theme — e.g. the BSP branch floor weights the three foods heavily for a food-rich level (see
+// data/pipelines/bsp.js). Empty weights (the default) reduce exactly to a uniform pick, so pipelines
+// that don't set weights keep their existing seeded output unchanged. Item *type* selection (weights)
+// is separate from item *count* (treasureRoom/itemRoom above) and from *where* items land (room labels).
 export const DEFAULTS = {
   treasureRoom: { chestItems: [1, 2], floorItems: [0, 1] },
   itemRoom: { floorItems: [1, 1] },
   creatures: [],
+  items: { weights: {} },
 };
 
 function roomWeight(zone, weights) {
@@ -43,9 +52,23 @@ export function weightedPick(rooms, weights, rng) {
   return rooms[rooms.length - 1];
 }
 
+// Weighted item-type pick over the pool (weight = weights[id] ?? 1). With no weights this reduces
+// exactly to rng.pick, so pipelines that don't set weights keep their existing seeded output.
+function weightedItem(pool, weights, rng) {
+  const ws = pool.map((id) => weights[id] ?? 1);
+  const total = ws.reduce((a, b) => a + b, 0);
+  let t = rng.random() * total;
+  for (let i = 0; i < pool.length; i++) {
+    t -= ws[i];
+    if (t < 0) return pool[i];
+  }
+  return pool[pool.length - 1];
+}
+
 /** Runs the populate stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard, rng, registry) {
   const cfg = { ...DEFAULTS, ...stageConfig };
+  const itemWeights = cfg.items?.weights ?? {};
   const zones = blackboard[LEVEL_ZONES] ?? [];
   const rooms = blackboard[LEVEL_ROOMS] ?? {};
 
@@ -60,7 +83,7 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
   };
   const dropItem = (zone) => {
     const t = freeTile(zone);
-    if (t) level.placeEntity(make(registry, rng.pick(ITEM_POOL), t[0], t[1]));
+    if (t) level.placeEntity(make(registry, weightedItem(ITEM_POOL, itemWeights, rng), t[0], t[1]));
   };
 
   // Treasure rooms: a chest (with items) + some floor items.
@@ -71,7 +94,9 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
       const inv = chest.components.get('inventory');
       const n = rng.intInclusive(...cfg.treasureRoom.chestItems);
       for (let i = 0; i < n; i++)
-        inv.items.push(make(registry, rng.pick(ITEM_POOL), null, null, chest.id));
+        inv.items.push(
+          make(registry, weightedItem(ITEM_POOL, itemWeights, rng), null, null, chest.id),
+        );
       level.placeEntity(chest);
     }
     const n = rng.intInclusive(...cfg.treasureRoom.floorItems);

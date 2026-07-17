@@ -149,9 +149,9 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 
 ## Alpha - v0.4.0 - Maps, Maps, Maps
 
-*Done when the engine supports several visually distinct styles of random map generation, and item tables used for "floor" spawning, monster inventory, and monster loot drops.*
+*Done when the engine supports several visually distinct styles of random map generation, and possibly some new room types.*
 
-- [ ] Map Gen - Binary Space Partitioning
+- [x] Map Gen - Binary Space Partitioning
 - [ ] Map Gen - Cellular Automata
 - [ ] Map Gen - Drunk Walk/Digger
 - [ ] Map Gen - Voronoi/Wave Function Collapse
@@ -162,6 +162,8 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 ---
 
 ## Alpha - v0.5.0 - Items
+
+*Done when item tables are used for floor spawning, monster inventory, and monster loot drops.*
 
 - [ ] Item Tables / generic entity tables (spawn tables later?)
   - Weight by variables: depth, etc. - just give it the registry?

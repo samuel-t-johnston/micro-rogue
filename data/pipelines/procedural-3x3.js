@@ -8,12 +8,13 @@ export default {
   stages: [
     { type: 'roomGridGeometry' },
     // Explicit label list (extends stage-label's default) so the deepest floor also reserves a room
-    // for the Amulet of Yendor — stage-populate drops it in the 'amulet'-labelled zone.
-    { type: 'label', labels: ['stairs-up', 'stairs-down', 'treasure', 'item', 'item', 'amulet'] },
+    // for the Amulet of Yendor — stage-populate drops it in the 'amulet'-labelled zone. No
+    // 'stairs-down': this is the bottom of the branch, so it gets an up-stair only.
+    { type: 'label', labels: ['stairs-up', 'treasure', 'item', 'item', 'amulet'] },
     { type: 'link' },
     { type: 'carveRooms' },
     { type: 'carveHalls' },
-    { type: 'stairs' },
+    { type: 'stairs', stairs: [['stairs-up', 'up']] },
     { type: 'spawn' },
     // The shipped creature roster: who spawns and their room-affinity weights (per-label multipliers;
     // a room's pick-weight is the product over its labels). Item counts fall to stage-populate defaults.
