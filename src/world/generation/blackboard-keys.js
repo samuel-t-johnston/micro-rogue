@@ -15,6 +15,10 @@ export const LEVEL_GRID = 'level:grid'; // { cols, rows, cellSize }
 export const LEVEL_ZONES = 'level:zones';
 export const LEVEL_ADJACENCY = 'level:adjacency'; // [[idA, idB], …] (idA < idB, deduped)
 export const LEVEL_LINKS = 'level:links'; // adjacency pairs chosen to become corridors
+// Organic plan graph (no tiles yet): the chamber sites and the connections between them, consumed by
+// the carve stages. See docs/design/organic-map-generation.md.
+export const LEVEL_NODES = 'level:nodes'; // [{ id, x, y, radius }] — planned chamber sites
+export const LEVEL_EDGES = 'level:edges'; // [{ a, b, kind }] — kind: 'mst' | 'loop'
 // zone cell "c,r" -> carved room floor: a rect { x0,y0,x1,y1 } (BSP/grid/static) or an irregular
 // tile set { tiles:[[x,y]…] } (organic); either may carry core:[x,y], a deep-interior anchor.
 export const LEVEL_ROOMS = 'level:rooms';
