@@ -60,6 +60,18 @@ describe('label stage', () => {
     for (const z of zones) expect(z.labels.filter((l) => l !== 'room')).toHaveLength(1);
   });
 
+  it('assigns roles and fill only to chamber zones, never passages/junctions', () => {
+    const zones = [
+      { id: 0, cells: [[0, 0]], rect: {}, labels: ['room'], kind: 'passage' },
+      { id: 1, cells: [[1, 0]], rect: {}, labels: ['room'], kind: 'chamber' },
+      { id: 2, cells: [[2, 0]], rect: {}, labels: ['room'] }, // absent kind ⇒ chamber
+    ];
+    label(zones, 7, { labels: ['stairs-up'], fill: 'item' });
+    expect(zones.find((z) => z.id === 0).labels).toEqual(['room']); // passage untouched
+    expect(countLabel(zones, 'stairs-up')).toBe(1); // the one role landed on a chamber
+    expect(countLabel(zones, 'item')).toBe(1); // fill went to the other chamber, not the passage
+  });
+
   it('skips trailing labels (with a warning) when there are too few zones', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const zones = label(makeZones(3)); // 3 zones, 5 default labels
