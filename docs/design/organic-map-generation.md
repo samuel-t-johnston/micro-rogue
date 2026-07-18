@@ -246,6 +246,34 @@ them as hard bounds / repellent. This is **phase E**, deliberately after both ge
 end-to-end, and is the feature that lets a single pipeline compose multiple structure stages (e.g. a
 BSP wing beside a CA cavern) to prove out the whole system.
 
+### Composition preconditions & known gaps (Phase E)
+
+Single-section pipelines (phase B/D) compose cleanly with the shared tail — but *multiple* structure
+sections in one map hit three gaps that phase E must close. They are recorded here so the composition
+work doesn't rediscover them by hitting a silent overwrite. All three fixes are **additive**; none
+disturbs the region model.
+
+1. **Zone-id namespacing.** `carveChambers` uses each node's `id` as the zone id and `"{id},0"` as the
+   room key, and every `layoutNodes` numbers its nodes from 0. Two node-based sections therefore reuse
+   ids `0…n` and overwrite each other's rooms. Sections must namespace their id space (e.g. offset by
+   the current `level:zones` length, keeping the node→room key in sync so `carveCorridors` still
+   resolves target tiles). This is why the walker is single-section until phase E.
+
+2. **`level:bounds` is a single, last-writer-wins slot** — "the current section's rect," not a durable
+   "map size." It works in the interleaved `layout→carve→layout→carve` pattern only because
+   `carveChambers` reads it *solely* to size a standalone grid, and a composed map's grid already
+   exists (so the read is skipped). Two consequences for phase E: a **full-map box stage must run
+   first** to establish the grid (the standalone sizing `level.width = bounds.x + bounds.w` assumes
+   bounds are origin-anchored and span the whole map), and nothing should treat `level:bounds` as the
+   map extent.
+
+3. **Per-section population needs a scope filter.** `label`/`stairs`/`populate` iterate the *entire*
+   `level:zones` array, so a single populate fills a composite map uniformly (which is correct for a
+   uniform map) but there is no way to give section A orcs and section B goblins. The fix is to tag
+   zones with a `section`/`district` id at carve time and let the population stages take a `section`
+   (or `bounds`) filter — the same shape as the existing `kind`/`labels` filters. This is the
+   [deferred **districts** feature](#11-deferred).
+
 ---
 
 ## 7. Shared tail — unchanged

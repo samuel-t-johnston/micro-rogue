@@ -19,6 +19,7 @@ export const LEVEL_LINKS = 'level:links'; // adjacency pairs chosen to become co
 // the carve stages. See docs/design/organic-map-generation.md.
 export const LEVEL_NODES = 'level:nodes'; // [{ id, x, y, radius }] — planned chamber sites
 export const LEVEL_EDGES = 'level:edges'; // [{ a, b, kind }] — kind: 'mst' | 'loop'
+export const LEVEL_BOUNDS = 'level:bounds'; // { x, y, w, h } — the rect this pipeline generates within
 // zone cell "c,r" -> carved room floor: a rect { x0,y0,x1,y1 } (BSP/grid/static) or an irregular
 // tile set { tiles:[[x,y]…] } (organic); either may carry core:[x,y], a deep-interior anchor.
 export const LEVEL_ROOMS = 'level:rooms';

@@ -8,6 +8,12 @@ function layout(config = {}, seed = 1) {
   return bb['level:nodes'];
 }
 
+function layoutBoard(config = {}, seed = 1) {
+  const bb = {};
+  runLayoutNodes(null, config, bb, createRng(seed));
+  return bb;
+}
+
 const sqDist = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 
 describe('layoutNodes stage', () => {
@@ -34,12 +40,21 @@ describe('layoutNodes stage', () => {
     }
   });
 
-  it('separates node centres by at least minSeparation', () => {
-    const minSeparation = 14;
-    const nodes = layout({ width: 60, height: 40, nodeCount: 14, radius: [2, 6], minSeparation });
+  it('separates chambers by their actual radii plus the gap', () => {
+    const gap = 2;
+    const nodes = layout({ width: 60, height: 40, nodeCount: 14, radius: [2, 6], gap });
     for (let i = 0; i < nodes.length; i++)
-      for (let j = i + 1; j < nodes.length; j++)
-        expect(sqDist(nodes[i], nodes[j])).toBeGreaterThanOrEqual(minSeparation ** 2);
+      for (let j = i + 1; j < nodes.length; j++) {
+        const need = nodes[i].radius + nodes[j].radius + gap;
+        expect(sqDist(nodes[i], nodes[j])).toBeGreaterThanOrEqual(need ** 2);
+      }
+  });
+
+  it('hits the target node count on a normal-sized floor', () => {
+    // The per-pair separation must not starve the count the way a global minimum did — a 56×40 floor
+    // comfortably fits a dozen chambers.
+    const nodes = layout({ width: 56, height: 40, nodeCount: 12, radius: [2, 6] }, 5);
+    expect(nodes.length).toBeGreaterThanOrEqual(10);
   });
 
   it('draws radii across the whole range (both small and large appear)', () => {
@@ -69,5 +84,16 @@ describe('layoutNodes stage', () => {
     const a = layout({ nodeCount: 12 }, 42);
     const b = layout({ nodeCount: 12 }, 42);
     expect(a).toEqual(b);
+  });
+
+  it('publishes the generation bounds for the carve stages', () => {
+    expect(layoutBoard({ width: 48, height: 32 })['level:bounds']).toEqual({
+      x: 0,
+      y: 0,
+      w: 48,
+      h: 32,
+    });
+    const bounds = { x: 20, y: 10, w: 24, h: 18 };
+    expect(layoutBoard({ bounds })['level:bounds']).toEqual(bounds);
   });
 });

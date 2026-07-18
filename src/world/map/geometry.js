@@ -1,16 +1,15 @@
 /** @file Small grid-geometry helpers shared across pathfinding and AI goals. */
 
-/** 8-directional neighbor offsets (orthogonal first, then diagonals). */
-export const DIRECTIONS_8 = [
+/** 4-directional (orthogonal) neighbor offsets — the cardinal subset of DIRECTIONS_8. */
+export const DIRECTIONS_4 = [
   [-1, 0],
   [1, 0],
   [0, -1],
   [0, 1],
-  [-1, -1],
-  [-1, 1],
-  [1, -1],
-  [1, 1],
 ];
+
+/** 8-directional neighbor offsets (orthogonal first, then diagonals). */
+export const DIRECTIONS_8 = [...DIRECTIONS_4, [-1, -1], [-1, 1], [1, -1], [1, 1]];
 
 /** Chebyshev (chessboard) distance — the number of 8-directional steps between two tiles. */
 export function chebyshevDistance(a, b) {
