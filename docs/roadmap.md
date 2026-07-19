@@ -153,7 +153,7 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 
 - [x] Map Gen - Binary Space Partitioning
 - [ ] Map Gen - Cellular Automata
-- [ ] Map Gen - Drunk Walk/Digger
+- [x] Map Gen - Drunk Walk/Digger
 - [ ] Map Gen - Voronoi/Wave Function Collapse
 - [ ] Fancy bitset/Page 437 line walls (in glyph rendering mode) - config to enable
 - [ ] Re-entry pipeline - level that always regenerates
