@@ -1,8 +1,9 @@
 // The BSP branch floor: a large "fully packed" building-style level (binary space partitioning with
 // halls), used for the game's second dungeon branch — reached from floor-1's second down-stair
 // (data/transit-map.js). Planner+realization is bspGeometry → label → bspCarve; then the usual
-// stairs/spawn/populate finish it. Being a leaf branch it places only an up-stair (back to floor-1).
-// See docs/howto/dynamic-map-generation.md and docs/design/map-generation.md.
+// stairs/spawn/populate finish it. It places an up-stair (back to floor-1) and a down-stair on to the
+// walker cave floor deeper in the branch. See docs/howto/dynamic-map-generation.md and
+// docs/design/map-generation.md.
 export default {
   id: 'bsp',
   stages: [
@@ -18,10 +19,16 @@ export default {
     },
     // A couple of treasure rooms; every other room is an item room (fill), so this big floor is densely
     // looted rather than mostly empty.
-    { type: 'label', labels: ['stairs-up', 'treasure', 'treasure'], fill: 'item' },
+    { type: 'label', labels: ['stairs-up', 'stairs-down', 'treasure', 'treasure'], fill: 'item' },
     { type: 'bspCarve', doors: { present: 'all', open: 'none' } },
-    // Leaf branch: only an up-stair, wired back to floor-1's 'branch1' port by the transit map.
-    { type: 'stairs', stairs: [['stairs-up', 'up']] },
+    // Up to floor-1 (via the transit map's 'branch1' port) and down to the walker cave floor.
+    {
+      type: 'stairs',
+      stairs: [
+        ['stairs-up', 'up'],
+        ['stairs-down', 'down'],
+      ],
+    },
     { type: 'spawn' },
     {
       type: 'populate',
