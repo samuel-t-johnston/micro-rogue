@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import walker from '../../../data/pipelines/walker.js';
-import { runPipeline } from '../generation/pipeline.js';
-import { createEntityRegistry } from '../../engine/core/entity-component-system.js';
-import { createRng } from '../../engine/core/rng.js';
+import walker from './walker.js';
+import { runPipeline } from '../../src/world/generation/pipeline.js';
+import { createEntityRegistry } from '../../src/engine/core/entity-component-system.js';
+import { createRng } from '../../src/engine/core/rng.js';
 
 // Generate the shipped walker floor headlessly — the per-pipeline generation test the dungeon-planner
 // design recommends: it exercises the real config end to end and pins the connection contract.
