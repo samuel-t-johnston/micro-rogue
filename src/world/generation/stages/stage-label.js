@@ -15,6 +15,7 @@
  *   level:zones — each chosen zone gets one label pushed onto its `labels` (alongside 'room').
  */
 import { LEVEL_ZONES } from '../blackboard-keys.js';
+import { isChamber } from '../zone-tiles.js';
 
 const DEFAULT_LABELS = ['stairs-up', 'stairs-down', 'treasure', 'item', 'item'];
 
@@ -23,8 +24,10 @@ export function run(level, stageConfig = {}, blackboard, rng) {
   const labels = stageConfig.labels ?? DEFAULT_LABELS;
   const zones = blackboard[LEVEL_ZONES] ?? [];
 
-  // Assign each label to a distinct zone, drawn without replacement so no zone gets two roles.
-  const pool = [...zones];
+  // Roles (and the fill label) only go on chamber zones — never a passage or junction, which are
+  // connective tissue, not places to put stairs, treasure, or the amulet. Drawn without replacement
+  // so no zone gets two roles.
+  const pool = zones.filter(isChamber);
   for (const label of labels) {
     if (pool.length === 0) {
       console.warn(`[label] ran out of zones; "${label}" not placed`);

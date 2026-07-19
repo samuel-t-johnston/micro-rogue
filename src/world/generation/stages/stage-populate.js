@@ -4,7 +4,7 @@
  * weight is the product of its labels' weights — >1 attracts, <1 repels). See docs/design/procedural-3x3-dungeon.md.
  */
 import { ENTITY_PREFABS, prefabIdsByKind } from '../../entities/entity-prefabs.js';
-import { roomTiles, centermostRoomTile } from '../zone-tiles.js';
+import { roomTiles, centermostRoomTile, isChamber } from '../zone-tiles.js';
 import { LEVEL_ZONES, LEVEL_ROOMS } from '../blackboard-keys.js';
 
 const make = (registry, id, x, y, entityId) => ENTITY_PREFABS[id].make(registry, x, y, entityId);
@@ -69,7 +69,9 @@ function weightedItem(pool, weights, rng) {
 export function run(level, stageConfig = {}, blackboard, rng, registry) {
   const cfg = { ...DEFAULTS, ...stageConfig };
   const itemWeights = cfg.items?.weights ?? {};
-  const zones = blackboard[LEVEL_ZONES] ?? [];
+  // Populate chamber zones only — passages and junctions (CA's connective tissue) are never rooms to
+  // fill.
+  const zones = (blackboard[LEVEL_ZONES] ?? []).filter(isChamber);
   const rooms = blackboard[LEVEL_ROOMS] ?? {};
 
   // Empty room tiles only — inside the room rect, and not already occupied (the spatial index

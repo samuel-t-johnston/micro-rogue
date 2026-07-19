@@ -14,6 +14,10 @@ import { run as runCarveRooms } from './stages/stage-carve-rooms.js';
 import { run as runCarveHalls } from './stages/stage-carve-halls.js';
 import { run as runBspGeometry } from './stages/stage-bsp-geometry.js';
 import { run as runBspCarve } from './stages/stage-bsp-carve.js';
+import { run as runLayoutNodes } from './stages/stage-layout-nodes.js';
+import { run as runLayoutEdges } from './stages/stage-layout-edges.js';
+import { run as runCarveChambers } from './stages/stage-carve-chambers.js';
+import { run as runCarveCorridors } from './stages/stage-carve-corridors.js';
 import { run as runStairs } from './stages/stage-stairs.js';
 import { run as runSpawn } from './stages/stage-spawn.js';
 import { run as runPopulate } from './stages/stage-populate.js';
@@ -31,6 +35,10 @@ const STAGES = {
   carveHalls: runCarveHalls,
   bspGeometry: runBspGeometry,
   bspCarve: runBspCarve,
+  layoutNodes: runLayoutNodes,
+  layoutEdges: runLayoutEdges,
+  carveChambers: runCarveChambers,
+  carveCorridors: runCarveCorridors,
   stairs: runStairs,
   spawn: runSpawn,
   populate: runPopulate,

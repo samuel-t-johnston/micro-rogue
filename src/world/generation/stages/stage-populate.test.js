@@ -202,6 +202,40 @@ describe('populate stage', () => {
     expect([pos.x, pos.y]).toEqual(tile);
   });
 
+  it('populates chamber zones only, never passage/junction regions', () => {
+    const level = createLevel();
+    const reg = createEntityRegistry();
+    const bb = level.blackboard;
+    level.width = 10;
+    level.height = 4;
+    level.tiles = Array.from({ length: 4 }, () => Array.from({ length: 10 }, () => 'floor'));
+    // A passage and a chamber, both labelled 'item'. Only the chamber should receive anything.
+    bb['level:zones'] = [
+      {
+        id: 0,
+        cells: [[0, 0]],
+        rect: { x: 0, y: 0, w: 4, h: 4 },
+        labels: ['room', 'item'],
+        kind: 'passage',
+      },
+      {
+        id: 1,
+        cells: [[1, 0]],
+        rect: { x: 5, y: 0, w: 4, h: 4 },
+        labels: ['room', 'item'],
+        kind: 'chamber',
+      },
+    ];
+    bb['level:rooms'] = {
+      '0,0': { x0: 1, y0: 1, x1: 2, y1: 2 }, // passage tiles: x 1..2
+      '1,0': { x0: 6, y0: 1, x1: 7, y1: 2 }, // chamber tiles: x 6..7
+    };
+    runPopulate(level, { itemRoom: { floorItems: [1, 1] } }, bb, createRng(1), reg);
+    const placed = level.entities.filter((e) => e.components.get('position'));
+    expect(placed.length).toBeGreaterThan(0);
+    for (const e of placed) expect(e.components.get('position').x).toBeGreaterThanOrEqual(5);
+  });
+
   it('places no amulet when the amulet label is absent', () => {
     const { reg } = generate(3); // default labels, no 'amulet'
     expect(reg.getEntitiesWith('questItem')).toHaveLength(0);

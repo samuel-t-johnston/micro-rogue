@@ -50,6 +50,23 @@ describe('transit map (the shipped 3-floor stack)', () => {
     });
   });
 
+  it('extends the BSP branch down to the walker cave floor and back', () => {
+    expect(getNode(transitMap, 'branch-1-floor-2')).toMatchObject({
+      pipelineId: 'walker',
+      branch: 1,
+      depth: 1,
+    });
+    expect(resolveDestination(transitMap, 'branch-1-floor-1', 'down')).toEqual({
+      node: 'branch-1-floor-2',
+      port: 'up',
+    });
+    expect(resolveDestination(transitMap, 'branch-1-floor-2', 'up')).toEqual({
+      node: 'branch-1-floor-1',
+      port: 'down',
+    });
+    expect(resolveDestination(transitMap, 'branch-1-floor-2', 'down')).toBeNull(); // branch bottom
+  });
+
   it('looks up nodes by id and their generation identity', () => {
     expect(getNode(transitMap, 'floor-2')).toMatchObject({
       id: 'floor-2',
