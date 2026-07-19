@@ -6,37 +6,13 @@ import { createRng } from '../../src/engine/core/rng.js';
 
 // Generate the shipped walker floor headlessly — the per-pipeline generation test the dungeon-planner
 // design recommends: it exercises the real config end to end and pins the connection contract.
+// (Full-level connectivity is asserted for every procedural pipeline in connectivity.test.js.)
 async function generate(seed) {
   const registry = createEntityRegistry();
   const level = await runPipeline(walker, createRng(seed), registry, {
     identity: { branch: 1, depth: 1 },
   });
   return { level, registry };
-}
-
-// Every node centre reachable over floor from the entry point — the whole floor is traversable.
-function fullyConnected(level) {
-  const nodes = level.blackboard['level:nodes'];
-  const floor = (x, y) => level.getTile(x, y) === 'floor';
-  const start = nodes[0];
-  const seen = new Set([`${start.x},${start.y}`]);
-  const stack = [[start.x, start.y]];
-  while (stack.length) {
-    const [x, y] = stack.pop();
-    for (const [dx, dy] of [
-      [1, 0],
-      [-1, 0],
-      [0, 1],
-      [0, -1],
-    ]) {
-      const k = `${x + dx},${y + dy}`;
-      if (floor(x + dx, y + dy) && !seen.has(k)) {
-        seen.add(k);
-        stack.push([x + dx, y + dy]);
-      }
-    }
-  }
-  return nodes.every((n) => seen.has(`${n.x},${n.y}`));
 }
 
 describe('walker pipeline (the shipped cave floor)', () => {
@@ -58,13 +34,6 @@ describe('walker pipeline (the shipped cave floor)', () => {
   it('marks a player entry point', async () => {
     const { registry } = await generate(1);
     expect(registry.getEntitiesWith('entryPoint')).toHaveLength(1);
-  });
-
-  it('produces a fully connected floor across seeds', async () => {
-    for (let seed = 1; seed <= 8; seed++) {
-      const { level } = await generate(seed);
-      expect(fullyConnected(level)).toBe(true);
-    }
   });
 
   it('populates chambers with creatures and items', async () => {
