@@ -95,31 +95,6 @@ AI/Senses/Goals
 - [x] Orc commander spawns with bow, arrows. Ranged attack goal.
 - [x] NPC open-door goal
 
-*NPC open-door note (landed): the `explore-doors-eager` goal makes wandering creatures seek out closed
-doors and pass through them, spreading a squad across a level instead of milling in one room. It sits
-just above `wander-aimlessly` in the orc and orc-commander stacks. Prerequisite: sight observations now
-carry `tags.isOpenable` + `isOpen` (a shared `describeObservedEntity` helper, `src/ai/senses/observation-utils.js`,
-keeps `vision` and `mega-vision` from drifting) so goals can reason about doors — previously a door
-appeared in perception untagged. The goal keeps private state in `memory.exploreDoors` (a pursued door's
-`targetId`/`targetPos` plus recently `explored` tiles that decay after 5 of the creature's turns): doors
-are **acquired** only through perception, but a chosen target's open/closed state is read straight off the
-entity so losing line of sight mid-approach doesn't strand it. It approaches a tile *beside* a closed door
-(the door tile isn't passable), opens it when adjacent, marks its side, steps onto the door, then steps off
-the far side away from where it came — the explored marks are what carry it *through* rather than back.
-Gives up on unreachable, vanished, or externally-opened targets. No save-version bump — `memory.exploreDoors`
-is additive with tolerant defaults.*
-
-*NPC ranged note (landed): the ranged-combat infrastructure was already creature-agnostic, so NPC use
-needed only AI + content. A stamped `entityTypeId` gives every prefab a stable content identity; a new
-**loadout stage** (`stage-loadout.js`) fills placed creatures' inventories from **item tables**
-(`item-tables.js`) — orcs get a spear, the orc commander a bow + arrows — running after placement so it
-disturbs no seeded determinism. Eager `equip-weapon`/`equip-ammo` goals wield the kit (introspecting the
-creature's own body via a new `context.selfEntity`), and a unified **`attack-in-range`** goal replaces the
-melee-only `attack-adjacent`, covering melee and ranged off the creature's own weapon reach. Its
-clear-line test (`src/combat/targeting.js`) is shared with the player's tile-action resolver. No kiting
-yet — a ranged attacker stands and shoots, with `chase-others` (ranked below) closing when out of reach.
-See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/ranged-weapons.md) §13.*
-
 ---
 
 ## Alpha - v0.3.0 - Level Up
@@ -152,7 +127,7 @@ See [docs/howto/loadouts.md](howto/loadouts.md) and [ranged-weapons.md](design/r
 *Done when the engine supports several visually distinct styles of random map generation, and possibly some new room types.*
 
 - [x] Map Gen - Binary Space Partitioning
-- [ ] Map Gen - Cellular Automata
+- [x] Map Gen - Cellular Automata
 - [x] Map Gen - Drunk Walk/Digger
 - [ ] Map Gen - Voronoi/Wave Function Collapse
 - [ ] Fancy bitset/Page 437 line walls (in glyph rendering mode) - config to enable

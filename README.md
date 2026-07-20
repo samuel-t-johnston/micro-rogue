@@ -14,12 +14,14 @@ ROGμE is designed to be an easy way to jump into game development, even if you 
 > - Sprite and glyph-based (ASCII) graphics, swappable on the fly
 > - Zoom and pan
 > - Auto-save and load, save version migration
+> - Flexible attribute system, XP, and level-up rules
+> - Food and hunger
 > - Inventory, containers, items, equipment, ammunition
 > - Creatures/monsters
 > - Melee and ranged combat
 > - Expandable "senses" system for creature and player perception (vision, hearing, smell)
-> - Goal-based, flexible AI system. Monsters use equipment.
-> - Expandable map generation system - pipelines and stages - supporting static and randomly generated maps
+> - Goal-based, flexible AI system. Monsters use equipment and communicate.
+> - Expandable map generation system - pipelines and stages - supporting static and random (BSP, CA, etc.) maps
 > - Complete game loop with win and loss conditions
 > - Web audio SFX and background music
 > - Extensive documentation via short "how-to" guides
