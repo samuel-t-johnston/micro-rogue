@@ -1,35 +1,37 @@
 import { describe, it, expect } from 'vitest';
-import walker from './walker.js';
+import ca from './ca.js';
 import { runPipeline } from '../../src/world/generation/pipeline.js';
 import { createEntityRegistry } from '../../src/engine/core/entity-component-system.js';
 import { createRng } from '../../src/engine/core/rng.js';
 
-// Generate the shipped walker floor headlessly — the per-pipeline generation test the dungeon-planner
-// design recommends: it exercises the real config end to end and pins the connection contract.
-// (Full-level connectivity is asserted for every procedural pipeline in connectivity.test.js.)
+// Generate the shipped CA cave floor headlessly — the per-pipeline generation test the dungeon-planner
+// design recommends. (Full-level connectivity is asserted for every procedural pipeline in
+// connectivity.test.js.)
 async function generate(seed) {
   const registry = createEntityRegistry();
-  const level = await runPipeline(walker, createRng(seed), registry, {
-    identity: { branch: 1, depth: 1 },
+  const level = await runPipeline(ca, createRng(seed), registry, {
+    identity: { branch: 1, depth: 2 },
   });
   return { level, registry };
 }
 
-describe('walker pipeline (the shipped cave floor)', () => {
-  it('generates a tiled level of the configured size', async () => {
+describe('ca pipeline (the shipped cave floor)', () => {
+  it('generates a tiled level of the configured size with inferred regions', async () => {
     const { level } = await generate(1);
     expect(level.width).toBe(56);
     expect(level.height).toBe(40);
-    expect(level.blackboard['level:nodes'].length).toBeGreaterThan(0);
+    const zones = level.blackboard['level:zones'];
+    expect(zones.length).toBeGreaterThan(0);
+    expect(zones.every((z) => z.origin === 'inferred')).toBe(true);
+    expect(zones.some((z) => z.kind === 'chamber')).toBe(true);
   });
 
-  it('places both declared stair transitions (up to BSP, down to the CA floor)', async () => {
+  it('places exactly the declared up-stair transition (and no down-stair)', async () => {
     const { registry } = await generate(1);
     const ports = registry
       .getEntitiesWith('transition')
-      .map((t) => t.components.get('transition').port)
-      .sort();
-    expect(ports).toEqual(['down', 'up']);
+      .map((t) => t.components.get('transition').port);
+    expect(ports).toEqual(['up']);
   });
 
   it('marks a player entry point', async () => {

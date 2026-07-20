@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import walker from './walker.js';
 import bsp from './bsp.js';
+import ca from './ca.js';
 import procedural3x3 from './procedural-3x3.js';
 import { runPipeline } from '../../src/world/generation/pipeline.js';
 import { centermostRoomTile } from '../../src/world/generation/zone-tiles.js';
@@ -16,6 +17,7 @@ import { createRng } from '../../src/engine/core/rng.js';
 const PIPELINES = [
   ['walker', walker],
   ['bsp', bsp],
+  ['ca', ca],
   ['procedural-3x3', procedural3x3],
 ];
 

@@ -1,8 +1,8 @@
 // The walker branch floor: an organic, cave-like level built by the semi-sober walker pipeline
-// (layoutNodes → layoutEdges → carveChambers → carveCorridors), then the usual shared tail. Sits one
-// step deeper than the BSP floor on the game's second branch (data/transit-map.js), reached from that
-// floor's down-stair. Being the branch's deepest floor it places only an up-stair (back to the BSP
-// floor). See docs/design/organic-map-generation.md and docs/howto/dynamic-map-generation.md.
+// (layoutNodes → layoutEdges → carveChambers → carveCorridors), then the usual shared tail. The middle
+// floor of the game's second branch (data/transit-map.js): reached from the BSP floor's down-stair,
+// and leading on down to the cellular-automata cave floor. See docs/design/organic-map-generation.md
+// and docs/howto/dynamic-map-generation.md.
 export default {
   id: 'walker',
   stages: [
@@ -11,9 +11,15 @@ export default {
     { type: 'carveChambers' },
     { type: 'carveCorridors' },
     // One up-stair chamber and a couple of treasure chambers; every other chamber holds loot (fill).
-    { type: 'label', labels: ['stairs-up', 'treasure', 'treasure'], fill: 'item' },
-    // Leaf of the branch: only an up-stair, wired back to the BSP floor's 'down' port by the transit map.
-    { type: 'stairs', stairs: [['stairs-up', 'up']] },
+    { type: 'label', labels: ['stairs-up', 'stairs-down', 'treasure', 'treasure'], fill: 'item' },
+    // Up to the BSP floor and down to the CA cave floor (transit map wires the ports).
+    {
+      type: 'stairs',
+      stairs: [
+        ['stairs-up', 'up'],
+        ['stairs-down', 'down'],
+      ],
+    },
     { type: 'spawn' },
     {
       type: 'populate',

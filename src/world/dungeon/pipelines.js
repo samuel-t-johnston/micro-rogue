@@ -8,6 +8,7 @@ import randomStaticMaze from '../../../data/pipelines/random-static-maze.js';
 import procedural3x3 from '../../../data/pipelines/procedural-3x3.js';
 import bsp from '../../../data/pipelines/bsp.js';
 import walker from '../../../data/pipelines/walker.js';
+import ca from '../../../data/pipelines/ca.js';
 
 const PIPELINES = {
   [staticTestLevel.id]: staticTestLevel,
@@ -15,6 +16,7 @@ const PIPELINES = {
   [procedural3x3.id]: procedural3x3,
   [bsp.id]: bsp,
   [walker.id]: walker,
+  [ca.id]: ca,
 };
 
 /**
