@@ -176,8 +176,13 @@ but they carve plain tiles and create **no** zone.
 
 ### `caSeed` → tiles
 
-Random fill: each interior tile is wall with probability `wallChance` (~0.45; below ~0.42 opens into
-one blob, above ~0.48 fragments into disconnected soup). Force the level border to wall.
+Random fill: each interior tile is wall with probability `wallChance`, border forced to wall. The
+draft's "~0.45" was the blind estimate and is wrong for the pure ≥5 rule: because that rule erodes a
+wall *minority*, walls must start in the **majority** to survive smoothing. Measured against real
+output, ~0.55 leaves one dominant cavern plus specks, **~0.62** (the default) breaks into several
+distinct caverns at ~⅓ floor, and much above ~0.64 the caves turn cramped and twisty. (A two-rule CA —
+also filling large open areas — would give defined chambers at lower density; deferred unless the
+single rule proves insufficient.)
 
 ### `caSmooth` → tiles
 

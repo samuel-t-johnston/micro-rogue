@@ -18,6 +18,8 @@ import { run as runLayoutNodes } from './stages/stage-layout-nodes.js';
 import { run as runLayoutEdges } from './stages/stage-layout-edges.js';
 import { run as runCarveChambers } from './stages/stage-carve-chambers.js';
 import { run as runCarveCorridors } from './stages/stage-carve-corridors.js';
+import { run as runCaSeed } from './stages/stage-ca-seed.js';
+import { run as runCaSmooth } from './stages/stage-ca-smooth.js';
 import { run as runStairs } from './stages/stage-stairs.js';
 import { run as runSpawn } from './stages/stage-spawn.js';
 import { run as runPopulate } from './stages/stage-populate.js';
@@ -39,6 +41,8 @@ const STAGES = {
   layoutEdges: runLayoutEdges,
   carveChambers: runCarveChambers,
   carveCorridors: runCarveCorridors,
+  caSeed: runCaSeed,
+  caSmooth: runCaSmooth,
   stairs: runStairs,
   spawn: runSpawn,
   populate: runPopulate,
