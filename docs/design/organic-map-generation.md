@@ -189,12 +189,20 @@ single rule proves insufficient.)
 A tile becomes wall if ≥5 of its 8 neighbours are wall. `iterations` ~4 (5–6 over-rounds and closes
 the necks that segmentation is looking for). Fixed iteration count keeps this O(tiles).
 
-### `caBridge` → tiles (non-zone), `level:links`
+### `caBridge` → tiles, `level:passageTiles`
 
-Find connected components; discard any below `minComponentSize` (~30 tiles). Bridge the survivors:
-MST over component **centroids** (O(components²) — *not* over tiles, see the raster discipline in
-ADR-028), each bridge carved with the same goal-biased walker at high sobriety (~0.85) so bridges
-read as deliberate. Bridges are tagged connective tissue.
+Find connected components; discard any below `minComponentSize` (~30 tiles), but always keep the
+single largest so the level is never wiped. Bridge the survivors: MST over component **representatives**
+(the floor tile nearest each centroid — O(components²), *not* over tiles, see the raster discipline in
+ADR-028), each bridge carved with the same goal-biased walker at high sobriety (~0.85) so bridges read
+as deliberate.
+
+**The digger knows what it dug.** The walker reports the tiles it turned from wall to floor — the
+tunnel it *created*, as opposed to the existing floor it merely passed through. Those dug tiles are the
+level's genuine connective tissue, published as `level:passageTiles` for `segmentRegions` to tag
+`passage`. This is how passages emerge at all: a bridge is width-1, so the watershed would otherwise
+split it down the middle between the two chambers and no passage region would form. Tagging at the
+source (the digger) is strictly better than trying to re-infer it.
 
 **This runs before segmentation.** Segment first and the bridges arrive with no region assignment and
 the region graph is silently wrong.
@@ -206,17 +214,26 @@ The stage CA earns. It consumes no RNG and is a pure function of geometry.
 1. **Distance transform.** `D(x,y)` = Chebyshev distance from each floor tile to the nearest wall,
    two O(n) sweeps. A 1-wide corridor has `D=1`; a cavern centre has `D=6`. This is the narrow-gap
    detector.
-2. **Cores.** Local maxima of `D` are chamber cores. Each becomes a chamber's `core` (§2).
-3. **Flood.** Grow outward from cores in descending `D` order until regions collide.
-4. **Merge on prominence.** Where two regions meet is a saddle; merge them unless at least one peak
-   rises more than `prominence` above the meeting point. This is mountain prominence — one integer
-   decides whether a lumpy cavern reads as one chamber or three, mapping directly onto what a player
-   perceives as a separate space. `prominence` ~2 to start.
+2. **Watershed the chamber floor** (everything but the dug `passageTiles`) in descending `D`: a tile
+   with no labelled neighbour is a core; otherwise it joins its neighbours. Excluding the passages
+   means a deliberate bridge never merges the two chambers it joins.
+3. **Merge on prominence.** A tile that first connects two basins is a saddle at height `S`; merge them
+   unless the *shallower* peak clears it — keep separate iff `min(peakA,peakB) − S > prominence`. One
+   integer decides whether a lumpy cavern reads as one chamber or several. **`prominence` 0** is the
+   tuned default (measured against rendered CA output — the blind draft's "~2" over-merged everything
+   into one blob). Saddle tiles are **divides**: they don't propagate a region (or a basin bleeds
+   through a neck into its neighbour) and are assigned to a region only afterward.
 
-Each surviving region becomes a `level:zones` entry: `kind: 'chamber'` if its core clears
-`passageThreshold` (tiles with `D ≤ 1` are `passage`, not undersized rooms), `origin: 'inferred'`,
-with its `tiles` and `core`. Region collisions produce `level:adjacency`; the low-`D` meeting tiles
-produce `level:chokepoints` (door / ambush / guard-post candidates, straight to population).
+Each chamber basin becomes a `level:zones` entry (`kind: 'chamber'`, `origin: 'inferred'`, with its
+`tiles` and `core`); a basin whose peak never clears `passageThreshold` is a `passage` instead. The
+dug `passageTiles` become their own `passage` regions (their connected components). Regions that touch
+produce `level:adjacency`; the narrowest (lowest-`D`) boundary tile of each pair is a
+`level:chokepoint` (door / ambush / guard-post candidate, straight to population).
+
+> **Passages come from the digger, not the watershed.** In practice a watershed over cave floor rarely
+> yields a standalone `passage` region — the connective necks get absorbed into the chambers they join,
+> surfacing instead as chokepoints. Real passage *regions* come from `caBridge` tagging the tiles it
+> dug (above). The `passageThreshold` rule remains a cheap catch for a genuinely thin basin.
 
 **Jagged CA walls are not a problem.** A single-tile wall nub yields a spurious `D` peak with
 near-zero prominence, so the merge step eats it on the first pass — the knob for "one cavern or

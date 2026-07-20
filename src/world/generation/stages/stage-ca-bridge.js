@@ -25,7 +25,7 @@
  *
  * Blackboard: reads level:bounds; writes tiles.
  */
-import { LEVEL_BOUNDS } from '../blackboard-keys.js';
+import { LEVEL_BOUNDS, LEVEL_PASSAGE_TILES } from '../blackboard-keys.js';
 import { DIRECTIONS_4, euclideanMst, squaredDistance } from '../../map/geometry.js';
 import { carveWalk } from '../walk.js';
 
@@ -104,10 +104,14 @@ export function run(level, stageConfig = {}, blackboard, rng) {
   }
   if (keepers.length < 2) return;
 
-  // Bridge the survivors along an MST of their representatives; each bridge arrives in its target.
+  // Bridge the survivors along an MST of their representatives; each bridge arrives in its target. The
+  // tiles a bridge digs (not the existing floor it passes through) are the level's connective tissue —
+  // published so segmentRegions can tag them `passage`.
   const reps = keepers.map(representative);
+  const passageTiles = blackboard[LEVEL_PASSAGE_TILES] ?? [];
   for (const { a, b } of euclideanMst(reps)) {
     const targetTiles = new Set(keepers[b].map(([x, y]) => `${x},${y}`));
-    carveWalk(level, reps[a], reps[b], targetTiles, opts, rng);
+    passageTiles.push(...carveWalk(level, reps[a], reps[b], targetTiles, opts, rng));
   }
+  blackboard[LEVEL_PASSAGE_TILES] = passageTiles;
 }

@@ -30,12 +30,17 @@ function stepToward(pos, target, rng) {
  * `maxStepsFactor · chebyshev(start,target)` steps it L-lines the remainder to `target`. That makes
  * non-arrival — a disconnected level, the one bug that ruins a run — impossible rather than unlikely.
  * The L fallback advances one axis per tile so the path stays 4-connected (a diagonal line would only
- * corner-touch and wouldn't be walkable). Consumes rng.
+ * corner-touch and wouldn't be walkable). Consumes rng. Returns the tiles it *dug* (turned from
+ * non-floor to floor) — the tunnel it created, as opposed to the existing floor it passed through;
+ * callers that care about connective tissue (caBridge → passages) collect these.
  */
 export function carveWalk(level, start, target, targetTiles, opts, rng) {
   const { sobriety, momentum, maxStepsFactor } = opts;
+  const dug = [];
   const carve = (x, y) => {
-    if (level.tiles[y]?.[x] !== undefined) level.tiles[y][x] = 'floor';
+    if (level.tiles[y]?.[x] === undefined) return;
+    if (level.tiles[y][x] !== 'floor') dug.push([x, y]);
+    level.tiles[y][x] = 'floor';
   };
   const inBounds = (x, y) => level.tiles[y]?.[x] !== undefined;
 
@@ -74,4 +79,5 @@ export function carveWalk(level, start, target, targetTiles, opts, rng) {
       carve(cx, cy);
     }
   }
+  return dug;
 }

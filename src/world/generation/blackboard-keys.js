@@ -20,6 +20,12 @@ export const LEVEL_LINKS = 'level:links'; // adjacency pairs chosen to become co
 export const LEVEL_NODES = 'level:nodes'; // [{ id, x, y, radius }] — planned chamber sites
 export const LEVEL_EDGES = 'level:edges'; // [{ a, b, kind }] — kind: 'mst' | 'loop'
 export const LEVEL_BOUNDS = 'level:bounds'; // { x, y, w, h } — the rect this pipeline generates within
+// [{ x, y, width }] — the narrow tiles where segmented regions meet (door / ambush / guard-post
+// candidates). Produced by segmentRegions. See docs/design/organic-map-generation.md (ADR-027).
+export const LEVEL_CHOKEPOINTS = 'level:chokepoints';
+// [[x,y], …] — tiles a digger carved from wall (not merely passed through). caBridge records its
+// bridges here; segmentRegions treats them as connective tissue and emits them as `passage` regions.
+export const LEVEL_PASSAGE_TILES = 'level:passageTiles';
 // zone cell "c,r" -> carved room floor: a rect { x0,y0,x1,y1 } (BSP/grid/static) or an irregular
 // tile set { tiles:[[x,y]…] } (organic); either may carry core:[x,y], a deep-interior anchor.
 export const LEVEL_ROOMS = 'level:rooms';

@@ -88,6 +88,21 @@ describe('caBridge stage', () => {
     expect(componentCount(level)).toBe(1);
   });
 
+  it('records the tiles it dug (not passed through) as passage tiles', () => {
+    const level = field(16, 9, [
+      [2, 2, 5, 6],
+      [10, 2, 13, 6],
+    ]);
+    runCaBridge(level, { minComponentSize: 5 }, level.blackboard, createRng(1));
+    const passage = level.blackboard['level:passageTiles'];
+    expect(passage.length).toBeGreaterThan(0);
+    for (const [x, y] of passage) {
+      expect(level.getTile(x, y)).toBe('floor'); // dug to floor
+      expect(x).toBeGreaterThan(5); // in the wall gap between the blobs, not inside a blob
+      expect(x).toBeLessThan(10);
+    }
+  });
+
   it('is deterministic for a given seed', () => {
     const build = () => {
       const level = field(16, 9, [
