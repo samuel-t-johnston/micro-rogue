@@ -1,8 +1,29 @@
 import { describe, it, expect } from 'vitest';
-import { cardinalDirection, projectTile, lineTiles } from './geometry.js';
+import {
+  cardinalDirection,
+  projectTile,
+  lineTiles,
+  squaredDistance,
+  euclideanMst,
+} from './geometry.js';
 import { createLevel } from './level.js';
 
 const origin = { x: 5, y: 5 };
+const P = (x, y) => ({ x, y });
+
+// Node reachability over an edge list — for asserting an MST spans its points.
+function connected(count, edges) {
+  const adj = Array.from({ length: count }, () => []);
+  for (const { a, b } of edges) {
+    adj[a].push(b);
+    adj[b].push(a);
+  }
+  const seen = new Set([0]);
+  const stack = [0];
+  while (stack.length)
+    for (const nb of adj[stack.pop()]) if (!seen.has(nb)) (seen.add(nb), stack.push(nb));
+  return seen.size === count;
+}
 
 function openLevel(w = 10, h = 10) {
   const level = createLevel();
@@ -95,5 +116,39 @@ describe('lineTiles', () => {
       { x: 3, y: 4 },
       { x: 2, y: 4 },
     ]);
+  });
+});
+
+describe('squaredDistance', () => {
+  it('is the squared Euclidean distance', () => {
+    expect(squaredDistance(P(0, 0), P(3, 4))).toBe(25);
+  });
+});
+
+describe('euclideanMst', () => {
+  it('returns no edges for fewer than two points', () => {
+    expect(euclideanMst([])).toEqual([]);
+    expect(euclideanMst([P(1, 1)])).toEqual([]);
+  });
+
+  it('spans every point with n-1 normalized edges', () => {
+    const pts = [P(0, 0), P(10, 0), P(5, 8), P(15, 8), P(20, 0)];
+    const mst = euclideanMst(pts);
+    expect(mst).toHaveLength(pts.length - 1);
+    for (const e of mst) expect(e.a).toBeLessThan(e.b);
+    expect(connected(pts.length, mst)).toBe(true);
+  });
+
+  it('prefers shorter edges (picks the square sides, not the diagonals)', () => {
+    // Unit-ish square: the MST must use three of the four length-10 sides, never a length-~14 diagonal.
+    const sq = [P(0, 0), P(10, 0), P(10, 10), P(0, 10)];
+    const mst = euclideanMst(sq);
+    const isDiagonal = (e) => (e.a === 0 && e.b === 2) || (e.a === 1 && e.b === 3);
+    expect(mst.some(isDiagonal)).toBe(false);
+  });
+
+  it('is deterministic', () => {
+    const pts = [P(0, 0), P(3, 1), P(9, 2), P(4, 7), P(12, 5)];
+    expect(euclideanMst(pts)).toEqual(euclideanMst(pts));
   });
 });

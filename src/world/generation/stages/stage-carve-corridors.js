@@ -34,84 +34,29 @@ import {
   LEVEL_LINKS,
   LEVEL_ADJACENCY,
 } from '../blackboard-keys.js';
-import { DIRECTIONS_4, chebyshevDistance } from '../../map/geometry.js';
+import { carveWalk } from '../walk.js';
 
 const DEFAULTS = { sobriety: 0.65, momentum: 0.5, maxStepsFactor: 4 };
-
-const key = (x, y) => `${x},${y}`;
-
-// A single step from `pos` toward `target`: move along the axis with the greater remaining distance,
-// breaking a tie with the rng (so a diagonal approach doesn't always favour one axis).
-function stepToward(pos, target, rng) {
-  const dx = Math.sign(target.x - pos.x);
-  const dy = Math.sign(target.y - pos.y);
-  const adx = Math.abs(target.x - pos.x);
-  const ady = Math.abs(target.y - pos.y);
-  if (adx > ady) return [dx, 0];
-  if (ady > adx) return [0, dy];
-  if (dx === 0) return [0, dy];
-  if (dy === 0) return [dx, 0];
-  return rng.random() < 0.5 ? [dx, 0] : [0, dy];
-}
 
 /** Runs the carve-corridors realization stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard, rng) {
   const nodes = blackboard[LEVEL_NODES] ?? [];
   const edges = blackboard[LEVEL_EDGES] ?? [];
   const rooms = blackboard[LEVEL_ROOMS] ?? {};
-  const sobriety = stageConfig.sobriety ?? DEFAULTS.sobriety;
-  const momentum = stageConfig.momentum ?? DEFAULTS.momentum;
-  const maxStepsFactor = stageConfig.maxStepsFactor ?? DEFAULTS.maxStepsFactor;
+  const opts = {
+    sobriety: stageConfig.sobriety ?? DEFAULTS.sobriety,
+    momentum: stageConfig.momentum ?? DEFAULTS.momentum,
+    maxStepsFactor: stageConfig.maxStepsFactor ?? DEFAULTS.maxStepsFactor,
+  };
 
   const byId = new Map(nodes.map((n) => [n.id, n]));
-  const carve = (x, y) => {
-    if (level.tiles[y]?.[x] !== undefined) level.tiles[y][x] = 'floor';
-  };
-  const inBounds = (x, y) => level.tiles[y]?.[x] !== undefined;
-
   for (const edge of edges) {
     const a = byId.get(edge.a);
     const b = byId.get(edge.b);
     if (!a || !b) continue;
-
-    const targetTiles = new Set((rooms[`${b.id},0`]?.tiles ?? []).map(([x, y]) => key(x, y)));
-    const maxSteps = Math.max(1, maxStepsFactor * chebyshevDistance(a, b));
-    let px = a.x;
-    let py = a.y;
-    let last = null;
-    let arrived = false;
-    carve(px, py);
-
-    for (let i = 0; i < maxSteps; i++) {
-      if (targetTiles.has(key(px, py))) {
-        arrived = true;
-        break;
-      }
-      let dir;
-      if (rng.random() < sobriety) dir = stepToward({ x: px, y: py }, b, rng);
-      else if (last && rng.random() < momentum) dir = last;
-      else dir = rng.pick(DIRECTIONS_4);
-      const nx = px + dir[0];
-      const ny = py + dir[1];
-      if (inBounds(nx, ny)) {
-        px = nx;
-        py = ny;
-        last = dir;
-        carve(px, py);
-      }
-    }
-
-    // Fallback: an L to the target centre so the chambers are always joined. One axis per tile keeps
-    // the path 4-connected (a diagonal line would only corner-touch and wouldn't be walkable).
-    if (!arrived) {
-      let cx = px;
-      let cy = py;
-      while (cx !== b.x || cy !== b.y) {
-        if (cx !== b.x) cx += Math.sign(b.x - cx);
-        else cy += Math.sign(b.y - cy);
-        carve(cx, cy);
-      }
-    }
+    // Arrival = entering B's chamber floor, so the two chambers end up joined.
+    const targetTiles = new Set((rooms[`${b.id},0`]?.tiles ?? []).map(([x, y]) => `${x},${y}`));
+    carveWalk(level, a, b, targetTiles, opts, rng);
   }
 
   const norm = edges.map((e) => (e.a < e.b ? [e.a, e.b] : [e.b, e.a]));

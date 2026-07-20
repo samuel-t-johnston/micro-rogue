@@ -1,4 +1,7 @@
-/** @file Small grid-geometry helpers shared across pathfinding and AI goals. */
+/**
+ * @file Small geometry helpers: grid directions/distances shared across pathfinding and AI goals, plus
+ * point-set helpers (squared distance, Euclidean MST) used by map generation.
+ */
 
 /** 4-directional (orthogonal) neighbor offsets — the cardinal subset of DIRECTIONS_8. */
 export const DIRECTIONS_4 = [
@@ -14,6 +17,50 @@ export const DIRECTIONS_8 = [...DIRECTIONS_4, [-1, -1], [-1, 1], [1, -1], [1, 1]
 /** Chebyshev (chessboard) distance — the number of 8-directional steps between two tiles. */
 export function chebyshevDistance(a, b) {
   return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+}
+
+/** Squared Euclidean distance between two points — enough for comparisons, avoids the sqrt. */
+export const squaredDistance = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
+
+/**
+ * Euclidean minimum spanning tree over `points` (`[{x,y}]`), by dense Prim (O(n²)). Returns the tree as
+ * `{ a, b }` index pairs with `a < b`. Deterministic — ties break toward the lowest index (the strict
+ * `< best` keeps the first seen) — and consumes no RNG. Empty for fewer than two points. Used by
+ * generation to connect chamber sites (layoutEdges) and CA component centroids (caBridge).
+ */
+export function euclideanMst(points) {
+  const n = points.length;
+  const edges = [];
+  if (n < 2) return edges;
+  const inTree = new Array(n).fill(false);
+  const dist = new Array(n).fill(Infinity);
+  const parent = new Array(n).fill(-1);
+  inTree[0] = true;
+  for (let v = 1; v < n; v++) {
+    dist[v] = squaredDistance(points[0], points[v]);
+    parent[v] = 0;
+  }
+  for (let k = 1; k < n; k++) {
+    let u = -1;
+    let best = Infinity;
+    for (let v = 0; v < n; v++)
+      if (!inTree[v] && dist[v] < best) {
+        best = dist[v];
+        u = v;
+      }
+    if (u === -1) break;
+    inTree[u] = true;
+    edges.push({ a: Math.min(u, parent[u]), b: Math.max(u, parent[u]) });
+    for (let v = 0; v < n; v++)
+      if (!inTree[v]) {
+        const d = squaredDistance(points[u], points[v]);
+        if (d < dist[v]) {
+          dist[v] = d;
+          parent[v] = u;
+        }
+      }
+  }
+  return edges;
 }
 
 /**
