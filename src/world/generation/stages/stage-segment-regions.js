@@ -285,7 +285,7 @@ export function run(level, stageConfig = {}, blackboard) {
     .map((c) => ({ x: c.x, y: c.y, width: Math.max(1, 2 * c.d - 1) }))
     .sort((a, b) => idx(a.x, a.y) - idx(b.x, b.y));
 
-  appendZones(blackboard, { zones, rooms, adjacency, chokepoints });
+  appendZones(blackboard, { zones, rooms, adjacency, chokepoints, section: stageConfig.section });
 }
 
 // Connected components (8-connected) of a tile list.

@@ -309,12 +309,14 @@ the hole that the BSP fill then overwrites in the middle, leaving two dead-end s
 are left unbridged and `stitch` joins them to the filled block. (The walker still can't *path-find*
 around a big obstacle; the straight-line skip is what keeps it honest.)
 
+**District population** *(built)*. `appendZones` stamps an optional `section` id on a stage's zones
+(`bspGeometry`/`segmentRegions` pass it from config), and `label`/`populate` take a `section` filter —
+so a composed floor labels and populates each district separately (BSP wing gets orcs, cave gets
+goblins) by running those stages once per section. Absent a `section`, both span the whole floor
+unchanged. `stairs`/`spawn` find their zone by label, so scoping `label` scopes them too.
+
 ### Still pending
 
-- **District population.** `label`/`stairs`/`populate` iterate *all* `level:zones`, so a composed map
-  is populated uniformly. To give the BSP wing orcs and the CA cavern goblins, tag zones with a
-  `section`/`district` id at carve time and let the population stages take a `section` filter — same
-  shape as the existing `kind`/`labels` filters. The [deferred **districts** feature](#11-deferred).
 - **Walker in composition.** `carveChambers`/`carveCorridors` couple zone id to `node.id`
   (`carveCorridors` resolves target tiles and writes links by node id), so the walker isn't
   append-safe yet and stays single-section. Not needed for the BSP+CA demo; a coordinated change when
@@ -379,15 +381,16 @@ Each phase is shippable and testable on its own; new floors attach to the **exis
 | **B** | Semi-sober walker: `layoutNodes` → `layoutEdges` → `carveChambers` → `carveCorridors`. No segmentation. One walker floor wired into the BSP branch. | Organic levels through the existing tail. |
 | **C** | Shared connectivity invariant (flood-fill from entry reaches every zone/stair) across all procedural pipelines. (Perf guard moved to D, beside its only real O(T²) risk.) | The load-bearing connectivity guarantee, enforced. |
 | **D** | Cellular automata: `caSeed` → `caSmooth` → `caBridge` → `segmentRegions`; brings inferred `passage` regions (from the digger's dug tiles) + `chokepoints`, and the deterministic work-count perf test. One CA floor wired in. (`junction` kind exists but is unproduced — deferred.) | Inference-based regions; the second generator on one tail. |
-| **E** | Composition. Built: `box` canvas, `appendZones` id-namespacing seam, `stitch` (connect sections, `maxConnections`), `reserve` (`level:reserved` cordoning). Pending: district population, and the composed demo floor(s). | The whole system — multiple structure stages, one connected level. |
+| **E** | Composition. Built: `box` canvas, `appendZones` id-namespacing + `section` seam, `stitch` (connect sections, `maxConnections`), `reserve` (`level:reserved`), district (`section`-scoped `label`/`populate`). Pending: the composed demo floor(s). | The whole system — multiple structure stages, one connected level. |
 | **F** | A standalone map-gen visualizer dev page (like the sprite finder): pick a pipeline, seed, and params; render the level and its zone graph, ideally stepping stage by stage via the `onStageComplete` seam. Supersedes the ad-hoc scratchpad renders used to tune each phase. | Fast visual iteration on pipelines and tuning. |
 
 ---
 
 ## 11. Deferred
 
-- **Districts** — per-cluster containment for thematic quarters (a flooded quarter, a barracks). A
-  content feature; no architecture needed until a concrete level wants it.
+- **District *containment*** — the `section`-scoped label/population mechanism is built (§6); what's
+  deferred is *geometric* containment of a walker's corridors to its own cluster (a flooded quarter, a
+  barracks that stays home). A content feature; no architecture needed until a concrete level wants it.
 - **Score-and-reject** — generate/measure/reroll if output quality proves inconsistent. Changes what
   a seed means (it becomes "the first acceptable roll"), same hazard class as stage order; don't add
   it casually. The segmenter is the scorer if we ever do.

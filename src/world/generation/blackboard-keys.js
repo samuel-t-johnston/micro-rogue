@@ -9,9 +9,10 @@
  *   static:* — the static/random-static structure stages (a hand-authored or picked layout).
  */
 export const LEVEL_GRID = 'level:grid'; // { cols, rows, cellSize }
-// [{ id, cells, rect, labels, kind?, origin? }]. kind: 'chamber'|'passage'|'junction' (absent ⇒
-// chamber); only chamber zones get labels/population. origin: 'tagged'|'inferred' — debug/visualizer
-// only, no stage may branch on it. See docs/design/organic-map-generation.md (ADR-026).
+// [{ id, cells, rect, labels, kind?, origin?, section? }]. kind: 'chamber'|'passage'|'junction'
+// (absent ⇒ chamber); only chamber zones get labels/population. origin: 'tagged'|'inferred' —
+// debug/visualizer only, no stage may branch on it. section: a district id (composed floors) that
+// `label`/`populate` can scope to. See docs/design/organic-map-generation.md (ADR-026).
 export const LEVEL_ZONES = 'level:zones';
 export const LEVEL_ADJACENCY = 'level:adjacency'; // [[idA, idB], …] (idA < idB, deduped)
 export const LEVEL_LINKS = 'level:links'; // adjacency pairs chosen to become corridors

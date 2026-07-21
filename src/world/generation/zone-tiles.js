@@ -23,12 +23,13 @@ import {
  * overwrite the first's. Ids are dense per stage, so the cumulative ids stay dense. Assumes the
  * one-cell `[[id,0]]` / `"id,0"` convention (BSP and the organic generators); the room-grid pipeline,
  * which keys rooms by grid cell and is never composed, writes the blackboard directly. `adjacency`,
- * `links`, and `chokepoints` are optional. Returns the id offset (base) applied — at base 0 this is
- * exactly the old direct-write behaviour.
+ * `links`, and `chokepoints` are optional. `section` (optional) stamps a district id on each appended
+ * zone, so `label`/`populate` can scope to one section — the composed floor's BSP wing vs its cave.
+ * Returns the id offset (base) applied — at base 0 with no section this is exactly the old direct write.
  */
 export function appendZones(
   blackboard,
-  { zones = [], rooms = {}, adjacency, links, chokepoints } = {},
+  { zones = [], rooms = {}, adjacency, links, chokepoints, section } = {},
 ) {
   const existingZones = blackboard[LEVEL_ZONES] ?? [];
   const base = existingZones.reduce((m, z) => Math.max(m, z.id), -1) + 1;
@@ -37,7 +38,7 @@ export function appendZones(
   const mergedRooms = { ...(blackboard[LEVEL_ROOMS] ?? {}) };
   for (const z of zones) {
     const id = z.id + base;
-    mergedZones.push({ ...z, id, cells: [[id, 0]] });
+    mergedZones.push({ ...z, id, cells: [[id, 0]], ...(section != null && { section }) });
     const room = rooms[`${z.id},0`];
     if (room) mergedRooms[`${id},0`] = room;
   }

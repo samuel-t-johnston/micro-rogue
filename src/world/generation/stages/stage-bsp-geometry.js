@@ -366,7 +366,7 @@ export function run(level, stageConfig = {}, blackboard, rng) {
     .sort((e1, e2) => e1[0] - e2[0] || e1[1] - e2[1])
     .map(([a, b], id) => ({ id, a, b }));
 
-  appendZones(blackboard, { zones, rooms, adjacency, links });
+  appendZones(blackboard, { zones, rooms, adjacency, links, section: stageConfig.section });
   blackboard[LEVEL_BSP] = {
     bounds,
     outerWall: stageConfig.outerWall ?? true,
