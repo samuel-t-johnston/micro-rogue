@@ -250,51 +250,69 @@ is available as an **optional audit** over any pipeline, and is only *required* 
 
 ---
 
-## 6. Composition — two modes
+## 6. Composition
 
-Both organic families must compose with other generators, the same way BSP already can.
+A composed level runs several structure sections in one pipeline — a BSP wing beside a CA cavern —
+over a shared grid, then the usual tail. Phase E builds the machinery; this section is **as-built**
+where marked, with the remainder still pending.
 
-**Mode #2 — generate inside a rectangle of a larger, in-progress map.** Already solved for BSP and
-adopted verbatim: a structure stage takes a `bounds` `{x,y,w,h}` param and owns the tile grid only
-when none exists yet, otherwise carving in place; `outerWall: false` leaves the enclosing box's own
-wall standing (see [`stage-bsp-carve.js`](../../src/world/generation/stages/stage-bsp-carve.js)). The
-walker and CA stages adopt the identical convention — this is pattern-matching existing code, low
-risk, and part of phases B/D.
+**Mode #2 — generate inside a rectangle** *(built)*. A structure stage takes a `bounds` `{x,y,w,h}`
+param and owns the tile grid only when none exists yet, otherwise carving in place; `outerWall: false`
+leaves the enclosing wall standing (see
+[`stage-bsp-carve.js`](../../src/world/generation/stages/stage-bsp-carve.js)). The CA stages read
+`level:bounds` for their region. To give sections a grid to carve into, the **`box`** stage runs first
+and lays the full map as solid wall (the "canvas") — the box-first precondition, now concrete.
 
-**Mode #1 — cordon off a rectangle for a *later* stage to populate.** Genuinely new; no stage today
-reserves space. A structure stage publishes `level:reserved` (a list of rects); organic generators
-treat reserved rects as off-limits — CA forces those cells to stay wall/excluded, the walker treats
-them as hard bounds / repellent. This is **phase E**, deliberately after both generators work
-end-to-end, and is the feature that lets a single pipeline compose multiple structure stages (e.g. a
-BSP wing beside a CA cavern) to prove out the whole system.
+**The assembly seam — `appendZones`** *(built)*. Zone-producing stages used to *overwrite*
+`level:zones`/`rooms`/`adjacency`, so a second section erased the first and both numbered ids from 0.
+[`appendZones`](../../src/world/generation/zone-tiles.js) merges a stage's zone graph into the
+blackboard, **offsetting its ids by the running zone count** (remapping cells, `"id,0"` room keys, and
+adjacency/link pairs). `bspGeometry` and `segmentRegions` append through it; at base 0 it's identical
+to the old direct write, so single-section pipelines are unchanged. This closed the **zone-id
+namespacing** gap for BSP and CA.
 
-### Composition preconditions & known gaps (Phase E)
+**Joining the sections — `stitch`** *(built)*. Bounded sections are disjoint floor components, so a
+composed level is disconnected until `stitch`
+([`stage-stitch.js`](../../src/world/generation/stages/stage-stitch.js)) carves short room-to-room
+corridors between them. It flood-fills components, then union-finds the shortest chamber-frontier gaps
+until everything is one component (a nearest-pair fallback guarantees it), dropping a door on each and
+recording adjacency. `maxConnections` is a best-effort ceiling on *separate* non-crossing connections
+(overlap-rejection is exact non-crossing for orthogonal corridors); connectivity itself is always
+free. Two notes from building it:
 
-Single-section pipelines (phase B/D) compose cleanly with the shared tail — but *multiple* structure
-sections in one map hit three gaps that phase E must close. They are recorded here so the composition
-work doesn't rediscover them by hitting a silent overwrite. All three fixes are **additive**; none
-disturbs the region model.
+- **`stitch` operates on the whole level, never `level:bounds`.** By the time it runs, `level:bounds`
+  holds only the *last* section's sub-rect (see the last-writer-wins gotcha below) — reading it made
+  `stitch` flood one half, mistake the other half's tiles for a separate component, and leave the
+  level disconnected. It uses `level.width/height`, with an optional `bounds` param for a future
+  embedded case.
+- **Three-plus areas work in one pass** — union-find connects N components into one regardless of
+  count, guided purely by gap length (a linear A│B│C layout naturally chains A–B–C). The one caveat:
+  `maxConnections` caps *extra* connections globally, drawn shortest-first, so with several seams of
+  unequal width the extras pile onto the tightest seam rather than distributing. Per-seam control
+  (different `maxConnections`/`maxGap`, or balanced redundancy) is a deliberate **multi-pass**: run
+  `stitch` once per seam region via its `bounds` param. Per-seam balancing in a single pass (cap
+  extras per component-pair) is a documented option, not built — connectivity never needs it.
 
-1. **Zone-id namespacing.** `carveChambers` uses each node's `id` as the zone id and `"{id},0"` as the
-   room key, and every `layoutNodes` numbers its nodes from 0. Two node-based sections therefore reuse
-   ids `0…n` and overwrite each other's rooms. Sections must namespace their id space (e.g. offset by
-   the current `level:zones` length, keeping the node→room key in sync so `carveCorridors` still
-   resolves target tiles). This is why the walker is single-section until phase E.
+**`level:bounds` is a single, last-writer-wins slot** *(confirmed)* — "the current section's rect,"
+not a durable map size. The box establishes the grid; each section overwrites `level:bounds` with its
+own rect; nothing may treat it as the map extent (`stitch` was the first to get bitten). A durable
+"full map" key could be added if more stages need it.
 
-2. **`level:bounds` is a single, last-writer-wins slot** — "the current section's rect," not a durable
-   "map size." It works in the interleaved `layout→carve→layout→carve` pattern only because
-   `carveChambers` reads it *solely* to size a standalone grid, and a composed map's grid already
-   exists (so the read is skipped). Two consequences for phase E: a **full-map box stage must run
-   first** to establish the grid (the standalone sizing `level.width = bounds.x + bounds.w` assumes
-   bounds are origin-anchored and span the whole map), and nothing should treat `level:bounds` as the
-   map extent.
+### Still pending
 
-3. **Per-section population needs a scope filter.** `label`/`stairs`/`populate` iterate the *entire*
-   `level:zones` array, so a single populate fills a composite map uniformly (which is correct for a
-   uniform map) but there is no way to give section A orcs and section B goblins. The fix is to tag
-   zones with a `section`/`district` id at carve time and let the population stages take a `section`
-   (or `bounds`) filter — the same shape as the existing `kind`/`labels` filters. This is the
-   [deferred **districts** feature](#11-deferred).
+- **Mode #1 — reserved areas.** `level:reserved`: a structure stage cordons rects a *later* stage
+  fills. CA (`caSeed`/`caSmooth`) keeps reserved cells wall; the walker treats them as hard bounds.
+  Honest limit found while planning: making a bridge walker *route around* a reserved rect needs
+  obstacle-aware carving — the clean use is reserving an area that's itself a separately-bounded
+  section joined by `stitch`, not forcing a bridge across it.
+- **District population.** `label`/`stairs`/`populate` iterate *all* `level:zones`, so a composed map
+  is populated uniformly. To give the BSP wing orcs and the CA cavern goblins, tag zones with a
+  `section`/`district` id at carve time and let the population stages take a `section` filter — same
+  shape as the existing `kind`/`labels` filters. The [deferred **districts** feature](#11-deferred).
+- **Walker in composition.** `carveChambers`/`carveCorridors` couple zone id to `node.id`
+  (`carveCorridors` resolves target tiles and writes links by node id), so the walker isn't
+  append-safe yet and stays single-section. Not needed for the BSP+CA demo; a coordinated change when
+  a composed floor wants a walker section.
 
 ---
 
@@ -320,10 +338,12 @@ Two independent scaling axes, and they must not be conflated:
   inner loop (a tile loop nested over tiles — the danger zone is `caBridge`'s nearest-component
   search, which is why it bridges centroids, not tiles).
 
-The discipline is a code-review rule — *no tile loop nests over tiles* — enforced by a per-pipeline
-**perf-budget test** that runs each generator at ~4× map dimensions (~16× tiles) under a wall-clock
-budget. That test lands in **phase C**, before the walker, so the budget exists as a gate from the
-start. Full reasoning in
+The discipline is a code-review rule — *no tile loop nests over tiles* — enforced by a **deterministic
+work-count test** rather than a wall-clock one (a timing assertion is flaky and slows the suite). As
+built, it counts tile-grid reads at 1× and 16× tile scale via a read-counting Proxy and asserts the
+ratio is roughly linear (≈16×), not quadratic (≈256×) — no clock, deterministic. It lives beside
+`caBridge` (`stage-ca-bridge.test.js`), the one stage with a real nearest-component O(T²) trap; the
+other stages have no super-linear tile loop to guard. Full reasoning in
 [ADR-028](architecture-decision-records/adr.md#adr-028-organic-generation-performance-envelope).
 
 ---
@@ -351,9 +371,9 @@ Each phase is shippable and testable on its own; new floors attach to the **exis
 |---|---|---|
 | **A** | Region-model groundwork: `kind`/`origin` on zones; tile-set `level:rooms`; generalized `zone-tiles.js`. No new generator. | BSP + statics still pass; the seam is ready. |
 | **B** | Semi-sober walker: `layoutNodes` → `layoutEdges` → `carveChambers` → `carveCorridors`. No segmentation. One walker floor wired into the BSP branch. | Organic levels through the existing tail. |
-| **C** | Shared invariant tests: connectivity (flood-fill from entry reaches all zones/stairs) + perf budget, across all procedural pipelines. | The load-bearing guards, enforced. |
-| **D** | Cellular automata: `caSeed` → `caSmooth` → `caBridge` → `segmentRegions`. Brings `passage`/`junction` regions, `chokepoints`. One CA floor wired in. | Inference-based regions; the second generator on one tail. |
-| **E** | Composition: `bounds` on organic stages (cheap), then `level:reserved` cordoning; a couple of composed floors mixing generators in one pipeline. | The whole system — multiple structure stages, one level. |
+| **C** | Shared connectivity invariant (flood-fill from entry reaches every zone/stair) across all procedural pipelines. (Perf guard moved to D, beside its only real O(T²) risk.) | The load-bearing connectivity guarantee, enforced. |
+| **D** | Cellular automata: `caSeed` → `caSmooth` → `caBridge` → `segmentRegions`; brings inferred `passage` regions (from the digger's dug tiles) + `chokepoints`, and the deterministic work-count perf test. One CA floor wired in. (`junction` kind exists but is unproduced — deferred.) | Inference-based regions; the second generator on one tail. |
+| **E** | Composition. Built: `box` canvas, `appendZones` id-namespacing seam, `stitch` (connect sections, `maxConnections`). Pending: `level:reserved` cordoning, district population, and the composed demo floor(s). | The whole system — multiple structure stages, one connected level. |
 
 ---
 
