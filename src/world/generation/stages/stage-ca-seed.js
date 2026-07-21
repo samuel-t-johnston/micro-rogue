@@ -14,10 +14,15 @@
  *                   dominant cavern plus specks, ~0.62 breaks into several distinct caverns (~⅓ floor),
  *                   and much above ~0.64 the caves get cramped and twisty. Tune per pipeline.
  *
+ * Reserved rects (`level:reserved`, from the `reserve` stage) are held as wall, so the cave grows
+ * around a hole a later section fills.
+ *
  * Blackboard:
+ *   reads  level:reserved
  *   writes tiles; level:bounds -> { x, y, w, h } (so the rest of the CA pipeline knows the region).
  */
-import { LEVEL_BOUNDS } from '../blackboard-keys.js';
+import { LEVEL_BOUNDS, LEVEL_RESERVED } from '../blackboard-keys.js';
+import { isReserved } from './stage-reserve.js';
 
 const DEFAULTS = { width: 48, height: 32, wallChance: 0.62 };
 
@@ -30,6 +35,7 @@ export function run(level, stageConfig = {}, blackboard, rng) {
     h: stageConfig.height ?? DEFAULTS.height,
   };
   const wallChance = stageConfig.wallChance ?? DEFAULTS.wallChance;
+  const reserved = blackboard[LEVEL_RESERVED] ?? [];
 
   if (!level.tiles.length) {
     level.width = bounds.x + bounds.w;
@@ -48,7 +54,10 @@ export function run(level, stageConfig = {}, blackboard, rng) {
   for (let y = bounds.y; y < bounds.y + bounds.h; y++) {
     for (let x = bounds.x; x < bounds.x + bounds.w; x++) {
       if (level.tiles[y]?.[x] === undefined) continue;
-      level.tiles[y][x] = onBorder(x, y) || rng.random() < wallChance ? 'wall' : 'floor';
+      level.tiles[y][x] =
+        onBorder(x, y) || isReserved(x, y, reserved) || rng.random() < wallChance
+          ? 'wall'
+          : 'floor';
     }
   }
 

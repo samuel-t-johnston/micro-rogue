@@ -24,6 +24,7 @@ import { run as runCaBridge } from './stages/stage-ca-bridge.js';
 import { run as runSegmentRegions } from './stages/stage-segment-regions.js';
 import { run as runBox } from './stages/stage-box.js';
 import { run as runStitch } from './stages/stage-stitch.js';
+import { run as runReserve } from './stages/stage-reserve.js';
 import { run as runStairs } from './stages/stage-stairs.js';
 import { run as runSpawn } from './stages/stage-spawn.js';
 import { run as runPopulate } from './stages/stage-populate.js';
@@ -51,6 +52,7 @@ const STAGES = {
   segmentRegions: runSegmentRegions,
   box: runBox,
   stitch: runStitch,
+  reserve: runReserve,
   stairs: runStairs,
   spawn: runSpawn,
   populate: runPopulate,

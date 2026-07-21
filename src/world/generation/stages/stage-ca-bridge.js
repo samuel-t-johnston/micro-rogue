@@ -25,9 +25,10 @@
  *
  * Blackboard: reads level:bounds; writes tiles.
  */
-import { LEVEL_BOUNDS, LEVEL_PASSAGE_TILES } from '../blackboard-keys.js';
-import { DIRECTIONS_4, euclideanMst, squaredDistance } from '../../map/geometry.js';
+import { LEVEL_BOUNDS, LEVEL_PASSAGE_TILES, LEVEL_RESERVED } from '../blackboard-keys.js';
+import { DIRECTIONS_4, euclideanMst, squaredDistance, lineTiles } from '../../map/geometry.js';
 import { carveWalk } from '../walk.js';
+import { isReserved } from './stage-reserve.js';
 
 const DEFAULTS = { minComponentSize: 30, sobriety: 0.85, momentum: 0.5, maxStepsFactor: 4 };
 
@@ -57,10 +58,12 @@ function representative(tiles) {
 export function run(level, stageConfig = {}, blackboard, rng) {
   const bounds = blackboard[LEVEL_BOUNDS] ?? { x: 0, y: 0, w: level.width, h: level.height };
   const minSize = stageConfig.minComponentSize ?? DEFAULTS.minComponentSize;
+  const reserved = blackboard[LEVEL_RESERVED] ?? [];
   const opts = {
     sobriety: stageConfig.sobriety ?? DEFAULTS.sobriety,
     momentum: stageConfig.momentum ?? DEFAULTS.momentum,
     maxStepsFactor: stageConfig.maxStepsFactor ?? DEFAULTS.maxStepsFactor,
+    blocked: reserved.length ? (x, y) => isReserved(x, y, reserved) : undefined,
   };
 
   const isFloor = (x, y) => level.tiles[y]?.[x] === 'floor';
@@ -109,7 +112,12 @@ export function run(level, stageConfig = {}, blackboard, rng) {
   // published so segmentRegions can tag them `passage`.
   const reps = keepers.map(representative);
   const passageTiles = blackboard[LEVEL_PASSAGE_TILES] ?? [];
+  const crossesReserved = (a, b) =>
+    reserved.length && lineTiles(a.x, a.y, b.x, b.y).some(({ x, y }) => isReserved(x, y, reserved));
   for (const { a, b } of euclideanMst(reps)) {
+    // A bridge that would cross a reserved rect is skipped, not carved into a dead-end stub — those
+    // survivors get joined later by `stitch` (to whatever fills the reserved area).
+    if (crossesReserved(reps[a], reps[b])) continue;
     const targetTiles = new Set(keepers[b].map(([x, y]) => `${x},${y}`));
     passageTiles.push(...carveWalk(level, reps[a], reps[b], targetTiles, opts, rng));
   }

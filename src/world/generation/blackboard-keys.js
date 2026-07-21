@@ -20,6 +20,9 @@ export const LEVEL_LINKS = 'level:links'; // adjacency pairs chosen to become co
 export const LEVEL_NODES = 'level:nodes'; // [{ id, x, y, radius }] — planned chamber sites
 export const LEVEL_EDGES = 'level:edges'; // [{ a, b, kind }] — kind: 'mst' | 'loop'
 export const LEVEL_BOUNDS = 'level:bounds'; // { x, y, w, h } — the rect this pipeline generates within
+// [{ x, y, w, h }] — rects a structure stage cordons off for a *later* stage to fill; organic
+// generators (caSeed/caSmooth) keep these cells wall. See docs/design/organic-map-generation.md.
+export const LEVEL_RESERVED = 'level:reserved';
 // [{ x, y, width }] — the narrow tiles where segmented regions meet (door / ambush / guard-post
 // candidates). Produced by segmentRegions. See docs/design/organic-map-generation.md (ADR-027).
 export const LEVEL_CHOKEPOINTS = 'level:chokepoints';

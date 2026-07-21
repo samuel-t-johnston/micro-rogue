@@ -298,13 +298,19 @@ not a durable map size. The box establishes the grid; each section overwrites `l
 own rect; nothing may treat it as the map extent (`stitch` was the first to get bitten). A durable
 "full map" key could be added if more stages need it.
 
+**Mode #1 — reserved areas** *(built)*. The `reserve` stage publishes `level:reserved` rects a *later*
+stage fills; `caSeed`/`caSmooth` hold those cells wall (see
+[`stage-reserve.js`](../../src/world/generation/stages/stage-reserve.js), the shared `isReserved`
+predicate). The intended pipeline is `box → reserve → CA (grows around the hole) → BSP (fills the hole)
+→ stitch`. `caBridge` is reserved-aware: it takes a `blocked` predicate the shared walker won't step
+onto or carve, **and** skips any bridge whose straight line crosses a reserved rect. That skip matters
+— a central hole can split the cave into arcs, and without it `caBridge` would tunnel a bridge across
+the hole that the BSP fill then overwrites in the middle, leaving two dead-end stubs. Instead the arcs
+are left unbridged and `stitch` joins them to the filled block. (The walker still can't *path-find*
+around a big obstacle; the straight-line skip is what keeps it honest.)
+
 ### Still pending
 
-- **Mode #1 — reserved areas.** `level:reserved`: a structure stage cordons rects a *later* stage
-  fills. CA (`caSeed`/`caSmooth`) keeps reserved cells wall; the walker treats them as hard bounds.
-  Honest limit found while planning: making a bridge walker *route around* a reserved rect needs
-  obstacle-aware carving — the clean use is reserving an area that's itself a separately-bounded
-  section joined by `stitch`, not forcing a bridge across it.
 - **District population.** `label`/`stairs`/`populate` iterate *all* `level:zones`, so a composed map
   is populated uniformly. To give the BSP wing orcs and the CA cavern goblins, tag zones with a
   `section`/`district` id at carve time and let the population stages take a `section` filter — same
@@ -373,7 +379,8 @@ Each phase is shippable and testable on its own; new floors attach to the **exis
 | **B** | Semi-sober walker: `layoutNodes` → `layoutEdges` → `carveChambers` → `carveCorridors`. No segmentation. One walker floor wired into the BSP branch. | Organic levels through the existing tail. |
 | **C** | Shared connectivity invariant (flood-fill from entry reaches every zone/stair) across all procedural pipelines. (Perf guard moved to D, beside its only real O(T²) risk.) | The load-bearing connectivity guarantee, enforced. |
 | **D** | Cellular automata: `caSeed` → `caSmooth` → `caBridge` → `segmentRegions`; brings inferred `passage` regions (from the digger's dug tiles) + `chokepoints`, and the deterministic work-count perf test. One CA floor wired in. (`junction` kind exists but is unproduced — deferred.) | Inference-based regions; the second generator on one tail. |
-| **E** | Composition. Built: `box` canvas, `appendZones` id-namespacing seam, `stitch` (connect sections, `maxConnections`). Pending: `level:reserved` cordoning, district population, and the composed demo floor(s). | The whole system — multiple structure stages, one connected level. |
+| **E** | Composition. Built: `box` canvas, `appendZones` id-namespacing seam, `stitch` (connect sections, `maxConnections`), `reserve` (`level:reserved` cordoning). Pending: district population, and the composed demo floor(s). | The whole system — multiple structure stages, one connected level. |
+| **F** | A standalone map-gen visualizer dev page (like the sprite finder): pick a pipeline, seed, and params; render the level and its zone graph, ideally stepping stage by stage via the `onStageComplete` seam. Supersedes the ad-hoc scratchpad renders used to tune each phase. | Fast visual iteration on pipelines and tuning. |
 
 ---
 
