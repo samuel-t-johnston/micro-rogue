@@ -1,7 +1,9 @@
 /**
  * @file Population stage: places items and creatures by room label. Treasure rooms get a chest plus a
  * few floor items; item rooms get floor items; creatures pick rooms by affinity weights (a room's
- * weight is the product of its labels' weights — >1 attracts, <1 repels). See docs/design/procedural-3x3-dungeon.md.
+ * weight is the product of its labels' weights — >1 attracts, <1 repels). A `section` config restricts
+ * it to one district's zones, so a composed floor's wings get different rosters. See
+ * docs/design/procedural-3x3-dungeon.md and docs/design/organic-map-generation.md.
  */
 import { ENTITY_PREFABS, prefabIdsByKind } from '../../entities/entity-prefabs.js';
 import { roomTiles, centermostRoomTile, isChamber } from '../zone-tiles.js';
@@ -70,8 +72,11 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
   const cfg = { ...DEFAULTS, ...stageConfig };
   const itemWeights = cfg.items?.weights ?? {};
   // Populate chamber zones only — passages and junctions (CA's connective tissue) are never rooms to
-  // fill.
-  const zones = (blackboard[LEVEL_ZONES] ?? []).filter(isChamber);
+  // fill. Restricted to `section` when set, so each district of a composed floor gets its own roster.
+  const section = stageConfig.section;
+  const zones = (blackboard[LEVEL_ZONES] ?? []).filter(
+    (z) => isChamber(z) && (section == null || z.section === section),
+  );
   const rooms = blackboard[LEVEL_ROOMS] ?? {};
 
   // Empty room tiles only — inside the room rect, and not already occupied (the spatial index

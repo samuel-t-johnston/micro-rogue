@@ -1,14 +1,68 @@
 /**
- * @file Shared helpers for placing entities inside a zone's *rooms* — the carved room floor
- * (`level:rooms`), never the corridors, doors, or gutters that also sit inside a zone's cells. This is
- * what keeps spawns out of hallways and off furniture. See docs/design/procedural-3x3-dungeon.md.
+ * @file Shared zone helpers: listing the floor tiles inside a zone's *rooms* (`level:rooms`, never the
+ * corridors/doors/gutters that also sit in a zone's cells — this keeps spawns out of hallways), the
+ * chamber predicate, and the seam that merges a structure stage's zone graph into the blackboard so
+ * multiple sections compose. See docs/design/procedural-3x3-dungeon.md and organic-map-generation.md.
  *
  * A `level:rooms` entry is either a rectangle (`{x0,y0,x1,y1}`, from BSP/grid/static layouts) or an
- * irregular tile set (`{tiles:[[x,y]…]}`, from organic generators — see
- * docs/design/organic-map-generation.md). Either may also carry `core:[x,y]`, a strictly-interior
- * anchor. These helpers are the single seam that hides that difference from every population and
- * finishing stage, so they work over any geometry unchanged.
+ * irregular tile set (`{tiles:[[x,y]…]}`, from organic generators). Either may also carry `core:[x,y]`,
+ * a strictly-interior anchor. `roomTiles`/`centermostRoomTile` are the single seam that hides that
+ * difference from every population and finishing stage, so they work over any geometry unchanged.
  */
+import {
+  LEVEL_ZONES,
+  LEVEL_ROOMS,
+  LEVEL_ADJACENCY,
+  LEVEL_LINKS,
+  LEVEL_CHOKEPOINTS,
+} from './blackboard-keys.js';
+
+/**
+ * Merges one structure stage's zone graph into the blackboard, offsetting its ids by the running zone
+ * count so multiple sections compose without colliding — a second section's zone 0 would otherwise
+ * overwrite the first's. Ids are dense per stage, so the cumulative ids stay dense. Assumes the
+ * one-cell `[[id,0]]` / `"id,0"` convention (BSP and the organic generators); the room-grid pipeline,
+ * which keys rooms by grid cell and is never composed, writes the blackboard directly. `adjacency`,
+ * `links`, and `chokepoints` are optional. `section` (optional) stamps a district id on each appended
+ * zone, so `label`/`populate` can scope to one section — the composed floor's BSP wing vs its cave.
+ * Returns the id offset (base) applied — at base 0 with no section this is exactly the old direct write.
+ */
+export function appendZones(
+  blackboard,
+  { zones = [], rooms = {}, adjacency, links, chokepoints, section } = {},
+) {
+  const existingZones = blackboard[LEVEL_ZONES] ?? [];
+  const base = existingZones.reduce((m, z) => Math.max(m, z.id), -1) + 1;
+
+  const mergedZones = existingZones.slice();
+  const mergedRooms = { ...(blackboard[LEVEL_ROOMS] ?? {}) };
+  for (const z of zones) {
+    const id = z.id + base;
+    mergedZones.push({ ...z, id, cells: [[id, 0]], ...(section != null && { section }) });
+    const room = rooms[`${z.id},0`];
+    if (room) mergedRooms[`${id},0`] = room;
+  }
+  blackboard[LEVEL_ZONES] = mergedZones;
+  blackboard[LEVEL_ROOMS] = mergedRooms;
+
+  if (adjacency) {
+    blackboard[LEVEL_ADJACENCY] = [
+      ...(blackboard[LEVEL_ADJACENCY] ?? []),
+      ...adjacency.map(([a, b]) => [a + base, b + base]),
+    ];
+  }
+  if (links) {
+    const existing = blackboard[LEVEL_LINKS] ?? [];
+    blackboard[LEVEL_LINKS] = [
+      ...existing,
+      ...links.map((l, i) => ({ id: existing.length + i, a: l.a + base, b: l.b + base })),
+    ];
+  }
+  if (chokepoints) {
+    blackboard[LEVEL_CHOKEPOINTS] = [...(blackboard[LEVEL_CHOKEPOINTS] ?? []), ...chokepoints];
+  }
+  return base;
+}
 
 /**
  * Whether a zone is a chamber — an open space that takes labels, stairs, and population. A zone with

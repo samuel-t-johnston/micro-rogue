@@ -1,8 +1,8 @@
 // The cellular-automata branch floor: an organic cave built by the CA pipeline (caSeed → caSmooth →
-// caBridge → segmentRegions), then the usual shared tail. The deepest floor of the game's second
-// branch (data/transit-map.js), reached from the walker floor's down-stair. Being the branch's leaf it
-// places only an up-stair (back to the walker floor). segmentRegions infers the chamber/passage zones
-// that label/stairs/spawn/populate consume — the same contract BSP and the walker produce. See
+// caBridge → segmentRegions), then the usual shared tail. The third floor of the game's second branch
+// (data/transit-map.js): reached from the walker floor's down-stair, and leading on down to the
+// composite keep-and-cave floor. segmentRegions infers the chamber/passage zones that
+// label/stairs/spawn/populate consume — the same contract BSP and the walker produce. See
 // docs/design/organic-map-generation.md and docs/howto/dynamic-map-generation.md.
 export default {
   id: 'ca',
@@ -11,11 +11,17 @@ export default {
     { type: 'caSmooth' },
     { type: 'caBridge' },
     { type: 'segmentRegions' },
-    // A couple of treasure chambers; every other chamber holds loot (fill). Passages are skipped by
+    // A treasure chamber and stairs; every other chamber holds loot (fill). Passages are skipped by
     // label/populate automatically (kind !== 'chamber').
-    { type: 'label', labels: ['stairs-up', 'treasure', 'treasure'], fill: 'item' },
-    // Leaf of the branch: only an up-stair, wired back to the walker floor's 'down' port.
-    { type: 'stairs', stairs: [['stairs-up', 'up']] },
+    { type: 'label', labels: ['stairs-up', 'stairs-down', 'treasure'], fill: 'item' },
+    // Up to the walker floor and down to the composite floor (transit map wires the ports).
+    {
+      type: 'stairs',
+      stairs: [
+        ['stairs-up', 'up'],
+        ['stairs-down', 'down'],
+      ],
+    },
     { type: 'spawn' },
     {
       type: 'populate',

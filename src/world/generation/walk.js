@@ -33,23 +33,27 @@ function stepToward(pos, target, rng) {
  * corner-touch and wouldn't be walkable). Consumes rng. Returns the tiles it *dug* (turned from
  * non-floor to floor) — the tunnel it created, as opposed to the existing floor it passed through;
  * callers that care about connective tissue (caBridge → passages) collect these.
+ *
+ * `opts.blocked(x, y)` (optional) marks tiles the walk may neither step onto nor carve — e.g. reserved
+ * rects. Callers must not aim a walk *across* a blocked region: the walker routes around small ones but
+ * can't path-find, and its straight-line fallback would leave a gap (two dead-end stubs). caBridge
+ * therefore skips any bridge whose straight line crosses reserved rather than relying on this alone.
  */
 export function carveWalk(level, start, target, targetTiles, opts, rng) {
-  const { sobriety, momentum, maxStepsFactor } = opts;
-  const dug = [];
-  const carve = (x, y) => {
-    if (level.tiles[y]?.[x] === undefined) return;
-    if (level.tiles[y][x] !== 'floor') dug.push([x, y]);
-    level.tiles[y][x] = 'floor';
-  };
-  const inBounds = (x, y) => level.tiles[y]?.[x] !== undefined;
+  const { sobriety, momentum, maxStepsFactor, blocked = () => false } = opts;
+  const canStep = (x, y) => level.tiles[y]?.[x] !== undefined && !blocked(x, y);
 
+  // Buffer the path and commit atomically: the walk never *steps* onto a blocked tile, but its
+  // straight-line fallback might have to — and carving as we go would leave a dead-end stub. So if the
+  // fallback can't reach the target without crossing a blocked tile, we carve nothing and report no
+  // connection (the caller — caBridge — lets `stitch` join those pieces instead). With no `blocked`
+  // predicate the fallback never trips, so this is exactly the old always-connect behaviour.
+  const path = [[start.x, start.y]];
   const maxSteps = Math.max(1, maxStepsFactor * chebyshevDistance(start, target));
   let px = start.x;
   let py = start.y;
   let last = null;
   let arrived = false;
-  carve(px, py);
 
   for (let i = 0; i < maxSteps; i++) {
     if (targetTiles.has(key(px, py))) {
@@ -62,11 +66,11 @@ export function carveWalk(level, start, target, targetTiles, opts, rng) {
     else dir = rng.pick(DIRECTIONS_4);
     const nx = px + dir[0];
     const ny = py + dir[1];
-    if (inBounds(nx, ny)) {
+    if (canStep(nx, ny)) {
       px = nx;
       py = ny;
       last = dir;
-      carve(px, py);
+      path.push([px, py]);
     }
   }
 
@@ -76,8 +80,16 @@ export function carveWalk(level, start, target, targetTiles, opts, rng) {
     while (cx !== target.x || cy !== target.y) {
       if (cx !== target.x) cx += Math.sign(target.x - cx);
       else cy += Math.sign(target.y - cy);
-      carve(cx, cy);
+      if (blocked(cx, cy)) return []; // can't finish around the obstacle → don't carve a stub
+      path.push([cx, cy]);
     }
+  }
+
+  const dug = [];
+  for (const [x, y] of path) {
+    if (level.tiles[y]?.[x] === undefined) continue;
+    if (level.tiles[y][x] !== 'floor') dug.push([x, y]);
+    level.tiles[y][x] = 'floor';
   }
   return dug;
 }

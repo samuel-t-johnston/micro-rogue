@@ -43,13 +43,8 @@
  *   level:bsp       -> { bounds, outerWall, halls:[{x0,y0,x1,y1}],
  *                        connections:[{ gap:[x,y], tiles:[[x,y]…], door:boolean, rooms:number[] }] }
  */
-import {
-  LEVEL_ZONES,
-  LEVEL_ADJACENCY,
-  LEVEL_LINKS,
-  LEVEL_ROOMS,
-  LEVEL_BSP,
-} from '../blackboard-keys.js';
+import { LEVEL_BSP } from '../blackboard-keys.js';
+import { appendZones } from '../zone-tiles.js';
 
 const DEFAULTS = {
   width: 48,
@@ -371,10 +366,7 @@ export function run(level, stageConfig = {}, blackboard, rng) {
     .sort((e1, e2) => e1[0] - e2[0] || e1[1] - e2[1])
     .map(([a, b], id) => ({ id, a, b }));
 
-  blackboard[LEVEL_ZONES] = zones;
-  blackboard[LEVEL_ROOMS] = rooms;
-  blackboard[LEVEL_ADJACENCY] = adjacency;
-  blackboard[LEVEL_LINKS] = links;
+  appendZones(blackboard, { zones, rooms, adjacency, links, section: stageConfig.section });
   blackboard[LEVEL_BSP] = {
     bounds,
     outerWall: stageConfig.outerWall ?? true,

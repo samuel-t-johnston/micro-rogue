@@ -34,14 +34,8 @@
  *   writes level:zones (kind chamber|passage, origin 'inferred'), level:rooms ("id,0" -> {tiles, rect,
  *          core}), level:adjacency ([[a,b]]), level:chokepoints ([{x,y,width}]).
  */
-import {
-  LEVEL_BOUNDS,
-  LEVEL_ZONES,
-  LEVEL_ROOMS,
-  LEVEL_ADJACENCY,
-  LEVEL_CHOKEPOINTS,
-  LEVEL_PASSAGE_TILES,
-} from '../blackboard-keys.js';
+import { LEVEL_BOUNDS, LEVEL_PASSAGE_TILES } from '../blackboard-keys.js';
+import { appendZones } from '../zone-tiles.js';
 import { DIRECTIONS_4, DIRECTIONS_8 } from '../../map/geometry.js';
 
 const DEFAULTS = { prominence: 0, passageThreshold: 1 };
@@ -291,10 +285,7 @@ export function run(level, stageConfig = {}, blackboard) {
     .map((c) => ({ x: c.x, y: c.y, width: Math.max(1, 2 * c.d - 1) }))
     .sort((a, b) => idx(a.x, a.y) - idx(b.x, b.y));
 
-  blackboard[LEVEL_ZONES] = zones;
-  blackboard[LEVEL_ROOMS] = rooms;
-  blackboard[LEVEL_ADJACENCY] = adjacency;
-  blackboard[LEVEL_CHOKEPOINTS] = chokepoints;
+  appendZones(blackboard, { zones, rooms, adjacency, chokepoints, section: stageConfig.section });
 }
 
 // Connected components (8-connected) of a tile list.

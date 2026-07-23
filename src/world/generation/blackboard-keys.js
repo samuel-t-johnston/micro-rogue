@@ -9,9 +9,10 @@
  *   static:* — the static/random-static structure stages (a hand-authored or picked layout).
  */
 export const LEVEL_GRID = 'level:grid'; // { cols, rows, cellSize }
-// [{ id, cells, rect, labels, kind?, origin? }]. kind: 'chamber'|'passage'|'junction' (absent ⇒
-// chamber); only chamber zones get labels/population. origin: 'tagged'|'inferred' — debug/visualizer
-// only, no stage may branch on it. See docs/design/organic-map-generation.md (ADR-026).
+// [{ id, cells, rect, labels, kind?, origin?, section? }]. kind: 'chamber'|'passage'|'junction'
+// (absent ⇒ chamber); only chamber zones get labels/population. origin: 'tagged'|'inferred' —
+// debug/visualizer only, no stage may branch on it. section: a district id (composed floors) that
+// `label`/`populate` can scope to. See docs/design/organic-map-generation.md (ADR-026).
 export const LEVEL_ZONES = 'level:zones';
 export const LEVEL_ADJACENCY = 'level:adjacency'; // [[idA, idB], …] (idA < idB, deduped)
 export const LEVEL_LINKS = 'level:links'; // adjacency pairs chosen to become corridors
@@ -20,6 +21,9 @@ export const LEVEL_LINKS = 'level:links'; // adjacency pairs chosen to become co
 export const LEVEL_NODES = 'level:nodes'; // [{ id, x, y, radius }] — planned chamber sites
 export const LEVEL_EDGES = 'level:edges'; // [{ a, b, kind }] — kind: 'mst' | 'loop'
 export const LEVEL_BOUNDS = 'level:bounds'; // { x, y, w, h } — the rect this pipeline generates within
+// [{ x, y, w, h }] — rects a structure stage cordons off for a *later* stage to fill; organic
+// generators (caSeed/caSmooth) keep these cells wall. See docs/design/organic-map-generation.md.
+export const LEVEL_RESERVED = 'level:reserved';
 // [{ x, y, width }] — the narrow tiles where segmented regions meet (door / ambush / guard-post
 // candidates). Produced by segmentRegions. See docs/design/organic-map-generation.md (ADR-027).
 export const LEVEL_CHOKEPOINTS = 'level:chokepoints';

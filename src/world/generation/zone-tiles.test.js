@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { roomTiles, centermostRoomTile } from './zone-tiles.js';
+import { roomTiles, centermostRoomTile, appendZones } from './zone-tiles.js';
 
 // A single-cell zone whose room is a 2x2 rect at (1,1)-(2,2) within cell (0,0).
 const zone = { id: 0, cells: [[0, 0]], rect: { x: 0, y: 0, w: 10, h: 10 } };
@@ -92,5 +92,55 @@ describe('zone-tiles', () => {
       },
     };
     expect(centermostRoomTile(z, r)).toEqual([8, 8]);
+  });
+});
+
+describe('appendZones', () => {
+  const zone = (id) => ({ id, cells: [[id, 0]], rect: {}, labels: ['room'] });
+
+  it('writes a first section directly (base 0, unchanged ids)', () => {
+    const bb = {};
+    const base = appendZones(bb, {
+      zones: [zone(0), zone(1)],
+      rooms: { '0,0': { tiles: [[1, 1]] }, '1,0': { tiles: [[2, 2]] } },
+      adjacency: [[0, 1]],
+    });
+    expect(base).toBe(0);
+    expect(bb['level:zones'].map((z) => z.id)).toEqual([0, 1]);
+    expect(bb['level:rooms']['1,0']).toEqual({ tiles: [[2, 2]] });
+    expect(bb['level:adjacency']).toEqual([[0, 1]]);
+  });
+
+  it('offsets a second section past the first, remapping cells, room keys, and adjacency', () => {
+    const bb = {};
+    appendZones(bb, {
+      zones: [zone(0), zone(1)],
+      rooms: { '0,0': { tiles: [[1, 1]] }, '1,0': { tiles: [[2, 2]] } },
+      adjacency: [[0, 1]],
+    });
+    const base = appendZones(bb, {
+      zones: [{ id: 0, cells: [[0, 0]], rect: {}, labels: ['room'], kind: 'chamber' }],
+      rooms: { '0,0': { tiles: [[9, 9]] } },
+      chokepoints: [{ x: 9, y: 9, width: 1 }],
+    });
+    expect(base).toBe(2);
+    expect(bb['level:zones'].map((z) => z.id)).toEqual([0, 1, 2]); // dense, no collision
+    expect(bb['level:zones'][2].cells).toEqual([[2, 0]]); // cell id remapped
+    expect(bb['level:rooms']['2,0']).toEqual({ tiles: [[9, 9]] }); // room key remapped
+    expect(bb['level:rooms']['0,0']).toEqual({ tiles: [[1, 1]] }); // first section preserved
+    expect(bb['level:adjacency']).toEqual([[0, 1]]); // first section's adjacency intact
+    expect(bb['level:chokepoints']).toEqual([{ x: 9, y: 9, width: 1 }]);
+  });
+
+  it('offsets a later section’s adjacency pairs and link ids', () => {
+    const bb = { 'level:zones': [{ id: 0 }, { id: 1 }] };
+    appendZones(bb, {
+      zones: [zone(0), zone(1)],
+      rooms: {},
+      adjacency: [[0, 1]],
+      links: [{ id: 0, a: 0, b: 1 }],
+    });
+    expect(bb['level:adjacency']).toEqual([[2, 3]]);
+    expect(bb['level:links']).toEqual([{ id: 0, a: 2, b: 3 }]);
   });
 });

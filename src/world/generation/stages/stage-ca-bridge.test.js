@@ -103,6 +103,19 @@ describe('caBridge stage', () => {
     }
   });
 
+  it('does not carve a bridge through a reserved rect (no dead-end stubs)', () => {
+    // Two blobs with a reserved band between them: the bridge would cross it, so it's skipped and the
+    // band stays wall (a later stage fills it; stitch reconnects).
+    const level = field(20, 9, [
+      [2, 3, 5, 5],
+      [14, 3, 17, 5],
+    ]);
+    level.blackboard['level:reserved'] = [{ x: 8, y: 0, w: 4, h: 9 }];
+    runCaBridge(level, { minComponentSize: 5 }, level.blackboard, createRng(1));
+    for (let y = 0; y < 9; y++)
+      for (let x = 8; x < 12; x++) expect(level.getTile(x, y)).toBe('wall');
+  });
+
   it('is deterministic for a given seed', () => {
     const build = () => {
       const level = field(16, 9, [

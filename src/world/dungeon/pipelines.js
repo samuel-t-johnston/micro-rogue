@@ -9,6 +9,7 @@ import procedural3x3 from '../../../data/pipelines/procedural-3x3.js';
 import bsp from '../../../data/pipelines/bsp.js';
 import walker from '../../../data/pipelines/walker.js';
 import ca from '../../../data/pipelines/ca.js';
+import composite from '../../../data/pipelines/composite.js';
 
 const PIPELINES = {
   [staticTestLevel.id]: staticTestLevel,
@@ -17,6 +18,7 @@ const PIPELINES = {
   [bsp.id]: bsp,
   [walker.id]: walker,
   [ca.id]: ca,
+  [composite.id]: composite,
 };
 
 /**
