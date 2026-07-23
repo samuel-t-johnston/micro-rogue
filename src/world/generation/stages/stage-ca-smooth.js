@@ -16,6 +16,9 @@
  * smoothing.
  *
  * Blackboard: reads level:bounds, level:reserved; writes tiles.
+ *
+ * Note: this currently only uses a "birth" threshold (wallThreshold) and not a "death" threshold (floorThreshold).
+ * This could be added as an additional knob to allow for more control over the smoothing process.
  */
 import { LEVEL_BOUNDS, LEVEL_RESERVED } from '../blackboard-keys.js';
 import { isReserved } from './stage-reserve.js';
