@@ -23,9 +23,11 @@ A responsive grid of the resulting maps, one card per seed. Each map is rendered
 
 Determinism holds: the same `pipelineId` + seed always renders the same map, so any card reproduces.
 
-## Reused by the dev page
+## Interactive version — the map visualizer page
 
-The renderer is a pure, DOM-free function — `levelToHtml(level)` returns an HTML string — so the exact same code runs headless here (the CLI writes the file) and in the browser (the map-gen dev page injects the fragment). They share `MAP_STYLES` too, so the two tools can't drift.
+For a live version, run `npm run dev` and open [`map-visualizer.html`](../../map-visualizer.html) (a standalone dev page, like the sprite finder). It lets you edit a pipeline in the browser, pick from the existing ones, append a stage with its registry defaults, generate several seeds at once, copy the pipeline, and export a generated floor as a hand-editable static layout.
+
+The renderer is a pure, DOM-free function — `levelToHtml(level)` returns an HTML string — so the exact same code runs headless here (the CLI writes the file) and in the browser (the page injects the fragment). They share `MAP_STYLES` too, so the two tools can't drift.
 
 ## Change what's visualized
 

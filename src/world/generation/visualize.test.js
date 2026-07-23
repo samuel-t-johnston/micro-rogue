@@ -5,6 +5,8 @@ import {
   zonesToMermaid,
   levelToHtml,
   mapLegendHtml,
+  toJsLiteral,
+  levelToStaticModule,
 } from './visualize.js';
 import { createLevel } from '../map/level.js';
 import { LEVEL_ZONES, LEVEL_ROOMS } from './blackboard-keys.js';
@@ -128,5 +130,63 @@ describe('mapLegendHtml', () => {
     expect(legend).toContain('<i class="s0"></i>keep');
     expect(legend).toContain('<i class="s1"></i>cave');
     expect(legend).toContain('<i class="p"></i>passage');
+  });
+});
+
+describe('toJsLiteral', () => {
+  it('emits repo-style JS (unquoted keys, single quotes) that round-trips', () => {
+    const value = [
+      { type: 'box', width: 48, height: 32 },
+      { type: 'label', labels: ['stairs-up', 'item'] },
+    ];
+    const src = toJsLiteral(value);
+    expect(src).toContain("type: 'box'"); // unquoted key, single-quoted string
+    // Re-parsing the emitted literal yields the original — the editor round-trip the page relies on.
+    expect(new Function(`return (${src})`)()).toEqual(value);
+  });
+
+  it('quotes keys that are not valid identifiers', () => {
+    expect(toJsLiteral({ 'a-b': 1 })).toBe("{ 'a-b': 1 }");
+  });
+});
+
+describe('levelToStaticModule', () => {
+  it('serializes the tile grid as symbols and entities as authored specs', () => {
+    const level = createLevel();
+    level.width = 3;
+    level.height = 3;
+    level.tiles = [
+      ['wall', 'wall', 'wall'],
+      ['wall', 'floor', 'wall'],
+      ['wall', 'wall', 'wall'],
+    ];
+    level.entities.push({
+      components: new Map([
+        ['entityTypeId', 'stairsUp'],
+        ['position', { x: 1, y: 1 }],
+        ['transition', { to: null, port: 'up' }],
+      ]),
+    });
+    const mod = levelToStaticModule(level);
+    expect(mod).toContain("export const legend = { '.': 'floor', '#': 'wall' }");
+    expect(mod).toContain('###\n#.#\n###'); // symbol grid
+    expect(mod).toContain("{ type: 'stairsUp', x: 1, y: 1, port: 'up' }");
+  });
+
+  it('emits a chest with its contents', () => {
+    const level = createLevel();
+    level.width = 1;
+    level.height = 1;
+    level.tiles = [['floor']];
+    level.entities.push({
+      components: new Map([
+        ['entityTypeId', 'chest'],
+        ['position', { x: 0, y: 0 }],
+        ['inventory', { items: [{ components: new Map([['entityTypeId', 'dagger']]) }] }],
+      ]),
+    });
+    expect(levelToStaticModule(level)).toContain(
+      "{ type: 'chest', x: 0, y: 0, contents: ['dagger'] }",
+    );
   });
 });

@@ -224,3 +224,74 @@ ${legend}
 </body>
 </html>`;
 }
+
+// ---- Config serialization (for the map-gen page: pipeline editor round-trip + static-map export) ---
+
+const isIdent = (k) => /^[A-Za-z_$][\w$]*$/.test(k);
+const jsKey = (k) => (isIdent(k) ? k : `'${k}'`);
+const jsPrim = (v) =>
+  typeof v === 'string' ? `'${v.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'` : String(v);
+
+// One-line form; `toJsLiteral` wraps it onto multiple lines once it gets long.
+function jsCompact(v) {
+  if (Array.isArray(v)) return `[${v.map(jsCompact).join(', ')}]`;
+  if (v && typeof v === 'object') {
+    const k = Object.keys(v);
+    return k.length ? `{ ${k.map((x) => `${jsKey(x)}: ${jsCompact(v[x])}`).join(', ')} }` : '{}';
+  }
+  return jsPrim(v);
+}
+
+/**
+ * A value as a repo-style JS literal string — unquoted identifier keys, single-quoted strings, short
+ * containers kept inline and longer ones wrapped and indented. Lets the map-gen page round-trip a
+ * pipeline between its editor and a real `data/pipelines/*.js` file. Handles plain data (objects,
+ * arrays, strings, numbers, booleans, null); not functions or other exotics.
+ */
+export function toJsLiteral(value, pad = '') {
+  const flat = jsCompact(value);
+  if (flat.length <= 64) return flat;
+  const inner = `${pad}  `;
+  if (Array.isArray(value)) {
+    return `[\n${value.map((x) => inner + toJsLiteral(x, inner)).join(',\n')},\n${pad}]`;
+  }
+  const keys = Object.keys(value);
+  return `{\n${keys
+    .map((x) => `${inner}${jsKey(x)}: ${toJsLiteral(value[x], inner)}`)
+    .join(',\n')},\n${pad}}`;
+}
+
+/**
+ * A generated level serialized as an editable static-map module (the `data/maps/*.js` authoring
+ * format): a symbol grid plus the placed entities as `{ type, x, y }` (chests carry `contents`, stairs
+ * their `port`). The inverse of loading a static layout — for the map-gen page's "export", so a
+ * promising generated floor can be hand-tuned. Best-effort on entities: it records each entity's prefab
+ * type and position, which reproduces the layout but not the seeded population exactly.
+ */
+export function levelToStaticModule(level) {
+  const rows = (level?.tiles ?? []).map((row) => row.map(tileChar).join('')).join('\n');
+  const entities = [];
+  for (const e of level?.entities ?? []) {
+    const type = e.components.get('entityTypeId');
+    const pos = e.components.get('position');
+    if (!type || !pos) continue; // markers with no prefab type (e.g. the entry point) aren't authored
+    const ent = { type, x: pos.x, y: pos.y };
+    const inv = e.components.get('inventory');
+    if (inv?.items?.length) {
+      const contents = inv.items.map((i) => i.components.get('entityTypeId')).filter(Boolean);
+      if (contents.length) ent.contents = contents;
+    }
+    const port = e.components.get('transition')?.port;
+    if (port) ent.port = port;
+    entities.push(ent);
+  }
+  return [
+    "export const legend = { '.': 'floor', '#': 'wall' };",
+    '',
+    'export const tiles = `\\',
+    `${rows}\`;`,
+    '',
+    `export const entities = ${toJsLiteral(entities)};`,
+    '',
+  ].join('\n');
+}
