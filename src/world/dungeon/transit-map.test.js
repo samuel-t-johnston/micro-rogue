@@ -80,7 +80,19 @@ describe('transit map (the shipped 3-floor stack)', () => {
       node: 'branch-1-floor-2',
       port: 'down',
     });
-    expect(resolveDestination(transitMap, 'branch-1-floor-3', 'down')).toBeNull(); // branch bottom
+  });
+
+  it('ends the branch at the composite keep-and-cave floor', () => {
+    expect(getNode(transitMap, 'branch-1-floor-4')).toMatchObject({
+      pipelineId: 'composite',
+      branch: 1,
+      depth: 3,
+    });
+    expect(resolveDestination(transitMap, 'branch-1-floor-3', 'down')).toEqual({
+      node: 'branch-1-floor-4',
+      port: 'up',
+    });
+    expect(resolveDestination(transitMap, 'branch-1-floor-4', 'down')).toBeNull(); // branch bottom
   });
 
   it('looks up nodes by id and their generation identity', () => {

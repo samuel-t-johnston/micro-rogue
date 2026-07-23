@@ -26,12 +26,13 @@ describe('ca pipeline (the shipped cave floor)', () => {
     expect(zones.some((z) => z.kind === 'chamber')).toBe(true);
   });
 
-  it('places exactly the declared up-stair transition (and no down-stair)', async () => {
+  it('places both declared stair transitions (up to the walker floor, down to the composite floor)', async () => {
     const { registry } = await generate(1);
     const ports = registry
       .getEntitiesWith('transition')
-      .map((t) => t.components.get('transition').port);
-    expect(ports).toEqual(['up']);
+      .map((t) => t.components.get('transition').port)
+      .sort();
+    expect(ports).toEqual(['down', 'up']);
   });
 
   it('marks a player entry point', async () => {
