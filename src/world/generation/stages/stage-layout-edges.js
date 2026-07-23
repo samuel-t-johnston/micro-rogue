@@ -21,7 +21,7 @@
 import { LEVEL_NODES, LEVEL_EDGES } from '../blackboard-keys.js';
 import { euclideanMst, squaredDistance as sqDist } from '../../map/geometry.js';
 
-const DEFAULTS = { loopFactor: 0.2 };
+export const DEFAULTS = { loopFactor: 0.2 };
 
 const orient = (a, b, c) => Math.sign((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x));
 

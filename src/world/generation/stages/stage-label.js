@@ -19,11 +19,11 @@
 import { LEVEL_ZONES } from '../blackboard-keys.js';
 import { isChamber } from '../zone-tiles.js';
 
-const DEFAULT_LABELS = ['stairs-up', 'stairs-down', 'treasure', 'item', 'item'];
+export const DEFAULTS = { labels: ['stairs-up', 'stairs-down', 'treasure', 'item', 'item'] };
 
 /** Runs the labeling stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard, rng) {
-  const labels = stageConfig.labels ?? DEFAULT_LABELS;
+  const labels = stageConfig.labels ?? DEFAULTS.labels;
   const zones = blackboard[LEVEL_ZONES] ?? [];
   const section = stageConfig.section;
 

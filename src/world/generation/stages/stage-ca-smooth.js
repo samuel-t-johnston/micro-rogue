@@ -21,7 +21,7 @@ import { LEVEL_BOUNDS, LEVEL_RESERVED } from '../blackboard-keys.js';
 import { isReserved } from './stage-reserve.js';
 import { DIRECTIONS_8 } from '../../map/geometry.js';
 
-const DEFAULTS = { iterations: 4, wallThreshold: 5 };
+export const DEFAULTS = { iterations: 4, wallThreshold: 5 };
 
 /** Runs the CA smooth stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard) {

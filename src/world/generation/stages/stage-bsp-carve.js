@@ -19,6 +19,8 @@
 import { createDoor } from '../../entities/furniture.js';
 import { LEVEL_ROOMS, LEVEL_BSP } from '../blackboard-keys.js';
 
+export const DEFAULTS = { doors: { present: 'all', open: 'none' } };
+
 function shuffle(arr, rng) {
   const out = [...arr];
   for (let i = out.length - 1; i > 0; i--) {
@@ -42,8 +44,8 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
   if (!plan) return;
   const { bounds, outerWall = true, halls = [], connections = [] } = plan;
   const rooms = blackboard[LEVEL_ROOMS] ?? {};
-  const present = stageConfig.doors?.present ?? 'all';
-  const open = stageConfig.doors?.open ?? 'none';
+  const present = stageConfig.doors?.present ?? DEFAULTS.doors.present;
+  const open = stageConfig.doors?.open ?? DEFAULTS.doors.open;
 
   // Own the grid only if no earlier stage laid tiles; otherwise carve into the existing level in place.
   if (!level.tiles.length) {

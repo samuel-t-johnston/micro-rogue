@@ -28,7 +28,14 @@
  */
 import { LEVEL_NODES, LEVEL_BOUNDS } from '../blackboard-keys.js';
 
-const DEFAULTS = { width: 48, height: 32, nodeCount: 12, radius: [2, 6], gap: 2, attempts: 30 };
+export const DEFAULTS = {
+  width: 48,
+  height: 32,
+  nodeCount: 12,
+  radius: [2, 6],
+  gap: 2,
+  attempts: 30,
+};
 
 // Radius is drawn uniformly over [min, max] for now. Note chamber *area* grows as radius², so uniform
 // radius already weights floor coverage toward the larger chambers; a deliberate low-skew (few large,

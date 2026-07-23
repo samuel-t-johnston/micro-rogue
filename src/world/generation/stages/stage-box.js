@@ -12,7 +12,7 @@
  */
 import { LEVEL_BOUNDS } from '../blackboard-keys.js';
 
-const DEFAULTS = { width: 48, height: 32 };
+export const DEFAULTS = { width: 48, height: 32 };
 
 /** Runs the box stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard) {

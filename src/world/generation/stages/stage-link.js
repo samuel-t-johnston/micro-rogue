@@ -15,6 +15,8 @@
  */
 import { LEVEL_ZONES, LEVEL_ADJACENCY, LEVEL_LINKS } from '../blackboard-keys.js';
 
+export const DEFAULTS = { extraLinkChance: 0.2, maxExtraDegree: 2 };
+
 function shuffle(arr, rng) {
   const out = [...arr];
   for (let i = out.length - 1; i > 0; i--) {
@@ -26,8 +28,8 @@ function shuffle(arr, rng) {
 
 /** Runs the linking stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard, rng) {
-  const extraLinkChance = stageConfig.extraLinkChance ?? 0.2;
-  const maxExtraDegree = stageConfig.maxExtraDegree ?? 2;
+  const extraLinkChance = stageConfig.extraLinkChance ?? DEFAULTS.extraLinkChance;
+  const maxExtraDegree = stageConfig.maxExtraDegree ?? DEFAULTS.maxExtraDegree;
   const zones = blackboard[LEVEL_ZONES] ?? [];
   const adjacency = blackboard[LEVEL_ADJACENCY] ?? [];
 

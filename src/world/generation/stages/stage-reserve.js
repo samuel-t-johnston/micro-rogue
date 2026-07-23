@@ -11,12 +11,14 @@
  */
 import { LEVEL_RESERVED } from '../blackboard-keys.js';
 
+export const DEFAULTS = { rects: [] };
+
 /** Whether (x, y) falls inside any of the reserved rects. The single definition consumers share. */
 export const isReserved = (x, y, rects) =>
   rects.some((r) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
 
 /** Runs the reserve stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard) {
-  const rects = stageConfig.rects ?? [];
+  const rects = stageConfig.rects ?? DEFAULTS.rects;
   blackboard[LEVEL_RESERVED] = [...(blackboard[LEVEL_RESERVED] ?? []), ...rects];
 }

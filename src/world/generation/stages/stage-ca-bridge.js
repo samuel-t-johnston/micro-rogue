@@ -30,7 +30,7 @@ import { DIRECTIONS_4, euclideanMst, squaredDistance, lineTiles } from '../../ma
 import { carveWalk } from '../walk.js';
 import { isReserved } from './stage-reserve.js';
 
-const DEFAULTS = { minComponentSize: 30, sobriety: 0.85, momentum: 0.5, maxStepsFactor: 4 };
+export const DEFAULTS = { minComponentSize: 30, sobriety: 0.85, momentum: 0.5, maxStepsFactor: 4 };
 
 // The floor tile of a component nearest its centroid — a guaranteed-interior bridge endpoint (a raw
 // centroid can land on wall in a bent component). Reads only the component's own tiles.

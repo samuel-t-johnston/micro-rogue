@@ -46,7 +46,7 @@
 import { LEVEL_BSP } from '../blackboard-keys.js';
 import { appendZones } from '../zone-tiles.js';
 
-const DEFAULTS = {
+export const DEFAULTS = {
   width: 48,
   height: 32,
   minRoomSize: 5,

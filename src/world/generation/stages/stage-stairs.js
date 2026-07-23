@@ -12,17 +12,19 @@ import { createStairs } from '../../entities/furniture.js';
 import { centermostRoomTile } from '../zone-tiles.js';
 import { LEVEL_ZONES, LEVEL_ROOMS } from '../blackboard-keys.js';
 
-const DEFAULT_STAIRS = [
-  ['stairs-up', 'up'],
-  ['stairs-down', 'down'],
-];
+export const DEFAULTS = {
+  stairs: [
+    ['stairs-up', 'up'],
+    ['stairs-down', 'down'],
+  ],
+};
 
 /** Runs the stairs finishing stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard, rng, registry) {
   const zones = blackboard[LEVEL_ZONES] ?? [];
   const rooms = blackboard[LEVEL_ROOMS] ?? {};
 
-  for (const [label, dir] of stageConfig.stairs ?? DEFAULT_STAIRS) {
+  for (const [label, dir] of stageConfig.stairs ?? DEFAULTS.stairs) {
     const zone = zones.find((z) => z.labels.includes(label));
     if (!zone) {
       console.warn(`[stairs] no ${label} zone; skipping`);

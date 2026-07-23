@@ -38,7 +38,7 @@ import { LEVEL_BOUNDS, LEVEL_PASSAGE_TILES } from '../blackboard-keys.js';
 import { appendZones } from '../zone-tiles.js';
 import { DIRECTIONS_4, DIRECTIONS_8 } from '../../map/geometry.js';
 
-const DEFAULTS = { prominence: 0, passageThreshold: 1 };
+export const DEFAULTS = { prominence: 0, passageThreshold: 1 };
 
 // Backward / forward neighbour sets for the two chamfer sweeps (raster order).
 const BACK = [
