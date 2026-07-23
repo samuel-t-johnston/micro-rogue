@@ -1,31 +1,40 @@
 # Visualizing Map Generation
 
-*A headless dev tool for inspecting what a generation pipeline produces — a markdown "filmstrip" of the level after each stage. For the design, see [procedural-3x3-dungeon.md](../design/procedural-3x3-dungeon.md).*
+*A headless dev tool for eyeballing what a generation pipeline produces — several example maps from a pipeline, rendered to a self-contained HTML page you can open or drop into a chat. For the design, see [procedural-3x3-dungeon.md](../design/procedural-3x3-dungeon.md).*
 
 ## Run it
 
 ```
-npm run visualize -- [runs] [baseSeed] [outPath]
+npm run visualize -- [pipelineId] [seeds] [outPath]
 ```
 
-- `runs` — how many layouts to generate (default 1)
-- `baseSeed` — first generation-stream seed; run *i* uses `baseSeed + i` (default 1)
-- `outPath` — markdown output (default `generation-report.md`, gitignored)
+- `pipelineId` — a pipeline in [`data/pipelines/`](../../data/pipelines/) (default `composite`). Anything with a default pipeline export: `bsp`, `ca`, `walker`, `composite`, …
+- `seeds` — how many maps to generate; map *i* uses seed *i* (default 4)
+- `outPath` — HTML output (default `mapgen-<pipelineId>.html`, gitignored)
 
-Example: `npm run visualize -- 5 100` writes 5 layouts (seeds 100–104). Or run the script directly: `node scripts/visualize-generation.mjs 5 100`.
+Example: `npm run visualize -- ca 6` writes 6 cellular-automata caves (seeds 1–6) to `mapgen-ca.html`. Or run the script directly: `node scripts/visualize-generation.mjs ca 6`.
 
-The report records the pipeline config, a timestamp, and the seeds, so any run reproduces. Each run is a **filmstrip**: a snapshot after every stage, showing the level evolve.
+## What you get
 
-## What you get per stage
+A responsive grid of the resulting maps, one card per seed. Each map is rendered by [`levelToHtml`](../../src/world/generation/visualize.js):
 
-- **Topology** (text) — zones with their labels/cells/rect, the chosen `links`, and the raw `adjacency`.
-- **Topology** (Mermaid) — a `flowchart` of the same: links solid, unlinked adjacency dashed. Topologically faithful, **not** spatially (Mermaid auto-lays-out nodes; it won't match the grid).
-- **Map** (text/ASCII) — the tile grid via [`levelToAscii`](../../src/world/generation/visualize.js). Shows `(no tiles carved yet)` for planning-only pipelines; comes alive once a carve stage runs.
+- **Tiles** — walls dark, floor lighter. Rooms are tinted by their **district** (`section`) — up to eight cycled colours — so a composed floor's wings read apart at a glance; passages (organic connective tissue) get their own muted colour; corridors and stitches show as plain floor. A legend maps each swatch.
+- **Entities** — drawn as their own game glyphs in their glyph colours (stairs `<`/`>`, doors `+`, creatures, items `*`), highest render layer winning a shared tile.
+
+Determinism holds: the same `pipelineId` + seed always renders the same map, so any card reproduces.
+
+## Reused by the dev page
+
+The renderer is a pure, DOM-free function — `levelToHtml(level)` returns an HTML string — so the exact same code runs headless here (the CLI writes the file) and in the browser (the map-gen dev page injects the fragment). They share `MAP_STYLES` too, so the two tools can't drift.
 
 ## Change what's visualized
 
-Edit the `PIPELINE` constant in [`scripts/visualize-generation.mjs`](../../scripts/visualize-generation.mjs) — add/remove stages or pass stage params (e.g. `{ type: 'roomGridGeometry', cols: 4, rows: 4, deletes: 2 }`). You can visualize a single stage by listing just one.
+Pass a different `pipelineId`. To tweak a pipeline's stages or params, edit its descriptor in [`data/pipelines/`](../../data/pipelines/) — the stage registry and every stage's `DEFAULTS` live in [`pipeline.js`](../../src/world/generation/pipeline.js) and the stage files.
+
+## Other renderers
+
+[`visualize.js`](../../src/world/generation/visualize.js) also exports text renderers used by tests and quick debugging — `levelToAscii` (the tile grid as text), `zonesToText` (zones/links/adjacency), and `zonesToMermaid` (the planning graph as a Mermaid flowchart). All pure, all unit-tested, no DOM.
 
 ## How it works
 
-The pipeline ([`pipeline.js`](../../src/world/generation/pipeline.js)) takes an optional `onStageComplete(stageType, level)` hook; the tool uses it to capture a snapshot after each stage. Rendering is done by pure functions in [`visualize.js`](../../src/world/generation/visualize.js) (`levelToAscii`, `zonesToText`, `zonesToMermaid`) — unit-tested, no DOM. The tool seeds the generation stream directly with `createRng(seed)`; in the running game that stream is instead derived as `rng.deriveRng('mapgen', branch, depth)` ([rng-and-determinism.md](../design/rng-and-determinism.md)).
+The tool seeds the generation stream directly with `createRng(seed)`; in the running game that stream is instead derived as `rng.deriveRng('mapgen', branch, depth)` ([rng-and-determinism.md](../design/rng-and-determinism.md)). The pipeline runner ([`pipeline.js`](../../src/world/generation/pipeline.js)) also exposes an `onStageComplete(stageType, level)` hook — a seam a future stage-by-stage view can snapshot through.
