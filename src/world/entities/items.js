@@ -121,7 +121,9 @@ export function createSword(registry, x, y, entityId) {
 
 /**
  * Creates a Spear — a reach weapon: range 2 (melee at adjacent, a thrust at distance 2), no ammunition,
- * +2 attack damage. Nothing leaves the hand. See docs/design/ranged-weapons.md.
+ * +2 attack damage. Nothing leaves the hand: the distance-2 thrust borrows the javelin's directional
+ * sprites (visually similar, and the spear has no directional art of its own) to lunge out and retract.
+ * See docs/design/ranged-weapons.md.
  */
 export function createSpear(registry, x, y, entityId) {
   const location = resolveItemLocation(registry, x, y, entityId);
@@ -135,7 +137,11 @@ export function createSpear(registry, x, y, entityId) {
   );
   registry.addComponent(entity, 'item', components.item(location));
   registry.addComponent(entity, 'equippable', components.equippable(Slots.WEAPON));
-  registry.addComponent(entity, 'weapon', components.weapon(2, { meleeRange: 1 }));
+  registry.addComponent(
+    entity,
+    'weapon',
+    components.weapon(2, { meleeRange: 1, attackSprites: directionalAttackSprites('javelin') }),
+  );
   registry.addComponent(entity, 'attributeModifiers', components.attributeModifiers({ attack: 2 }));
   return addMapPosition(registry, entity, location, x, y);
 }
