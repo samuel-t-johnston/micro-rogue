@@ -4,61 +4,77 @@
  * stage type in STAGES to make it usable from a pipeline config.
  */
 import { createLevel } from '../map/level.js';
-import { run as runStatic } from './stages/stage-static.js';
-import { run as runRandomStatic } from './stages/stage-random-static.js';
-import { run as runPlaceStaticEntities } from './stages/stage-place-static-entities.js';
-import { run as runRoomGridGeometry } from './stages/stage-room-grid-geometry.js';
-import { run as runLabel } from './stages/stage-label.js';
-import { run as runLink } from './stages/stage-link.js';
-import { run as runCarveRooms } from './stages/stage-carve-rooms.js';
-import { run as runCarveHalls } from './stages/stage-carve-halls.js';
-import { run as runBspGeometry } from './stages/stage-bsp-geometry.js';
-import { run as runBspCarve } from './stages/stage-bsp-carve.js';
-import { run as runLayoutNodes } from './stages/stage-layout-nodes.js';
-import { run as runLayoutEdges } from './stages/stage-layout-edges.js';
-import { run as runCarveChambers } from './stages/stage-carve-chambers.js';
-import { run as runCarveCorridors } from './stages/stage-carve-corridors.js';
-import { run as runCaSeed } from './stages/stage-ca-seed.js';
-import { run as runCaSmooth } from './stages/stage-ca-smooth.js';
-import { run as runCaBridge } from './stages/stage-ca-bridge.js';
-import { run as runSegmentRegions } from './stages/stage-segment-regions.js';
-import { run as runBox } from './stages/stage-box.js';
-import { run as runStitch } from './stages/stage-stitch.js';
-import { run as runReserve } from './stages/stage-reserve.js';
-import { run as runStairs } from './stages/stage-stairs.js';
-import { run as runSpawn } from './stages/stage-spawn.js';
-import { run as runPopulate } from './stages/stage-populate.js';
-import { run as runScaleCreatures } from './stages/stage-scale-creatures.js';
-import { run as runLoadout } from './stages/stage-loadout.js';
+import * as staticStage from './stages/stage-static.js';
+import * as randomStatic from './stages/stage-random-static.js';
+import * as placeStaticEntities from './stages/stage-place-static-entities.js';
+import * as roomGridGeometry from './stages/stage-room-grid-geometry.js';
+import * as label from './stages/stage-label.js';
+import * as link from './stages/stage-link.js';
+import * as carveRooms from './stages/stage-carve-rooms.js';
+import * as carveHalls from './stages/stage-carve-halls.js';
+import * as bspGeometry from './stages/stage-bsp-geometry.js';
+import * as bspCarve from './stages/stage-bsp-carve.js';
+import * as layoutNodes from './stages/stage-layout-nodes.js';
+import * as layoutEdges from './stages/stage-layout-edges.js';
+import * as carveChambers from './stages/stage-carve-chambers.js';
+import * as carveCorridors from './stages/stage-carve-corridors.js';
+import * as caSeed from './stages/stage-ca-seed.js';
+import * as caSmooth from './stages/stage-ca-smooth.js';
+import * as caBridge from './stages/stage-ca-bridge.js';
+import * as segmentRegions from './stages/stage-segment-regions.js';
+import * as box from './stages/stage-box.js';
+import * as stitch from './stages/stage-stitch.js';
+import * as reserve from './stages/stage-reserve.js';
+import * as stairs from './stages/stage-stairs.js';
+import * as spawn from './stages/stage-spawn.js';
+import * as populate from './stages/stage-populate.js';
+import * as scaleCreatures from './stages/stage-scale-creatures.js';
+import * as loadout from './stages/stage-loadout.js';
 
-const STAGES = {
-  static: runStatic,
-  randomStatic: runRandomStatic,
-  placeStaticEntities: runPlaceStaticEntities,
-  roomGridGeometry: runRoomGridGeometry,
-  label: runLabel,
-  link: runLink,
-  carveRooms: runCarveRooms,
-  carveHalls: runCarveHalls,
-  bspGeometry: runBspGeometry,
-  bspCarve: runBspCarve,
-  layoutNodes: runLayoutNodes,
-  layoutEdges: runLayoutEdges,
-  carveChambers: runCarveChambers,
-  carveCorridors: runCarveCorridors,
-  caSeed: runCaSeed,
-  caSmooth: runCaSmooth,
-  caBridge: runCaBridge,
-  segmentRegions: runSegmentRegions,
-  box: runBox,
-  stitch: runStitch,
-  reserve: runReserve,
-  stairs: runStairs,
-  spawn: runSpawn,
-  populate: runPopulate,
-  scaleCreatures: runScaleCreatures,
-  loadout: runLoadout,
+// Stage type -> its module ({ run, DEFAULTS? }). The registries below derive from this single map, so
+// a stage is registered — and its defaults surfaced to the map-gen visualizer — in exactly one place.
+const MODULES = {
+  static: staticStage,
+  randomStatic,
+  placeStaticEntities,
+  roomGridGeometry,
+  label,
+  link,
+  carveRooms,
+  carveHalls,
+  bspGeometry,
+  bspCarve,
+  layoutNodes,
+  layoutEdges,
+  carveChambers,
+  carveCorridors,
+  caSeed,
+  caSmooth,
+  caBridge,
+  segmentRegions,
+  box,
+  stitch,
+  reserve,
+  stairs,
+  spawn,
+  populate,
+  scaleCreatures,
+  loadout,
 };
+
+const STAGES = Object.fromEntries(Object.entries(MODULES).map(([type, m]) => [type, m.run]));
+
+/**
+ * Stage type -> its default config: the stage's own `DEFAULTS` export, or `{}` when it takes no
+ * parameters. One source of truth with the stage code (a stage owns its defaults), so the map-gen
+ * visualizer's "add stage" can insert real, current defaults without ever drifting.
+ */
+export const STAGE_DEFAULTS = Object.fromEntries(
+  Object.entries(MODULES).map(([type, m]) => [type, m.DEFAULTS ?? {}]),
+);
+
+/** The registered stage type names, in registry order — for the visualizer's stage picker. */
+export const STAGE_TYPES = Object.keys(MODULES);
 
 /**
  * Runs a pipeline config's stages in order against a fresh level and returns it.

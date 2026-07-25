@@ -129,7 +129,8 @@ AI/Senses/Goals
 - [x] Map Gen - Binary Space Partitioning
 - [x] Map Gen - Cellular Automata
 - [x] Map Gen - Drunk Walk/Digger
-- [ ] Map Gen - Voronoi/Wave Function Collapse
+- [x] Map Gen - Composability (Generated Levels)
+- [ ] Map Gen - Composability (Static Levels)
 - [ ] Fancy bitset/Page 437 line walls (in glyph rendering mode) - config to enable
 - [ ] Re-entry pipeline - level that always regenerates
 - [ ] New rooms? (options: vault, temple, courtyard, throne room, armory, lab, graveyard, shop, zoo, nest)
@@ -172,6 +173,9 @@ AI/Senses/Goals
 - [ ] Damage randomization
 - [ ] spear animation
 - [ ] defense/armor
+- [ ] Map Gen - Offset Grid (https://www.redblobgames.com/x/2321-offgrid/ + https://gitlab.com/chriscox/offgrid)
+- [ ] Map Gen - Rooms & Mazes (https://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/)
+- [ ] Map Gen - Actual Mazes
 
 ---
 
@@ -216,6 +220,7 @@ AI/Senses/Goals
 
 *Low Priority / Hard:*
 
+- [ ] Map generation "Prefabs" - specification and placement
 - [ ] Configurable UI layout — anchor system supports it; only lefty/righty modes for now
 - [ ] Localization / templated display strings** — revisit if localization becomes real (ADR-013)
 - [ ] Dedicated map screen — zoom-out-as-map first; separate map screen only if levels outgrow it

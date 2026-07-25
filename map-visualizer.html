@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Map Visualizer — ROGµE dev</title>
+    <style>
+      /* Dev-only tool; self-contained styling that borrows the game's terminal palette. The map cells
+         themselves are styled by MAP_STYLES (injected from visualize.js) so the render matches the CLI. */
+      :root {
+        --color-bg: #0a0e0a;
+        --color-surface: #111811;
+        --color-primary: #00ff41;
+        --color-accent: #39ff7a;
+        --color-text: #c9d1d9;
+        --color-text-dim: #6a8a6a;
+        --color-border: #1f3a1f;
+        --color-danger: #f85149;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font:
+          13px/1.4 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          monospace;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        padding: 0.5rem 0.75rem;
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border);
+      }
+      header h1 {
+        margin: 0;
+        font-size: 1rem;
+        letter-spacing: 0.08em;
+        color: var(--color-primary);
+      }
+      header label {
+        color: var(--color-text-dim);
+      }
+      select,
+      button {
+        font: inherit;
+        color: var(--color-text);
+        background: var(--color-bg);
+        border: 1px solid var(--color-border);
+        border-radius: 3px;
+        padding: 0.25rem 0.5rem;
+        cursor: pointer;
+      }
+      select:focus,
+      button:focus {
+        outline: 1px solid var(--color-primary);
+      }
+      button.primary {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+
+      main {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+      }
+
+      /* Left: the editable pipeline */
+      #editor {
+        width: 400px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--color-border);
+        background: var(--color-surface);
+      }
+      #editor .editor-head {
+        padding: 0.4rem 0.75rem;
+        color: var(--color-text-dim);
+        border-bottom: 1px solid var(--color-border);
+      }
+      #pipeline {
+        flex: 1;
+        resize: none;
+        border: 0;
+        padding: 0.75rem;
+        font: inherit;
+        color: var(--color-text);
+        background: var(--color-bg);
+        white-space: pre;
+        overflow: auto;
+        tab-size: 2;
+      }
+      #pipeline:focus {
+        outline: none;
+      }
+      #error {
+        color: var(--color-danger);
+        padding: 0.5rem 0.75rem;
+        border-top: 1px solid var(--color-border);
+        white-space: pre-wrap;
+        display: none;
+      }
+      #error.show {
+        display: block;
+      }
+
+      /* Right: the generated maps */
+      #results {
+        flex: 1;
+        min-width: 0;
+        overflow: auto;
+        padding: 0.75rem;
+      }
+      #results:empty::after {
+        content: 'Edit a pipeline on the left, then press Generate.';
+        color: var(--color-text-dim);
+      }
+      .rogue-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr));
+        gap: 14px;
+        margin-top: 10px;
+      }
+      figure {
+        margin: 0;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 6px;
+        padding: 8px;
+        overflow-x: auto;
+      }
+      figcaption {
+        font-size: 12px;
+        color: var(--color-text-dim);
+        margin-bottom: 6px;
+      }
+
+      /* Export popup (mirrors the sprite finder) */
+      dialog {
+        width: min(720px, 92vw);
+        color: var(--color-text);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+      }
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.6);
+      }
+      dialog p {
+        margin: 0 0 0.5rem;
+        color: var(--color-text-dim);
+      }
+      dialog code {
+        color: var(--color-accent);
+      }
+      #export-text {
+        width: 100%;
+        resize: vertical;
+        font: inherit;
+        color: var(--color-text);
+        background: var(--color-bg);
+        border: 1px solid var(--color-border);
+        border-radius: 3px;
+        padding: 0.5rem;
+      }
+      .dialog-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+    </style>
+    <style id="map-styles">
+      <!-- MAP_STYLES injected on load -->
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>MAP&nbsp;VISUALIZER</h1>
+      <label for="existing">Load:</label>
+      <select id="existing"></select>
+      <label for="add-stage">+ Stage:</label>
+      <select id="add-stage"></select>
+      <label for="seeds">Seeds:</label>
+      <select id="seeds"></select>
+      <button id="generate" class="primary" type="button">Generate</button>
+      <button id="copy" type="button">Copy pipeline</button>
+      <button id="export" type="button">Export map</button>
+    </header>
+    <main>
+      <aside id="editor">
+        <div class="editor-head">
+          Pipeline — an array of stage invocations (JS literal, editable)
+        </div>
+        <textarea id="pipeline" spellcheck="false" autocomplete="off"></textarea>
+        <div id="error"></div>
+      </aside>
+      <section id="results"></section>
+    </main>
+
+    <dialog id="export-dialog">
+      <p>
+        A hand-editable static layout (seed 1). Save as <code>data/maps/&lt;name&gt;.js</code> and
+        reference it from a <code>static</code> pipeline. Entities are best-effort (type +
+        position).
+      </p>
+      <textarea id="export-text" readonly rows="16" spellcheck="false"></textarea>
+      <div class="dialog-actions">
+        <button id="export-copy" type="button">Copy</button>
+        <button id="export-download" type="button">Download .js</button>
+        <button id="export-close" type="button">Close</button>
+      </div>
+    </dialog>
+
+    <script type="module">
+      import { runPipeline, STAGE_DEFAULTS, STAGE_TYPES } from './src/world/generation/pipeline.js';
+      import {
+        levelToHtml,
+        mapLegendHtml,
+        MAP_STYLES,
+        toJsLiteral,
+        levelToStaticModule,
+      } from './src/world/generation/visualize.js';
+      import { createEntityRegistry } from './src/engine/core/entity-component-system.js';
+      import { createRng } from './src/engine/core/rng.js';
+
+      // Existing pipelines offered in the "Load" dropdown. The browser can't glob, so this is an
+      // explicit manifest (add a line to offer another) — the map-gen pipelines are the ones worth
+      // visualizing; the static/maze ones aren't procedural.
+      import ca from './data/pipelines/ca.js';
+      import bsp from './data/pipelines/bsp.js';
+      import walker from './data/pipelines/walker.js';
+      import composite from './data/pipelines/composite.js';
+      const PIPELINES = { ca, bsp, walker, composite };
+
+      // The map cells share the CLI's stylesheet, so the page and the exported .html files match.
+      document.getElementById('map-styles').textContent = MAP_STYLES;
+
+      const $ = (id) => document.getElementById(id);
+      const pipelineEl = $('pipeline');
+      const resultsEl = $('results');
+      const errorEl = $('error');
+
+      // ---- Pipeline box ----
+      function setPipeline(stages) {
+        pipelineEl.value = toJsLiteral(stages);
+        clearError();
+      }
+      function parsePipeline() {
+        // Local dev tool: eval the box as a JS literal so it accepts exactly what a pipeline file holds.
+        const stages = new Function(`return (${pipelineEl.value.trim() || '[]'})`)();
+        if (!Array.isArray(stages)) throw new Error('Pipeline must be an array of stage objects.');
+        return stages;
+      }
+      function showError(msg) {
+        errorEl.textContent = msg;
+        errorEl.classList.add('show');
+      }
+      function clearError() {
+        errorEl.textContent = '';
+        errorEl.classList.remove('show');
+      }
+
+      // ---- "Load" existing pipeline (confirm before clobbering an edited box) ----
+      const existingEl = $('existing');
+      existingEl.append(new Option('—', ''));
+      for (const id of Object.keys(PIPELINES)) existingEl.append(new Option(id, id));
+      existingEl.addEventListener('change', () => {
+        const id = existingEl.value;
+        existingEl.value = '';
+        if (!id) return;
+        if (pipelineEl.value.trim() && !confirm(`Replace the current pipeline with "${id}"?`))
+          return;
+        setPipeline(PIPELINES[id].stages);
+      });
+
+      // ---- "+ Stage": append a stage with its registry defaults ----
+      const addStageEl = $('add-stage');
+      addStageEl.append(new Option('—', ''));
+      for (const type of STAGE_TYPES) addStageEl.append(new Option(type, type));
+      addStageEl.addEventListener('change', () => {
+        const type = addStageEl.value;
+        addStageEl.value = '';
+        if (!type) return;
+        let stages;
+        try {
+          stages = parsePipeline();
+        } catch (e) {
+          showError(`Can't add a stage — the pipeline doesn't parse:\n${e.message}`);
+          return;
+        }
+        stages.push({ type, ...structuredClone(STAGE_DEFAULTS[type]) });
+        setPipeline(stages);
+      });
+
+      // ---- Seeds count ----
+      const seedsEl = $('seeds');
+      for (let i = 1; i <= 10; i++) seedsEl.append(new Option(String(i), String(i)));
+      seedsEl.value = '4';
+
+      // ---- Generate ----
+      async function generate() {
+        clearError();
+        let stages;
+        try {
+          stages = parsePipeline();
+        } catch (e) {
+          showError(`Pipeline doesn't parse:\n${e.message}`);
+          return;
+        }
+        const n = Number(seedsEl.value);
+        const btn = $('generate');
+        btn.disabled = true;
+        btn.textContent = 'Generating…';
+        // Yield a frame so the button state paints before the (synchronous) generation work.
+        await new Promise((r) => requestAnimationFrame(r));
+        try {
+          const panels = [];
+          let legend = '';
+          for (let seed = 1; seed <= n; seed++) {
+            const registry = createEntityRegistry();
+            const level = await runPipeline({ stages }, createRng(seed), registry);
+            const creatures = registry.getEntitiesWith('ai').length;
+            const items = registry.getEntitiesWith('item').length;
+            panels.push({ seed, creatures, items, html: levelToHtml(level) });
+            if (!legend) legend = mapLegendHtml(level);
+          }
+          renderResults(panels, legend);
+        } catch (e) {
+          showError(`Generation failed:\n${e.message}`);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Generate';
+        }
+      }
+
+      function renderResults(panels, legend) {
+        const cards = panels
+          .map(
+            (p) =>
+              `<figure><figcaption>seed ${p.seed} · ${p.creatures} creatures · ${p.items} items</figcaption>${p.html}</figure>`,
+          )
+          .join('');
+        // Trusted HTML: levelToHtml/mapLegendHtml are our own renderers over our own data.
+        resultsEl.innerHTML = `${legend}<div class="rogue-grid">${cards}</div>`;
+      }
+
+      // ---- Copy pipeline ----
+      $('copy').addEventListener('click', async () => {
+        const btn = $('copy');
+        try {
+          await navigator.clipboard.writeText(pipelineEl.value);
+          btn.textContent = 'Copied!';
+        } catch {
+          pipelineEl.focus();
+          pipelineEl.select();
+          btn.textContent = 'Press Ctrl+C';
+        }
+        setTimeout(() => (btn.textContent = 'Copy pipeline'), 1500);
+      });
+
+      // ---- Export a static layout (seed 1) ----
+      const exportDialog = $('export-dialog');
+      const exportText = $('export-text');
+      $('export').addEventListener('click', async () => {
+        clearError();
+        let stages;
+        try {
+          stages = parsePipeline();
+        } catch (e) {
+          showError(`Pipeline doesn't parse:\n${e.message}`);
+          return;
+        }
+        try {
+          const registry = createEntityRegistry();
+          const level = await runPipeline({ stages }, createRng(1), registry);
+          exportText.value = levelToStaticModule(level);
+          exportDialog.showModal();
+          exportText.scrollTop = 0;
+        } catch (e) {
+          showError(`Export failed:\n${e.message}`);
+        }
+      });
+      $('export-copy').addEventListener('click', async () => {
+        const btn = $('export-copy');
+        try {
+          await navigator.clipboard.writeText(exportText.value);
+          btn.textContent = 'Copied!';
+        } catch {
+          exportText.select();
+          btn.textContent = 'Press Ctrl+C';
+        }
+        setTimeout(() => (btn.textContent = 'Copy'), 1500);
+      });
+      $('export-download').addEventListener('click', () => {
+        const blob = new Blob([exportText.value], { type: 'text/javascript' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'map-export.js';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+      $('export-close').addEventListener('click', () => exportDialog.close());
+
+      // ---- Wiring ----
+      $('generate').addEventListener('click', generate);
+
+      // Boot with a pipeline in the box so Generate works immediately.
+      setPipeline(PIPELINES.composite.stages);
+    </script>
+  </body>
+</html>

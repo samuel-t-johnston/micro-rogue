@@ -14,9 +14,11 @@ import { xpForLevel } from '../../../../data/attribute-set.js';
 import { getAccumulator, addToAccumulator } from '../../../attributes/attribute-access.js';
 import { applyLevelUps } from '../../systems/level-up.js';
 
+export const DEFAULTS = { levels: {} };
+
 /** Runs the scale-creatures stage (see the file overview). `stageConfig.levels` maps entityTypeId → target level. */
 export function run(level, stageConfig = {}, blackboard, rng, registry) {
-  const targets = stageConfig.levels ?? {};
+  const targets = stageConfig.levels ?? DEFAULTS.levels;
 
   for (const entity of registry.getEntitiesWith('levelUp')) {
     const spec = entity.components.get('levelUp');

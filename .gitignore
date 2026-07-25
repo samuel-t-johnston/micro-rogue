@@ -1,6 +1,7 @@
 node_modules/
 coverage/
 generation-report*.md
+mapgen-*.html
 sprite-previews/
 .DS_Store
 *.log

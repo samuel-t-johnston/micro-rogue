@@ -36,7 +36,7 @@ import {
 } from '../blackboard-keys.js';
 import { carveWalk } from '../walk.js';
 
-const DEFAULTS = { sobriety: 0.65, momentum: 0.5, maxStepsFactor: 4 };
+export const DEFAULTS = { sobriety: 0.65, momentum: 0.5, maxStepsFactor: 4 };
 
 /** Runs the carve-corridors realization stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard, rng) {

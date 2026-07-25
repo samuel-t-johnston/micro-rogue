@@ -24,7 +24,7 @@
 import { LEVEL_BOUNDS, LEVEL_RESERVED } from '../blackboard-keys.js';
 import { isReserved } from './stage-reserve.js';
 
-const DEFAULTS = { width: 48, height: 32, wallChance: 0.62 };
+export const DEFAULTS = { width: 48, height: 32, wallChance: 0.62 };
 
 /** Runs the CA seed stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard, rng) {

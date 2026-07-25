@@ -38,7 +38,7 @@ import { roomTiles, isChamber } from '../zone-tiles.js';
 import { DIRECTIONS_4 } from '../../map/geometry.js';
 import { createDoor } from '../../entities/furniture.js';
 
-const DEFAULTS = { maxConnections: 1, maxGap: 6, spacing: 2 };
+export const DEFAULTS = { maxConnections: 1, maxGap: 6, spacing: 2 };
 
 // The orthogonal L from a to b (horizontal leg then vertical), inclusive of both ends — 4-connected.
 function lPath(a, b) {

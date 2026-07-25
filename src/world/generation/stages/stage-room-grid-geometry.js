@@ -23,7 +23,7 @@
  */
 import { LEVEL_GRID, LEVEL_ZONES, LEVEL_ADJACENCY } from '../blackboard-keys.js';
 
-const DEFAULTS = { cols: 3, rows: 3, cellSize: 10, deletes: 1, merges: 1, minZones: 1 };
+export const DEFAULTS = { cols: 3, rows: 3, cellSize: 10, deletes: 1, merges: 1, minZones: 1 };
 
 /** A stable string key for a grid cell (col, row) — the cell-space analogue of tileKey. */
 export const cellKey = (c, r) => `${c},${r}`;
