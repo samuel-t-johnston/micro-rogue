@@ -14,8 +14,11 @@ infrastructure exists.
 > (§7) — and the save v6→v7 migration. Notes where the build refined the plan:
 >
 > - **Bow `meleeRange: 0`** (always fires; no point-blank stab) — resolved from the §2 open question.
-> - **Spear stays on the melee wiggle** by choice (its 1-tile reach makes a thrust sprite barely
->   distinct); arrow and javelin flight use the real directional Utumno sprites.
+> - **Spear thrust uses the javelin's directional sprites** — at distance 2 the spear lunges out and
+>   retracts (the `thrust` animation) borrowing `javelin-<dir>` art, since the spear has no directional
+>   frames of its own and the two read alike. (It originally stayed on the melee wiggle; the reused
+>   javelin art makes the reach read clearly as its own attack.) Arrow and javelin flight use their own
+>   directional Utumno sprites.
 > - **`flightStyle` seam not built** — thrust-vs-projectile is still inferred from `ammoType`; see §9.
 > - **Player-facing how-to:** [docs/howto/weapons.md](../howto/weapons.md).
 >
@@ -365,8 +368,9 @@ no code changes are needed to adopt it, thanks to the glyph/wiggle fallbacks.
 are currently inferred:
 
 1. **Animate vs. wiggle — fully per-weapon, even per-direction.** Driven purely by whether
-   `attackSprites[dir]` exists; a missing entry falls back to the melee wiggle. The spear wiggles only
-   because its `attackSprites` is empty — nothing about reach weapons forces it.
+   `attackSprites[dir]` exists; a missing entry falls back to the melee wiggle. The spear carries the
+   javelin's directional sprites, so its distance-2 reach plays a thrust; a weapon with empty
+   `attackSprites` still wiggles — nothing about reach weapons forces either choice.
 2. **Which sprite flies — tied to ammo type (correctly).** External ammo (not `null`/`'self'`) draws
    the **ammo's** sprites (bow → arrow); otherwise the **weapon's own** (javelin, spear). This mirrors
    what physically leaves the hand, so coupling it to `ammoType` is right.
