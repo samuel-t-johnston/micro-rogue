@@ -90,7 +90,10 @@ export function createInventoryScreenBody({ theme, getViewport, getItems, onActi
   }
 
   return {
-    render(ctx, body) {
+    // Draws the scrollable list into `body` (its top may sit above the visible region when scrolled)
+    // and returns the content's pixel height so the scroll container can size its track. The action
+    // menu is drawn separately by renderOverlay so it isn't clipped to the scroll region.
+    renderContent(ctx, body) {
       const items = getItems();
       if (items.length === 0) {
         drawText(ctx, '(empty)', body.x + body.w / 2, body.y + PADDING * 2, {
@@ -98,6 +101,7 @@ export function createInventoryScreenBody({ theme, getViewport, getItems, onActi
           size: 14,
           align: 'center',
         });
+        return 0;
       } else {
         items.forEach((item, i) => {
           const rect = rowRect(body, i);
@@ -127,7 +131,14 @@ export function createInventoryScreenBody({ theme, getViewport, getItems, onActi
           }
         });
       }
+      return items.length * ROW_H;
+    },
 
+    hasOverlay() {
+      return menu !== null;
+    },
+
+    renderOverlay(ctx) {
       menu?.render(ctx);
     },
 

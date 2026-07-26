@@ -1,4 +1,5 @@
 import { drawText, hitTest } from '../core/canvas-ui.js';
+import { createScrollable } from '../core/scrollable.js';
 import { Anchor, applyHandedness, placeBox } from '../core/anchor-system.js';
 import { gameSettings } from '../../engine/config/settings.js';
 
@@ -79,12 +80,6 @@ export function formatDebugEntry(e) {
   return `T${e.turn ?? 0} ${body}`;
 }
 
-/** Clamps a scroll offset into the valid range for the given content/viewport heights. */
-export function clampScroll(scroll, contentH, viewportH) {
-  const max = Math.max(0, contentH - viewportH);
-  return Math.min(max, Math.max(0, scroll));
-}
-
 /**
  * Bottom-left message log: a few ghost lines plus an icon when closed; a scrollable modal overlay
  * when open. Tapping the icon cycles the view state; the overlay's [✕], a closing tap, or Escape
@@ -100,8 +95,7 @@ export function createMessageLogWidget({
   isDebugEnabled,
 }) {
   let viewState = LogViewState.GHOST;
-  let scroll = 0;
-  let drag = null;
+  let scroller = createScrollable();
 
   // Bottom-left by default; mirrors to bottom-right when handedness is 'left' (the
   // character-menu button takes the vacated corner). See docs/howto/handedness.md.
@@ -145,13 +139,12 @@ export function createMessageLogWidget({
   function open(state) {
     viewState = state;
     // Start pinned to the newest entry.
-    scroll = clampScroll(Infinity, contentHeight(), bodyRect().h);
+    scroller.pinToBottom(contentHeight(), bodyRect().h);
   }
 
   function close() {
     viewState = LogViewState.GHOST;
-    scroll = 0;
-    drag = null;
+    scroller = createScrollable(); // drop any scroll offset / in-flight drag
   }
 
   function advance() {
@@ -222,20 +215,24 @@ export function createMessageLogWidget({
       return;
     }
 
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(body.x, body.y, body.w, body.h);
-    ctx.clip();
-    const first = Math.max(0, Math.floor(scroll / ROW_H));
-    const last = Math.min(lines.length, Math.ceil((scroll + body.h) / ROW_H));
-    for (let i = first; i < last; i++) {
-      const { text, debug } = lines[i];
-      drawText(ctx, text, body.x, body.y - scroll + i * ROW_H, {
-        color: debug ? theme.debug : theme.text,
-        size: ROW_TEXT_SIZE,
-      });
-    }
-    ctx.restore();
+    // The scroller clips to the body and draws the scrollbar (only on overflow); we draw just the
+    // rows visible at the current offset, so a long log doesn't paint hundreds of off-screen lines.
+    scroller.render(ctx, {
+      theme,
+      region: body,
+      contentH: contentHeight(),
+      drawContent: (c, scroll) => {
+        const first = Math.max(0, Math.floor(scroll / ROW_H));
+        const last = Math.min(lines.length, Math.ceil((scroll + body.h) / ROW_H));
+        for (let i = first; i < last; i++) {
+          const { text, debug } = lines[i];
+          drawText(c, text, body.x, body.y - scroll + i * ROW_H, {
+            color: debug ? theme.debug : theme.text,
+            size: ROW_TEXT_SIZE,
+          });
+        }
+      },
+    });
   }
 
   function renderButton(ctx) {
@@ -269,35 +266,24 @@ export function createMessageLogWidget({
         return false;
       }
 
-      switch (event.type) {
-        case 'keydown':
-          if (event.key === 'Escape') close();
-          return true;
-        case 'wheel':
-          scroll = clampScroll(scroll + event.deltaY, contentHeight(), bodyRect().h);
-          return true;
-        case 'pointerdown':
-          if (hitTest(buttonRect(), event.x, event.y)) {
-            advance();
-            return true;
-          }
-          if (hitTest(closeRect(), event.x, event.y)) {
-            close();
-            return true;
-          }
-          drag = { y: event.y, scroll };
-          return true;
-        case 'pointermove':
-          if (drag)
-            scroll = clampScroll(drag.scroll + (drag.y - event.y), contentHeight(), bodyRect().h);
-          return true;
-        case 'pointerup':
-        case 'pointercancel':
-          drag = null;
-          return true;
-        default:
-          return true;
+      if (event.type === 'keydown') {
+        if (event.key === 'Escape') close();
+        return true;
       }
+      if (event.type === 'pointerdown') {
+        if (hitTest(buttonRect(), event.x, event.y)) {
+          advance();
+          return true;
+        }
+        if (hitTest(closeRect(), event.x, event.y)) {
+          close();
+          return true;
+        }
+      }
+      // Wheel and body drags scroll; the log body isn't selectable, so any tap the scroller reports
+      // is ignored. Modal either way — swallow every event while the overlay is open.
+      scroller.handleInput(event, { region: bodyRect(), contentH: contentHeight() });
+      return true;
     },
   };
 }

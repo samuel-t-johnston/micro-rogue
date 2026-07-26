@@ -3,6 +3,7 @@
  * settings, etc. belong in the game menu (game-menu.js).
  */
 import { drawText, hitTest } from '../core/canvas-ui.js';
+import { createScrollable } from '../core/scrollable.js';
 
 const HEADER_H = 56;
 const BACK_BTN_SIZE = 44;
@@ -163,29 +164,52 @@ export function createCharacterMenuRoot({
 }
 
 /**
- * Wraps a screen body (renderer + input handler) in the consistent header + back chrome. The body
- * draws into the rect passed to `renderBody`/`handleBodyInput`.
+ * Wraps a scrollable screen `body` in the consistent header + back chrome. The header stays fixed;
+ * the body scrolls within the region below it when its content overflows (a scrollbar appears only
+ * then). The body is an object with:
+ *   renderContent(ctx, rect) → contentHeight  (draws the scrollable content; `rect.y` may be above
+ *                                               the region when scrolled; returns its pixel height)
+ *   handleInput(event, rect) → handled        (hit-tests against the same rect)
+ *   hasOverlay?() → boolean                   (a full-screen sub-menu is up: it's modal and unclipped)
+ *   renderOverlay?(ctx)                        (draws that sub-menu on top of the scroll region)
  */
 export function createCharacterMenuSubScreen({
   theme,
   getViewport,
   title,
-  renderBody,
-  handleBodyInput,
+  body,
   onBack,
   getAlerted = () => false,
 }) {
+  const scroller = createScrollable();
+  let contentH = 0;
+
   function bodyRect() {
     const vp = getViewport();
     const top = MARGIN + HEADER_H + MARGIN;
     return { x: MARGIN, y: top, w: vp.width - 2 * MARGIN, h: vp.height - top - MARGIN };
   }
 
+  // The rect the body draws/hit-tests against: same column, top shifted up by the scroll offset so
+  // content at content-y 0 lands at region.y - scroll.
+  function contentRect(region, scroll) {
+    return { x: region.x, y: region.y - scroll, w: region.w, h: region.h };
+  }
+
   return {
     render(ctx) {
       const vp = getViewport();
       drawHeader(ctx, theme, vp, title, '‹', getAlerted()); // ‹ back
-      renderBody(ctx, bodyRect());
+      const region = bodyRect();
+      scroller.render(ctx, {
+        theme,
+        region,
+        contentH,
+        drawContent: (c, scroll) => {
+          contentH = body.renderContent(c, contentRect(region, scroll));
+        },
+      });
+      body.renderOverlay?.(ctx); // full-screen sub-menus draw on top, outside the scroll clip
     },
 
     handleInput(event) {
@@ -197,7 +221,17 @@ export function createCharacterMenuSubScreen({
         onBack();
         return true;
       }
-      if (handleBodyInput?.(event, bodyRect())) return true;
+      // A full-screen sub-menu is modal: forward raw events straight to it, bypassing the scroller.
+      if (body.hasOverlay?.()) return body.handleInput(event, bodyRect());
+
+      const region = bodyRect();
+      const { tap } = scroller.handleInput(event, { region, contentH });
+      if (tap) {
+        return body.handleInput(
+          { type: 'pointerdown', x: tap.x, y: tap.y },
+          contentRect(region, scroller.scroll),
+        );
+      }
       return event.type === 'pointerdown' || event.type === 'pointermove';
     },
   };

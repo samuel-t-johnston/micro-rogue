@@ -99,8 +99,11 @@ export function createEquipmentScreenBody({
   }
 
   return {
-    render(ctx, body) {
-      for (const rect of rowRects(body)) {
+    // Draws the scrollable rows into `body` and returns the content's pixel height so the scroll
+    // container can size its track. The action menu is drawn by renderOverlay to stay unclipped.
+    renderContent(ctx, body) {
+      const rects = rowRects(body);
+      for (const rect of rects) {
         const r = rect.row;
 
         if (r.kind === 'section') {
@@ -161,7 +164,14 @@ export function createEquipmentScreenBody({
           });
         }
       }
+      return rects.length ? rects.at(-1).y + rects.at(-1).h - body.y : 0;
+    },
 
+    hasOverlay() {
+      return menu !== null;
+    },
+
+    renderOverlay(ctx) {
       menu?.render(ctx);
     },
 

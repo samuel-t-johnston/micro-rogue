@@ -65,9 +65,11 @@ export function createStatsScreenBody({ theme, getStats }) {
   }
 
   return {
-    render(ctx, body) {
+    // Draws the character sheet into `body` and returns its content height so the scroll container can
+    // size its track. Read-only, so there's no overlay/hasOverlay.
+    renderContent(ctx, body) {
       const s = getStats();
-      if (!s) return;
+      if (!s) return 0;
 
       const leftX = body.x + PAD;
       const innerW = body.w - 2 * PAD;
@@ -154,6 +156,7 @@ export function createStatsScreenBody({ theme, getStats }) {
       y += ROW_GAP;
       scoreRow('Speed', s.spd, '', '');
       scoreRow('Melee Atk', s.meleeAttack, 'Ranged Atk', s.rangedAttack);
+      return y - body.y + PAD; // trailing padding so the last row isn't flush to the scroll foot
     },
 
     handleInput() {
