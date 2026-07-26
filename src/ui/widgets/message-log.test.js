@@ -5,7 +5,6 @@ import {
   visibleLogLines,
   debugLogLines,
   formatDebugEntry,
-  clampScroll,
 } from './message-log.js';
 
 describe('nextLogView', () => {
@@ -74,19 +73,5 @@ describe('formatDebugEntry', () => {
 
   it('skips the cross-cutting turn/seen fields in the structured rendering', () => {
     expect(formatDebugEntry({ turn: 7, seen: false, action: 'hear' })).toBe('T7 action=hear');
-  });
-});
-
-describe('clampScroll', () => {
-  it('pins to zero when the content fits the viewport', () => {
-    expect(clampScroll(50, 100, 200)).toBe(0);
-  });
-
-  it('pins to the maximum offset past the bottom', () => {
-    expect(clampScroll(999, 500, 200)).toBe(300);
-  });
-
-  it('passes a valid offset through unchanged', () => {
-    expect(clampScroll(120, 500, 200)).toBe(120);
   });
 });

@@ -99,8 +99,7 @@ export function createCharacterMenuController({
       getAlerted,
       title: 'Inventory',
       onBack: openRoot,
-      renderBody: body.render,
-      handleBodyInput: body.handleInput,
+      body,
     });
   }
 
@@ -126,8 +125,7 @@ export function createCharacterMenuController({
       getAlerted,
       title: 'Equipment',
       onBack: openRoot,
-      renderBody: body.render,
-      handleBodyInput: body.handleInput,
+      body,
     });
   }
 
@@ -160,8 +158,7 @@ export function createCharacterMenuController({
       getAlerted,
       title: 'Stats',
       onBack: openRoot,
-      renderBody: body.render,
-      handleBodyInput: body.handleInput,
+      body,
     });
   }
 
