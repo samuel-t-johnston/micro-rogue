@@ -36,3 +36,8 @@ export const LEVEL_ROOMS = 'level:rooms';
 export const LEVEL_BSP = 'level:bsp'; // BSP carve plan: { bounds, outerWall, exits: [{a,b,gap,orientation}] }
 export const STATIC_ENTITIES = 'static:entities'; // authored entity specs from a static layout
 export const STATIC_LAYOUT = 'static:layout'; // the resolved static layout module/name
+// [[x,y], …] — authored floor tiles a static area exposes as the only points stitch may join it
+// through; and [{x,y,w,h}] — rects stitch must not carve (a static block's footprint), except at a
+// connector. Together they let a hand-authored area link to generated ones without being cut into.
+export const LEVEL_CONNECTORS = 'level:connectors';
+export const LEVEL_PROTECTED = 'level:protected';
