@@ -141,9 +141,10 @@ reaching. A connector must sit on a floor tile (it throws otherwise). A block wi
 sealed, which is a fine choice for a hidden vault; a connector that's genuinely boxed in with no route
 out is warned about instead.
 
-> **Digger/passage areas** (raw CA/walker corridors with no chamber zone) aren't connectable this way
-> yet — connectors are currently authored by static layouts. Publishing them from a digger stage is a
-> planned follow-up; the `stitch` machinery already supports it.
+> **Digger/passage areas** (a `kind:'passage'` zone with no chamber, which `stitch` otherwise ignores)
+> can be made connectable with the opt-in `passageConnectors` stage — it publishes such a zone's
+> frontier tiles as connectors, reusing this same machinery. Add it before `stitch`. See
+> [organic-map-generation.md](../design/organic-map-generation.md).
 
 ## Create a new map
 

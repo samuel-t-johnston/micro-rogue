@@ -292,6 +292,20 @@ connectivity itself is always free (at least one connection). Two properties mat
   `bounds` param); per-seam balancing in a single pass is a documented option, not built — connectivity
   never needs it.
 
+**Connectors and protected footprints — joining *authored* sections.** A hand-authored static section
+(the `static` stage, embedded via `bounds`) must not be cut into, and usually wants to dictate *where*
+it links to the rest of the floor. Two blackboard keys handle this: `level:protected` (rects `stitch`
+never carves through) and `level:connectors` (floor tiles it *may* join through). A protected block's
+own frontier is excluded, so it's reachable only via its connectors; a connector join is never doored
+(the authored side owns its opening) and records no zone adjacency (connectors are zoneless). Routing
+tries the two L-orientations, then falls back to a BFS *around* the footprint, so a connector on any
+face still connects (or warns if it's genuinely boxed in). The same connector key is the fix for the
+one case the chamber-frontier rule can't reach on its own — a `kind:'passage'` component with no
+chamber: the opt-in `passageConnectors` stage
+([`stage-passage-connectors.js`](../../src/world/generation/stages/stage-passage-connectors.js))
+publishes such a zone's frontier tiles as connectors so `stitch` can attach to raw corridor tissue,
+without changing any pipeline that doesn't ask for it.
+
 **`level:bounds` is a single, last-writer-wins slot** — "the current section's rect," not a durable map
 size. The box establishes the grid; each section overwrites `level:bounds` with its own rect; nothing
 may treat it as the map extent (`stitch` was the first to get bitten). A durable "full map" key could be
