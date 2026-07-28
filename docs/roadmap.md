@@ -1,11 +1,5 @@
 # Roadmap
-Purpose: This document is intended to be a place where I can jot down long-term plans for ROGµE. It is not a comprehensive roadmap and will change as implementation continues.
-
----
-
-Milestones are ordered by dependency, not by time estimate. Each milestone has a clear "done" condition. Nothing in a later milestone should be started before the prior milestone's done condition is met — the point is to have something that works and can be tested at each stage.
-
-Open questions and deferred decisions are noted inline where they land on the roadmap.
+Feature roadmap for long-term plans for ROGµE. Not necessarily comprehensive, and will change as implementation continues.
 
 ---
 
@@ -130,10 +124,20 @@ AI/Senses/Goals
 - [x] Map Gen - Cellular Automata
 - [x] Map Gen - Drunk Walk/Digger
 - [x] Map Gen - Composability (Generated Levels)
-- [ ] Map Gen - Composability (Static Levels)
+- [x] Map Gen - Composability (Static Levels)
 - [ ] Fancy bitset/Page 437 line walls (in glyph rendering mode) - config to enable
 - [ ] Re-entry pipeline - level that always regenerates
 - [ ] New rooms? (options: vault, temple, courtyard, throne room, armory, lab, graveyard, shop, zoo, nest)
+
+---
+
+## Dev Feature - Map Visualizer
+
+*A dev page to make dealing with large sprite sheets delightful.*
+
+- [x] Visualize map generation pipelines across multiple seeds
+- [x] Easy stage selection and customization
+- [x] Dev page and agent CLI support
 
 ---
 
@@ -193,6 +197,8 @@ AI/Senses/Goals
 *Features driven by using the engine to build a new roguelike! Maybe a 7DRL.*
 
 - [ ] Clean up old save file versions
+- [ ] UI API (dom, terminal, remote?)
+- [ ] Storage API (browser, SQL?)
 
 ---
 
@@ -211,7 +217,6 @@ AI/Senses/Goals
 - [ ] View RNG seed, mode where seed can be specified
 - [ ] Animation enable/disable config — a reduced-motion toggle driving `animations.setEnabled` (the seam exists and persists across resets; no shipped caller). Wire a `reduceMotion` setting + a `prefers-reduced-motion` read, re-applied at startup.
 - [ ] Improved audio config UI — surface the present-but-unwired per-channel mute API (`setMasterMuted` / `sfx.setMuted` / `music.setMuted`) as mute toggles, via `*Muted` settings keys pushed through `applyAudioSettings` (see [audio-design.md](design/audio-design.md)).
-
 - [ ] Particles and projectile animations — leave a hook in the animation system; implement when ranged combat exists
 - [ ] `flee` goal: low-HP retreat behavior
 - [ ] Emote icons: `!` alert, `?` investigating, `💤` sleeping — reusable component

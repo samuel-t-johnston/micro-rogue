@@ -65,6 +65,20 @@ npm dev:fresh
 
 The dev server serves the repo root, so `index.html` at the root, `src/` modules, and `styles/` all resolve via relative paths. Any static server pointed at the repo root works (e.g. `npx serve .`).
 
+### Dev Tools
+
+Run the map generation visualizer:
+
+```
+npm visualize
+```
+
+Run the sprite preview script:
+
+```
+npm sprite:preview
+```
+
 # Testing
 
 ## Framework
