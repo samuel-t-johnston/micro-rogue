@@ -4,9 +4,11 @@
  * See docs/design/procedural-3x3-dungeon.md and docs/howto/dungeon-layout.md.
  *
  * Stage parameters (optional):
- *   stairs — [[label, direction], …] pairs to place (default up + down). A leaf/branch floor can pass
- *            e.g. `[['stairs-up','up']]` to place only an up-stair. Each direction becomes the stair's
- *            port; the transit map keys its edges off those port names.
+ *   stairs — [[label, direction, port?], …] to place (default up + down). A leaf/branch floor can pass
+ *            e.g. `[['stairs-up','up']]` to place only an up-stair. `port` defaults to the direction;
+ *            passing a distinct one lets a floor carry several same-direction stairs that lead to
+ *            different places (a down-stair into a branch, or two up-stairs where branches reconverge),
+ *            since the transit map and arrival both key off the port, not the direction.
  */
 import { createStairs } from '../../entities/furniture.js';
 import { centermostRoomTile } from '../zone-tiles.js';
@@ -24,7 +26,7 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
   const zones = blackboard[LEVEL_ZONES] ?? [];
   const rooms = blackboard[LEVEL_ROOMS] ?? {};
 
-  for (const [label, dir] of stageConfig.stairs ?? DEFAULTS.stairs) {
+  for (const [label, dir, port] of stageConfig.stairs ?? DEFAULTS.stairs) {
     const zone = zones.find((z) => z.labels.includes(label));
     if (!zone) {
       console.warn(`[stairs] no ${label} zone; skipping`);
@@ -35,6 +37,6 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
       console.warn(`[stairs] ${label} zone has no room; skipping`);
       continue;
     }
-    level.placeEntity(createStairs(registry, tile[0], tile[1], dir));
+    level.placeEntity(createStairs(registry, tile[0], tile[1], dir, null, port));
   }
 }

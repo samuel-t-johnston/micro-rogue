@@ -72,6 +72,44 @@ describe('stairs stage', () => {
     expect(stairs[0].components.get('name')).toBe('Stairs Up');
   });
 
+  it('places a stair with a custom port distinct from its direction (multi-exit)', () => {
+    const level = createLevel();
+    const reg = createEntityRegistry();
+    const bb = level.blackboard;
+    runRoomGridGeometry(level, {}, bb, createRng(1));
+    runLabel(
+      level,
+      { labels: ['stairs-up', 'stairs-down', 'branch', 'item', 'item'] },
+      bb,
+      createRng(1),
+    );
+    runCarveRooms(level, {}, bb, createRng(1));
+    runStairs(
+      level,
+      {
+        stairs: [
+          ['stairs-up', 'up'],
+          ['stairs-down', 'down'],
+          ['branch', 'down', 'branch1'], // a second down-stair with its own port
+        ],
+      },
+      bb,
+      createRng(1),
+      reg,
+    );
+
+    const stairs = reg.getEntitiesWith('transition');
+    expect(stairs).toHaveLength(3);
+    expect(stairs.map((s) => s.components.get('transition').port).sort()).toEqual([
+      'branch1',
+      'down',
+      'up',
+    ]);
+    // The branch stair uses the down sprite/name but carries its distinct port.
+    const branch = stairs.find((s) => s.components.get('transition').port === 'branch1');
+    expect(branch.components.get('name')).toBe('Stairs Down');
+  });
+
   it('skips (with a warning) a stairs label that has no zone, placing the other', () => {
     // Geometry + carve, but a label set that omits 'stairs-down' entirely.
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});

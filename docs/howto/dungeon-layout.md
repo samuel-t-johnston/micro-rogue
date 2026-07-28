@@ -33,7 +33,7 @@ The shipped dungeon is a 3-floor main stack (branch 0) plus one side **branch**:
 
 A floor can have two down-stairs going to different places. Ports are just names, so the trick is giving the second stair a **distinct port** and wiring an edge to it:
 
-- **Procedural floor** — `stairs` stage config picks which stairs to place: `{ type: 'stairs', stairs: [['stairs-up','up'], ['stairs-down','down']] }`. A leaf/branch floor can place only an up-stair with `stairs: [['stairs-up','up']]`.
+- **Procedural floor** — `stairs` stage config picks which stairs to place: `{ type: 'stairs', stairs: [['stairs-up','up'], ['stairs-down','down']] }`. A leaf/branch floor can place only an up-stair with `stairs: [['stairs-up','up']]`. For a same-direction branch stair, add a third **port** element and label a distinct zone for it: `['branch','down','branch1']` (the `port` defaults to the direction when omitted). Two up-stairs with distinct ports likewise let two branches reconverge on one floor — the player arrives at whichever one their edge names.
 - **Static floor** — author the extra stair with a `port` in the layout's entities: `{ type: 'stairsDown', x, y, port: 'branch1' }` (see [`data/maps/floor-1-a.js`](../../data/maps/floor-1-a.js)). Same-direction stairs stay visually identical; only the port (and thus the edge) differs.
 
 The down-vs-up log message reads off the stair's `entityTypeId`, not the port, so a `branch1` down-stair still says "descend."

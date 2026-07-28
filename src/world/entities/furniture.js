@@ -36,11 +36,14 @@ export function createChest(registry, x, y) {
 }
 
 /**
- * Creates a Stairs furniture (a level transition). The `port` is the direction ('up'/'down'), which
- * the dungeon transit map uses to resolve the destination and arrival point. `to` is an optional
- * pre-resolved destination, left null in the minimal cut.
+ * Creates a Stairs furniture (a level transition). `direction` ('up'/'down') sets the sprite and name;
+ * `port` (defaulting to the direction) is what the dungeon transit map keys destinations and arrival
+ * points off. Passing a `port` distinct from the direction lets a floor carry several same-direction
+ * stairs that lead to different places (e.g. a down-stair into a branch), the generated counterpart of
+ * a static layout's per-stair `port`. `to` is an optional pre-resolved destination, left null in the
+ * minimal cut (the transit map resolves by port).
  */
-export function createStairs(registry, x, y, direction = 'up', to = null) {
+export function createStairs(registry, x, y, direction = 'up', to = null, port = direction) {
   const up = direction === 'up';
   const entity = registry.createEntity();
   registry.addComponent(entity, 'name', components.name(up ? 'Stairs Up' : 'Stairs Down'));
@@ -55,7 +58,7 @@ export function createStairs(registry, x, y, direction = 'up', to = null) {
     'renderable',
     components.renderable(up ? 'stairs-up' : 'stairs-down', '#888888', up ? '<' : '>', '#dddddd'),
   );
-  registry.addComponent(entity, 'transition', components.transition(to, direction));
+  registry.addComponent(entity, 'transition', components.transition(to, port));
   registry.addComponent(entity, 'persistVisible', components.persistVisible());
   return entity;
 }

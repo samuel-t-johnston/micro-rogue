@@ -164,6 +164,77 @@ describe('LevelManager.travel', () => {
     expect(player.components.get('tilePerception').memory.get('3,3')).toBe('floor');
   });
 
+  it('lands on the matching entrance when two branches reconverge on one floor', async () => {
+    // Diamond: floor 'c' is reachable both directly (a→c) and via a branch (a→b→c), each arriving at
+    // its own up-stair. This is the multi-entrance case — distinct ports, not distinct directions.
+    const MAP = {
+      start: { node: 'a', port: 'up' },
+      nodes: [
+        { id: 'a', pipelineId: 'f', branch: 0, depth: 0 },
+        { id: 'b', pipelineId: 'f', branch: 1, depth: 0 },
+        { id: 'c', pipelineId: 'f', branch: 0, depth: 1 },
+      ],
+      edges: [
+        { a: ['a', 'down'], b: ['c', 'up'], dir: 'bidi' }, // main descent → c's 'up' entrance
+        { a: ['a', 'branch'], b: ['b', 'up'], dir: 'bidi' }, // side branch a → b
+        { a: ['b', 'down'], b: ['c', 'up2'], dir: 'bidi' }, // b rejoins c at its 'up2' entrance
+      ],
+    };
+    // Stairs each floor exposes: [x, y, direction, port]. Floor c has two up-stairs (two entrances).
+    const STAIRS = {
+      a: [
+        [1, 1, 'up', 'up'],
+        [8, 8, 'down', 'down'],
+        [8, 1, 'down', 'branch'],
+      ],
+      b: [
+        [1, 1, 'up', 'up'],
+        [8, 8, 'down', 'down'],
+      ],
+      c: [
+        [1, 1, 'up', 'up'],
+        [8, 1, 'up', 'up2'],
+        [8, 8, 'down', 'down'],
+      ],
+    };
+    const build = (registry, node) => {
+      const level = createLevel({
+        branch: node.branch,
+        depth: node.depth,
+        pipelineId: node.pipelineId,
+      });
+      level.width = 10;
+      level.height = 10;
+      level.tiles = Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => 'floor'));
+      for (const [x, y, dir, port] of STAIRS[node.id])
+        level.placeEntity(createStairs(registry, x, y, dir, null, port));
+      return level;
+    };
+    const start = async () => {
+      const registry = createEntityRegistry();
+      const manager = createLevelManager({
+        registry,
+        transitMap: MAP,
+        generateLevel: (n) => build(registry, n),
+      });
+      const { level } = await manager.start();
+      const player = makePlayer(registry);
+      level.placeEntity(player);
+      return { manager, player };
+    };
+
+    const direct = await start();
+    await direct.manager.travel(direct.player, 'down'); // a → c
+    expect(direct.manager.getCurrentNodeId()).toBe('c');
+    expect(direct.player.components.get('position')).toEqual({ x: 1, y: 1 }); // c's 'up' entrance
+
+    const viaBranch = await start();
+    await viaBranch.manager.travel(viaBranch.player, 'branch'); // a → b
+    await viaBranch.manager.travel(viaBranch.player, 'down'); // b → c
+    expect(viaBranch.manager.getCurrentNodeId()).toBe('c');
+    expect(viaBranch.player.components.get('position')).toEqual({ x: 8, y: 1 }); // c's 'up2' entrance
+  });
+
   it('builds each floor from its transit-map node identity', async () => {
     const seen = [];
     const registry = createEntityRegistry();
