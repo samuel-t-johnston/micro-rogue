@@ -29,6 +29,8 @@ import { LEVEL_BOUNDS, LEVEL_PASSAGE_TILES, LEVEL_RESERVED } from '../blackboard
 import { DIRECTIONS_4, euclideanMst, squaredDistance, lineTiles } from '../../map/geometry.js';
 import { carveWalk } from '../walk.js';
 import { isReserved } from './stage-reserve.js';
+import { isFloorTile } from '../../map/tile-registry.js';
+import { paletteOf } from '../palette.js';
 
 export const DEFAULTS = { minComponentSize: 30, sobriety: 0.85, momentum: 0.5, maxStepsFactor: 4 };
 
@@ -59,14 +61,16 @@ export function run(level, stageConfig = {}, blackboard, rng) {
   const bounds = blackboard[LEVEL_BOUNDS] ?? { x: 0, y: 0, w: level.width, h: level.height };
   const minSize = stageConfig.minComponentSize ?? DEFAULTS.minComponentSize;
   const reserved = blackboard[LEVEL_RESERVED] ?? [];
+  const { floor, wall } = paletteOf(blackboard);
   const opts = {
     sobriety: stageConfig.sobriety ?? DEFAULTS.sobriety,
     momentum: stageConfig.momentum ?? DEFAULTS.momentum,
     maxStepsFactor: stageConfig.maxStepsFactor ?? DEFAULTS.maxStepsFactor,
     blocked: reserved.length ? (x, y) => isReserved(x, y, reserved) : undefined,
+    floor,
   };
 
-  const isFloor = (x, y) => level.tiles[y]?.[x] === 'floor';
+  const isFloor = (x, y) => isFloorTile(level.tiles[y]?.[x]);
 
   // Connected floor components (4-connected) within the region, each collected as its tile list.
   const seen = new Set();
@@ -103,7 +107,7 @@ export function run(level, stageConfig = {}, blackboard, rng) {
   if (keepers.length === 0) keepers = [components[0]];
   const kept = new Set(keepers);
   for (const comp of components) {
-    if (!kept.has(comp)) for (const [x, y] of comp) level.tiles[y][x] = 'wall';
+    if (!kept.has(comp)) for (const [x, y] of comp) level.tiles[y][x] = wall;
   }
   if (keepers.length < 2) return;
 

@@ -4,6 +4,7 @@
  * the identical walk with the same load-bearing guarantees. See docs/design/organic-map-generation.md.
  */
 import { DIRECTIONS_4, chebyshevDistance } from '../map/geometry.js';
+import { isFloorTile } from '../map/tile-registry.js';
 
 const key = (x, y) => `${x},${y}`;
 
@@ -38,9 +39,11 @@ function stepToward(pos, target, rng) {
  * rects. Callers must not aim a walk *across* a blocked region: the walker routes around small ones but
  * can't path-find, and its straight-line fallback would leave a gap (two dead-end stubs). caBridge
  * therefore skips any bridge whose straight line crosses reserved rather than relying on this alone.
+ *
+ * `opts.floor` (optional) is the tile id to carve (the current palette's floor); defaults to `'floor'`.
  */
 export function carveWalk(level, start, target, targetTiles, opts, rng) {
-  const { sobriety, momentum, maxStepsFactor, blocked = () => false } = opts;
+  const { sobriety, momentum, maxStepsFactor, blocked = () => false, floor = 'floor' } = opts;
   const canStep = (x, y) => level.tiles[y]?.[x] !== undefined && !blocked(x, y);
 
   // Buffer the path and commit atomically: the walk never *steps* onto a blocked tile, but its
@@ -88,8 +91,8 @@ export function carveWalk(level, start, target, targetTiles, opts, rng) {
   const dug = [];
   for (const [x, y] of path) {
     if (level.tiles[y]?.[x] === undefined) continue;
-    if (level.tiles[y][x] !== 'floor') dug.push([x, y]);
-    level.tiles[y][x] = 'floor';
+    if (!isFloorTile(level.tiles[y][x])) dug.push([x, y]);
+    level.tiles[y][x] = floor;
   }
   return dug;
 }

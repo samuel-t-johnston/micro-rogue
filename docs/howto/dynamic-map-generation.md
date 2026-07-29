@@ -44,6 +44,10 @@ The shipped procedural pipeline splits cleanly:
 
 Static pipelines use a different, shorter set (`static` / `randomStatic` to lay down a fixed layout, `placeStaticEntities` to instantiate authored entities) — see [static-map-layouts.md](static-map-layouts.md). The registry holds both families; a pipeline mixes whatever stages it needs.
 
+### Theming with the palette stage
+
+Carve stages don't hard-code tile ids — they lay down whatever `{ floor, wall }` **palette** is in scope. The `palette` stage sets it, and it's sticky (holds until the next `palette` stage), so a pipeline themes a run by interleaving one: `{ type: 'palette', floor: 'cave-floor', wall: 'cave-wall' }` before the CA stages makes them carve a cave instead of stone. A composed level can set a different palette per section. Absent, generation defaults to stone. See [tile-types.md § Terrain palettes](tile-types.md#terrain-palettes).
+
 ### Determinism
 
 All randomness comes from the `rng` the runner is handed — the dungeon runtime derives a dedicated per-floor `mapgen` stream from the floor's identity (see [rng-and-determinism.md](../design/rng-and-determinism.md)), so the same seed always yields the same floor, independent of gameplay rolls.

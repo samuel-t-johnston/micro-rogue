@@ -11,6 +11,7 @@
  * Blackboard: writes level:bounds -> { x: 0, y: 0, w: width, h: height }; fills level.tiles with wall.
  */
 import { LEVEL_BOUNDS } from '../blackboard-keys.js';
+import { paletteOf } from '../palette.js';
 
 export const DEFAULTS = { width: 48, height: 32 };
 
@@ -18,8 +19,9 @@ export const DEFAULTS = { width: 48, height: 32 };
 export function run(level, stageConfig = {}, blackboard) {
   const width = stageConfig.width ?? DEFAULTS.width;
   const height = stageConfig.height ?? DEFAULTS.height;
+  const { wall } = paletteOf(blackboard);
   level.width = width;
   level.height = height;
-  level.tiles = Array.from({ length: height }, () => Array.from({ length: width }, () => 'wall'));
+  level.tiles = Array.from({ length: height }, () => Array.from({ length: width }, () => wall));
   blackboard[LEVEL_BOUNDS] = { x: 0, y: 0, w: width, h: height };
 }

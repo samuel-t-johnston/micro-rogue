@@ -17,7 +17,9 @@ export default {
       section: 'keep',
     },
     { type: 'bspCarve', doors: { present: 'all', open: 'none' } },
-    // East wing — a CA cave.
+    // East wing — a CA cave. The palette is sticky, so cave tiles hold from here on (including the
+    // stitch corridor that joins the wings); reset it before `stitch` if you want stone plumbing.
+    { type: 'palette', floor: 'cave-floor', wall: 'cave-wall' },
     { type: 'caSeed', bounds: { x: 28, y: 0, w: 28, h: 40 } },
     { type: 'caSmooth' },
     { type: 'caBridge' },

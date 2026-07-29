@@ -21,6 +21,7 @@
  */
 import { LEVEL_NODES, LEVEL_BOUNDS, LEVEL_ZONES, LEVEL_ROOMS } from '../blackboard-keys.js';
 import { DIRECTIONS_4, chebyshevDistance } from '../../map/geometry.js';
+import { paletteOf } from '../palette.js';
 
 // Plus-shaped brush: the walker tile and its four orthogonal neighbours.
 const BRUSH = [[0, 0], ...DIRECTIONS_4];
@@ -71,18 +72,19 @@ const boundsOf = (tiles) => {
 export function run(level, stageConfig, blackboard, rng) {
   const nodes = blackboard[LEVEL_NODES] ?? [];
   const bounds = blackboard[LEVEL_BOUNDS] ?? { x: 0, y: 0, w: level.width, h: level.height };
+  const { floor, wall } = paletteOf(blackboard);
 
   // Own the grid only if no earlier stage laid tiles; otherwise carve into the existing level in place.
   if (!level.tiles.length) {
     level.width = bounds.x + bounds.w;
     level.height = bounds.y + bounds.h;
     level.tiles = Array.from({ length: level.height }, () =>
-      Array.from({ length: level.width }, () => 'wall'),
+      Array.from({ length: level.width }, () => wall),
     );
   }
 
   const setFloor = (x, y) => {
-    if (level.tiles[y]?.[x] !== undefined) level.tiles[y][x] = 'floor';
+    if (level.tiles[y]?.[x] !== undefined) level.tiles[y][x] = floor;
   };
 
   const zones = blackboard[LEVEL_ZONES] ?? [];

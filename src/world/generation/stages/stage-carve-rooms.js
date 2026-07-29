@@ -6,6 +6,7 @@
  * stage. See docs/design/procedural-3x3-dungeon.md (Room variety & dog-leg halls).
  */
 import { LEVEL_GRID, LEVEL_ZONES, LEVEL_ROOMS } from '../blackboard-keys.js';
+import { paletteOf } from '../palette.js';
 
 const MIN_FLOOR = 2; // a 2x2 floor room (4x4 counting its wall ring)
 
@@ -21,11 +22,12 @@ export function run(level, stageConfig, blackboard, rng) {
   const grid = blackboard[LEVEL_GRID] ?? { cols: 0, rows: 0, cellSize: 10 };
   const cs = grid.cellSize;
   const zones = blackboard[LEVEL_ZONES] ?? [];
+  const { floor, wall } = paletteOf(blackboard);
 
   level.width = grid.cols * cs;
   level.height = grid.rows * cs;
   level.tiles = Array.from({ length: level.height }, () =>
-    Array.from({ length: level.width }, () => 'wall'),
+    Array.from({ length: level.width }, () => wall),
   );
 
   const cellZone = new Map();
@@ -77,7 +79,7 @@ export function run(level, stageConfig, blackboard, rng) {
   const rooms = {};
   for (const [key, r] of room) {
     for (let y = r.y0; y <= r.y1; y++) {
-      for (let x = r.x0; x <= r.x1; x++) level.tiles[y][x] = 'floor';
+      for (let x = r.x0; x <= r.x1; x++) level.tiles[y][x] = floor;
     }
     rooms[key] = { ...r };
   }

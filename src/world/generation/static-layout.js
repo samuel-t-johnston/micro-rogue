@@ -7,6 +7,7 @@
  * an offset via a `bounds` param, so a static block composes into an already-generated level. See
  * docs/howto/static-map-layouts.md.
  */
+import { isFloorTile } from '../map/tile-registry.js';
 
 // Default module importer: resolves the map file relative to this module's URL (GitHub Pages-safe).
 // Injectable so callers (tests, alternate sources) can supply modules without the dynamic import.
@@ -108,7 +109,7 @@ export function parseRegions(mod, bounds) {
   const ox = bounds?.x ?? 0;
   const oy = bounds?.y ?? 0;
   const tileRows = toRows(mod.tiles);
-  const isFloor = (lx, ly) => mod.legend[tileRows[ly]?.[lx]] === 'floor';
+  const isFloor = (lx, ly) => isFloorTile(mod.legend[tileRows[ly]?.[lx]]);
 
   // glyph -> accumulated tiles (world coords, deduped) + how it was defined (for the room shape below).
   const acc = new Map();

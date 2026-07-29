@@ -35,6 +35,7 @@ import {
   LEVEL_ADJACENCY,
 } from '../blackboard-keys.js';
 import { carveWalk } from '../walk.js';
+import { paletteOf } from '../palette.js';
 
 export const DEFAULTS = { sobriety: 0.65, momentum: 0.5, maxStepsFactor: 4 };
 
@@ -47,6 +48,7 @@ export function run(level, stageConfig = {}, blackboard, rng) {
     sobriety: stageConfig.sobriety ?? DEFAULTS.sobriety,
     momentum: stageConfig.momentum ?? DEFAULTS.momentum,
     maxStepsFactor: stageConfig.maxStepsFactor ?? DEFAULTS.maxStepsFactor,
+    floor: paletteOf(blackboard).floor,
   };
 
   const byId = new Map(nodes.map((n) => [n.id, n]));
