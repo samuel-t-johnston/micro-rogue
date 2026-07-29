@@ -16,13 +16,14 @@
 import { LEVEL_ZONES, LEVEL_ROOMS, LEVEL_CONNECTORS } from '../blackboard-keys.js';
 import { roomTiles } from '../zone-tiles.js';
 import { DIRECTIONS_4 } from '../../map/geometry.js';
+import { isFloorTile } from '../../map/tile-registry.js';
 
 /** Runs the passage-connectors stage (see the file overview). */
 export function run(level, stageConfig = {}, blackboard) {
   const zones = blackboard[LEVEL_ZONES] ?? [];
   const rooms = blackboard[LEVEL_ROOMS] ?? {};
   const section = stageConfig.section;
-  const isFloor = (x, y) => level.tiles[y]?.[x] === 'floor';
+  const isFloor = (x, y) => isFloorTile(level.tiles[y]?.[x]);
 
   const connectors = (blackboard[LEVEL_CONNECTORS] ?? []).slice();
   const seen = new Set(connectors.map(([x, y]) => `${x},${y}`));

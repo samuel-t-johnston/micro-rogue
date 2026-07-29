@@ -23,6 +23,7 @@
  */
 import { LEVEL_BOUNDS, LEVEL_RESERVED } from '../blackboard-keys.js';
 import { isReserved } from './stage-reserve.js';
+import { paletteOf } from '../palette.js';
 
 export const DEFAULTS = { width: 48, height: 32, wallChance: 0.62 };
 
@@ -36,12 +37,13 @@ export function run(level, stageConfig = {}, blackboard, rng) {
   };
   const wallChance = stageConfig.wallChance ?? DEFAULTS.wallChance;
   const reserved = blackboard[LEVEL_RESERVED] ?? [];
+  const { floor, wall } = paletteOf(blackboard);
 
   if (!level.tiles.length) {
     level.width = bounds.x + bounds.w;
     level.height = bounds.y + bounds.h;
     level.tiles = Array.from({ length: level.height }, () =>
-      Array.from({ length: level.width }, () => 'wall'),
+      Array.from({ length: level.width }, () => wall),
     );
   }
 
@@ -55,9 +57,7 @@ export function run(level, stageConfig = {}, blackboard, rng) {
     for (let x = bounds.x; x < bounds.x + bounds.w; x++) {
       if (level.tiles[y]?.[x] === undefined) continue;
       level.tiles[y][x] =
-        onBorder(x, y) || isReserved(x, y, reserved) || rng.random() < wallChance
-          ? 'wall'
-          : 'floor';
+        onBorder(x, y) || isReserved(x, y, reserved) || rng.random() < wallChance ? wall : floor;
     }
   }
 

@@ -88,6 +88,15 @@ describe('describeTile', () => {
       expect(describeTile(level, viewer, { x: 4, y: 4 })).toBe('You see a wall.');
     });
 
+    it('names palette variants by category, not tile id (floors keep the definite article)', () => {
+      level.tiles[4][4] = 'cave-floor';
+      const onFloor = makeViewer(registry, 2, 2, { visible: ['4,4'] });
+      expect(describeTile(level, onFloor, { x: 4, y: 4 })).toBe('You see the cave floor.');
+      level.tiles[4][4] = 'cave-wall';
+      const onWall = makeViewer(registry, 2, 2, { visible: ['4,4'] });
+      expect(describeTile(level, onWall, { x: 4, y: 4 })).toBe('You see a cave wall.');
+    });
+
     it('joins three things with an Oxford comma', () => {
       placeCreature(registry, level, 3, 3, 'Orc');
       placeItem(registry, level, 3, 3, 'Dagger');

@@ -23,6 +23,8 @@
 import { LEVEL_BOUNDS, LEVEL_RESERVED } from '../blackboard-keys.js';
 import { isReserved } from './stage-reserve.js';
 import { DIRECTIONS_8 } from '../../map/geometry.js';
+import { isFloorTile } from '../../map/tile-registry.js';
+import { paletteOf } from '../palette.js';
 
 export const DEFAULTS = { iterations: 4, wallThreshold: 5 };
 
@@ -32,6 +34,7 @@ export function run(level, stageConfig = {}, blackboard) {
   const iterations = stageConfig.iterations ?? DEFAULTS.iterations;
   const threshold = stageConfig.wallThreshold ?? DEFAULTS.wallThreshold;
   const reserved = blackboard[LEVEL_RESERVED] ?? [];
+  const { floor, wall } = paletteOf(blackboard);
 
   const inside = (x, y) =>
     x >= bounds.x && x < bounds.x + bounds.w && y >= bounds.y && y < bounds.y + bounds.h;
@@ -43,16 +46,17 @@ export function run(level, stageConfig = {}, blackboard) {
 
   for (let it = 0; it < iterations; it++) {
     const src = level.tiles.map((row) => row.slice());
-    const isWall = (x, y) => !inside(x, y) || src[y][x] === 'wall';
+    // Off-region and any non-floor tile count as wall, so caves stay closed at the region edge.
+    const isWall = (x, y) => !inside(x, y) || !isFloorTile(src[y][x]);
     for (let y = bounds.y; y < bounds.y + bounds.h; y++) {
       for (let x = bounds.x; x < bounds.x + bounds.w; x++) {
         if (onBorder(x, y) || isReserved(x, y, reserved)) {
-          level.tiles[y][x] = 'wall';
+          level.tiles[y][x] = wall;
           continue;
         }
         let walls = 0;
         for (const [dx, dy] of DIRECTIONS_8) if (isWall(x + dx, y + dy)) walls++;
-        level.tiles[y][x] = walls >= threshold ? 'wall' : 'floor';
+        level.tiles[y][x] = walls >= threshold ? wall : floor;
       }
     }
   }

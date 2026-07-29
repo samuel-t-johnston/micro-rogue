@@ -18,6 +18,7 @@
  */
 import { createDoor } from '../../entities/furniture.js';
 import { LEVEL_ROOMS, LEVEL_BSP } from '../blackboard-keys.js';
+import { paletteOf } from '../palette.js';
 
 export const DEFAULTS = { doors: { present: 'all', open: 'none' } };
 
@@ -46,13 +47,14 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
   const rooms = blackboard[LEVEL_ROOMS] ?? {};
   const present = stageConfig.doors?.present ?? DEFAULTS.doors.present;
   const open = stageConfig.doors?.open ?? DEFAULTS.doors.open;
+  const { floor, wall } = paletteOf(blackboard);
 
   // Own the grid only if no earlier stage laid tiles; otherwise carve into the existing level in place.
   if (!level.tiles.length) {
     level.width = bounds.x + bounds.w;
     level.height = bounds.y + bounds.h;
     level.tiles = Array.from({ length: level.height }, () =>
-      Array.from({ length: level.width }, () => 'wall'),
+      Array.from({ length: level.width }, () => wall),
     );
   }
 
@@ -65,19 +67,19 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
     if (level.tiles[y]?.[x] !== undefined) level.tiles[y][x] = type;
   };
   const floorRect = (r) => {
-    for (let y = r.y0; y <= r.y1; y++) for (let x = r.x0; x <= r.x1; x++) setTile(x, y, 'floor');
+    for (let y = r.y0; y <= r.y1; y++) for (let x = r.x0; x <= r.x1; x++) setTile(x, y, floor);
   };
 
   // Wall the whole managed area first (so an embedded empty box gets its interior walls), respecting
   // outerWall on the border, then floor everything walkable over it.
   for (let y = bounds.y; y < bounds.y + bounds.h; y++) {
     for (let x = bounds.x; x < bounds.x + bounds.w; x++) {
-      if (outerWall || !onBorder(x, y)) setTile(x, y, 'wall');
+      if (outerWall || !onBorder(x, y)) setTile(x, y, wall);
     }
   }
   for (const room of Object.values(rooms)) floorRect(room);
   for (const hall of halls) floorRect(hall);
-  for (const c of connections) for (const [x, y] of c.tiles) setTile(x, y, 'floor');
+  for (const c of connections) for (const [x, y] of c.tiles) setTile(x, y, floor);
 
   // Doors go on the door-eligible connections (room exits), never on hall-to-hall gaps.
   const eligible = connections.filter((c) => c.door);

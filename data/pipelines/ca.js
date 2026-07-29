@@ -7,6 +7,7 @@
 export default {
   id: 'ca',
   stages: [
+    { type: 'palette', floor: 'cave-floor', wall: 'cave-wall' },
     { type: 'caSeed', width: 56, height: 40 },
     { type: 'caSmooth' },
     { type: 'caBridge' },

@@ -37,6 +37,7 @@
 import { LEVEL_BOUNDS, LEVEL_PASSAGE_TILES } from '../blackboard-keys.js';
 import { appendZones } from '../zone-tiles.js';
 import { DIRECTIONS_4, DIRECTIONS_8 } from '../../map/geometry.js';
+import { isFloorTile } from '../../map/tile-registry.js';
 
 export const DEFAULTS = { prominence: 0, passageThreshold: 1 };
 
@@ -63,7 +64,7 @@ export function distanceTransform(level, bounds) {
   const big = level.width + level.height;
   const x1 = bounds.x + bounds.w;
   const y1 = bounds.y + bounds.h;
-  const isFloor = (x, y) => level.tiles[y]?.[x] === 'floor';
+  const isFloor = (x, y) => isFloorTile(level.tiles[y]?.[x]);
   const inRegion = (x, y) => x >= bounds.x && x < x1 && y >= bounds.y && y < y1;
   const D = Array.from({ length: level.height }, () => new Array(level.width).fill(0));
   const get = (x, y) => (inRegion(x, y) ? D[y][x] : 0);
@@ -101,8 +102,8 @@ export function run(level, stageConfig = {}, blackboard) {
   // watershed — treated as barriers — so a deliberate bridge never merges the two chambers it joins;
   // each dug run becomes its own `passage` region below. `prominence` then only splits genuinely lumpy
   // caverns. Absent (e.g. a pure-CA level with no bridges, or an audit over BSP) it's a plain watershed.
-  const passageList = (blackboard[LEVEL_PASSAGE_TILES] ?? []).filter(
-    ([x, y]) => level.tiles[y]?.[x] === 'floor',
+  const passageList = (blackboard[LEVEL_PASSAGE_TILES] ?? []).filter(([x, y]) =>
+    isFloorTile(level.tiles[y]?.[x]),
   );
   const passageSet = new Set(passageList.map(([x, y]) => idx(x, y)));
 
@@ -111,7 +112,7 @@ export function run(level, stageConfig = {}, blackboard) {
   const floors = [];
   for (let y = bounds.y; y < bounds.y + bounds.h; y++)
     for (let x = bounds.x; x < bounds.x + bounds.w; x++)
-      if (level.tiles[y][x] === 'floor' && !passageSet.has(idx(x, y))) floors.push([x, y]);
+      if (isFloorTile(level.tiles[y][x]) && !passageSet.has(idx(x, y))) floors.push([x, y]);
   floors.sort((a, b) => D[b[1]][b[0]] - D[a[1]][a[0]] || idx(a[0], a[1]) - idx(b[0], b[1]));
 
   // Union-find over region ids, each root carrying its peak D.

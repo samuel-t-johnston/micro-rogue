@@ -12,6 +12,7 @@
 import { createDoor } from '../../entities/furniture.js';
 import { cellsAdjacent } from './stage-room-grid-geometry.js';
 import { LEVEL_ZONES, LEVEL_LINKS, LEVEL_ROOMS } from '../blackboard-keys.js';
+import { paletteOf } from '../palette.js';
 
 // Plan one corridor as opening offsets + the lane for its perpendicular leg.
 //   la / lb        — the gutter lines just outside each room's facing wall (la by A, lb by B).
@@ -49,9 +50,10 @@ export function run(level, stageConfig, blackboard, rng, registry) {
   const links = blackboard[LEVEL_LINKS] ?? [];
   const rooms = blackboard[LEVEL_ROOMS] ?? {};
   const byId = new Map(zones.map((z) => [z.id, z]));
+  const { floor } = paletteOf(blackboard);
 
   const carve = (x, y) => {
-    if (level.tiles[y]?.[x] !== undefined) level.tiles[y][x] = 'floor';
+    if (level.tiles[y]?.[x] !== undefined) level.tiles[y][x] = floor;
   };
   const carveH = (x0, x1, y) => {
     for (let x = Math.min(x0, x1); x <= Math.max(x0, x1); x++) carve(x, y);

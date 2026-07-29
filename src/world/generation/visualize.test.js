@@ -173,6 +173,20 @@ describe('levelToStaticModule', () => {
     expect(mod).toContain("{ type: 'stairsUp', x: 1, y: 1, port: 'up' }");
   });
 
+  it('builds the legend from the tiles present, so a cave-palette level round-trips', () => {
+    const level = createLevel();
+    level.width = 3;
+    level.height = 3;
+    level.tiles = [
+      ['cave-wall', 'cave-wall', 'cave-wall'],
+      ['cave-wall', 'cave-floor', 'cave-wall'],
+      ['cave-wall', 'cave-wall', 'cave-wall'],
+    ];
+    const mod = levelToStaticModule(level);
+    expect(mod).toContain("export const legend = { ',': 'cave-floor', '%': 'cave-wall' }");
+    expect(mod).toContain('%%%\n%,%\n%%%');
+  });
+
   it('emits a chest with its contents', () => {
     const level = createLevel();
     level.width = 1;

@@ -50,6 +50,8 @@ import {
 import { roomTiles, isChamber } from '../zone-tiles.js';
 import { DIRECTIONS_4 } from '../../map/geometry.js';
 import { createDoor } from '../../entities/furniture.js';
+import { isFloorTile } from '../../map/tile-registry.js';
+import { paletteOf } from '../palette.js';
 
 export const DEFAULTS = { maxConnections: 1, maxGap: 6, spacing: 2 };
 
@@ -92,10 +94,11 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
   const spacing = stageConfig.spacing ?? DEFAULTS.spacing;
   const protectedRects = blackboard[LEVEL_PROTECTED] ?? [];
   const connectorTiles = blackboard[LEVEL_CONNECTORS] ?? [];
+  const { floor } = paletteOf(blackboard);
 
   const W = level.width;
   const idx = (x, y) => y * W + x;
-  const isFloor = (x, y) => level.tiles[y]?.[x] === 'floor';
+  const isFloor = (x, y) => isFloorTile(level.tiles[y]?.[x]);
   const isProtected = (x, y) =>
     protectedRects.some((r) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
   const connectorSet = new Set(connectorTiles.map(([x, y]) => idx(x, y)));
@@ -231,7 +234,7 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
     let door = null;
     for (const [x, y] of path) {
       if (door == null && !isFloor(x, y)) door = [x, y]; // first dug (wall) tile of the gap
-      if (level.tiles[y]?.[x] !== undefined) level.tiles[y][x] = 'floor';
+      if (level.tiles[y]?.[x] !== undefined) level.tiles[y][x] = floor;
       carved.add(idx(x, y));
     }
     // A connector join is never doored — the static side owns its opening's door treatment.

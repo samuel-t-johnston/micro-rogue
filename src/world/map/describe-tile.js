@@ -39,13 +39,16 @@ function entityPhrase(e) {
 
 function terrainPhrase(tileId) {
   if (!tileId) return 'nothing';
-  let name;
+  let tile;
   try {
-    name = getTileType(tileId).name.toLowerCase();
+    tile = getTileType(tileId);
   } catch {
     return 'nothing';
   }
-  return name === 'floor' ? 'the floor' : withArticle(name);
+  const name = tile.name.toLowerCase();
+  // A floor is the ground underfoot, so a definite article reads naturally ("the floor", "the cave
+  // floor"); anything else takes an indefinite one ("a wall", "a cave wall").
+  return tile.category === 'floor' ? `the ${name}` : withArticle(name);
 }
 
 /**

@@ -6,7 +6,7 @@
  * why the two tools can't drift. See docs/design/procedural-3x3-dungeon.md (Visualization & debug
  * tooling) and docs/howto/visualizing-generation.md.
  */
-import { getTileType } from '../map/tile-registry.js';
+import { getTileType, isFloorTile } from '../map/tile-registry.js';
 import { LEVEL_ZONES, LEVEL_ROOMS, LEVEL_ADJACENCY, LEVEL_LINKS } from './blackboard-keys.js';
 import { roomTiles, isChamber } from './zone-tiles.js';
 
@@ -165,7 +165,7 @@ export function levelToHtml(level) {
   for (let y = 0; y < level.height; y++) {
     let row = '';
     for (let x = 0; x < level.width; x++) {
-      const base = level.tiles[y]?.[x] === 'floor' ? (cls.get(`${x},${y}`) ?? 'f') : 'w';
+      const base = isFloorTile(level.tiles[y]?.[x]) ? (cls.get(`${x},${y}`) ?? 'f') : 'w';
       const g = glyphs.get(`${x},${y}`);
       row += g
         ? `<i class="${base}" style="color:${g.color}">${esc(g.ch)}</i>`
@@ -269,7 +269,8 @@ export function toJsLiteral(value, pad = '') {
  * type and position, which reproduces the layout but not the seeded population exactly.
  */
 export function levelToStaticModule(level) {
-  const rows = (level?.tiles ?? []).map((row) => row.map(tileChar).join('')).join('\n');
+  const { charOf, legend } = buildLegend(level);
+  const rows = (level?.tiles ?? []).map((row) => row.map((id) => charOf(id)).join('')).join('\n');
   const entities = [];
   for (const e of level?.entities ?? []) {
     const type = e.components.get('entityTypeId');
@@ -286,7 +287,7 @@ export function levelToStaticModule(level) {
     entities.push(ent);
   }
   return [
-    "export const legend = { '.': 'floor', '#': 'wall' };",
+    `export const legend = ${toJsLiteral(legend)};`,
     '',
     'export const tiles = `\\',
     `${rows}\`;`,
@@ -294,4 +295,31 @@ export function levelToStaticModule(level) {
     `export const entities = ${toJsLiteral(entities)};`,
     '',
   ].join('\n');
+}
+
+// The symbol legend for a static-map export: every distinct tile id actually present, mapped to a
+// unique authoring char. Each tile contributes its own `symbol` (`.`/`#`/…); when two present tiles
+// share one (symbols aren't unique — a cave floor and a stone floor may both be `.`), later ones fall
+// back to an unused char so the legend round-trips every id distinctly. Ids are sorted for a stable,
+// readable legend. Returns `{ charOf(id), legend }` — `charOf` maps an id (or null) to its export char.
+function buildLegend(level) {
+  const ids = new Set();
+  for (const row of level?.tiles ?? []) for (const id of row) if (id != null) ids.add(id);
+  const FALLBACK = [...'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+  const idToChar = new Map();
+  const legend = {};
+  const taken = new Set();
+  for (const id of [...ids].sort()) {
+    let ch;
+    try {
+      ch = getTileType(id).symbol;
+    } catch {
+      ch = null;
+    }
+    if (ch == null || taken.has(ch)) ch = FALLBACK.find((c) => !taken.has(c)) ?? '?';
+    taken.add(ch);
+    idToChar.set(id, ch);
+    legend[ch] = id;
+  }
+  return { charOf: (id) => idToChar.get(id) ?? ' ', legend };
 }

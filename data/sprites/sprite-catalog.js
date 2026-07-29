@@ -18,6 +18,8 @@ export const SPRITES = {
   // Terrain
   floor: { sheet: 'sprite-sheet', col: 2, row: 0 },
   wall: { sheet: 'sprite-sheet', col: 1, row: 5 },
+  'cave-floor': { sheet: 'ProjectUtumnoFull-DCSS', col: 45, row: 7 },
+  'cave-wall': { sheet: 'ProjectUtumnoFull-DCSS', col: 2, row: 6 },
 
   // Items
   'healing-potion': { sheet: 'ProjectUtumnoFull-DCSS', col: 26, row: 42 },

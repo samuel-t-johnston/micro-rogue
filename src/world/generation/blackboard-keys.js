@@ -21,6 +21,9 @@ export const LEVEL_LINKS = 'level:links'; // adjacency pairs chosen to become co
 export const LEVEL_NODES = 'level:nodes'; // [{ id, x, y, radius }] — planned chamber sites
 export const LEVEL_EDGES = 'level:edges'; // [{ a, b, kind }] — kind: 'mst' | 'loop'
 export const LEVEL_BOUNDS = 'level:bounds'; // { x, y, w, h } — the rect this pipeline generates within
+// { floor, wall } — the tile ids carve stages lay down, by category. Set by the `palette` stage and
+// sticky until the next one; absent ⇒ plain stone (see src/world/generation/palette.js).
+export const LEVEL_PALETTE = 'level:palette';
 // [{ x, y, w, h }] — rects a structure stage cordons off for a *later* stage to fill; organic
 // generators (caSeed/caSmooth) keep these cells wall. See docs/design/organic-map-generation.md.
 export const LEVEL_RESERVED = 'level:reserved';
