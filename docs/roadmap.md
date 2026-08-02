@@ -126,7 +126,7 @@ AI/Senses/Goals
 - [x] Map Gen - Composability (Generated Levels)
 - [x] Map Gen - Composability (Static Levels)
 - [ ] Fancy bitset/Page 437 line walls (in glyph rendering mode) - config to enable
-- [ ] Re-entry pipeline - level that always regenerates
+- [x] Re-entry pipeline - level that always regenerates
 - [ ] New rooms? (options: vault, temple, courtyard, throne room, armory, lab, graveyard, shop, zoo, nest)
 
 ---
@@ -189,6 +189,8 @@ AI/Senses/Goals
 
 - [ ] Levels, monsters, loot, classes, skills - it all feels like a proper (small, somewhat generic) game.
 - [ ] UI polish, theme adjustments, rounded buttons?
+- [ ] Dev documentation - strip demo content (scripts?) - creatures, items, furniture, levels, tiles, attributes...
+- [ ] Update dev libs
 
 ---
 
@@ -252,3 +254,15 @@ AI/Senses/Goals
 - [ ] ECS component subscription system** — `level.moveEntity()` is the current explicit coordination point for positional changes (ADR-018); extract to a subscription model if multiple independent systems need to react to the same component changes
 - [ ] Full AI state inspector: confidence values, memory payload, all senses
 - [ ] Notification layer: compare sense results turn-over-turn, fan to log and emote system
+
+*Ideas that haven't been properly thought through*
+
+New room ideas (vault, temple, throne, courtyard, armory, lab, graveyward, shop, zoo, nest)
+ - throne: random good/bad effects - nethack style
+ - vault: gold and jewelry
+ - lab: potions, table
+ - armory: armor stand, armor, weapons
+ - temple: altar - uncurse/bless/+1 an item
+ - graveyard: bones
+ - nest: bugs, webs
+ - courtyard: just layout - pillars? grass?
