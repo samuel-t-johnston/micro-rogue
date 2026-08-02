@@ -14,15 +14,20 @@ const STAT_FONT = '600 13px system-ui, sans-serif'; // matches the stat lines, f
 const DANGER = '#e0352f'; // alert red for the hunger warning (distinct from the softer HP red)
 // The at-a-glance hunger warning shown beside HP, keyed by hungerStatus() (see world/systems/hunger.js).
 const HUNGER_LABEL = { hungry: '(Hungry)', starving: '(Starving!)' };
+const EAT_EMOJI = '🍽️'; // "easy eat" affordance shown with the hunger warning; the stat lines tap to eat.
 
 /**
  * Creates the HUD widget: a level box in the corner with HP/MP/EXP stat lines beside it, anchored
  * top-left (mirrored to top-right for left-handedness — the box hugs the corner either way and the
- * lines read inward). EXP shows progress within the current level (into / span to next). Tapping
- * anywhere on the HUD fires `onOpen` (the game scene routes it to the Stats screen).
+ * lines read inward). EXP shows progress within the current level (into / span to next).
+ *
+ * Two tap targets: the level box fires `onOpen` (the game scene routes it to the Stats screen), and
+ * the stat-lines block fires `onEasyEat` (the "easy eat" quick-eat modal). When hungry a fork-and-knife
+ * emoji rides beside the hunger warning as a hint that the lines are now an eat button.
  */
-export function createHudWidget({ theme, getViewport, onOpen }) {
-  // Shared geometry so render and hit-testing never drift.
+export function createHudWidget({ theme, getViewport, onOpen, onEasyEat }) {
+  // Shared geometry so render and hit-testing never drift. The box and the stat lines are separate
+  // click targets (boxRect / statRect); together they cover the same footprint the HUD always had.
   function layout() {
     const vp = getViewport();
     const anchor = applyHandedness(ANCHOR, gameSettings.get('handedness'));
@@ -31,14 +36,17 @@ export function createHudWidget({ theme, getViewport, onOpen }) {
     const top = y + MARGIN;
     const boxX = right ? x - MARGIN - BOX : x + MARGIN;
     const textX = right ? boxX - GAP : boxX + BOX + GAP;
-    const rectX = right ? boxX - GAP - TEXT_W : boxX;
+    const statX = right ? boxX - GAP - TEXT_W : boxX + BOX;
     return {
       right,
       top,
       boxX,
       textX,
       align: right ? 'right' : 'left',
-      rect: { x: rectX, y: top, w: BOX + GAP + TEXT_W, h: BOX },
+      boxRect: { x: boxX, y: top, w: BOX, h: BOX },
+      // The stat-lines target spans the gap + text column (the box's inner edge to the far side), so a
+      // tap anywhere beside the box triggers easy-eat.
+      statRect: { x: statX, y: top, w: GAP + TEXT_W, h: BOX },
     };
   }
 
@@ -85,15 +93,29 @@ export function createHudWidget({ theme, getViewport, onOpen }) {
         const gap = 6;
         const hpW = ctx.measureText(hpText).width;
         const labelX = right ? textX - hpW - gap : textX + hpW + gap;
-        drawText(ctx, warn, labelX, top + 3, { color: DANGER, size: 13, weight: '700', align });
+        // The fork-and-knife emoji leads the warning as the eat-affordance hint; drawn as one string so
+        // the existing mirrored labelX/align keeps it adjacent to the warning on either handedness.
+        drawText(ctx, `${EAT_EMOJI} ${warn}`, labelX, top + 3, {
+          color: DANGER,
+          size: 13,
+          weight: '700',
+          align,
+        });
       }
     },
 
     handleInput(event) {
       if (event.type !== 'pointerdown') return false;
-      if (!hitTest(layout().rect, event.x, event.y)) return false;
-      onOpen?.();
-      return true;
+      const { boxRect, statRect } = layout();
+      if (hitTest(boxRect, event.x, event.y)) {
+        onOpen?.();
+        return true;
+      }
+      if (hitTest(statRect, event.x, event.y)) {
+        onEasyEat?.();
+        return true;
+      }
+      return false;
     },
   };
 }

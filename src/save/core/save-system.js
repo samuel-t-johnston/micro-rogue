@@ -20,7 +20,7 @@ import {
 } from './serialize.js';
 
 /** Save schema version. Bumped only on a breaking schema change (see the design doc). */
-export const SAVE_VERSION = 12;
+export const SAVE_VERSION = 13;
 
 /** Game release version; independent of SAVE_VERSION, tracks releases and mirrors package.json. */
 export const GAME_VERSION = '0.3.1';
@@ -334,6 +334,30 @@ export const migrations = [
       for (const blob of Object.values(save.frozenLevels ?? {})) {
         if (blob.level && blob.level.epoch === undefined) blob.level.epoch = 0;
         if (blob.frozenAtTurn === undefined) blob.frozenAtTurn = 1;
+      }
+      return save;
+    },
+  },
+  {
+    from: 12,
+    to: 13,
+    // v13 adds the `food` tag that marks edibles for the HUD's "easy eat" affordance (see
+    // src/world/systems/food.js). Saves through v12 created Grapes/Bread/Meat before it existed, so
+    // food already in a player's inventory wouldn't be recognized. Backfill the tag by the stable
+    // entityTypeId of the shipped foods — frozen literals here, never live code — on both the active
+    // registry and every frozen floor. Non-food entities are untouched; a re-run is idempotent.
+    migrate(save) {
+      const FOOD_TYPE_IDS = new Set(['grapes', 'bread', 'meat']);
+      const tagFood = (entities) => {
+        for (const entity of entities ?? []) {
+          if (FOOD_TYPE_IDS.has(entity.components?.entityTypeId) && !entity.components.food) {
+            entity.components.food = {};
+          }
+        }
+      };
+      tagFood(save.entities);
+      for (const floor of Object.values(save.frozenLevels ?? {})) {
+        tagFood(floor.entities);
       }
       return save;
     },

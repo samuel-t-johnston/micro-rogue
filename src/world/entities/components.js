@@ -164,6 +164,14 @@ export const components = {
     return [...names];
   },
 
+  // Marks an item as food — something the player can eat. A bare tag: it says "this is food" without
+  // the reader having to inspect the consumable's effect, so identifying edibles (for the HUD's "easy
+  // eat" affordance) stays robust to how satiation is implemented. The nutrition it restores is still
+  // the consumable's satiate amount; this only tags what counts as a meal. See src/world/systems/food.js.
+  food() {
+    return {};
+  },
+
   // Hearing acuity, paired with the `hearing` sense (in the `senses` list). `range` is how far this
   // entity hears: a sound is audible when its distance is within `range + sound.volume`. Better ears
   // = larger range; range 0 (or a missing component) = effectively deaf. Kept as a stat component so
