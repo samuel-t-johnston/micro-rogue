@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveDestination, getNode, getStart } from './transit-map.js';
+import { resolveDestination, getNode, getStart } from './transit-map-util.js';
 import transitMap from '../../../data/transit-map.js';
 
 describe('transit map (the shipped 3-floor stack)', () => {

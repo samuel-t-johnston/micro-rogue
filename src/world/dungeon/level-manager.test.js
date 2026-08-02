@@ -164,6 +164,191 @@ describe('LevelManager.travel', () => {
     expect(player.components.get('tilePerception').memory.get('3,3')).toBe('floor');
   });
 
+  // A two-floor map whose floor 'a' opts into total-reset regeneration on return.
+  const REGEN_MAP = {
+    start: { node: 'a', port: 'up' },
+    nodes: [
+      { id: 'a', pipelineId: 'test-floor', branch: 0, depth: 0, reentry: 'regen' },
+      { id: 'b', pipelineId: 'test-floor', branch: 0, depth: 1 },
+    ],
+    edges: [{ a: ['a', 'down'], b: ['b', 'up'], dir: 'bidi' }],
+  };
+
+  // Starts a game on REGEN_MAP with a generateLevel seam that records the (node, epoch) of each build.
+  async function startRegenGame() {
+    const epochs = [];
+    const registry = createEntityRegistry();
+    const manager = createLevelManager({
+      registry,
+      transitMap: REGEN_MAP,
+      generateLevel: (node, epoch) => {
+        epochs.push(`${node.id}:${epoch}`);
+        return makeFloor(registry, node);
+      },
+    });
+    const { level } = await manager.start();
+    const player = makePlayer(registry);
+    level.placeEntity(player);
+    return { registry, manager, level, player, epochs };
+  }
+
+  it('regenerates a revisited floor when its node opts into reentry: regen', async () => {
+    const { registry, manager, level: floorA, player, epochs } = await startRegenGame();
+
+    // A breadcrumb that a thaw would restore. A regen rebuilds the floor, so it must be gone.
+    const up = stairPos(registry, 'up');
+    const breadcrumb = registry.createEntity();
+    registry.addComponent(breadcrumb, 'name', components.name('Breadcrumb'));
+    registry.addComponent(breadcrumb, 'position', components.position(up.x, up.y));
+    floorA.placeEntity(breadcrumb);
+    const breadcrumbId = breadcrumb.id;
+
+    await manager.travel(player, 'down'); // to B (freezes A with its breadcrumb)
+    const floorA2 = await manager.travel(player, 'up'); // back to A — regenerates, not thaws
+
+    expect(manager.getCurrentNodeId()).toBe('a');
+    expect(registry.getEntity(breadcrumbId)).toBeNull(); // not restored: the floor was rebuilt
+    expect(floorA2.entities).not.toContain(breadcrumb);
+    expect(epochs).toEqual(['a:0', 'b:0', 'a:1']); // A first built at epoch 0, rebuilt at epoch 1
+  });
+
+  it('increments the epoch on each successive regeneration of the same floor', async () => {
+    const { manager, player, epochs } = await startRegenGame();
+    await manager.travel(player, 'down'); // A frozen (epoch 0)
+    await manager.travel(player, 'up'); // A regenerated at epoch 1
+    await manager.travel(player, 'down'); // A frozen (epoch 1)
+    await manager.travel(player, 'up'); // A regenerated at epoch 2
+    expect(epochs).toEqual(['a:0', 'b:0', 'a:1', 'a:2']);
+  });
+
+  it('arrives in the dark on a regen — stale layout memory is not restored', async () => {
+    const { registry, manager, player } = await startRegenGame();
+    const tp = components.tilePerception();
+    tp.memory.set('1,1', 'floor');
+    registry.addComponent(player, 'tilePerception', tp);
+
+    await manager.travel(player, 'down'); // freezes A's remembered tiles
+    await manager.travel(player, 'up'); // regen — memory of the old layout is meaningless
+
+    expect(player.components.get('tilePerception').memory.size).toBe(0);
+  });
+
+  // Builds a floor-mapped quest item (questItem + item + position) and drops it on `level`.
+  function placeQuestItem(registry, level, x, y, questId) {
+    const q = registry.createEntity();
+    registry.addComponent(q, 'name', components.name(`Quest ${questId}`));
+    registry.addComponent(q, 'item', components.item({ type: 'map' }));
+    registry.addComponent(q, 'questItem', components.questItem(questId));
+    registry.addComponent(q, 'position', components.position(x, y));
+    level.placeEntity(q);
+    return q;
+  }
+
+  it('carries a floor quest item across a regen, onto the arrival tile', async () => {
+    const { registry, manager, level: floorA, player } = await startRegenGame();
+    const amulet = placeQuestItem(registry, floorA, 1, 1, 'amulet');
+    const amuletId = amulet.id;
+
+    // A plain, non-quest entity that the total reset must destroy.
+    const breadcrumb = registry.createEntity();
+    registry.addComponent(breadcrumb, 'name', components.name('Breadcrumb'));
+    registry.addComponent(breadcrumb, 'position', components.position(1, 1));
+    floorA.placeEntity(breadcrumb);
+    const breadcrumbId = breadcrumb.id;
+
+    await manager.travel(player, 'down');
+    const floorA2 = await manager.travel(player, 'up'); // regen
+
+    const survived = registry.getEntity(amuletId);
+    const arrival = player.components.get('position');
+    expect(survived).not.toBeNull();
+    expect(survived.components.has('questItem')).toBe(true);
+    expect(survived.components.get('position')).toEqual({ x: arrival.x, y: arrival.y });
+    expect(survived.components.get('item').location).toEqual({ type: 'map' });
+    expect([...floorA2.getEntitiesAt(arrival.x, arrival.y)]).toContain(survived);
+    expect(registry.getEntity(breadcrumbId)).toBeNull(); // the reset was total for everything else
+  });
+
+  it('carries a quest item out of a chest, dropping the chest itself', async () => {
+    const { registry, manager, level: floorA, player } = await startRegenGame();
+    const chest = registry.createEntity();
+    registry.addComponent(chest, 'position', components.position(5, 5));
+    registry.addComponent(chest, 'container', components.container());
+    registry.addComponent(chest, 'inventory', components.inventory());
+    const amulet = registry.createEntity();
+    registry.addComponent(amulet, 'name', components.name('Amulet'));
+    registry.addComponent(
+      amulet,
+      'item',
+      components.item({ type: 'container', containerId: chest.id }),
+    );
+    registry.addComponent(amulet, 'questItem', components.questItem('amulet'));
+    chest.components.get('inventory').items.push(amulet);
+    floorA.placeEntity(chest);
+    const amuletId = amulet.id;
+    const chestId = chest.id;
+
+    await manager.travel(player, 'down');
+    await manager.travel(player, 'up'); // regen
+
+    const survived = registry.getEntity(amuletId);
+    const arrival = player.components.get('position');
+    expect(survived).not.toBeNull();
+    expect(survived.components.get('item').location).toEqual({ type: 'map' }); // now on the floor
+    expect(survived.components.get('position')).toEqual({ x: arrival.x, y: arrival.y });
+    expect(registry.getEntity(chestId)).toBeNull(); // the container is destroyed with everything else
+  });
+
+  it('preserves the carried quest item’s own state and contents (the real entity, not a fresh one)', async () => {
+    const { registry, manager, level: floorA, player } = await startRegenGame();
+    const relic = placeQuestItem(registry, floorA, 3, 3, 'relic'); // name: 'Quest relic'
+    registry.addComponent(relic, 'inventory', components.inventory());
+    const charge = registry.createEntity();
+    registry.addComponent(charge, 'name', components.name('Charge'));
+    relic.components.get('inventory').items.push(charge);
+    const relicId = relic.id;
+    const chargeId = charge.id;
+
+    await manager.travel(player, 'down');
+    await manager.travel(player, 'up'); // regen
+
+    const survived = registry.getEntity(relicId);
+    expect(survived.components.get('name')).toBe('Quest relic'); // same entity, state intact
+    const contents = survived.components.get('inventory').items;
+    expect(contents).toHaveLength(1);
+    expect(contents[0].id).toBe(chargeId); // its nested contents rode along
+    expect(contents[0].components.get('name')).toBe('Charge');
+  });
+
+  it('stacks multiple carried quest items on the one arrival tile', async () => {
+    const { registry, manager, level: floorA, player } = await startRegenGame();
+    const ids = [0, 1, 2].map((i) => placeQuestItem(registry, floorA, 2 + i, 2, `q${i}`).id);
+
+    await manager.travel(player, 'down');
+    const floorA2 = await manager.travel(player, 'up'); // regen
+
+    const arrival = player.components.get('position');
+    const here = [...floorA2.getEntitiesAt(arrival.x, arrival.y)];
+    for (const id of ids) {
+      const e = registry.getEntity(id);
+      expect(e).not.toBeNull();
+      expect(e.components.get('position')).toEqual({ x: arrival.x, y: arrival.y });
+      expect(here).toContain(e);
+    }
+  });
+
+  it('stamps the freeze turn onto the frozen floor snapshot', async () => {
+    const { manager, player } = await startGame();
+    await manager.travel(player, 'down', 42); // freeze floor A at turn 42
+    expect(manager.snapshot().frozenLevels.a.frozenAtTurn).toBe(42);
+  });
+
+  it('defaults the freeze turn to 0 when no turn count is supplied', async () => {
+    const { manager, player } = await startGame();
+    await manager.travel(player, 'down'); // no turn arg (older callers / tests)
+    expect(manager.snapshot().frozenLevels.a.frozenAtTurn).toBe(0);
+  });
+
   it('lands on the matching entrance when two branches reconverge on one floor', async () => {
     // Diamond: floor 'c' is reachable both directly (a→c) and via a branch (a→b→c), each arriving at
     // its own up-stair. This is the multi-entrance case — distinct ports, not distinct directions.

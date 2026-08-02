@@ -112,15 +112,16 @@ Enemies that follow the player through stairs are not serialized with the level 
 
 ---
 
-## Speculative: Re-entry Pipelines
+## Re-entry Pipelines
 
-*This idea is worth preserving but not designing in detail yet. Revisit once the generation pipeline is working and real re-entry scenarios exist to reason from.*
-
-When the player returns to a stored level, it might be interesting to run a lightweight pipeline over the saved state rather than simply deserializing it as-is. Re-entry stages could simulate the passage of time (redistributing creatures, consuming perishable items), or reflect broader game state changes (all monsters enraged after a major story event).
-
-The generation pipeline is an obvious conceptual model for this — both are sequences of passes that modify map state. The key difference is input: generation starts from a seed and parameters; re-entry starts from a fully-formed saved level and global game context. This might make a shared abstraction awkward in practice even if the vocabulary carries over.
-
-The relationship could go a few ways: a fully separate re-entry pipeline modeled loosely on generation; generation stages that declare themselves re-runnable; or something simpler — event handlers that fire on level load, which may be sufficient for most re-entry effects without needing pipeline machinery at all. Don't resolve this until there are concrete scenarios to design against.
+When the player returns to a stored level, a re-entry pipeline can run an optional transform over the
+saved state rather than deserializing it as-is — to regenerate the level entirely, or to reflect the
+passage of time and broader game-state changes. The design lives in its own document:
+[reentry-pipelines.md](reentry-pipelines.md). In short: generation's *vocabulary* (ordered passes that
+modify map state) carries over, but its input does not — re-entry starts from a fully-formed level plus
+global context, not a seed and empty grid — so total regen reuses `runPipeline` while selective
+mutation needs a distinct stage contract. The first slice is a total-reset "always regenerates" node
+with quest-item carry-over to prevent soft-locks.
 
 ---
 

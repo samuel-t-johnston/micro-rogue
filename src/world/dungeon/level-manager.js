@@ -11,29 +11,43 @@
 import { rng } from '../../engine/core/rng.js';
 import { runPipeline } from '../generation/pipeline.js';
 import { collectSubgraph } from './subgraph.js';
-import { freezeLevel, thawLevel } from './cold-storage.js';
+import { freezeLevel } from './cold-storage.js';
+import { getReentryPolicy } from './reentry.js';
 import { getPipeline } from './pipelines.js';
-import { getStart, getNode, resolveDestination } from './transit-map.js';
+import { getStart, getNode, resolveDestination } from './transit-map-util.js';
 import { resolveArrival } from '../map/spawn.js';
+import { placeItemOnMap } from '../entities/placement.js';
 
 /**
  * Creates the dungeon runtime (see the file overview): start/travel/restore/snapshot over floors.
- * `generateLevel(node)` is an optional seam that overrides how a floor is built — the default runs the
- * node's pipeline on its derived mapgen stream. Tests inject a trivial floor builder so the runtime's
- * travel/freeze/thaw logic can be exercised without depending on any shipped content pipeline.
+ * `generateLevel(node, epoch)` is an optional seam that overrides how a floor is built — the default
+ * runs the node's pipeline on its derived mapgen stream (folding in `epoch` for a re-entry regen).
+ * Tests inject a trivial floor builder so the runtime's travel/freeze/thaw/regen logic can be
+ * exercised without depending on any shipped content pipeline.
  */
 export function createLevelManager({ registry, transitMap, generateLevel } = {}) {
   const coldStorage = new Map(); // nodeId -> frozen blob (the inactive floors)
   let current = null; // { nodeId, level }
 
   // Generates a floor from its transit-map node, drawing from the per-level mapgen stream derived
-  // from the node's identity so the floor is the same every time the seed is.
-  async function generate(node) {
-    if (generateLevel) return generateLevel(node);
-    const mapgenRng = rng.deriveRng('mapgen', node.branch, node.depth);
-    return runPipeline(getPipeline(node.pipelineId), mapgenRng, registry, {
-      identity: { branch: node.branch, depth: node.depth },
-    });
+  // from the node's identity so the floor is the same every time the seed is. `epoch` is the re-entry
+  // regeneration count: 0 (the original build) keeps the no-arg derivation so existing seeds and first
+  // visits are byte-identical; a regen (epoch ≥ 1) folds the epoch in for a different-but-reproducible
+  // layout. The built level carries the epoch it was made at, so the next regen increments from it.
+  // See docs/design/reentry-pipelines.md and docs/design/rng-and-determinism.md.
+  async function generate(node, epoch = 0) {
+    const level = generateLevel
+      ? await generateLevel(node, epoch)
+      : await runPipeline(
+          getPipeline(node.pipelineId),
+          epoch === 0
+            ? rng.deriveRng('mapgen', node.branch, node.depth)
+            : rng.deriveRng('mapgen', node.branch, node.depth, epoch),
+          registry,
+          { identity: { branch: node.branch, depth: node.depth } },
+        );
+    level.epoch = epoch;
+    return level;
   }
 
   // Places the player (and, by reference, its carried items) onto `level` at the arrival port.
@@ -76,8 +90,10 @@ export function createLevelManager({ registry, transitMap, generateLevel } = {})
 
     // Moves the player through the transition at `port`: freezes the current floor, generates or
     // thaws the destination, and lands the player on it. Returns the new active level, or null if
-    // the port leads nowhere (top/bottom of the dungeon).
-    async travel(player, port) {
+    // the port leads nowhere (top/bottom of the dungeon). `currentTurn` is stamped onto the frozen
+    // floor as `frozenAtTurn` so a future re-entry stage can compute how long the player was away
+    // (see docs/design/reentry-pipelines.md); it is write-only for now.
+    async travel(player, port, currentTurn = 0) {
       const dest = resolveDestination(transitMap, current.nodeId, port);
       if (!dest) return null;
 
@@ -85,13 +101,22 @@ export function createLevelManager({ registry, transitMap, generateLevel } = {})
       const excludeIds = new Set([...collectSubgraph([player])].map((e) => e.id));
       const frozen = freezeLevel(registry, current.level, excludeIds);
       frozen.playerMemory = extractPlayerMemory(player); // fog of war rides into the frozen record
+      frozen.frozenAtTurn = currentTurn; // turn the floor was frozen at, for elapsed-time re-entry
       coldStorage.set(current.nodeId, frozen);
 
       let level;
+      let carriedOver = [];
       if (coldStorage.has(dest.node)) {
+        // A revisited floor: its node's re-entry policy turns the frozen blob into the live level to
+        // arrive on — `thaw` (default) restores it as frozen, `regen` rebuilds it. The policy also
+        // yields the fog-of-war to lay back down (frozen memory for a restored layout, null for a
+        // freshly regenerated one) and any entities to re-place on the arrival tile. See reentry.js.
+        const node = getNode(transitMap, dest.node);
         const blob = coldStorage.get(dest.node);
-        level = thawLevel(blob, registry);
-        applyPlayerMemory(player, blob.playerMemory); // restore the floor's remembered tiles
+        const result = await getReentryPolicy(node.reentry)(blob, node, { registry, generate });
+        level = result.level;
+        carriedOver = result.carriedOver ?? [];
+        applyPlayerMemory(player, result.playerMemory);
         coldStorage.delete(dest.node); // active again, no longer frozen
       } else {
         level = await generate(getNode(transitMap, dest.node));
@@ -99,6 +124,15 @@ export function createLevelManager({ registry, transitMap, generateLevel } = {})
       }
 
       arrive(player, level, dest.port);
+
+      // Quest items a regen preserved land on the player's arrival tile — the soft-lock guard from
+      // reentry.js (a dropped Amulet of Yendor mustn't be destroyed by a total reset). They settle
+      // exactly like a dropped item so pickup works normally.
+      if (carriedOver.length) {
+        const { x, y } = player.components.get('position');
+        for (const item of carriedOver) placeItemOnMap(registry, level, item, x, y);
+      }
+
       current = { nodeId: dest.node, level };
       return level;
     },

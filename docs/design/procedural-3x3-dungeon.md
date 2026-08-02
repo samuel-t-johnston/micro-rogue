@@ -182,7 +182,7 @@ furniture/creatures never stack on stairs, doors, the entry point, or each other
 - ~~The **coordinator** itself~~ — **built (minimal):** a linear 3-floor stack. Branching,
   cross-floor pit pairing, named-port capability contracts, and a transit-map visualizer remain
   future work (designed in [dungeon-planner.md](dungeon-planner.md)).
-- **Re-entry pipelines** (map-generation.md, Speculative) — simulating time on level reload.
+- **Re-entry pipelines** ([reentry-pipelines.md](reentry-pipelines.md)) — regenerating a level or simulating time on reload.
 - A debug **zone/graph overlay** for inspecting the plan — nice-to-have for steps 1–3.
 
 ## Relevant files
