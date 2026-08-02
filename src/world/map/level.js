@@ -6,15 +6,24 @@ import { tileKey } from '../../engine/core/tile-key.js';
  * methods. Identity (branch, depth, pipelineId, seed) is stamped by the pipeline at generation time
  * and carried for the dungeon coordinator + cold storage: `(branch, depth)` keys the level in the
  * transit map and the mapgen RNG; `seed` is the derived generation seed (kept so a frozen level can
- * be reconstructed even if the derivation function later changes). See
- * docs/design/rng-and-determinism.md and docs/design/map-generation.md.
+ * be reconstructed even if the derivation function later changes). `epoch` counts re-entry
+ * regenerations (0 = original) and is folded into the mapgen derivation so each regen is a
+ * different-but-reproducible level. See docs/design/rng-and-determinism.md,
+ * docs/design/map-generation.md, and docs/design/reentry-pipelines.md.
  */
-export function createLevel({ branch = null, depth = null, pipelineId = null, seed = null } = {}) {
+export function createLevel({
+  branch = null,
+  depth = null,
+  pipelineId = null,
+  seed = null,
+  epoch = 0,
+} = {}) {
   return {
     branch,
     depth,
     pipelineId,
     seed,
+    epoch, // regeneration count: 0 = the original generation, ≥1 = the Nth re-entry regen (reentry-pipelines.md)
     width: 0,
     height: 0,
     tiles: [], // tiles[y][x] — tile type id string

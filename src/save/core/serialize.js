@@ -116,6 +116,7 @@ export function serializeLevel(level) {
     depth: level.depth,
     pipelineId: level.pipelineId,
     seed: level.seed,
+    epoch: level.epoch,
     width: level.width,
     height: level.height,
     tiles: level.tiles.map((row) => [...row]),
@@ -136,6 +137,7 @@ export function deserializeLevel(data, registry) {
     depth: data.depth ?? null,
     pipelineId: data.pipelineId ?? null,
     seed: data.seed ?? null,
+    epoch: data.epoch ?? 0,
   });
   level.width = data.width;
   level.height = data.height;

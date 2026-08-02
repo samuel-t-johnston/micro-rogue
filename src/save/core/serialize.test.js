@@ -160,6 +160,22 @@ describe('level serialization', () => {
     expect(level2.pipelineId).toBe('procedural-3x3');
     expect(level2.seed).toBe(9999);
   });
+
+  it('round-trips the regeneration epoch, defaulting a pre-epoch level to 0', () => {
+    // A regenerated level carries a non-zero epoch (its visit count); it must survive freeze/save.
+    const level = createLevel({ epoch: 2 });
+    level.width = 1;
+    level.height = 1;
+    level.tiles = [['floor']];
+    expect(serializeLevel(level).epoch).toBe(2);
+
+    // A level serialized before the epoch field existed (no `epoch` key) deserializes to 0.
+    const preEpoch = deserializeLevel(
+      { width: 1, height: 1, tiles: [['floor']], overrides: [], blackboard: {}, entityIds: [] },
+      createEntityRegistry(),
+    );
+    expect(preEpoch.epoch).toBe(0);
+  });
 });
 
 // The one guard that enforces the plain-JSON component invariant (see serialize.js / components.js):

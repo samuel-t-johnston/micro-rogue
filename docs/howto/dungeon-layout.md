@@ -23,11 +23,11 @@ export default {
 };
 ```
 
-- **`nodes`** — each floor: its `id`, the `pipelineId` that builds it, and its identity `(branch, depth)`. The identity keys the floor's mapgen RNG stream and its place in cold storage, so a floor regenerates identically.
+- **`nodes`** — each floor: its `id`, the `pipelineId` that builds it, and its identity `(branch, depth)`. The identity keys the floor's mapgen RNG stream and its place in cold storage, so a floor regenerates identically. An optional **`reentry`** field sets what happens when the player *returns* to a frozen floor: absent (or `'thaw'`) restores it exactly as left; `'regen'` throws it away and rebuilds it fresh on an incremented epoch (a quest item like the Amulet of Yendor is carried across to the arrival tile so a total reset can't soft-lock the game). See [reentry-pipelines.md](../design/reentry-pipelines.md); `floor-2` ships as `'regen'` so its maze re-rolls on each visit.
 - **`edges`** — connections between **named ports**. A port (`'up'`/`'down'`) maps to a staircase's direction; `dir: 'bidi'` means the link works both ways. The level manager resolves "the player took the `down` stairs on floor-2" to "arrive at floor-3's `up` port."
 - **`start`** — where a new game begins.
 
-The shipped dungeon is a 3-floor main stack (branch 0) plus one side **branch**: a second down-stair in floor-1's start room, port `branch1`, wired to a four-floor branch (branch 1) — a large BSP floor (`branch-1-floor-1`), a walker cave floor (`branch-1-floor-2`), a cellular-automata cave floor (`branch-1-floor-3`), then a composite keep-and-cave floor (`branch-1-floor-4`, a BSP wing + CA wing stitched together), each reached by the previous floor's down-stair. The fuller model (exit/enter capabilities, contract validation) is designed in [dungeon-planner.md](../design/dungeon-planner.md) but not built — today's reader is `transit-map.js` accessors in [`src/world/dungeon/transit-map.js`](../../src/world/dungeon/transit-map.js).
+The shipped dungeon is a 3-floor main stack (branch 0) plus one side **branch**: a second down-stair in floor-1's start room, port `branch1`, wired to a four-floor branch (branch 1) — a large BSP floor (`branch-1-floor-1`), a walker cave floor (`branch-1-floor-2`), a cellular-automata cave floor (`branch-1-floor-3`), then a composite keep-and-cave floor (`branch-1-floor-4`, a BSP wing + CA wing stitched together), each reached by the previous floor's down-stair. The fuller model (exit/enter capabilities, contract validation) is designed in [dungeon-planner.md](../design/dungeon-planner.md) but not built — today's reader is the accessors in [`src/world/dungeon/transit-map-util.js`](../../src/world/dungeon/transit-map-util.js).
 
 ### Branching: more than one stair of the same direction
 
@@ -60,7 +60,7 @@ const PIPELINES = {
 
 1. Resolves the destination via the transit map; bails if the port leads nowhere (top/bottom of the dungeon).
 2. **Freezes** the departing floor — serializes its entities out via [`cold-storage.js`](../../src/world/dungeon/cold-storage.js) and removes them — *excluding* the player's whole sub-graph (carried + equipped items travel with them, never frozen).
-3. **Thaws** the destination if previously visited, else **generates** it from its node's pipeline.
+3. On the destination: if previously visited, applies its node's **re-entry policy** to the frozen blob (`thaw` restores it as-left; `regen` rebuilds it — see [reentry-pipelines.md](../design/reentry-pipelines.md)); otherwise **generates** it fresh from its node's pipeline.
 4. Carries the player's fog-of-war memory: lifted into the departing floor's frozen record and laid back down on arrival (cold storage stays player-agnostic; this player coupling lives only in the level manager).
 5. Lands the player at the destination port.
 

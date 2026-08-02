@@ -20,7 +20,7 @@ import {
 } from './serialize.js';
 
 /** Save schema version. Bumped only on a breaking schema change (see the design doc). */
-export const SAVE_VERSION = 11;
+export const SAVE_VERSION = 12;
 
 /** Game release version; independent of SAVE_VERSION, tracks releases and mirrors package.json. */
 export const GAME_VERSION = '0.3.1';
@@ -313,6 +313,27 @@ export const migrations = [
           maxLevel: 25,
           lastLevel: Math.min(level, 25),
         };
+      }
+      return save;
+    },
+  },
+  {
+    from: 11,
+    to: 12,
+    // v12 introduces re-entry state (see docs/design/reentry-pipelines.md). Each level gains a
+    // regeneration `epoch` (0 = the original generation; ≥1 folds into the mapgen derivation so a
+    // regenerated floor differs deterministically), and each frozen floor records `frozenAtTurn`,
+    // the turn it was frozen at, for future elapsed-time re-entry stages. Saves through v11 predate
+    // both: a floor frozen before the feature has done zero regenerations (epoch 0) and is treated as
+    // frozen at the dawn of the run (turn 1). `=== undefined` guards, not `??`, so a legitimate 0 is
+    // never re-defaulted.
+    migrate(save) {
+      if (save.currentLevel && save.currentLevel.epoch === undefined) {
+        save.currentLevel.epoch = 0;
+      }
+      for (const blob of Object.values(save.frozenLevels ?? {})) {
+        if (blob.level && blob.level.epoch === undefined) blob.level.epoch = 0;
+        if (blob.frozenAtTurn === undefined) blob.frozenAtTurn = 1;
       }
       return save;
     },

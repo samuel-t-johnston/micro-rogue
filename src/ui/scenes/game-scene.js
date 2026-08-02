@@ -575,7 +575,7 @@ export function createGameScene({
       // Down vs up reads off the stair itself, not the port name (a branch stair's port isn't 'down').
       const descending = transitionEntity.components.get('entityTypeId') === 'stairsDown';
       const turns = turnManager?.playerTurnCount ?? 0;
-      const newLevel = await levelManager.travel(player, port);
+      const newLevel = await levelManager.travel(player, port, turns);
       if (newLevel) {
         level = newLevel;
         // Per-floor fog of war is swapped by levelManager.travel (it freezes the departed floor's

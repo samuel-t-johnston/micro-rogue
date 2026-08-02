@@ -754,6 +754,39 @@ describe('v10 → v11 migration (real, from a fixture)', () => {
   });
 });
 
+describe('v11 → v12 migration (real, from a fixture)', () => {
+  it('backfills a regeneration epoch of 0 on the active and frozen levels', () => {
+    const migrated = loadSave(saveV9);
+    expect(migrated.saveVersion).toBe(SAVE_VERSION);
+    expect(migrated.currentLevel.epoch).toBe(0);
+    expect(migrated.frozenLevels['floor-2'].level.epoch).toBe(0);
+  });
+
+  it('backfills frozenAtTurn of 1 on every frozen floor blob', () => {
+    const migrated = loadSave(saveV9);
+    expect(migrated.frozenLevels['floor-2'].frozenAtTurn).toBe(1);
+  });
+
+  it('does not overwrite an epoch or frozenAtTurn that already exists', () => {
+    const raw = {
+      saveVersion: 11,
+      versionHistory: [{ saveVersion: 11 }],
+      currentLevel: { epoch: 3 },
+      frozenLevels: { a: { level: { epoch: 5 }, frozenAtTurn: 42, entities: [] } },
+    };
+    const migrated = loadSave(raw);
+    expect(migrated.currentLevel.epoch).toBe(3);
+    expect(migrated.frozenLevels.a.level.epoch).toBe(5);
+    expect(migrated.frozenLevels.a.frozenAtTurn).toBe(42);
+  });
+
+  it('does not mutate the source fixture', () => {
+    loadSave(saveV9);
+    expect(saveV9.currentLevel.epoch).toBeUndefined();
+    expect(saveV9.frozenLevels['floor-2'].frozenAtTurn).toBeUndefined();
+  });
+});
+
 describe('commitSave / loadSavedGame orchestration', () => {
   it('returns null when there is no save', () => {
     expect(loadSavedGame()).toBeNull();

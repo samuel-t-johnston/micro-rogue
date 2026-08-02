@@ -99,7 +99,7 @@ the same way. Minimal shape:
 
 Resolution (`resolveDestination(map, node, port)`) returns the destination `{ node, port }` or null
 (the top/bottom of the dungeon, or the wrong end of a one-way edge). See
-[`src/world/dungeon/transit-map.js`](../../src/world/dungeon/transit-map.js).
+[`src/world/dungeon/transit-map-util.js`](../../src/world/dungeon/transit-map-util.js).
 
 ---
 
@@ -178,7 +178,7 @@ shape at a glance and documents branches.
 ## Relevant files
 
 - Transit map data — [`data/transit-map.js`](../../data/transit-map.js)
-- Resolution + node lookup — [`src/world/dungeon/transit-map.js`](../../src/world/dungeon/transit-map.js)
+- Resolution + node lookup — [`src/world/dungeon/transit-map-util.js`](../../src/world/dungeon/transit-map-util.js)
 - Dungeon runtime (travel, cold storage, current node) — [`src/world/dungeon/level-manager.js`](../../src/world/dungeon/level-manager.js)
 - Freeze/thaw — [`src/world/dungeon/cold-storage.js`](../../src/world/dungeon/cold-storage.js)
 - Sub-graph closure — [`src/world/dungeon/subgraph.js`](../../src/world/dungeon/subgraph.js)
