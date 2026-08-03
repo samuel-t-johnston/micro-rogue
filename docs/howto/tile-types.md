@@ -80,6 +80,23 @@ floor-category tile) or the stage throws. With no `palette` stage, generation fa
 **Static maps don't use palettes** — their legend names concrete tile ids directly (`{ ',': 'cave-floor' }`),
 so author cave terrain straight into the legend (see [static-map-layouts.md](static-map-layouts.md)).
 
+## Line walls
+
+The base wall tiles (`wall`, `cave-wall`) each have a **line-wall family** — 15 generated variants that
+differ from the base only in `glyph`, one per non-empty combination of cardinal neighbours, drawn with
+CP437 double-line box characters (║ ╣ ╬ …). They live in
+[`data/tiles/line-walls.js`](../../data/tiles/line-walls.js), not `terrain.js`, and are merged into the
+registry by [`tile-registry.js`](../../src/world/map/tile-registry.js) so they resolve like any other
+tile. Variant ids are `${base}-${dirs}` in N-E-S-W order (`wall-ns`, `wall-nes`, `cave-wall-nesw`).
+
+They're placed by the `lineWalls` generation stage (see
+[dynamic-map-generation.md § Line walls](dynamic-map-generation.md#line-walls-cp437-double-line-rendering)),
+which analyses each wall's neighbours and swaps in the matching variant. Because a variant inherits its
+base's `name`, `category`, `blocksMovement`, `opaque`, `symbol`, and `sprite` — overriding only the
+glyph — it's cosmetic in glyph mode and a no-op in sprite mode (variants reuse the base sprite until
+per-direction wall art exists). To give a new wall type a line family, add its id to
+`LINE_WALL_FAMILIES`.
+
 ## Worth knowing
 
 - **Tile IDs are stable identifiers.** Save files and map files reference them by ID. Renaming a tile ID without a migration will break existing saves and maps.
