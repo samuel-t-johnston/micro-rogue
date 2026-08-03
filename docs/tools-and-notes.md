@@ -28,6 +28,9 @@ Lately expanded into a general list of interesting stuff related to roguelikes.
  - https://www.redblobgames.com/
  - https://blog.jrheard.com/procedural-dungeon-generation-cellular-automata
  - https://www.gridsagegames.com/
+ - https://ondras.github.io/rot.js/manual/#map/maze - maze algorithms in rot.js
+ - https://ondras.github.io/rot.js/manual/#map/cellular - CA algorithm in rot.js
+ - https://ondras.github.io/rot.js/manual/#map/dungeon - room and hall algorithms in rot.js
 
 **Games/Demos**
  - https://ytirnity.com/play/hexwalker/

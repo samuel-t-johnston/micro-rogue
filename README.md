@@ -30,18 +30,18 @@ ROGμE is designed to be an easy way to jump into game development, even if you 
 
 ## Why a Traditional Roguelike?
 
-Traditional roguelikes are great projects for brand new game devs, and equally fun for seasoned pros. Unlike many games that call themselves roguelikes or roguelites, "traditional" roguelikes are asset-light, but systems-heavy. You don’t need to make loads of art, story, or music and sound to produce a great roguelike. You don’t need 3D models or textures.
+Traditional roguelikes are great projects for brand new game devs, and equally fun for seasoned pros. Unlike many modern games that call themselves roguelikes or roguelites, "traditional roguelikes" are asset-light, but systems-heavy. You don’t need to make loads of art, story, or music and sound to produce a great roguelike. You don’t need 3D models or textures.
 
-Traditional roguelikes rely on simple systems that interact with one another in interesting ways. They use randomization to ensure that no two playthroughs are the same. As a developer, you can start with simple systems and add complexity over time. Many popular roguelikes have been slowly developed over years, and even decades!
+Traditional roguelikes rely on simple systems that interact with each other in interesting ways. They use randomization to ensure that no two playthroughs are the same. As a developer, you can start with simple systems and add complexity over time. Many popular roguelikes have been slowly developed over years, and even decades!
 
 Roguelikes also have an amazing community of players and developers. There are events like [7DRL](https://7drl.com) and great resources like [r/roguelikes](https://www.reddit.com/r/roguelikes), [r/roguelikedev](https://www.reddit.com/r/roguelikedev/), [Rogue Basin](https://www.roguebasin.com/index.php/Roguelike_Dev_FAQ), and [Rogue Temple](https://forums.roguetemple.com/index.php).
 
 ## Why ROGμE?
 
-There are several good game engines for roguelikes. ROGμE tries to make life easier for developers in a few ways.
+There are many good tools for developing roguelikes. ROGμE tries to make life easier for developers in a few ways.
 
 1. **It’s already a game!** Every system in ROGμE comes pre-populated with data. It’s playable as a game straight out of the box. You can start by tweaking settings, adding new items, or totally overhauling major systems. It’s up to you.
-2. **It’s web-native and cross platform.** It uses vanilla JavaScript and HTML. You can play it on mobile, tablet or desktop. No server setup or install necessary. In fact, you can play it [on GitHub right now](https://samuel-t-johnston.github.io/micro-rogue/), thanks to GitHub Pages.
+2. **It’s web-native and cross platform.** It uses vanilla JavaScript and HTML. No complex dependencies, no compiling. No server setup or install necessary. You can play it on mobile, tablet or desktop. In fact, you can play it [on GitHub right now](https://samuel-t-johnston.github.io/micro-rogue/), thanks to GitHub Pages auto-deploy.
 3. **It’s AI- and human-friendly!** ROGμE is designed from the ground up to work well with autonomous agents and AI coding assistants. Not using AI? No problem. The same detailed documentation that helps AI understand the codebase is also great for human developers.
 	
 ## How Do I Get Started?
@@ -76,7 +76,7 @@ npm install
 
 There is no build step! Source files are served directly to the browser as ES modules. To deploy, copy the repo contents (excluding `node_modules/`) to any static host. Since you will already have Node installed, that's the easiest option. Use the commands below.
 
-(Note: Whenever you commit changes that impact what files the browser loads, bump the cache version in `service-worker.js`.)
+(Note: Whenever you commit changes that impact what files the browser loads, bump the cache version in `service-worker.js`. This ensures that the PWA picks up your changes.)
 
 ## Run
 
@@ -104,7 +104,7 @@ The dev server serves the repo root, so `index.html` at the root, `src/` modules
 
 ### Framework
 
-ROGμE uses Vitest with `happy-dom` for tests that need a DOM. Test files live alongside source as `*.test.js`.
+ROGμE has a sizable suite of unit tests. It uses Vitest with `happy-dom` for tests that need a DOM. Test files live alongside source as `*.test.js`.
 
 Run tests with `npm test` (watch mode) or `npm run test:run` (single pass). For a coverage report, run `npm run test:coverage` (single pass with a per-file text summary, via `@vitest/coverage-v8`).
 
