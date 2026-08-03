@@ -48,17 +48,31 @@ UI surfaces read it, so a creeping starvation registers without opening a menu:
 ## Add a food item
 
 Food is a consumable whose effect is `satiate` — the hunger-pool counterpart of `heal`
-([consumable.md](consumable.md) and [item.md](item.md) for the recipe). The `params.amount` is how much
-hunger it restores:
+([consumable.md](consumable.md) and [item.md](item.md) for the recipe) — **plus a `food` tag**. The
+`params.amount` is how much hunger it restores:
 
 ```js
 components.consumable(EffectTypes.SATIATE, { amount: 100 })   // bread: a solid meal
+components.food()                                              // marks it edible (see below)
 ```
 
 Existing food — grapes (50), bread (100), meat (150) — lives in the item factories
 ([`items.js`](../../src/world/entities/items.js)) and the prefab pool; add yours there and it flows
 through the normal loadout/floor-spawn paths. Nothing hunger-specific to wire — `executeConsume` applies
 the effect, and the next `tickHunger` narrates the result off the pool rise.
+
+**Always add the `food` component**, not just the satiate consumable. The tag is how the game
+identifies edibles without inspecting effect types — it drives the HUD's "easy eat" affordance (below).
+A satiate item with no `food` tag still works when eaten from the inventory, but easy-eat won't see it.
+
+### Easy eat
+
+The HUD's HP/MP/EXP block is a tap target that eats the least-nutritious carried food in one confirm,
+so a hungry player skips the character-menu → inventory → Use dance. The selection is
+[`selectEasyEatFood`](../../src/world/systems/food.js) — it filters the inventory by the `food` tag and
+ranks by the satiate amount (lowest first, so snacks go before hearty meals). The game scene raises a
+Yes/No modal (or a "no food" notice) and, on Yes, submits the same `consume` action the inventory's Use
+does. A fork-and-knife emoji rides beside the `(Hungry)`/`(Starving!)` HUD warning as the hint.
 
 ## Tune it
 

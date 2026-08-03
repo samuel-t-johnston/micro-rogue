@@ -300,6 +300,7 @@ export function createGrapes(registry, x, y, entityId) {
     'consumable',
     components.consumable(EffectTypes.SATIATE, { amount: 50 }),
   );
+  registry.addComponent(entity, 'food', components.food());
   return addMapPosition(registry, entity, location, x, y);
 }
 
@@ -320,6 +321,7 @@ export function createBread(registry, x, y, entityId) {
     'consumable',
     components.consumable(EffectTypes.SATIATE, { amount: 100 }),
   );
+  registry.addComponent(entity, 'food', components.food());
   return addMapPosition(registry, entity, location, x, y);
 }
 
@@ -340,6 +342,7 @@ export function createMeat(registry, x, y, entityId) {
     'consumable',
     components.consumable(EffectTypes.SATIATE, { amount: 150 }),
   );
+  registry.addComponent(entity, 'food', components.food());
   return addMapPosition(registry, entity, location, x, y);
 }
 

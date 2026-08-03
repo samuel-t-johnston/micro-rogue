@@ -787,6 +787,47 @@ describe('v11 → v12 migration (real, from a fixture)', () => {
   });
 });
 
+describe('v12 → v13 migration (food tag)', () => {
+  const findEntity = (entities, id) => entities.find((e) => e.id === id);
+  // A minimal v12 save carrying the three shipped foods (by entityTypeId) plus a non-food consumable
+  // and a frozen floor with a food item — enough to exercise every backfill branch.
+  const rawV12 = () => ({
+    saveVersion: 12,
+    versionHistory: [{ saveVersion: 12 }],
+    entities: [
+      { id: 1, components: { entityTypeId: 'grapes', consumable: { effectType: 'satiate' } } },
+      { id: 2, components: { entityTypeId: 'bread' } },
+      { id: 3, components: { entityTypeId: 'meat' } },
+      { id: 4, components: { entityTypeId: 'healingPotion' } },
+    ],
+    frozenLevels: { 'floor-2': { entities: [{ id: 5, components: { entityTypeId: 'grapes' } }] } },
+  });
+
+  it('tags the shipped foods with a food component', () => {
+    const migrated = loadSave(rawV12());
+    expect(migrated.saveVersion).toBe(SAVE_VERSION);
+    expect(findEntity(migrated.entities, 1).components.food).toEqual({});
+    expect(findEntity(migrated.entities, 2).components.food).toEqual({});
+    expect(findEntity(migrated.entities, 3).components.food).toEqual({});
+  });
+
+  it('leaves non-food items untagged', () => {
+    const migrated = loadSave(rawV12());
+    expect(findEntity(migrated.entities, 4).components.food).toBeUndefined();
+  });
+
+  it('also tags food inside frozen floors', () => {
+    const migrated = loadSave(rawV12());
+    expect(findEntity(migrated.frozenLevels['floor-2'].entities, 5).components.food).toEqual({});
+  });
+
+  it('does not mutate the source object', () => {
+    const raw = rawV12();
+    loadSave(raw);
+    expect(raw.entities[0].components.food).toBeUndefined();
+  });
+});
+
 describe('commitSave / loadSavedGame orchestration', () => {
   it('returns null when there is no save', () => {
     expect(loadSavedGame()).toBeNull();

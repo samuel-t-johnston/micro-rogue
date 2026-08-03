@@ -218,6 +218,7 @@ describe('component-codec round-trip guard', () => {
     entryPoint: components.entryPoint(),
     equippable: components.equippable(Slots.WEAPON),
     faction: components.faction(['orcs']),
+    food: components.food(),
     hearing: components.hearing(5),
     inventory: components.inventory([item1, item2]),
     item: components.item({ type: 'inventory', ownerId: item1.id }),

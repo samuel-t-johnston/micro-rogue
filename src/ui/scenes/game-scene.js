@@ -44,6 +44,10 @@ import { createGameMenuController } from '../menus/game-menu-controller.js';
 import { createGameMenuButton } from '../widgets/game-menu-button.js';
 import { createOutcomePopup } from '../overlays/outcome-popup.js';
 import { createContextMenu } from '../menus/context-menu.js';
+import { createActionMenu } from '../menus/action-menu.js';
+import { createNotice } from '../overlays/notice.js';
+import { selectEasyEatFood } from '../../world/systems/food.js';
+import { displayName } from '../../engine/log/text/log-text.js';
 import { drawText, drawButton, hitTest } from '../core/canvas-ui.js';
 import { resolveTileActions } from '../../actions/core/resolve-tile-actions.js';
 import { getAttackCapability } from '../../combat/weapons.js';
@@ -117,6 +121,7 @@ export function createGameScene({
   const LONGPRESS_MS = 450; // press-and-hold that raises the contextual tile menu (touch)
   let longPressTimer = null;
   let contextMenu = null; // the open contextual tile menu (modal popover), or null
+  let easyEatModal = null; // the open "easy eat" modal (confirm-eat or no-food notice), or null
   // Targeting mode for ranged actions (throw now; wands/spells later): { prompt, onPick, hoverTile }.
   // While set, a map tap resolves a target tile instead of moving, and the rest of the UI is inert.
   let targeting = null;
@@ -163,6 +168,37 @@ export function createGameScene({
       onSelect: (action) => {
         contextMenu = null;
         if (action) inputController.submit(action);
+      },
+    });
+  }
+
+  // Raises the "easy eat" modal from the HUD's stat-lines tap: eat the least-nutritious carried food in
+  // one confirm, skipping the character menu → inventory → Use dance for the common "I'm hungry" case.
+  // With no food it's a one-button notice; otherwise a Yes/No where Yes submits the same `consume`
+  // action the inventory's Use does (so it costs a turn and narrates identically). No/dismiss do nothing.
+  function openEasyEat() {
+    const food = selectEasyEatFood(player);
+    if (!food) {
+      easyEatModal = createNotice({
+        theme,
+        getViewport,
+        message: 'You have no food to eat.',
+        onConfirm: () => (easyEatModal = null),
+        onDismiss: () => (easyEatModal = null),
+      });
+      return;
+    }
+    easyEatModal = createActionMenu({
+      theme,
+      getViewport,
+      title: `Eat ${displayName(food, 'food')}?`,
+      actions: [
+        { label: 'Yes', action: { type: 'consume', itemEntityId: food.id } },
+        { label: 'No', action: null },
+      ],
+      onSelect: (action) => {
+        easyEatModal = null;
+        if (action) inputController?.submit(action);
       },
     });
   }
@@ -365,6 +401,7 @@ export function createGameScene({
     theme,
     getViewport,
     onOpen: () => characterMenuController.openStats(),
+    onEasyEat: () => openEasyEat(),
   });
   const characterMenuButton = createCharacterMenuButton({
     theme,
@@ -618,6 +655,9 @@ export function createGameScene({
     // The contextual tile menu is modal while open — it swallows input and dismisses on tap-outside.
     if (contextMenu) return contextMenu.handleInput(event);
 
+    // The easy-eat modal is likewise modal: it owns all input until confirmed or dismissed.
+    if (easyEatModal) return easyEatModal.handleInput(event);
+
     // Targeting mode is modal over the map: taps pick a target (handled in onPointerUp), drags still
     // pan, the crosshair tracks the pointer, and Escape cancels. Everything else is swallowed.
     if (targeting) {
@@ -802,6 +842,7 @@ export function createGameScene({
       characterMenuController.render(ctx);
       gameMenuController.render(ctx);
       contextMenu?.render(ctx);
+      easyEatModal?.render(ctx);
       renderTargeting(ctx);
       outcomePopup.render(ctx);
 
@@ -881,6 +922,7 @@ export function createGameScene({
       turnManager = null;
       inputController = null;
       contextMenu = null;
+      easyEatModal = null;
       targeting = null;
       resetGestures();
       levelManager = null;
