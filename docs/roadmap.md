@@ -213,7 +213,8 @@ AI/Senses/Goals
 - [ ] Screen overlay effects (vignette) - reduced-motion fallback; disableable
 - [ ] Light-sensitive vision sense - current unlimited vision sense becomes "darkvision". Tile light levels + light emitters
 - [ ] Score + Leaderboards
-- [ ] More furniture: fountains? secret doors? 
+- [ ] More furniture: fountains?
+- [ ] Search action + secret doors — see [secret-doors-and-search.md](design/secret-doors-and-search.md). Phase 1: static-map secret doors + active/passive search. Phase 2: `secretDoorChance` on door-placing stages. Phase 3: secret rooms.
 - [ ] Zoo level for dev testing
 - [ ] Developer F.A.Q.
 - [ ] View RNG seed, mode where seed can be specified
