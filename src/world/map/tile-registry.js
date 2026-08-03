@@ -1,11 +1,17 @@
 import TERRAIN from '../../../data/tiles/terrain.js';
+import { LINE_WALL_TILES } from '../../../data/tiles/line-walls.js';
+
+// The base terrain plus the generated line-wall variants (data/tiles/line-walls.js). Variants are
+// merged here rather than authored into terrain.js so the registry stays a single lookup for every
+// consumer (renderer, describe-tile, the entity-sprites test) while terrain.js holds only base tiles.
+const TILES = { ...TERRAIN, ...LINE_WALL_TILES };
 
 /**
  * Resolves a tile id to its terrain definition (sprite, passability, opacity, etc.).
  * @throws {Error} On an unknown tile id.
  */
 export function getTileType(id) {
-  const tile = TERRAIN[id];
+  const tile = TILES[id];
   if (!tile) throw new Error(`Unknown tile type: "${id}"`);
   return tile;
 }
@@ -16,7 +22,7 @@ export function getTileType(id) {
  * are the same to a carve stage. Safe on off-grid reads (undefined) — callers rely on that.
  */
 export function tileCategory(id) {
-  return id == null ? null : (TERRAIN[id]?.category ?? null);
+  return id == null ? null : (TILES[id]?.category ?? null);
 }
 
 /**

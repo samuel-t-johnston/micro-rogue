@@ -24,6 +24,7 @@ import * as caBridge from './stages/stage-ca-bridge.js';
 import * as segmentRegions from './stages/stage-segment-regions.js';
 import * as box from './stages/stage-box.js';
 import * as palette from './stages/stage-palette.js';
+import * as lineWalls from './stages/stage-line-walls.js';
 import * as stitch from './stages/stage-stitch.js';
 import * as passageConnectors from './stages/stage-passage-connectors.js';
 import * as reserve from './stages/stage-reserve.js';
@@ -56,6 +57,7 @@ const MODULES = {
   segmentRegions,
   box,
   palette,
+  lineWalls,
   stitch,
   passageConnectors,
   reserve,

@@ -48,6 +48,10 @@ Static pipelines use a different, shorter set (`static` / `randomStatic` to lay 
 
 Carve stages don't hard-code tile ids — they lay down whatever `{ floor, wall }` **palette** is in scope. The `palette` stage sets it, and it's sticky (holds until the next `palette` stage), so a pipeline themes a run by interleaving one: `{ type: 'palette', floor: 'cave-floor', wall: 'cave-wall' }` before the CA stages makes them carve a cave instead of stone. A composed level can set a different palette per section. Absent, generation defaults to stone. See [tile-types.md § Terrain palettes](tile-types.md#terrain-palettes).
 
+### Line walls (CP437 double-line rendering)
+
+The `lineWalls` stage is a late, purely-cosmetic pass: it rewrites each wall tile to the double-line box-drawing variant (║ ╣ ╬ …) matching which of its four cardinal neighbours are walls, so glyph mode draws connected walls instead of a field of `#`. Add `{ type: 'lineWalls' }` after every tile-writing stage. It's glyph-only — variants reuse their base wall's sprite, so sprite mode is unchanged — and gameplay-neutral, since variants keep the base's category, passability, and opacity. Any wall-category tile counts as a connecting neighbour (stone and cave walls join at a boundary); the grid edge counts as empty, so a wall on the border closes into a clean box outline; and an isolated wall (no wall neighbour) keeps its plain glyph. See [tile-types.md § Line walls](tile-types.md#line-walls) and [`data/tiles/line-walls.js`](../../data/tiles/line-walls.js).
+
 ### Determinism
 
 All randomness comes from the `rng` the runner is handed — the dungeon runtime derives a dedicated per-floor `mapgen` stream from the floor's identity (see [rng-and-determinism.md](../design/rng-and-determinism.md)), so the same seed always yields the same floor, independent of gameplay rolls.
