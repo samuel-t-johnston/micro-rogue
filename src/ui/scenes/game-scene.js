@@ -47,6 +47,7 @@ import { createContextMenu } from '../menus/context-menu.js';
 import { createActionMenu } from '../menus/action-menu.js';
 import { createNotice } from '../overlays/notice.js';
 import { selectEasyEatFood } from '../../world/systems/food.js';
+import { performSearch } from '../../world/systems/search.js';
 import { displayName } from '../../engine/log/text/log-text.js';
 import { drawText, drawButton, hitTest } from '../core/canvas-ui.js';
 import { resolveTileActions } from '../../actions/core/resolve-tile-actions.js';
@@ -541,6 +542,23 @@ export function createGameScene({
     // Per-player-turn upkeep (see src/engine/turn/upkeep.js). Order matters: scent diffuses before the
     // autosave so a reload restores the up-to-date field. Steps read the current level from context.
     upkeep.register('scent', (ctx) => scentUpkeep(ctx.level, ctx.registry));
+    // Passive search: a half-strength sweep every player turn (upkeep is player-only, so it never
+    // rolls for other creatures). Runs before autosave so a discovered door is captured on reload.
+    // NOTE: the wording hard-codes "door" and mirrors the active action's copy (action-search.js) with
+    // a softer verb ("notice" vs "discover"). Both need a shared, per-entity noun once a second secret
+    // type exists. See docs/design/secret-doors-and-search.md §5.4.
+    upkeep.register('passive-search', (ctx) => {
+      const revealed = performSearch(ctx.player, ctx.level, ctx.registry, { passive: true });
+      if (revealed.length > 0) {
+        gameLog.add({
+          actor: ctx.player.id,
+          action: 'search',
+          passive: true,
+          found: revealed.length,
+          display: revealed.length === 1 ? 'You notice a hidden door!' : 'You notice hidden doors!',
+        });
+      }
+    });
     upkeep.register('autosave', () => saveGame());
 
     // The shipped victories (content — see data/win-conditions.js): each a "carry a quest item to a

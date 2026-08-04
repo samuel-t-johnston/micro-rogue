@@ -167,7 +167,17 @@ Therefore:
 
 On a successful reveal, log a player-facing line ("You discover a hidden door!"). On active search with
 no discovery, a neutral line ("You find nothing.") so the turn isn't a silent no-op. Passive discovery
-also logs; passive *misses* are silent (they happen every turn).
+also logs, with a softer verb ("You notice a hidden door!"); passive *misses* are silent (they happen
+every turn).
+
+**Known coupling to unwind when a second secret type lands.** The discovery wording is intentionally
+kept in the two *callers* (the active action and the passive upkeep step) rather than in
+`performSearch`, because the verb differs by mode ("discover" vs "notice") and player-facing text
+doesn't belong in the player-agnostic core. The cost is that both callers currently hard-code the noun
+**"door"** — fine while every secret *is* a door, but the moment a second type exists (a hidden chest?),
+both messages produce wrong text. At that point, derive the noun per revealed entity (e.g. from its
+post-reveal `name`, or a label on the `secret` marker) and share that between the two callers. Both
+sites carry a `NOTE:` comment pointing here.
 
 ---
 
