@@ -15,6 +15,7 @@ const PASS_THROUGH = new Set([
   'selfInteract',
   'lookAt',
   'wait',
+  'search',
   'throw',
 ]);
 
