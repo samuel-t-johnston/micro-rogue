@@ -100,6 +100,10 @@ export function resolveTileActions(
     // Wait is always offered on the player's own tile: it's the tap fallback when there's nothing
     // else underfoot, and a deliberate "pass the turn" option in the contextual menu either way.
     actions.push({ id: 'wait', label: 'Wait', action: { type: 'wait' }, free: false });
+    // Search is a self/area action (it sweeps the surrounding tiles, not this one), so it lives on the
+    // player's own tile — never as a per-tile row, which would leak a secret's location. Always offered:
+    // the player can't know whether a secret is nearby. See docs/design/secret-doors-and-search.md.
+    actions.push({ id: 'search', label: 'Search', action: { type: 'search' }, free: false });
   } else {
     // Attack a creature within reach — melee when adjacent, or a clear-line shot out to weapon range.
     // Offered at any distance (not just adjacent), so a tap on an in-range enemy fires. It's the

@@ -13,6 +13,7 @@ import { executeThrow } from '../action-types/action-throw.js';
 import { executeAttack } from '../action-types/action-attack.js';
 import { executeLookAt } from '../action-types/action-look.js';
 import { executeShout } from '../action-types/action-shout.js';
+import { executeSearch } from '../action-types/action-search.js';
 import { buildPlanningContext } from '../../ai/core/planning-context.js';
 import { evaluateGoals } from '../../ai/core/goal-evaluator.js';
 import { resolveGoals } from '../../ai/goals/goal-registry.js';
@@ -53,6 +54,7 @@ export function createActionSystem({
     attack: (entity, action) => executeAttack(entity, action, level, registry),
     lookAt: (entity, action) => executeLookAt(entity, action, level),
     shout: (entity, action) => executeShout(entity, action, level, registry),
+    search: (entity, action) => executeSearch(entity, action, level, registry),
   };
 
   async function executeAction(entity, action) {

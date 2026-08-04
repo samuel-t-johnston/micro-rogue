@@ -145,7 +145,7 @@ describe('resolveTileActions', () => {
     level.placeEntity(item);
 
     const rows = resolve(level, 2, 2);
-    expect(ids(rows)).toEqual(['self', 'wait']);
+    expect(ids(rows)).toEqual(['self', 'wait', 'search']);
     expect(rows[0].label).toBe('Pick up the Dagger');
     expect(rows[0].action).toEqual({ type: 'selfInteract' });
   });
@@ -153,14 +153,25 @@ describe('resolveTileActions', () => {
   it('labels stairs underfoot by direction, with Wait offered second', () => {
     level.placeEntity(createStairs(registry, 2, 2, 'down'));
     const rows = resolve(level, 2, 2);
-    expect(ids(rows)).toEqual(['self', 'wait']);
+    expect(ids(rows)).toEqual(['self', 'wait', 'search']);
     expect(rows[0].label).toBe('Descend');
   });
 
-  it('offers Wait as the only gameplay action on an empty self tile', () => {
+  it('offers Wait then Search as the gameplay actions on an empty self tile', () => {
     const rows = resolve(level, 2, 2);
-    expect(ids(rows)).toEqual(['wait']);
+    expect(ids(rows)).toEqual(['wait', 'search']);
     expect(rows[0].action).toEqual({ type: 'wait' });
+  });
+
+  it('offers Search only on the self tile, never on another tile (no location leak)', () => {
+    expect(ids(resolve(level, 2, 2))).toContain('search'); // self
+    for (const [x, y] of [
+      [3, 2],
+      [2, 3],
+      [4, 4],
+    ]) {
+      expect(ids(resolve(level, x, y))).not.toContain('search');
+    }
   });
 
   it('offers Look last on every tile, as a free action', () => {

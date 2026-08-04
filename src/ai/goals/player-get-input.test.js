@@ -109,4 +109,10 @@ describe('playerGetInput', () => {
     const result = await playerGetInput.evaluate(ctx);
     expect(result).toEqual({ action: { type: 'lookAt', x: 4, y: 4 } });
   });
+
+  it('passes a menu search action straight through (so it consumes the turn)', async () => {
+    const ctx = makeContext(level, [{ type: 'search' }]);
+    const result = await playerGetInput.evaluate(ctx);
+    expect(result).toEqual({ action: { type: 'search' } });
+  });
 });

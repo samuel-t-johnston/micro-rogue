@@ -245,6 +245,7 @@ describe('component-codec round-trip guard', () => {
     questItem: components.questItem('amulet-of-yendor'),
     renderable: components.renderable('orc', '#101010', 'o', '#00ff00', 0),
     scentSource: components.scentSource({ profile: 'orcs', intensity: 3 }),
+    secret: components.secret('cave-floor'),
     senses: components.senses(['vision', 'hearing']),
     smell: components.smell(2),
     sound: components.sound({
