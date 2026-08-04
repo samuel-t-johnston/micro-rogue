@@ -111,9 +111,15 @@ A `secretDoor` prefab in `src/world/entities/entity-prefabs.js` makes the dorman
 `entityTypeId` + `secret`). Reveal is a small helper (`revealSecret(entity, level, registry)`) rather
 than living in the door prefab, so future secret entity types (secret levers, illusory walls) reuse it.
 
-**Save impact:** this is a save-affecting change → version bump + migration + a fixture at the prior
-version, per the project's always-migrate rule. Old saves have no secret doors, so the migration is a
-no-op shape bump, but it still ships.
+**Save impact: no `saveVersion` bump, no migration.** The `secret` component is a purely *additive*
+optional field, which `docs/design/save-system-design.md` (Versioning) explicitly says does not bump
+the schema. The bar for a migration is *existing saved data that must change or be backfilled* — e.g.
+the v12→v13 `food` migration retroactively tagged edibles already in a player's inventory. A secret
+door has nothing to backfill: no entity in an old save should become one (secrets only exist on
+freshly-generated floors), and the hidden closet can't be injected into a floor whose tiles are already
+frozen. An old save loads fine — it simply carries no `secret` components. The one save-side obligation
+is the round-trip sample for `secret` in `serialize.test.js`'s component-codec guard, which ships with
+the component.
 
 ---
 
@@ -232,8 +238,8 @@ Per the project's test-first rules for pure logic and RNG-consuming code:
 - **Disguise** — an unrevealed secret door reads as a wall through the public readers: `isPassable`
   false, `describeTile` says "a wall", `resolveTileActions` offers only "Look", `vision` treats the
   tile as opaque.
-- **Save round-trip** — the `secret` component survives serialize/deserialize; the migration fixture
-  loads and reveals correctly.
+- **Save round-trip** — the `secret` component survives serialize/deserialize (its sample in
+  `serialize.test.js`'s component-codec guard). No migration test: the change is purely additive (see §4).
 - **Passive search** — the upkeep step reveals over turns for the player and does not roll for other
   creatures.
 
