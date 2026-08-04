@@ -278,6 +278,16 @@ export const components = {
     return { profile, intensity };
   },
 
+  // Marks an entity as an undiscovered secret disguised as terrain (a secret door). While present,
+  // the entity deliberately carries NONE of its "real" components (name/renderable/openable/…) — the
+  // wall terrain beneath it provides the disguise for every reader (passability, sight, look-text,
+  // rendering, tile actions). `revealFloor` is the tile id written under the entity when it is found,
+  // captured at generation time from the district palette (reveal doesn't see the palette). Presence of
+  // this component IS "unrevealed"; revealSecret removes it. See docs/design/secret-doors-and-search.md.
+  secret(revealFloor = 'floor') {
+    return { revealFloor };
+  },
+
   // Ordered list of sense names resolved through src/ai/senses/sense-registry.js.
   // Stored as string keys (not function references) so the component serializes cleanly.
   // Each resolved sense is sense(entity, level, turnCount) → SenseResult.

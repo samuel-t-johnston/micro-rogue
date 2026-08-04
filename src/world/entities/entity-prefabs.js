@@ -21,6 +21,7 @@ import {
   createChest,
   createBoulder,
   createDoor,
+  createSecretDoor,
 } from './furniture.js';
 
 /**
@@ -68,6 +69,7 @@ export const ENTITY_PREFABS = {
   // differently and the map data refers to them by distinct ids.
   boulder: { kind: 'furniture', make: createBoulder },
   door: { kind: 'furniture', make: createDoor },
+  secretDoor: { kind: 'furniture', make: createSecretDoor },
   chest: { kind: 'furniture', make: createChest },
   stairsUp: { kind: 'furniture', make: (registry, x, y) => createStairs(registry, x, y, 'up') },
   stairsDown: { kind: 'furniture', make: (registry, x, y) => createStairs(registry, x, y, 'down') },

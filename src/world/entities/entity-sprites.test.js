@@ -24,6 +24,15 @@ describe('entity sprites + glyphs', () => {
   for (const [label, make] of Object.entries(factories)) {
     it(`${label} has a glyph and a resolvable sprite`, async () => {
       const entity = await make(createEntityRegistry());
+      // A dormant secret (a secret door) is disguised as the terrain beneath it and deliberately has
+      // no renderable of its own — the wall tile draws it. Assert that contract instead of a sprite.
+      if (entity.components.has('secret')) {
+        expect(
+          entity.components.has('renderable'),
+          `${label} is a dormant secret and must carry no renderable`,
+        ).toBe(false);
+        return;
+      }
       const r = entity.components.get('renderable');
       expect(r.glyph, `${label} is missing a glyph`).toBeTruthy();
       expect(
