@@ -257,10 +257,35 @@ passage reads as a suspicious dead-end — an obvious, unforced cue to search th
 accompanies `'redundant'` secrets (reachable from the open side); an `'all'` secret on a sole-access
 wall has no such hint, which is the point of the harder mode.
 
-### Phase 3: secret rooms (later)
+### Phase 3: secret rooms (built)
 
-Dedicated stages that carve a room reachable *only* through a secret door — the payoff case from §1.
-Out of scope for now; noted so the earlier phases don't foreclose it.
+A `secretRoom` stage (`stage-secret-room.js`) that carves a tiny treasure room reachable *only* through
+a secret door — the payoff case from §1. The minimal room is a single floor tile holding a chest, cut
+from a 3×3 footprint: a 1×3 run of existing wall (its middle tile becomes the secret door, opening onto
+adjacent floor) backed by a 2×3 block of untouched rock that becomes the room floor plus its wall shell.
+
+```
+. # ~ ~          . # # #
+. # ~ ~    -->   . + = #      (. floor, # wall, ~ rock, + secret door, = chest)
+. # ~ ~          . # # #
+```
+
+Four orientations (door faces N/E/S/W). "Rock" is an in-bounds wall tile — the stage never expands the
+map or carves into existing floor, so the room stays sealed except through the secret door. If no
+orientation fits anywhere, no room is placed (no error). The room floor and the door's `revealFloor`
+take the id of the floor the door opens onto, so a room reveals stone off a stone corridor and cave off
+a cave one — district-correct without consulting the (sticky) palette. Run after carving, before
+`lineWalls`.
+
+Because the interior is one tile filled by the chest, the player can't stand *inside*: they search →
+reveal the door → open it → step onto the now-open door tile → open the chest from there.
+
+Parameters: `count` (rooms to attempt, default 1; placements never overlap), `contents` (chest loot as
+prefab ids, default a healing potion + bread), `bounds` (district scoping). Shipped on the `composite`
+branch-bottom floor (`data/pipelines/composite.js`).
+
+Larger rooms (a bigger interior needing ≥3 aligned walls and an adjusted door position) are deferred —
+not worth the complexity yet.
 
 ---
 
@@ -284,6 +309,10 @@ Per the project's test-first rules for pure logic and RNG-consuming code:
   conversion leaves wall terrain + a dormant secret whose `revealFloor` is the old floor; `bounds`
   restricts candidates; deterministic for a seed. Plus the connectivity contract above, asserted over
   the real door pipelines (bsp, composite, procedural-3x3) for both scopes.
+- **`secretRoom` stage** — places a sealed one-tile room (secret door onto floor, chest behind, walls on
+  the chest's other three sides); reveals to the floor the door opens onto; stocks default vs. custom
+  chest loot; places nothing when no 2×3 rock block backs a wall; `count` places non-overlapping rooms;
+  `bounds` confines the door; deterministic for a seed.
 
 Rendering (the wall looking right in glyph + sprite mode, and the door appearing on reveal) is verified
 by inspection, not snapshot tests, per the testing guidance.

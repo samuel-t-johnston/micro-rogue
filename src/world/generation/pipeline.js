@@ -27,6 +27,7 @@ import * as palette from './stages/stage-palette.js';
 import * as lineWalls from './stages/stage-line-walls.js';
 import * as stitch from './stages/stage-stitch.js';
 import * as secretDoors from './stages/stage-secret-doors.js';
+import * as secretRoom from './stages/stage-secret-room.js';
 import * as passageConnectors from './stages/stage-passage-connectors.js';
 import * as reserve from './stages/stage-reserve.js';
 import * as stairs from './stages/stage-stairs.js';
@@ -61,6 +62,7 @@ const MODULES = {
   lineWalls,
   stitch,
   secretDoors,
+  secretRoom,
   passageConnectors,
   reserve,
   stairs,
