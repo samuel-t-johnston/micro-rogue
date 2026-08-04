@@ -26,6 +26,10 @@ export default {
     { type: 'segmentRegions', section: 'cave' },
     // Join the two wings so the floor is one connected space.
     { type: 'stitch', maxConnections: 2 },
+    // Tuck a secret treasure room into the rock, reachable only by searching. Runs after all carving so
+    // its footprint can't be re-floored; it reveals to whichever district floor the door opens onto
+    // (stone in the keep, cave in the east). See docs/design/secret-doors-and-search.md §7.
+    { type: 'secretRoom' },
     // Label each district on its own, then place the single up-stair in the keep.
     { type: 'label', section: 'keep', labels: ['stairs-up', 'treasure'], fill: 'item' },
     { type: 'label', section: 'cave', labels: ['treasure'], fill: 'item' },

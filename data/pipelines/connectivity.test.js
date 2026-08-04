@@ -31,18 +31,25 @@ async function generate(config, seed) {
   return { level, registry };
 }
 
-// Structural connectivity: flood over tiles the terrain lets you walk on, ignoring entities. Closed
-// doors sit on floor and are openable, so they don't disconnect a level; walls do. 4-connected,
-// matching how corridors are carved (and stricter than 8-connected).
-function reachableFrom(level, start) {
+// Structural connectivity: flood over tiles the terrain lets you walk on. Closed doors sit on floor and
+// are openable, so they don't disconnect a level; walls do. A secret door sits on WALL terrain but is a
+// latent passage (revealable by searching), so a tile holding a `secret` entity counts as walkable when
+// `secretsPassable` — the invariant is then "reachable, possibly by searching". 4-connected, matching
+// how corridors are carved (and stricter than 8-connected).
+function reachableFrom(level, start, { secretsPassable = true } = {}) {
   const walkable = (x, y) => {
     const id = level.getTile(x, y);
     if (!id) return false;
+    let terrainOpen;
     try {
-      return !getTileType(id).blocksMovement;
+      terrainOpen = !getTileType(id).blocksMovement;
     } catch {
       return false;
     }
+    if (terrainOpen) return true;
+    if (!secretsPassable) return false;
+    for (const e of level.getEntitiesAt(x, y)) if (e.components.has('secret')) return true;
+    return false;
   };
   const seen = new Set();
   if (!walkable(start.x, start.y)) return seen;
@@ -71,6 +78,72 @@ function entryTile(registry) {
   const pos = entry?.components.get('position');
   return pos ? { x: pos.x, y: pos.y } : null;
 }
+
+// Pipelines that place doors — the ones a secretDoors stage has something to convert. The stage is
+// appended (runs last, after all carving), which is exactly how it dodges the re-floor problem that
+// inline placement hit.
+const DOOR_PIPELINES = [
+  ['bsp', bsp],
+  ['composite', composite],
+  ['procedural-3x3', procedural3x3],
+];
+
+const withSecretStage = (config, secretDoors) => ({
+  ...config,
+  stages: [...config.stages, { type: 'secretDoors', ...secretDoors }],
+});
+
+describe.each(DOOR_PIPELINES)('%s + scope:"all" secret doors', (name, config) => {
+  it('gates real paths yet stays reachable by searching', async () => {
+    for (let seed = 1; seed <= 10; seed++) {
+      const cfg = withSecretStage(config, { chance: 1, scope: 'all' });
+      const { level, registry } = await generate(cfg, seed);
+      const start = entryTile(registry);
+
+      const secrets = registry.getEntitiesWith('secret');
+      expect(secrets.length, `${name} seed ${seed}: no secrets placed`).toBeGreaterThan(0);
+      // Every secret is disguised as wall terrain (not left on floor).
+      for (const s of secrets) {
+        const p = s.components.get('position');
+        expect(getTileType(level.getTile(p.x, p.y)).blocksMovement).toBe(true);
+      }
+
+      // Latent passages counted: the whole level (every stair) is still reachable via searching.
+      const reached = reachableFrom(level, start);
+      for (const tr of registry.getEntitiesWith('transition')) {
+        const p = tr.components.get('position');
+        expect(
+          reached.has(`${p.x},${p.y}`),
+          `${name} seed ${seed}: stair (${p.x},${p.y}) unreachable even via search`,
+        ).toBe(true);
+      }
+      // Treated as plain walls, the secrets strand something — proof they gate, not decorate.
+      const strict = reachableFrom(level, start, { secretsPassable: false });
+      expect(strict.size, `${name} seed ${seed}: 'all' secrets gated nothing`).toBeLessThan(
+        reached.size,
+      );
+    }
+  });
+});
+
+describe.each(DOOR_PIPELINES)('%s + scope:"redundant" secret doors', (name, config) => {
+  it('never forces a search: every stair stays reachable over floor alone', async () => {
+    for (let seed = 1; seed <= 10; seed++) {
+      const cfg = withSecretStage(config, { chance: 1, scope: 'redundant' });
+      const { level, registry } = await generate(cfg, seed);
+      const start = entryTile(registry);
+      // Redundant-only secrets sit on loops, so a searchless (floor-only) path always remains.
+      const strict = reachableFrom(level, start, { secretsPassable: false });
+      for (const tr of registry.getEntitiesWith('transition')) {
+        const p = tr.components.get('position');
+        expect(
+          strict.has(`${p.x},${p.y}`),
+          `${name} seed ${seed}: stair (${p.x},${p.y}) needs a search under 'redundant' scope`,
+        ).toBe(true);
+      }
+    }
+  });
+});
 
 describe.each(PIPELINES)('%s pipeline connectivity', (name, config) => {
   it('reaches every room and every stair from the entry point, across seeds', async () => {

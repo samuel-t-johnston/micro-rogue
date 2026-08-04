@@ -52,6 +52,17 @@ Carve stages don't hard-code tile ids — they lay down whatever `{ floor, wall 
 
 The `lineWalls` stage is a late, purely-cosmetic pass: it rewrites each wall tile to the double-line box-drawing variant (║ ╣ ╬ …) matching which of its four cardinal neighbours are walls, so glyph mode draws connected walls instead of a field of `#`. Add `{ type: 'lineWalls' }` after every tile-writing stage. It's glyph-only — variants reuse their base wall's sprite, so sprite mode is unchanged — and gameplay-neutral, since variants keep the base's category, passability, and opacity. Any wall-category tile counts as a connecting neighbour (stone and cave walls join at a boundary); the grid edge counts as empty, so a wall on the border closes into a clean box outline; and an isolated wall (no wall neighbour) keeps its plain glyph. See [tile-types.md § Line walls](tile-types.md#line-walls) and [`data/tiles/line-walls.js`](../../data/tiles/line-walls.js).
 
+### Secret doors and rooms
+
+Two optional stages hide content behind walls a player must **search** to reveal (see [secret-doors-and-search.md](../design/secret-doors-and-search.md) for how the disguise and search work). Both place a wall-disguised entity, so run them **after all tile-writing/door stages and before `lineWalls`**, so the affected tiles join the box-drawing mask.
+
+- **`secretDoors`** turns existing closed doors into secret doors. `{ type: 'secretDoors', chance, scope, bounds? }`:
+  - `chance` (0..1, default 0 — a no-op) is the per-door probability.
+  - `scope` is `'redundant'` (default — hides only doors on a loop, so a searchless path always remains) or `'all'` (may seal a sole-access door, gating a region behind a search). Redundancy is computed structurally, so it never disconnects the level.
+  - `bounds` restricts which doors are eligible (e.g. one district); redundancy is still judged over the whole map.
+  - Shipped on `procedural-3x3` (`floor-3`) at `scope: 'all', chance: 0.2`.
+- **`secretRoom`** carves a small treasure room from solid rock, entered only through a secret door. `{ type: 'secretRoom', count?, contents?, bounds? }`: `count` rooms (default 1, non-overlapping), `contents` chest loot as prefab ids (default a healing potion + bread), `bounds` to scope it. It needs a 3×3 rock footprint against a wall with floor beyond; if none fits, it places nothing. Shipped on `composite` (the branch's bottom floor).
+
 ### Determinism
 
 All randomness comes from the `rng` the runner is handed — the dungeon runtime derives a dedicated per-floor `mapgen` stream from the floor's identity (see [rng-and-determinism.md](../design/rng-and-determinism.md)), so the same seed always yields the same floor, independent of gameplay rolls.

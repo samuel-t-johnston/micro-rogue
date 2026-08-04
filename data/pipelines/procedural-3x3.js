@@ -14,6 +14,12 @@ export default {
     { type: 'link' },
     { type: 'carveRooms' },
     { type: 'carveHalls' },
+    // Hide some corridor doors as secret doors. Scope 'all' may seal the SOLE path to a room, so on this
+    // bottom floor the amulet room or the lone up-stair can end up behind a secret — a deliberate
+    // "search for the way out" climax. Never a hard lock: a secret is a latent passage, always
+    // revealable by searching the wall from the reachable side (and passive search rolls every turn).
+    // See docs/design/secret-doors-and-search.md §7.
+    { type: 'secretDoors', chance: 0.2, scope: 'all' },
     { type: 'stairs', stairs: [['stairs-up', 'up']] },
     { type: 'spawn' },
     // The shipped creature roster: who spawns and their room-affinity weights (per-label multipliers;
