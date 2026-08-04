@@ -37,7 +37,7 @@ Every row must be the same length, and every character must have an entry in `le
 
 - **`stairsUp`** — also gets an `entryPoint`, so the player arrives here. **`stairsDown`** — a level exit (its `transition` destination is wired later by a coordinator).
 - **Creatures** — `orc`, `goblin`. **Items** — `healingPotion`, `potionOfPain`, `dagger`, `sword`, `leatherArmor`, `scroll`.
-- **Furniture** — `boulder`, `door`, and `chest`. A `chest` carries a `contents` array of item type names that are created inside it.
+- **Furniture** — `boulder`, `door`, `chest`, and `secretDoor`. A `chest` carries a `contents` array of item type names that are created inside it. A `secretDoor` is placed on a **wall** tile (not floor) and stays disguised as that wall until a search reveals it, so put floor on its far side and something worth finding beyond (it reveals to a plain `floor` tile); see [secret-doors-and-search.md](../design/secret-doors-and-search.md).
 
 Placement is exact and deterministic (no RNG): the stage places exactly what the layout lists, where it lists it. Keep entity tiles on floor and avoid overlaps unless you intend a stack. Unknown types throw. The supported `type` ids are the keys of the prefab catalog in [`src/world/entities/entity-prefabs.js`](../../src/world/entities/entity-prefabs.js) — register a new entity type there to make it placeable.
 
