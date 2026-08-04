@@ -211,14 +211,51 @@ enforce: the tile is wall terrain, there is floor on the far side, and that far 
 entrance. This proves out the component, reveal, the search core (active + passive), rendering, "look",
 save/migration, and feedback — end to end — with no generation work.
 
-### Phase 2: `secretDoorChance` on door-generating stages
+### Phase 2: a dedicated `secretDoors` stage (built)
 
-Teach the stages that already drop doors (`stage-bsp-carve.js`, and any other door-placing stage) a
-`secretDoorChance` parameter. With probability `secretDoorChance`, a connection that would get a normal
-door instead gets a secret door: leave the tile as wall terrain (don't carve the opening) and place a
-`secretDoor` marker. Because the opening isn't carved, connectivity tooling must continue to treat the
-secret tile as passable-once-found — verify `data/pipelines/connectivity.test.js` still holds (a secret
-door, like a normal door, must not disconnect the level; it is a latent passage, not a wall).
+Rather than a `secretDoorChance` param smeared across every door-placing stage, secret doors are a
+**post-carve stage** (`stage-secret-doors.js`, type `secretDoors`) that converts *existing* closed
+doors into secret doors: it removes the door entity, re-walls its tile (inheriting the wall of an
+adjacent tile, so it matches the local district — stone vs. cave — regardless of the sticky palette),
+and drops a dormant `secretDoor` whose `revealFloor` is the floor the door sat on.
+
+Why a stage and not a per-stage param: inline placement in a carve stage is fragile — in a composed
+pipeline a *later* carve (e.g. `stitch` in `composite`) can dig straight through a just-placed secret's
+wall tile and re-floor it, breaking the disguise. A stage that runs **after all carving** (and before
+`lineWalls`, so the re-walled tile joins the box-drawing mask) can't be undone, works for every pipeline
+uniformly, and keeps the carve stages ignorant of secrets. Pipelines opt in by adding
+`{ type: 'secretDoors', chance, scope, bounds? }` where they want it — composable, and `bounds` scopes
+it to one district of a composite level.
+
+Parameters:
+- `chance` (0..1, default 0 — a no-op that draws no RNG, so existing pipelines are byte-identical).
+- `scope`: `'redundant'` (default) or `'all'`. Both are supported because both have uses — a
+  shortcut-hiding pass vs. a gate-the-region pass.
+- `bounds`: optional sub-rect; candidate doors are restricted to it, but redundancy is judged over the
+  whole map (an alternate route through another district still counts).
+
+**Redundancy is structural**, computed by the stage itself (no per-stage bookkeeping): a door is
+redundant iff, with it walled, its two floor sides are still connected through other floor. Doors are
+processed in a fixed order and each conversion mutates the tiles, so redundancy is judged against the
+current *non-secret* graph — which guarantees `'redundant'` scope never removes the last searchless path
+to any region (so it never disconnects the level and never forces a search). `'all'` scope may seal a
+sole-access door, gating a region behind a search; the region stays reachable because a secret is a
+**latent passage**.
+
+*Note the `'redundant'` asymmetry:* a pure-BSP floor doors only spanning-tree edges (its loops are
+door-less hall openings), so `'redundant'` scope finds little to hide there — it's meaningful on
+procedural-3x3 and on `stitch` joins. That's expected, not a bug.
+
+**Connectivity contract.** `data/pipelines/connectivity.test.js`'s flood treats a tile holding a
+`secret` entity as a latent passage (walkable), so the invariant becomes "reachable, possibly by
+searching." The tests assert both: under `'all'`, every stair stays reachable via search *and* the
+secrets genuinely gate (strand tiles when treated as plain walls); under `'redundant'`, every stair
+stays reachable over **floor alone** (no search ever required).
+
+**Dead-end tutorialization.** A secret hidden inside a corridor seals one end; from the open end the
+passage reads as a suspicious dead-end — an obvious, unforced cue to search there. This tell naturally
+accompanies `'redundant'` secrets (reachable from the open side); an `'all'` secret on a sole-access
+wall has no such hint, which is the point of the harder mode.
 
 ### Phase 3: secret rooms (later)
 
@@ -242,6 +279,11 @@ Per the project's test-first rules for pure logic and RNG-consuming code:
   `serialize.test.js`'s component-codec guard). No migration test: the change is purely additive (see §4).
 - **Passive search** — the upkeep step reveals over turns for the player and does not roll for other
   creatures.
+- **`secretDoors` stage** — `chance` 0 is a no-op that draws no RNG; `'redundant'` converts loop doors
+  but keeps a searchless path and never touches a sole-access door; `'all'` seals a sole-access door; a
+  conversion leaves wall terrain + a dormant secret whose `revealFloor` is the old floor; `bounds`
+  restricts candidates; deterministic for a seed. Plus the connectivity contract above, asserted over
+  the real door pipelines (bsp, composite, procedural-3x3) for both scopes.
 
 Rendering (the wall looking right in glyph + sprite mode, and the door appearing on reveal) is verified
 by inspection, not snapshot tests, per the testing guidance.
