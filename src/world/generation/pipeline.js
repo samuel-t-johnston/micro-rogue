@@ -31,7 +31,6 @@ import * as secretRoom from './stages/stage-secret-room.js';
 import * as passageConnectors from './stages/stage-passage-connectors.js';
 import * as reserve from './stages/stage-reserve.js';
 import * as stairs from './stages/stage-stairs.js';
-import * as spawn from './stages/stage-spawn.js';
 import * as populate from './stages/stage-populate.js';
 import * as scaleCreatures from './stages/stage-scale-creatures.js';
 import * as loadout from './stages/stage-loadout.js';
@@ -66,7 +65,6 @@ const MODULES = {
   passageConnectors,
   reserve,
   stairs,
-  spawn,
   populate,
   scaleCreatures,
   loadout,

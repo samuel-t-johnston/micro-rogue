@@ -154,7 +154,7 @@ Revises the realization stages from steps 6–7: rooms become randomly sized/pla
 **Invariants to keep:** one floor component per zone (carve-rooms, including merges); a single floor
 component for the whole level (carve-halls); two doors per link; determinism.
 
-**Placement (stairs/spawn/populate):** these place entities only within zone **room rectangles**
+**Placement (stairs/populate):** these place entities only within zone **room rectangles**
 (`level:rooms`, via `roomTiles`/`centermostRoomTile`), **not** raw cell floor — otherwise corridor and
 door tiles (also `floor`, also inside a cell) get picked, landing entities in hallways or on doors.
 Populate additionally skips tiles already holding an entity (checked through the spatial index), so

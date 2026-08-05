@@ -35,11 +35,6 @@ describe('ca pipeline (the shipped cave floor)', () => {
     expect(ports).toEqual(['down', 'up']);
   });
 
-  it('marks a player entry point', async () => {
-    const { registry } = await generate(1);
-    expect(registry.getEntitiesWith('entryPoint')).toHaveLength(1);
-  });
-
   it('populates chambers with creatures and items', async () => {
     const { registry } = await generate(2);
     expect(registry.getEntitiesWith('ai').length).toBeGreaterThan(0);

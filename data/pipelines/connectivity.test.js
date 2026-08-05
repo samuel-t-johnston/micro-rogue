@@ -73,9 +73,14 @@ function reachableFrom(level, start, { secretsPassable = true } = {}) {
   return seen;
 }
 
-function entryTile(registry) {
-  const [entry] = registry.getEntitiesWith('entryPoint');
-  const pos = entry?.components.get('position');
+// Where the player actually arrives on a freshly generated floor: standing on the up-stair — the
+// transition whose port the transit map lands them on (see resolveArrival). Every procedural floor
+// declares an up-stair, so this is the connectivity flood-fill's seed.
+function arrivalTile(registry) {
+  const transitions = registry.getEntitiesWith('transition');
+  const up =
+    transitions.find((t) => t.components.get('transition').port === 'up') ?? transitions[0];
+  const pos = up?.components.get('position');
   return pos ? { x: pos.x, y: pos.y } : null;
 }
 
@@ -98,7 +103,7 @@ describe.each(DOOR_PIPELINES)('%s + scope:"all" secret doors', (name, config) =>
     for (let seed = 1; seed <= 10; seed++) {
       const cfg = withSecretStage(config, { chance: 1, scope: 'all' });
       const { level, registry } = await generate(cfg, seed);
-      const start = entryTile(registry);
+      const start = arrivalTile(registry);
 
       const secrets = registry.getEntitiesWith('secret');
       expect(secrets.length, `${name} seed ${seed}: no secrets placed`).toBeGreaterThan(0);
@@ -131,7 +136,7 @@ describe.each(DOOR_PIPELINES)('%s + scope:"redundant" secret doors', (name, conf
     for (let seed = 1; seed <= 10; seed++) {
       const cfg = withSecretStage(config, { chance: 1, scope: 'redundant' });
       const { level, registry } = await generate(cfg, seed);
-      const start = entryTile(registry);
+      const start = arrivalTile(registry);
       // Redundant-only secrets sit on loops, so a searchless (floor-only) path always remains.
       const strict = reachableFrom(level, start, { secretsPassable: false });
       for (const tr of registry.getEntitiesWith('transition')) {
@@ -146,12 +151,12 @@ describe.each(DOOR_PIPELINES)('%s + scope:"redundant" secret doors', (name, conf
 });
 
 describe.each(PIPELINES)('%s pipeline connectivity', (name, config) => {
-  it('reaches every room and every stair from the entry point, across seeds', async () => {
+  it('reaches every room and every stair from the arrival tile, across seeds', async () => {
     for (let seed = 1; seed <= 10; seed++) {
       const { level, registry } = await generate(config, seed);
 
-      const start = entryTile(registry);
-      expect(start, `${name} seed ${seed}: no entry point`).not.toBeNull();
+      const start = arrivalTile(registry);
+      expect(start, `${name} seed ${seed}: no arrival tile`).not.toBeNull();
       const reached = reachableFrom(level, start);
 
       const zones = level.blackboard['level:zones'] ?? [];
@@ -161,7 +166,7 @@ describe.each(PIPELINES)('%s pipeline connectivity', (name, config) => {
         if (!tile) continue;
         expect(
           reached.has(`${tile[0]},${tile[1]}`),
-          `${name} seed ${seed}: zone ${zone.id} unreachable from entry`,
+          `${name} seed ${seed}: zone ${zone.id} unreachable from arrival`,
         ).toBe(true);
       }
 
@@ -169,7 +174,7 @@ describe.each(PIPELINES)('%s pipeline connectivity', (name, config) => {
         const pos = tr.components.get('position');
         expect(
           reached.has(`${pos.x},${pos.y}`),
-          `${name} seed ${seed}: stair at (${pos.x},${pos.y}) unreachable from entry`,
+          `${name} seed ${seed}: stair at (${pos.x},${pos.y}) unreachable from arrival`,
         ).toBe(true);
       }
     }

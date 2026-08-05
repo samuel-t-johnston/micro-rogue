@@ -1,7 +1,6 @@
 // The BSP branch floor: a large "fully packed" building-style level (binary space partitioning with
-// halls), used for the game's second dungeon branch — reached from floor-1's second down-stair
-// (data/transit-map.js). Planner+realization is bspGeometry → label → bspCarve; then the usual
-// stairs/spawn/populate finish it. It places an up-stair (back to floor-1) and a down-stair on to the
+// halls). Planner+realization is bspGeometry → label → bspCarve; then the usual
+// stairs/populate finish it. It places an up-stair (back to floor-1) and a down-stair on to the
 // walker cave floor deeper in the branch. See docs/howto/dynamic-map-generation.md and
 // docs/design/map-generation.md.
 export default {
@@ -29,7 +28,6 @@ export default {
         ['stairs-down', 'down'],
       ],
     },
-    { type: 'spawn' },
     {
       type: 'populate',
       creatures: [

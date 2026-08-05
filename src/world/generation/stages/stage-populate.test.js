@@ -5,7 +5,6 @@ import { run as runLink } from './stage-link.js';
 import { run as runCarveRooms } from './stage-carve-rooms.js';
 import { run as runCarveHalls } from './stage-carve-halls.js';
 import { run as runStairs } from './stage-stairs.js';
-import { run as runSpawn } from './stage-spawn.js';
 import { run as runPopulate, weightedPick, DEFAULTS } from './stage-populate.js';
 import { roomTiles, centermostRoomTile } from '../zone-tiles.js';
 import { createLevel } from '../../map/level.js';
@@ -33,7 +32,6 @@ function fullGenerate(seed) {
     runCarveRooms,
     runCarveHalls,
     runStairs,
-    runSpawn,
   ]) {
     stage(level, {}, bb, createRng(seed), reg);
   }

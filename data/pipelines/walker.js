@@ -20,7 +20,6 @@ export default {
         ['stairs-down', 'down'],
       ],
     },
-    { type: 'spawn' },
     {
       type: 'populate',
       creatures: [
