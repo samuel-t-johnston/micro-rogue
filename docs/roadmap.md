@@ -118,16 +118,16 @@ AI/Senses/Goals
 
 ## Alpha - v0.4.0 - Maps, Maps, Maps
 
-*Done when the engine supports several visually distinct styles of random map generation, and possibly some new room types.*
+*Done when the engine supports several visually distinct styles of random map generation.*
 
 - [x] Map Gen - Binary Space Partitioning
 - [x] Map Gen - Cellular Automata
 - [x] Map Gen - Drunk Walk/Digger
 - [x] Map Gen - Composability (Generated Levels)
 - [x] Map Gen - Composability (Static Levels)
-- [ ] Fancy bitset/Page 437 line walls (in glyph rendering mode) - config to enable
+- [x] Fancy bitset/Page 437 line walls (in glyph rendering mode) - config to enable
 - [x] Re-entry pipeline - level that always regenerates
-- [ ] New rooms? (options: vault, temple, courtyard, throne room, armory, lab, graveyard, shop, zoo, nest)
+- [x] Secret doors and search action
 
 ---
 
@@ -141,16 +141,18 @@ AI/Senses/Goals
 
 ---
 
-## Alpha - v0.5.0 - Items
+## Alpha - v0.5.0 - Entity Tables
 
 *Done when item tables are used for floor spawning, monster inventory, and monster loot drops.*
 
-- [ ] Item Tables / generic entity tables (spawn tables later?)
+- [ ] Item Tables / generic entity tables
   - Weight by variables: depth, etc. - just give it the registry?
 - [ ] RNG item spawn in map gen - item tables + player level
 - [ ] RNG monster inventory in map gen - item tables + player level
 - [ ] RNG monster loot drops - item tables
-- [ ] Consider new items (gold coins)
+- [ ] Consider new items and currency
+- [ ] Spawn tables
+- [ ] Spawners - generate new monsters on a live level
 
 ---
 
@@ -175,7 +177,6 @@ AI/Senses/Goals
 - [ ] 1 boss
 - [ ] Attack telegraph animations
 - [ ] Damage randomization
-- [ ] spear animation
 - [ ] defense/armor
 - [ ] Map Gen - Offset Grid (https://www.redblobgames.com/x/2321-offgrid/ + https://gitlab.com/chriscox/offgrid)
 - [ ] Map Gen - Rooms & Mazes (https://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/)
@@ -183,7 +184,7 @@ AI/Senses/Goals
 
 ---
 
-## Alpha - v0.8.0 - Bringing Balance to the Force
+## Alpha - v0.8.0 - Balance
 
 *This milestone is not finalized*
 
@@ -191,6 +192,9 @@ AI/Senses/Goals
 - [ ] UI polish, theme adjustments, rounded buttons?
 - [ ] Dev documentation - strip demo content (scripts?) - creatures, items, furniture, levels, tiles, attributes...
 - [ ] Update dev libs
+- [ ] Howto files - further reading
+- [ ] Full code review and cleanup pass
+- [ ] Configurable keyboard shortcuts
 
 ---
 
@@ -201,6 +205,7 @@ AI/Senses/Goals
 - [ ] Clean up old save file versions
 - [ ] UI API (dom, terminal, remote?)
 - [ ] Storage API (browser, SQL?)
+- [ ] Consider MilazzoFOV, configurable FOV algorithms - https://www.adammil.net/blog/v125_Roguelike_Vision_Algorithms.html
 
 ---
 
@@ -208,13 +213,11 @@ AI/Senses/Goals
 
 *Medium Priority / Easy:*
 
-- [ ] Randomize attack damage
 - [ ] "Save" button that tells the user about auto-save.
 - [ ] Screen overlay effects (vignette) - reduced-motion fallback; disableable
 - [ ] Light-sensitive vision sense - current unlimited vision sense becomes "darkvision". Tile light levels + light emitters
 - [ ] Score + Leaderboards
 - [ ] More furniture: fountains?
-- [ ] Search action + secret doors — see [secret-doors-and-search.md](design/secret-doors-and-search.md). Phase 1: static-map secret doors + active/passive search. Phase 2: `secretDoorChance` on door-placing stages. Phase 3: secret rooms.
 - [ ] Zoo level for dev testing
 - [ ] Developer F.A.Q.
 - [ ] View RNG seed, mode where seed can be specified
@@ -226,7 +229,7 @@ AI/Senses/Goals
 - [ ] Status effects: HUD display, multi-effect overflow handling
 - [ ] Echolocation sense — a precise hearing-style sense that resolves *exact* source tiles via walking-distance sound propagation (the muffling / weighted path-cost model explored during M6 hearing design). Distinct from ordinary hearing, which deliberately yields only an imprecise direction + a type/classification; echolocation would pinpoint the source. High-detail and arguably more "bat sonar" than human hearing — revisit as a special creature ability or player tool.
 
-*Low Priority / Hard:*
+*Low Priority / Harder:*
 
 - [ ] Map generation "Prefabs" - specification and placement
 - [ ] Configurable UI layout — anchor system supports it; only lefty/righty modes for now

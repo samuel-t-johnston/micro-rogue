@@ -16,9 +16,7 @@ export default {
   nodes: [
     { id: 'floor-1', pipelineId: 'static-test-level', branch: 0, depth: 0 },
     // floor-2 opts into total-reset regeneration: each return re-rolls the maze on an incremented
-    // epoch (see docs/design/reentry-pipelines.md). A `questItem` (e.g. a dropped Amulet of Yendor)
-    // is carried across onto the arrival tile; everything else the player left is gone. `reentry`
-    // absent ⇒ the floor thaws unchanged, the default for every other node.
+    // epoch (see docs/design/reentry-pipelines.md).
     { id: 'floor-2', pipelineId: 'random-static-maze', branch: 0, depth: 1, reentry: 'regen' },
     { id: 'floor-3', pipelineId: 'procedural-3x3', branch: 0, depth: 2 },
     // Branch 1: reached from floor-1's second (start-room) down-stair — a BSP floor, then a walker cave

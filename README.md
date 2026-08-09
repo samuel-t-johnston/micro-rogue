@@ -9,20 +9,20 @@ ROGμE is designed to be an easy way to jump into game development, even if you 
 > There is a save migration system in place to update saves on load whenever possible.
 > 
 > The engine already supports:
-> - Running in-browser on desktop and mobile, with click or touch-based UI. Tap-and-hold context menu.
+> - Running in-browser on desktop and mobile, with click or touch-based UI.
 > - "Install" as a [PWA](https://web.dev/articles/what-are-pwas) via "Add to Home Screen"
 > - Sprite and glyph-based (ASCII) graphics, swappable on the fly
-> - Zoom and pan
-> - Auto-save and load, save version migration
-> - Flexible attribute system, HP, MP, XP, and level-up rules
-> - Food and hunger
-> - Inventory, containers, items, equipment, ammunition
-> - Creatures/monsters
-> - Melee and ranged combat
-> - Expandable "senses" system for creature and player perception (vision, hearing, smell)
-> - Goal-based, flexible AI system. Monsters use equipment, open doors, communicate.
-> - Expandable map generation system - pipelines and stages - supporting static and random (BSP, CA, digger, etc.) maps
 > - Complete game loop with win and loss conditions
+> - Melee and ranged combat
+> - Composable, expandable map generation system - supporting static and procedural (BSP, CA, digger, etc.) maps
+> - Goal-based, flexible AI system. Monsters can fight, chase, flee, use equipment, open doors, communicate, etc.
+> - Flexible attribute system, HP, MP, XP, and level-up rules
+> - Expandable "senses" system for creature and player perception (vision, hearing, smell)
+> - Inventory, containers, items, equipment, ammunition
+> - Food and hunger
+> - Secrets and searching
+> - Auto-save and load, save version migration
+> - Zoom and pan
 > - Web audio SFX and background music
 > - Extensive documentation via short "how-to" guides
 
