@@ -18,7 +18,7 @@ rooms as it goes. Organic generators mostly don't — a cellular-automata level 
 with no moment during generation where the algorithm could say "this is a chamber."
 
 The tempting response is to give organic levels their own vocabulary. This design does not. The BSP
-work earned a single downstream tail — `label`, `stairs`, `spawn`, and `populate` read `level:zones`
+work earned a single downstream tail — `label`, `stairs`, and `populate` read `level:zones`
 and `level:rooms` and never ask which generator ran — and that is the property that makes level types
 pipeline configurations rather than separate systems. A parallel `region:*` namespace would fork that
 tail and force population stages to branch on generator identity, which is the exact thing the pipeline
@@ -315,7 +315,7 @@ added if more stages ever need it.
 `segmentRegions` pass it from config), `label` and `populate` take a `section` filter — so a composed
 floor labels and populates each district separately (BSP keep gets orcs, cave gets goblins and
 scuttlers) by running those stages once per section. Absent a `section`, both span the whole floor
-unchanged. `stairs`/`spawn` find their zone by label, so scoping `label` scopes them too.
+unchanged. `stairs` finds its zone by label, so scoping `label` scopes it too.
 
 **Reserved areas.** A second composition mode: the `reserve` stage publishes `level:reserved` rects that
 a *later* stage fills. `caSeed`/`caSmooth` hold those cells wall (the shared `isReserved` predicate in
@@ -334,7 +334,7 @@ mode instead.
 ## 7. Shared tail — unchanged
 
 Both pipelines hand off the same thing BSP does. `populate` reads `kind == 'chamber'` (absent ⇒ chamber)
-and the zone's room tiles; `stairs`/`spawn` place on `centermostRoomTile`, which prefers the `core`;
+and the zone's room tiles; `stairs` places on `centermostRoomTile`, which prefers the `core`;
 `label` assigns roles over the zone set geometry-agnostically. `label`/`populate` additionally take the
 optional `section` filter (§6), which is inert when absent — so the tail stays generator-agnostic. If
 any of these stages ever branches on generator identity or on `origin`, the abstraction has failed and

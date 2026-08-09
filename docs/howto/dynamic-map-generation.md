@@ -17,7 +17,6 @@ export default {
     { type: 'carveRooms' },
     { type: 'carveHalls' },
     { type: 'stairs' },
-    { type: 'spawn' },
     { type: 'populate', creatures: [/* which creatures spawn + room-affinity weights */] },
     { type: 'scaleCreatures', levels: { goblin: 3, orc: 3, scuttler: 3, orcCommander: 3 } },
     { type: 'loadout' },
@@ -40,7 +39,7 @@ Every stage gets the same five arguments. They communicate through the shared **
 The shipped procedural pipeline splits cleanly:
 
 1. **Planner** — `roomGridGeometry` → `label` → `link` build an abstract zone graph in the blackboard (rooms, their labels, the connections between them). No tiles yet.
-2. **Realization** — `carveRooms` → `carveHalls` turn that graph into actual floor/wall tiles, then `stairs`, `spawn`, and `populate` place exits, the player's arrival mark, and contents; finally `scaleCreatures` levels the placed monsters for depth and `loadout` arms them from item tables.
+2. **Realization** — `carveRooms` → `carveHalls` turn that graph into actual floor/wall tiles, then `stairs` and `populate` place exits and contents; finally `scaleCreatures` levels the placed monsters for depth and `loadout` arms them from item tables. The player arrives standing on the up-stair (`resolveArrival`), so no separate arrival marker is placed.
 
 Static pipelines use a different, shorter set (`static` / `randomStatic` to lay down a fixed layout, `placeStaticEntities` to instantiate authored entities) — see [static-map-layouts.md](static-map-layouts.md). The registry holds both families; a pipeline mixes whatever stages it needs.
 

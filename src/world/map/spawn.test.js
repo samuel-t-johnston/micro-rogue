@@ -35,10 +35,22 @@ describe('resolveSpawn', () => {
     expect(resolveSpawn(reg, { width: 20, height: 20 })).toEqual({ x: 4, y: 7 });
   });
 
-  it('falls back to the level centre with a warning when none is marked', () => {
+  it('falls back to the raw centre (with a warning) when the level cannot report passability', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const reg = createEntityRegistry();
     expect(resolveSpawn(reg, { width: 10, height: 8 })).toEqual({ x: 5, y: 4 });
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('falls back to the nearest walkable tile to centre, never a wall', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const reg = createEntityRegistry();
+    // Centre (5,4) is wall; the closest passable tile is one east. isPassable is the real level's
+    // walkability probe, so the fallback settles onto floor rather than into the wall.
+    const passable = new Set(['6,4']);
+    const level = { width: 10, height: 8, isPassable: (x, y) => passable.has(`${x},${y}`) };
+    expect(resolveSpawn(reg, level)).toEqual({ x: 6, y: 4 });
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
   });

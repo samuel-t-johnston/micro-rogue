@@ -2,7 +2,7 @@
  * @file Shared loader for static map layouts. Imports a map module by name and parses its
  * `tiles`/`legend` into the level's tile grid, returning its authored `entities` list (instantiated
  * later by the place-static-entities stage) and any authored `regions` (rooms + labels published to
- * the zone/room contract so the shared tail — label/stairs/spawn/populate — works over hand-authored
+ * the zone/room contract so the shared tail — label/stairs/populate — works over hand-authored
  * areas). Used by both the `static` and `randomStatic` structure stages. A layout can be laid down at
  * an offset via a `bounds` param, so a static block composes into an already-generated level. See
  * docs/howto/static-map-layouts.md.

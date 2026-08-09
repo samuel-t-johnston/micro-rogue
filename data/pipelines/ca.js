@@ -2,7 +2,7 @@
 // caBridge → segmentRegions), then the usual shared tail. The third floor of the game's second branch
 // (data/transit-map.js): reached from the walker floor's down-stair, and leading on down to the
 // composite keep-and-cave floor. segmentRegions infers the chamber/passage zones that
-// label/stairs/spawn/populate consume — the same contract BSP and the walker produce. See
+// label/stairs/populate consume — the same contract BSP and the walker produce. See
 // docs/design/organic-map-generation.md and docs/howto/dynamic-map-generation.md.
 export default {
   id: 'ca',
@@ -23,7 +23,6 @@ export default {
         ['stairs-down', 'down'],
       ],
     },
-    { type: 'spawn' },
     {
       type: 'populate',
       creatures: [

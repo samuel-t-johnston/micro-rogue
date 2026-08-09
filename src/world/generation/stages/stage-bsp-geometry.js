@@ -2,7 +2,7 @@
  * @file Structure-planning stage: binary space partitioning (the "BSP" geometry). Recursively splits
  * the map rectangle into leaf rooms — a "fully packed" building-like layout where every tile is a room
  * floor or a wall, with no leftover void. No tiles are written here; this stage plans, and `bspCarve`
- * realizes. `label`/`stairs`/`spawn`/`populate` consume its output through the same
+ * realizes. `label`/`stairs`/`populate` consume its output through the same
  * `level:zones`/`level:rooms` contract the room-grid pipeline uses, so they work over BSP geometry
  * unchanged. See docs/design/map-generation.md.
  *

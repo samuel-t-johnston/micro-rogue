@@ -80,8 +80,8 @@ export function run(level, stageConfig = {}, blackboard, rng, registry) {
   const rooms = blackboard[LEVEL_ROOMS] ?? {};
 
   // Empty room tiles only — inside the room rect, and not already occupied (the spatial index
-  // tracks everything placed so far: stairs, doors, the entry point, earlier spawns). This keeps
-  // spawns out of hallways and off furniture, and stops anything from stacking.
+  // tracks everything placed so far: stairs, doors, earlier spawns). This keeps spawns out of
+  // hallways and off furniture, and stops anything from stacking.
   const openTiles = (zone) =>
     roomTiles(zone, rooms).filter(([x, y]) => level.getEntitiesAt(x, y).size === 0);
   const freeTile = (zone) => {

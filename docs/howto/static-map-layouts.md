@@ -44,7 +44,7 @@ Placement is exact and deterministic (no RNG): the stage places exactly what the
 ## Regions: authored rooms and labels
 
 By default a static layout publishes *no* rooms, so the shared population tail (`label`, `stairs`,
-`spawn`, `populate`) has nothing to act on — a static level's contents come entirely from its authored
+`populate`) has nothing to act on — a static level's contents come entirely from its authored
 `entities`. Add an optional `regions` export to hand-designate rooms so those stages work over your
 layout, letting a static area be *populated* like a generated one instead of hand-placing everything.
 
@@ -80,7 +80,6 @@ the pipeline (and skip `placeStaticEntities` for anything you'd rather have `pop
 { type: 'static', layout: 'my-vault' },
 { type: 'label', labels: ['stairs-down'], fill: 'item' }, // optional: auto-label the untagged rooms
 { type: 'stairs' },
-{ type: 'spawn' },
 { type: 'populate', creatures: [/* … */] },
 ```
 

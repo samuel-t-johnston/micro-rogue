@@ -34,7 +34,6 @@ export default {
     { type: 'label', section: 'keep', labels: ['stairs-up', 'treasure'], fill: 'item' },
     { type: 'label', section: 'cave', labels: ['treasure'], fill: 'item' },
     { type: 'stairs', stairs: [['stairs-up', 'up']] },
-    { type: 'spawn' },
     // District population — a garrison in the keep, vermin in the cave.
     {
       type: 'populate',

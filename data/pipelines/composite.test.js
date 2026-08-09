@@ -33,7 +33,6 @@ describe('composite pipeline (the shipped keep-and-cave floor)', () => {
       .getEntitiesWith('transition')
       .map((t) => t.components.get('transition').port);
     expect(ports).toEqual(['up']);
-    expect(registry.getEntitiesWith('entryPoint')).toHaveLength(1);
   });
 
   it('garrisons orcs in the west keep and vermin in the east cave (district population)', async () => {

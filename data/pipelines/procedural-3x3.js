@@ -1,7 +1,8 @@
 // The shipped procedural pipeline: a Rogue-style 3x3 room-grid dungeon. Planner (roomGridGeometry →
 // label → link) builds the zone graph in the blackboard; realization (carveRooms → carveHalls) turns
-// it into tiles; then stairs, spawn, and populate place the exits, the player's arrival mark, and the
-// contents (the creature roster below), and scaleCreatures + loadout level and arm those creatures.
+// it into tiles; then stairs and populate place the exits and the contents (the creature roster
+// below), and scaleCreatures + loadout level and arm those creatures. The player arrives on the
+// up-stair (resolveArrival), so no separate arrival marker is placed.
 // See docs/design/procedural-3x3-dungeon.md and docs/howto/dynamic-map-generation.md.
 export default {
   id: 'procedural-3x3',
@@ -21,7 +22,6 @@ export default {
     // See docs/design/secret-doors-and-search.md §7.
     { type: 'secretDoors', chance: 0.2, scope: 'all' },
     { type: 'stairs', stairs: [['stairs-up', 'up']] },
-    { type: 'spawn' },
     // The shipped creature roster: who spawns and their room-affinity weights (per-label multipliers;
     // a room's pick-weight is the product over its labels). Item counts fall to stage-populate defaults.
     {
