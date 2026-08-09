@@ -15,8 +15,9 @@ Lately expanded into a general list of interesting stuff related to roguelikes.
 
 (I make no claim of quality here, just a place to jot down tools I'm interested in.)
 
- - REXPaint - ASCII art tool
-   - https://www.gridsagegames.com/rexpaint
+ - LICEcap - GIF screenshot tool - https://www.cockos.com/licecap/
+ - REXPaint - ASCII art tool - https://www.gridsagegames.com/rexpaint
+ - Paletton - Color palette tool - https://paletton.com
  - aseprite - Animated sprite editor and pixel art tool. $20 on Itch.io or Steam, or compile it yourself.
    - https://www.aseprite.org/
    - https://github.com/aseprite/aseprite
@@ -31,6 +32,8 @@ Lately expanded into a general list of interesting stuff related to roguelikes.
  - https://ondras.github.io/rot.js/manual/#map/maze - maze algorithms in rot.js
  - https://ondras.github.io/rot.js/manual/#map/cellular - CA algorithm in rot.js
  - https://ondras.github.io/rot.js/manual/#map/dungeon - room and hall algorithms in rot.js
+ - https://www.pcg-random.org - PCG RNG
+ - https://www.adammil.net/blog/v125_Roguelike_Vision_Algorithms.html - Roguelike FOV algorithm comparison
 
 **Games/Demos**
  - https://ytirnity.com/play/hexwalker/
