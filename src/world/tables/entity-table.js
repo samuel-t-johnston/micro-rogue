@@ -4,7 +4,7 @@
  * specs later) that a placement site turns into real entities. Tables drive loot drops, chest contents,
  * and procedural floor/creature population; the caller always supplies the RNG, so the same definition
  * is deterministic under map generation's derived streams and reproducible under the gameplay stream at
- * death. See docs/design/entity-tables.md (design in progress) and src/world/entities/item-tables.js.
+ * death. See docs/design/entity-tables.md, docs/howto/loot-tables.md, and src/world/entities/item-tables.js.
  *
  * A table produces *specs*, never built entities: a spec has no placement context, so the identical
  * output lands in an inventory, a chest, or on a floor tile depending only on who resolves it. This is
