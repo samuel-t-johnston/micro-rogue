@@ -145,11 +145,11 @@ AI/Senses/Goals
 
 *Done when item tables are used for floor spawning, monster inventory, and monster loot drops.*
 
-- [ ] Item Tables / generic entity tables
-  - Weight by variables: depth, etc. - just give it the registry?
+- [x] Item Tables / generic entity tables
+  - Weight by variables: depth, etc. — via a `ctx` bag (rng, depth, source, …), not the whole registry
 - [ ] RNG item spawn in map gen - item tables + player level
 - [ ] RNG monster inventory in map gen - item tables + player level
-- [ ] RNG monster loot drops - item tables
+- [x] RNG monster loot drops - item tables
 - [ ] Consider new items and currency
 - [ ] Spawn tables
 - [ ] Spawners - generate new monsters on a live level
