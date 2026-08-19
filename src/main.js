@@ -10,6 +10,8 @@ import { createResultsScene } from './ui/scenes/results-scene.js';
 import { createDebugOverlay } from './debug/debug-overlay.js';
 import { clearSave } from './save/core/save-system.js';
 import { initAudio } from './audio/audio-settings.js';
+import { useTables } from './world/tables/entity-table.js';
+import { TABLES } from '../data/tables/index.js';
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -38,6 +40,7 @@ function getViewport() {
 const theme = readTheme();
 gameSettings.load(); // restore UI preferences (handedness, …) before any scene mounts
 initAudio(); // load the sfx/music manifests and push persisted volumes into the audio layer
+useTables(TABLES); // install the entity-table catalog so nested `ref(id)` lookups resolve
 const appState = createAppStateMachine();
 const debugOverlay = gameConfig.debugEnabled ? createDebugOverlay({ getViewport }) : null;
 

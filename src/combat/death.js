@@ -2,6 +2,7 @@ import { gameLog } from '../engine/log/game-log.js';
 import { animations } from '../render/animations.js';
 import { subject, conjugate } from '../engine/log/text/log-text.js';
 import { awardKillXp } from './kill-reward.js';
+import { dropLoot } from './death-loot.js';
 
 /**
  * @file Death handling, triggered from the damage chokepoint (src/effects/effect-types/effect-damage.js)
@@ -10,12 +11,13 @@ import { awardKillXp } from './kill-reward.js';
  */
 
 /**
- * STUB: hook for what a creature leaves behind when it dies — dropping carried items, rolling
- * treasure, leaving a corpse entity, death barks, etc. Intentionally empty for now; this is the seam
- * to build those on later.
+ * What a creature leaves behind when it dies. Rolls its loot table (src/combat/death-loot.js) and drops the
+ * results on its tile — a no-op for types with no table (src/combat/death-loot.js). Still the seam for the rest of "death leaves
+ * something": dropping carried inventory, a corpse entity, death barks. Runs before teardown, while the
+ * entity's position and components are intact.
  */
 export function onDeath(entity, level, registry) {
-  // no-op
+  dropLoot(entity, level, registry);
 }
 
 /**
